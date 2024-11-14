@@ -1,15 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useDesktopMode } from './hooks/useDesktopMode';
 
 const Desktop = (): JSX.Element => {
-    const [desktopMode, setDesktopMode] = useState<'light' | 'dark'>('light');
-
-    const toggleDesktopMode = (): void => {
-        setDesktopMode(desktopMode === 'light' ? 'dark' : 'light');
-    };
-
-    useEffect(() => {
-        document.documentElement.classList.toggle('dark', desktopMode === 'dark');
-    }, [desktopMode]);
+    const { desktopMode, toggleDesktopMode } = useDesktopMode();
 
     return (
         <div className="bg-light dark:bg-dark bg-cover w-screen h-screen">
