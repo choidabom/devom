@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 type DesktopMode = 'light' | 'dark';
 
 export const useDesktopMode = (): {
-    desktopMode: string;
+    desktopMode: DesktopMode;
     toggleDesktopMode: () => void;
 } => {
     const [desktopMode, setDesktopMode] = useState<DesktopMode>('light');
