@@ -5,8 +5,8 @@ export default {
     theme: {
         extend: {
             backgroundImage: {
-                light: `url(/desktop/desktop-light.png)`,
-                dark: `url(/desktop/desktop-dark.png)`,
+                light: `url(/desktop/light.png)`,
+                dark: `url(/desktop/dark.png)`,
             },
         },
     },
