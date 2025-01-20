@@ -1,3 +1,4 @@
+import type { JSX} from 'react';
 import { useRef } from 'react';
 import RnD from './RnD';
 
