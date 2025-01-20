@@ -1,5 +1,7 @@
+import type { JSX } from "react";
+
 interface RnDProps {
-    ref: React.RefObject<HTMLDivElement>;
+    ref: React.RefObject<HTMLDivElement| null>;
     children: React.ReactNode;
 }
 
