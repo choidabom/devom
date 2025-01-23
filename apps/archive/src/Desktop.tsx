@@ -1,9 +1,41 @@
 import type { JSX } from 'react';
-import AppWindow from './components/AppWindow';
+import { useState } from 'react';
+import ApplicationManager from './ApplicationManage';
+import AppWindow from './components/appWindow/AppWindow';
+import Blog from './components/application/Blog';
+import TodoList from './components/application/TodoList';
 import { useDesktopMode } from './hooks/useDesktopMode';
 
 const Desktop = (): JSX.Element => {
     const { desktopMode, toggleDesktopMode } = useDesktopMode();
+
+    const [applicationManager] = useState(() => {
+        const manager = new ApplicationManager();
+        manager.addApplication('blog', <Blog />, {
+            width: 800,
+            height: 650,
+            left: 70,
+            top: 70,
+            minWidth: 640,
+            minHeight: 640,
+        });
+        manager.addApplication('todolist', <TodoList />, {
+            width: 800,
+            height: 650,
+            left: 350,
+            top: 100,
+            minWidth: 500,
+            minHeight: 640,
+        });
+
+        return manager;
+    });
+    const [applications, setApplications] = useState(applicationManager.getApplications());
+
+    const handleZIndex = (id: number): void => {
+        applicationManager.setZIndexToFront(id);
+        setApplications(applicationManager.getApplications().slice());
+    };
 
     return (
         <div className="h-screen w-screen bg-light bg-cover dark:bg-dark">
@@ -15,7 +47,9 @@ const Desktop = (): JSX.Element => {
                 {desktopMode === 'light' ? '🌞' : '🌙'}
             </button>
 
-            <AppWindow />
+            {applications.map((app) => (
+                <AppWindow key={app.id} app={app} onZIndex={() => handleZIndex(app.id)} />
+            ))}
         </div>
     );
 };
