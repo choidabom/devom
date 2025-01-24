@@ -1,6 +1,7 @@
-name: Deployment 
+name: Deployment devom
 
-on: 
+on:
+  workflow_dispatch:
   push:
     branches: 
       - master
@@ -10,7 +11,7 @@ on:
 jobs: 
   build:
     runs-on: ubuntu-latest
-    outputs: 
+    outputs:
       page_url: ${{ steps.build.outputs.page_url }}
     steps:
       # Checkout the repository
@@ -36,7 +37,7 @@ jobs:
       - name: Build Archive App
         id: build
         run: pnpm --filter=devom/archive build
-        working-directory: apps/archive 
+        working-directory: apps/archive
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -50,8 +51,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: ${{ jobs.build.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/deploy-pages@v4
-        id: deployment
