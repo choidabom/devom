@@ -10,7 +10,8 @@ on:
 jobs: 
   build:
     runs-on: ubuntu-latest
-
+      outputs:
++      page_url: ${{ steps.build.outputs.page_url }}
     steps:
       # Checkout the repository
       - name: Checkout repository
@@ -33,7 +34,14 @@ jobs:
 
       # Build the archive app
       - name: Build Archive App
+        id: build
         run: pnpm --filter=devom/archive build
++       working-directory: apps/archive
++
++      - name: Upload artifact
++       uses: actions/upload-pages-artifact@v3
++       with:
++         path: apps/archive/dist
 
   deploy:
     needs: build
