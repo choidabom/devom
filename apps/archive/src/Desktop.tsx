@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 import { useDesktopMode } from './hooks/useDesktopMode';
 
 const Desktop = (): JSX.Element => {
