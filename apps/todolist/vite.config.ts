@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
+import libCss from "vite-plugin-libcss";
 
 const ABSOLUTE_PATH_REGEX = /^(?:\/|(?:[A-Za-z]:)?[/\\|])/;
 const RELATIVE_PATH_REGEX = /^\.?\.(\/|$)/;
@@ -17,6 +18,7 @@ export default defineConfig({
       include: ["src"],
       rollupTypes: true,
     }),
+    libCss(),
   ],
   build: {
     lib: {
@@ -32,6 +34,5 @@ export default defineConfig({
         assetFileNames: "[name].[ext]",
       },
     },
-    cssCodeSplit: false,
   },
 });
