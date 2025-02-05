@@ -7,11 +7,9 @@
         "preinstall": "npx only-allow pnpm",
         "archive": "pnpm --filter=@devom/archive"
     },
-    "workspaces": {
-        "packages": [
-            "apps/*"
-        ]
-    },
+    "workspaces": [
+        "apps/*"
+    ],
     "devDependencies": {
         "vite": "^5.4.1"
     },
