@@ -1,5 +1,5 @@
 import { TodoList } from '@devom/todolist';
-import React, { useState, type JSX } from 'react';
+import { useState, type JSX } from 'react';
 import ApplicationManager from './ApplicationManage';
 import AppWindow from './components/appWindow/AppWindow';
 import Blog from './components/application/Blog';
