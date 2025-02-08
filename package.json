@@ -5,13 +5,12 @@
     "type": "module",
     "scripts": {
         "preinstall": "npx only-allow pnpm",
-        "archive": "pnpm --filter=@devom/archive"
+        "archive": "pnpm --filter=@devom/archive",
+        "todolist": "pnpm --filter=@devom/todolist"
     },
-    "workspaces": {
-        "packages": [
-            "apps/*"
-        ]
-    },
+    "workspaces": [
+        "apps/*"
+    ],
     "devDependencies": {
         "vite": "^5.4.1"
     },
