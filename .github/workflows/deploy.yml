@@ -7,43 +7,46 @@ on:
       - master
     paths: 
       - "apps/archive/**"
+      - "apps/todolist/**"
 
 jobs: 
   build:
     runs-on: ubuntu-22.04
     outputs:
-      page_url: ${{ steps.build.outputs.page_url }}
+      page_url: ${{ steps.set_output.outputs.page_url }}
     steps:
-      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # Set up pnpm
       - name: Set up pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
 
-      # Install dependencies
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --recursive
 
-      # Build the archive app
+      - name: Build dependencies (todolist)
+        run: pnpm --filter=@devom/todolist build
+        working-directory: apps/todolist
+
       - name: Build Archive App
-        id: build
-        run: pnpm --filter=archive build
+        run: pnpm build
         working-directory: apps/archive
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: apps/archive/dist
+
+      - name: Set page_url output
+        id: set_output
+        run: echo "page_url=${{ github.server_url }}/${{ github.repository }}/deployments" >> $GITHUB_ENV
 
   deploy:
     needs: build
