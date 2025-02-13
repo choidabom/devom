@@ -1,5 +1,5 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, PluginOption } from "vite";
 import dts from "vite-plugin-dts";
 import libCss from "vite-plugin-libcss";
 
@@ -19,7 +19,7 @@ export default defineConfig({
       rollupTypes: true,
     }),
     libCss(),
-  ],
+  ] as PluginOption[],
   build: {
     lib: {
       entry: "src/index.ts",
