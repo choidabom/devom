@@ -5,5 +5,5 @@ import { defineConfig } from 'vite';
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [react()] as PluginOption[],
-    base: '/devom',
+    base: process.env.NODE_DEV === 'production' ? '/devom' : '/',
 });
