@@ -24,9 +24,13 @@ export const registerDragEvent = (
                     if (moveEvent.cancelable) {
                         moveEvent.preventDefault();
                     }
-                    const deltaX = moveEvent.touches[0].screenX - touchEvent.touches[0].screenX;
-                    const deltaY = moveEvent.touches[0].screenY - touchEvent.touches[0].screenY;
-                    onDragChange(deltaX, deltaY);
+
+                    if (moveEvent.touches?.[0] && touchEvent.touches?.[0]) {
+                        const deltaX = moveEvent.touches[0].screenX - touchEvent.touches[0].screenX;
+                        const deltaY = moveEvent.touches[0].screenY - touchEvent.touches[0].screenY;
+                
+                        onDragChange(deltaX, deltaY);
+                    }
                 };
                 const handleTouchEnd = (): void => {
                     document.removeEventListener('touchmove', handleTouchMove);
