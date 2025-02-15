@@ -1,41 +1,15 @@
 {
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "target": "ES2020",
-        "useDefineForClassFields": true,
-        "lib": [
-            "ES2020",
-            "DOM",
-            "DOM.Iterable"
-        ],
-        "module": "ESNext",
-        "skipLibCheck": true,
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "jsx": "react-jsx",
-        "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ]
-        },
-        "composite": true,
-        "declaration": true,
-        "declarationMap": true,
-        "declarationDir": "dist/types",
-        "outDir": "dist",
-        "rootDir": "src",
-        "noEmit": true
+        "rootDir": "src",                       /* Typescript 소스 파일의 루트 디렉토리를 지정함. */
+        "outDir": "dist",                       /* 컴파일된 Javascript 파일이 출력될 디렉토리를 지정함. */
+        "declarationDir": "dist/types",         /* 생성된 타입 선언 파일(.d.ts)이 저장될 디렉토리를 지정함. */
+        "declaration": true,                    /* 타입 선언 파일(.d.ts)을 생성하고 라이브러리 개발 시 필요한 타입 정의 제공 */
+        "declarationMap": true,                 /* 타입 선언 파일에 대한 소스맵 생성 */
+        "composite": true,                      /* 프로젝트 참조 기능 활성화 */
     },
-    "include": [
-        "src"
-    ],
-    "exclude": [
+    "include": ["src"],                         /* 컴파일에 포함할 파일들을 지정함. */
+    "exclude": [                                /* 컴파일에서 제외할 디렉토리를 지정함. */
         "node_modules",
         "dist"
     ]
