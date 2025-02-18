@@ -1,15 +1,17 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "rootDir": "src",                       /* Typescript 소스 파일의 루트 디렉토리를 지정함. */
-        "outDir": "dist",                       /* 컴파일된 Javascript 파일이 출력될 디렉토리를 지정함. */
-        "declarationDir": "dist/types",         /* 생성된 타입 선언 파일(.d.ts)이 저장될 디렉토리를 지정함. */
-        "declaration": true,                    /* 타입 선언 파일(.d.ts)을 생성하고 라이브러리 개발 시 필요한 타입 정의 제공 */
-        "declarationMap": true,                 /* 타입 선언 파일에 대한 소스맵 생성 */
-        "composite": true,                      /* 프로젝트 참조 기능 활성화 */
+        "outDir": "dist", /* 컴파일된 Javascript 파일이 출력될 디렉토리를 지정함. */
+        "rootDir": "src", /* Typescript 소스 파일의 루트 디렉토리를 지정함. */
+        "declaration": true, /* 타입 선언 파일(.d.ts)을 생성하고 라이브러리 개발 시 필요한 타입 정의 제공 */
+        "declarationMap": true, /* 타입 선언 파일에 대한 소스맵 생성 */
+        "declarationDir": "dist/types", /* 생성된 타입 선언 파일(.d.ts)이 저장될 디렉토리를 지정함. */
+        "composite": true, /* 프로젝트 참조 기능 활성화 */
     },
-    "include": ["src"],                         /* 컴파일에 포함할 파일들을 지정함. */
-    "exclude": [                                /* 컴파일에서 제외할 디렉토리를 지정함. */
+    "include": [ /* 컴파일에 포함할 파일들을 지정함. */
+        "src"
+    ],
+    "exclude": [ /* 컴파일에서 제외할 디렉토리를 지정함. */
         "node_modules",
         "dist"
     ]
