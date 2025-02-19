@@ -1,0 +1,18 @@
+{
+  "name": "@devom/typescript-playground",
+  "version": "0.0.0",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
