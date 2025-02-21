@@ -8,7 +8,7 @@ const Blog = (): JSX.Element => {
 
     return (
         <div className="h-full w-full">
-            <img src="./desktop/blog.png" onClick={() => handleAddBlogLink()} />
+            <img src="./image/blog.png" onClick={() => handleAddBlogLink()} />
         </div>
     );
 };

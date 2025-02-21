@@ -14,9 +14,13 @@ const todoItems: TodoItem[] = [
     completed: false,
   },
   { text: "useWindowsize hook 리팩토링 및 hook 추가", completed: false },
+
   { text: "zustand 수정 - class to zustand", completed: false },
-  { text: "resume 페이지 생성", completed: false },
+  { text: "resume 페이지 생성", completed: true },
+  { text: "tsconfig 패키지로 분리", completed: true },
   { text: "todolist 페이지 리팩토링", completed: false },
+  { text: "이미지 슬라이더 구현", completed: false },
+  { text: "이미지 확대 구현", completed: false },
 ];
 
 function TodoList() {

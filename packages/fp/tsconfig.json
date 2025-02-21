@@ -1,3 +1,6 @@
 {
-  "extends": "@devom/typescript-playground/tsconfig.base.json"
+  "extends": "@devom/tsconfig/node.json",
+  "compilerOptions": {
+    "module": "NodeNext"
+  }
 }

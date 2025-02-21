@@ -4,6 +4,7 @@ import ApplicationManager from './ApplicationManage';
 import AppWindow from './components/appWindow/AppWindow';
 import Blog from './components/application/Blog';
 import { useDesktopMode } from './hooks/useDesktopMode';
+import Resume from './components/application/Resume';
 
 const Desktop = (): JSX.Element => {
     const { desktopMode, toggleDesktopMode } = useDesktopMode();
@@ -22,6 +23,14 @@ const Desktop = (): JSX.Element => {
             width: 800,
             height: 650,
             left: 350,
+            top: 100,
+            minWidth: 500,
+            minHeight: 640,
+        });
+        manager.addApplication('résumé', <Resume />, {
+            width: 500,
+            height: 800,
+            left: 800,
             top: 100,
             minWidth: 500,
             minHeight: 640,
