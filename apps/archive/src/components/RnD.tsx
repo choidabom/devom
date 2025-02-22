@@ -1,5 +1,5 @@
+import { inrange } from '@devom/utils';
 import type { JSX } from 'react';
-import { inrange } from '../utils/inrange';
 import { registerDragEvent } from '../utils/registerDragEvent';
 
 interface RnDProps {
