@@ -1,0 +1,22 @@
+{
+    "name": "@devom/utils",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "start": "node dist/index.js"
+    },
+    "dependencies": {
+        "@devom/tsconfig": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.2",
+        "vite": "^5.0.0",
+        "vite-plugin-dts": "^3.2.0",
+        "typescript": "^5.7.3"
+    }
+}

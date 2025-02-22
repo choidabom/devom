@@ -13,6 +13,7 @@ const todoItems: TodoItem[] = [
     text: "로컬 개발 환경에서 수정 시, 재빌드가 아닌 바로 반영되도록 하는 설정 찾기 in vite",
     completed: false,
   },
+  { text: "tsconfig 패키지로 분리", completed: true },
   { text: "useWindowsize hook 리팩토링 및 hook 추가", completed: false },
   { text: "zustand 수정 - class to zustand", completed: false },
   { text: "resume 페이지 생성", completed: false },
