@@ -99,9 +99,6 @@ importers:
       typescript-eslint:
         specifier: ^8.0.1
         version: 8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.3)
-      zustand:
-        specifier: ^5.0.3
-        version: 5.0.3(@types/react@19.0.4)(react@19.0.0)
 
   apps/todolist:
     dependencies:
@@ -2799,24 +2796,6 @@ packages:
     engines: {node: '>=8.0.0'}
     hasBin: true
 
-  zustand@5.0.3:
-    resolution: {integrity: sha512-14fwWQtU3pH4dE0dOpdMiWjddcH+QzKIgk1cl8epwSE7yag43k/AD/m4L6+K7DytAOr9gGBe3/EXj9g7cdostg==}
-    engines: {node: '>=12.20.0'}
-    peerDependencies:
-      '@types/react': '>=18.0.0'
-      immer: '>=9.0.6'
-      react: '>=18.0.0'
-      use-sync-external-store: '>=1.2.0'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      immer:
-        optional: true
-      react:
-        optional: true
-      use-sync-external-store:
-        optional: true
-
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
@@ -5494,8 +5473,3 @@ snapshots:
       validator: 13.12.0
     optionalDependencies:
       commander: 9.5.0
-
-  zustand@5.0.3(@types/react@19.0.4)(react@19.0.0):
-    optionalDependencies:
-      '@types/react': 19.0.4
-      react: 19.0.0
