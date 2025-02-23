@@ -1,9 +1,9 @@
 import type { JSX } from 'react';
 import { useRef, useState } from 'react';
-import type Application from '../../Application';
 import { useWindowSize } from '../../hooks/useWindowsize';
-import AppWindowHeader from './AppWindowHeader';
+import type { Application } from '../../types/types';
 import RnD from '../RnD';
+import AppWindowHeader from './AppWindowHeader';
 
 export const MIN_WIDTH = 500;
 export const MIN_HEIGHT = 400;
@@ -17,11 +17,13 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
     const { app, onZIndex } = props;
     const appWindowRef = useRef<HTMLDivElement>(null);
     const { width: windowWidth, height: windowHeight } = useWindowSize();
+    const config = app.config;
+
     const [{ x, y, w, h }, setAppRect] = useState({
-        x: app.left ?? 100,
-        y: app.top ?? 100,
-        w: app.width ?? MIN_WIDTH,
-        h: app.height ?? MIN_HEIGHT,
+        x: config.left ?? 100,
+        y: config.top ?? 100,
+        w: config.width ?? MIN_WIDTH,
+        h: config.height ?? MIN_HEIGHT,
     });
 
     const [isClosed, setIsClosed] = useState(false);
@@ -65,28 +67,28 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
                         x: isMaximized ? 0 : x,
                         y: isMaximized ? 0 : y,
                     }}
-                    zIndex={app.zIndex}
-                    minWidth={app.minWidth ?? MIN_WIDTH}
-                    minHeight={app.minHeight ?? MIN_HEIGHT}
+                    zIndex={config.zIndex}
+                    minWidth={config.minWidth ?? MIN_WIDTH}
+                    minHeight={config.minHeight ?? MIN_HEIGHT}
                     windowWidth={windowWidth}
                     windowHeight={windowHeight}
-                    disableResizeControl={app.disableResizeControl}
+                    disableResizeControl={config.disableResizeControl}
                     updateRnDRect={setAppRect}
                     className={`flex flex-col overflow-hidden rounded-lg shadow-lg shadow-black/30 ${isAnimating ? 'minimize-animation' : ''}`}
                     onZIndex={onZIndex}
                 >
                     <AppWindowHeader
-                        appName={app.appName}
+                        appName={app.name}
                         isMaximized={isMaximized}
                         appRect={{ x, y, w, h }}
-                        disableResizeControl={app.disableResizeControl}
+                        disableResizeControl={config.disableResizeControl}
                         onSetAppRect={setAppRect}
                         onClose={handleClose}
                         onMinimize={handleMinimize}
                         onMaximize={handleMaximize}
                     />
                     <div className="main-content h-screen flex-grow overflow-y-auto overflow-x-hidden bg-white">
-                        {app.content}
+                        {app.component}
                     </div>
                 </RnD>
             )}
