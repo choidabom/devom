@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import Desktop from './Desktop';
+import { Desktop } from './components/desktop/Desktop';
 
 const App = (): JSX.Element => {
     return <Desktop />;

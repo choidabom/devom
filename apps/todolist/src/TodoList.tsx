@@ -15,7 +15,7 @@ const todoItems: TodoItem[] = [
   },
   { text: "tsconfig 패키지로 분리", completed: true },
   { text: "useWindowsize hook 리팩토링 및 hook 추가", completed: false },
-  { text: "zustand 수정 - class to zustand", completed: false },
+  { text: "class to context api", completed: true },
   { text: "resume 페이지 생성", completed: false },
   { text: "todolist 페이지 리팩토링", completed: false },
 ];

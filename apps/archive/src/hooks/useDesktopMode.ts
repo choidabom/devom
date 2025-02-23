@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { safeLocalStorage } from '@devom/utils';
 
 type DesktopMode = 'light' | 'dark';
 
@@ -11,7 +12,7 @@ export const useDesktopMode = (): {
     const toggleDesktopMode = (): void => {
         setDesktopMode((currentMode) => {
             const newMode: DesktopMode = currentMode === 'light' ? 'dark' : 'light';
-            localStorage.setItem('theme', newMode);
+            safeLocalStorage.setItem('theme', newMode);
             document.documentElement.classList.replace(currentMode, newMode);
 
             return newMode;
@@ -19,7 +20,7 @@ export const useDesktopMode = (): {
     };
 
     useEffect(() => {
-        const theme = localStorage.getItem('theme') as DesktopMode;
+        const theme = safeLocalStorage.getItem('theme') as DesktopMode;
         const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
         const mode = theme || (preferDark ? 'dark' : 'light');
