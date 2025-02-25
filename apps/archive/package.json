@@ -18,7 +18,7 @@
     },
     "dependencies": {
         "@devom/utils": "workspace:*",
-        "@devom/tsconfig": "workspace:*",
+        "@devom/ts-config": "workspace:*",
         "@devom/todolist": "workspace:*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"

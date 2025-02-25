@@ -1,5 +1,5 @@
 {
-  "name": "@devom/tsconfig",
+  "name": "@devom/ts-config",
   "private": true,
   "version": "0.0.0",
   "files": [

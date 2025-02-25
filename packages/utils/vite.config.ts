@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["@devom/tsconfig"],
+      external: ["@devom/ts-config"],
     },
   },
 });

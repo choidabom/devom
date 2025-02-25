@@ -1,3 +1,3 @@
 {
-    "extends": "@devom/tsconfig/react.json",
+    "extends": "@devom/ts-config/react.json",
 }

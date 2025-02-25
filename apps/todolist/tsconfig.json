@@ -1,7 +1,7 @@
 {
     "extends": [
-        "@devom/tsconfig/react.json",
-        "@devom/tsconfig/library.json"
+        "@devom/ts-config/react.json",
+        "@devom/ts-config/library.json"
     ],
     "include": [ /* 컴파일에 포함할 파일들을 지정함. */
         "src"
