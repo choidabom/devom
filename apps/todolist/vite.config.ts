@@ -1,5 +1,5 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig, PluginOption } from "vite";
+import { type PluginOption, defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 import libCss from "vite-plugin-libcss";
 
