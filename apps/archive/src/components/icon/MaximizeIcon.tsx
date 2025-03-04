@@ -9,6 +9,7 @@ export const MaximizeIcon = (): JSX.Element => (
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <title id="maximize-icon">Maximize</title>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
   </svg>
 );

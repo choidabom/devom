@@ -34,7 +34,7 @@ const AppWindowHeader = (props: AppWindowHeaderProps): JSX.Element => {
 
   return (
     <div
-      className={`flex items-center justify-between ${disableResizeControl ? `bg-macosGray` : `bg-gray-200 bg-opacity-70`} p-2`}
+      className={`flex items-center justify-between ${disableResizeControl ? "bg-macosGray" : "bg-gray-200 bg-opacity-70"} p-2`}
       onDoubleClick={onMaximize}
       {...registerDragEvent((deltaX: number, deltaY: number) => {
         onSetAppRect({
@@ -47,12 +47,16 @@ const AppWindowHeader = (props: AppWindowHeaderProps): JSX.Element => {
     >
       <div className="m-1 flex space-x-2">
         <button
-          className={`group relative flex h-3 w-3 items-center justify-center rounded-full bg-red-500`}
+          type="button"
+          className={
+            "group relative flex h-3 w-3 items-center justify-center rounded-full bg-red-500"
+          }
           onClick={onClose}
         >
           <CloseIcon />
         </button>
         <button
+          type="button"
           className={`relative h-3 w-3 rounded-full ${isMaximized ? "bg-gray-500" : "bg-yellow-500"} group flex items-center justify-center`}
           onClick={onMinimize}
           onDoubleClick={(e) => e.stopPropagation()}
@@ -60,7 +64,10 @@ const AppWindowHeader = (props: AppWindowHeaderProps): JSX.Element => {
           {!isMaximized && <MinimizeIcon />}
         </button>
         <button
-          className={`group relative flex h-3 w-3 items-center justify-center rounded-full bg-green-500`}
+          type="button"
+          className={
+            "group relative flex h-3 w-3 items-center justify-center rounded-full bg-green-500"
+          }
           onClick={onMaximize}
         >
           <MaximizeIcon />
@@ -68,12 +75,12 @@ const AppWindowHeader = (props: AppWindowHeaderProps): JSX.Element => {
       </div>
       <div className="flex-1 text-center">
         <span
-          className={`text-sm ${disableResizeControl ? `text-white` : `text-gray-700`}`}
+          className={`text-sm ${disableResizeControl ? "text-white" : "text-gray-700"}`}
         >
           {appName}
         </span>
       </div>
-      <div className="w-12"></div>
+      <div className="w-12" />
     </div>
   );
 };
