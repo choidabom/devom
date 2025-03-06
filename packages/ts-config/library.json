@@ -5,6 +5,6 @@
         "declaration": true,
         "declarationMap": true,
         "declarationDir": "dist/types",
-        "composite": true,
-    },
+        "composite": true
+    }
 }
