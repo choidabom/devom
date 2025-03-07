@@ -8,6 +8,7 @@ on:
     paths: 
       - "apps/archive/**"
       - "apps/todolist/**"
+      - "packages/utils/**"
 
 jobs: 
   build:
@@ -26,18 +27,18 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 8
+          version: 9
 
       - name: Install dependencies
-        run: pnpm install --recursive
-
-      - name: Build dependencies (todolist)
-        run: pnpm --filter=@devom/todolist build
-        working-directory: apps/todolist
+        run: pnpm install
 
       - name: Build dependencies (utils)
         run: pnpm --filter=@devom/utils build
         working-directory: packages/utils
+
+      - name: Build dependencies (todolist)
+        run: pnpm --filter=@devom/todolist build
+        working-directory: apps/todolist
 
       - name: Build Archive App
         run: pnpm build

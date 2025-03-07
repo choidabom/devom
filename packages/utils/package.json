@@ -15,9 +15,9 @@
         "@devom/ts-config": "workspace:*"
     },
     "devDependencies": {
-        "@types/node": "^22.13.2",
-        "vite": "^5.0.0",
-        "vite-plugin-dts": "^3.2.0",
-        "typescript": "^5.7.3"
+        "@types/node": "catalog:",
+        "vite": "catalog:",
+        "vite-plugin-dts": "catalog:",
+        "typescript": "catalog:"
     }
 }
