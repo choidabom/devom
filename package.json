@@ -4,10 +4,15 @@
     "private": true,
     "type": "module",
     "workspaces": [
-        "apps/*"
+        "apps/*",
+        "packages/*"
     ],
     "scripts": {
         "preinstall": "npx only-allow pnpm",
+        "build:packages": "pnpm --filter \"@devom/*\" build",
+        "lint:packages": "pnpm --filter \"@devom/*\" lint",
+        "build":"pnpm --filter \"archive\" build", 
+        "dev":"pnpm --filter \"archive\" dev", 
         "archive": "pnpm --filter=@devom/archive",
         "todolist": "pnpm --filter=@devom/todolist"
     },

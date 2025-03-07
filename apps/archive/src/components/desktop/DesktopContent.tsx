@@ -4,7 +4,6 @@ import { useApplications } from "../../context/useApplications";
 import { useDesktopMode } from "../../hooks/useDesktopMode";
 import AppWindow from "../appWindow/AppWindow";
 import Blog from "../application/Blog";
-import Resume from "../application/Resume";
 
 export const DesktopContent = (): JSX.Element => {
   const initializedRef = useRef<boolean>(false);
@@ -31,14 +30,6 @@ export const DesktopContent = (): JSX.Element => {
         minWidth: 500,
         minHeight: 640,
       });
-      addApplication("résumé", <Resume />, {
-        width: 500,
-        height: 800,
-        left: 800,
-        top: 100,
-        minWidth: 500,
-        minHeight: 640,
-      });
     }
   }, [addApplication]);
 
@@ -47,7 +38,9 @@ export const DesktopContent = (): JSX.Element => {
       <button
         type="button"
         className="absolute right-5 top-5 rounded-full bg-gray-200 p-2 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700"
-        aria-label={`Switch to ${desktopMode === "light" ? "dark" : "light"} mode`}
+        aria-label={`Switch to ${
+          desktopMode === "light" ? "dark" : "light"
+        } mode`}
         onClick={toggleDesktopMode}
       >
         {desktopMode === "light" ? "🌞" : "🌙"}
