@@ -74,7 +74,9 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
           windowHeight={windowHeight}
           disableResizeControl={config.disableResizeControl}
           updateRnDRect={setAppRect}
-          className={`flex flex-col overflow-hidden rounded-lg shadow-lg shadow-black/30 ${isAnimating ? "minimize-animation" : ""}`}
+          className={`flex flex-col overflow-hidden rounded-lg shadow-lg shadow-black/30 ${
+            isAnimating ? "minimize-animation" : ""
+          }`}
           onZIndex={onZIndex}
         >
           <AppWindowHeader

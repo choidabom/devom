@@ -11,9 +11,7 @@ const Blog = (): JSX.Element => {
       <img
         aria-label="Blog Image"
         src="./image/blog.png"
-        onKeyDown={() => {
-          handleAddBlogLink();
-        }}
+        onClick={() => handleAddBlogLink()}
       />
     </div>
   );

@@ -21,13 +21,14 @@ export const useDesktopMode = (): {
 
   useEffect(() => {
     const theme = safeLocalStorage.getItem("theme") as DesktopMode;
-    const preferDark = window.matchMedia(
-      "(prefers-color-scheme: dark)",
-    ).matches;
+    // wip: I just want to setup light mode ..
 
-    const mode = theme || (preferDark ? "dark" : "light");
-    document.documentElement.classList.add(mode);
-    setDesktopMode(mode);
+    // const preferDark = window.matchMedia(
+    //   "(prefers-color-scheme: dark)",
+    // ).matches;
+    // const mode = theme || (preferDark ? "dark" : "light");
+    document.documentElement.classList.add(theme);
+    setDesktopMode(theme);
 
     return (): void => {
       document.documentElement.classList.remove("light", "dark");
