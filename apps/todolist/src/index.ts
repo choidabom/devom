@@ -1,1 +1,3 @@
-export { default as TodoList } from "./TodoList.tsx";
+import "@devom/todolist/index.css";
+import TodoList from "./TodoList.tsx";
+export { TodoList };

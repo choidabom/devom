@@ -5,8 +5,10 @@ import dts from "vite-plugin-dts";
 const ABSOLUTE_PATH_REGEX = /^(?:\/|(?:[A-Za-z]:)?[/\\|])/;
 const RELATIVE_PATH_REGEX = /^\.?\.(\/|$)/;
 
-export const isAbsolute = (path: string): boolean => ABSOLUTE_PATH_REGEX.test(path);
-export const isRelative = (path: string): boolean => RELATIVE_PATH_REGEX.test(path);
+export const isAbsolute = (path: string): boolean =>
+  ABSOLUTE_PATH_REGEX.test(path);
+export const isRelative = (path: string): boolean =>
+  RELATIVE_PATH_REGEX.test(path);
 
 export default defineConfig({
   plugins: [
@@ -26,12 +28,6 @@ export default defineConfig({
     rollupOptions: {
       external: (id: string): boolean => !isAbsolute(id) && !isRelative(id),
       output: {
-        intro: (chunk) => {
-          if (chunk.fileName === "index.js") {
-            return `import "./index.css";`;
-          }
-          return "";
-        },
         entryFileNames: "index.js",
         chunkFileNames: "chunk-[name].js",
         assetFileNames: "[name].[ext]",
