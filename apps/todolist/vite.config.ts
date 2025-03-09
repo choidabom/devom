@@ -1,14 +1,7 @@
+import { isAbsolute, isRelative } from "@devom/utils";
 import react from "@vitejs/plugin-react";
 import { type PluginOption, defineConfig } from "vite";
 import dts from "vite-plugin-dts";
-
-const ABSOLUTE_PATH_REGEX = /^(?:\/|(?:[A-Za-z]:)?[/\\|])/;
-const RELATIVE_PATH_REGEX = /^\.?\.(\/|$)/;
-
-export const isAbsolute = (path: string): boolean =>
-  ABSOLUTE_PATH_REGEX.test(path);
-export const isRelative = (path: string): boolean =>
-  RELATIVE_PATH_REGEX.test(path);
 
 export default defineConfig({
   plugins: [

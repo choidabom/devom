@@ -125,6 +125,9 @@ importers:
       '@devom/ts-config':
         specifier: workspace:*
         version: link:../../packages/ts-config
+      '@devom/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       react:
         specifier: catalog:react18
         version: 18.3.1

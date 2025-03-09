@@ -24,6 +24,7 @@
     },
     "dependencies": {
         "@devom/ts-config": "workspace:*",
+        "@devom/utils": "workspace:*",
         "react": "catalog:react18",
         "react-dom": "catalog:react18"
     },
