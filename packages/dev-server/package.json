@@ -1,0 +1,29 @@
+{
+  "name": "@devom/dev-server",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "pnpm biome check --fix --unsafe"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "esbuild": "^0.25.1",
+    "express": "^4.21.2",
+    "react": "catalog:react18",
+    "react-dom": "catalog:react18",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/react": "catalog:react18",
+    "@types/react-dom": "catalog:react18",
+    "@types/ws": "^8.18.0",
+    "typescript": "catalog:"
+  }
+}
