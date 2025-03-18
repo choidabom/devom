@@ -3,7 +3,7 @@ packages:
   - "packages/**"
   
 catalog:
-  typescript: "^5.7.3"
+  typescript: "^5.8.2"
   ts-node: "^10.9.2"
   "@types/node": "^22.13.2"
   autoprefixer: "^10.4.20"
