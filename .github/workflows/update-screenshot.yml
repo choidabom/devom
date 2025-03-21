@@ -35,9 +35,18 @@ jobs:
       - name: Capture screenshot
         run: pnpm start
         
+      - name: Verify screenshot exists
+        run: |
+          ls -lah
+          if [ ! -f blog.png ]; then
+            echo "Error: blog.png not found!"
+            exit 1
+          fi
+
       - name: Move screenshots to blog directory
         run: |
           mv blog.png ../../apps/archive/public/image/
+          ls -lah ../../apps/archive/public/image/
 
       - name: Commit and push changes
         run: |
