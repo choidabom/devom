@@ -1,15 +1,22 @@
 name: Deployment devom
 
+permissions:
+  actions: read
+  contents: read
+
 on:
   workflow_dispatch:
   push:
     branches: 
       - master
+    paths: 
+      - "apps/archive/**"
+      - "apps/todolist/**"
+      - "packages/utils/**"
   workflow_run:
-      workflows: ["update-screenshot.yml"]
+      workflows: ["update-screenshot"]
       types:
         - completed
-        - success
 
 jobs: 
   build:
