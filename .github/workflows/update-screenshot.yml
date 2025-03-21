@@ -1,5 +1,9 @@
 name: Blog Screenshot Automation
 
+permissions:
+  actions: write
+  contents: write
+
 on:
   workflow_dispatch:     
 

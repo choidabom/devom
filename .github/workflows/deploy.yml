@@ -3,6 +3,7 @@ name: Deployment devom
 permissions:
   actions: read
   contents: read
+  pages: write
 
 on:
   workflow_dispatch:
@@ -14,12 +15,19 @@ on:
       - "apps/todolist/**"
       - "packages/utils/**"
   workflow_run:
-      workflows: ["update-screenshot"]
-      types:
-        - completed
+    workflows: 
+      - "Blog Screenshot Automation"
+    types:
+      - completed
+    branches:
+      - master
 
 jobs: 
   build:
+    if: |
+      github.event.workflow_run.conclusion == 'success' || 
+      github.event_name == 'push' || 
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     outputs:
       page_url: ${{ steps.set_output.outputs.page_url }}
