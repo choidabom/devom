@@ -5,10 +5,11 @@ on:
   push:
     branches: 
       - master
-    paths: 
-      - "apps/archive/**"
-      - "apps/todolist/**"
-      - "packages/utils/**"
+  workflow_run:
+      workflows: ["update-screenshot.yml"]
+      types:
+        - completed
+        - success
 
 jobs: 
   build:
