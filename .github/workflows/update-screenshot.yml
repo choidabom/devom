@@ -1,0 +1,48 @@
+name: Blog Screenshot Automation
+
+on:
+  schedule:
+    - cron: '0 0 * * *' 
+  workflow_dispatch:     
+
+jobs:
+  capture-and-update:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/screenshot-updater  
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          
+      - name: Install dependencies
+        run: |
+          cd ../..
+          pnpm install
+          cd packages/screenshot-updater
+          
+      - name: Capture screenshot
+        run: pnpm start
+        
+      - name: Move screenshots to blog directory
+        run: |
+          mv blog.png ../../apps/archive/public/image/
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add ../../
+          git commit -m "add: update blog screenshot: $(date +'%Y-%m-%d')"
+          git push
