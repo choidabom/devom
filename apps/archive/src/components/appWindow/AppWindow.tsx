@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 import { useRef, useState } from "react";
+import { useWindowControls } from "../../hooks/useWindowControls";
 import { useWindowSize } from "../../hooks/useWindowsize";
 import type { Application } from "../../types/types";
 import RnD from "../RnD";
@@ -15,9 +16,12 @@ interface AppWindowProps {
 
 const AppWindow = (props: AppWindowProps): JSX.Element | null => {
   const { app, onZIndex } = props;
+  const config = app.config;
   const appWindowRef = useRef<HTMLDivElement>(null);
   const { width: windowWidth, height: windowHeight } = useWindowSize();
-  const config = app.config;
+  const [windowState, windowActions] = useWindowControls();
+  const { isClosed, isMinimized, isMaximized, isAnimating } = windowState;
+  const { handleClose, handleMinimize, handleMaximize } = windowActions;
 
   const [{ x, y, w, h }, setAppRect] = useState({
     x: config.left ?? 100,
@@ -25,30 +29,6 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
     w: config.width ?? MIN_WIDTH,
     h: config.height ?? MIN_HEIGHT,
   });
-
-  const [isClosed, setIsClosed] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isMaximized, setIsMaximized] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const handleClose = (): void => {
-    setIsClosed(true);
-  };
-
-  const handleMinimize = (): void => {
-    if (isMaximized) {
-      return;
-    }
-    setIsAnimating(true);
-    setTimeout(() => {
-      setIsMinimized(true);
-      setIsAnimating(false);
-    }, 500);
-  };
-
-  const handleMaximize = (): void => {
-    setIsMaximized(!isMaximized);
-  };
 
   if (isClosed) {
     return null;
