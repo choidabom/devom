@@ -8,11 +8,7 @@ const Blog = (): JSX.Element => {
 
   return (
     <div className="h-full w-full">
-      <img
-        aria-label="Blog Image"
-        src="./image/blog.png"
-        onClick={() => handleAddBlogLink()}
-      />
+      <img aria-label="Blog Image" src="./image/blog.png" onClick={() => handleAddBlogLink()} />
     </div>
   );
 };

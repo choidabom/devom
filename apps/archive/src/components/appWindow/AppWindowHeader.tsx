@@ -21,16 +21,7 @@ interface AppWindowHeaderProps {
 }
 
 const AppWindowHeader = (props: AppWindowHeaderProps): JSX.Element => {
-  const {
-    appName,
-    isMaximized,
-    appRect,
-    disableResizeControl,
-    onSetAppRect,
-    onClose,
-    onMinimize,
-    onMaximize,
-  } = props;
+  const { appName, isMaximized, appRect, disableResizeControl, onSetAppRect, onClose, onMinimize, onMaximize } = props;
 
   return (
     <div
@@ -46,13 +37,7 @@ const AppWindowHeader = (props: AppWindowHeaderProps): JSX.Element => {
       })}
     >
       <div className="m-1 flex space-x-2">
-        <button
-          type="button"
-          className={
-            "group relative flex h-3 w-3 items-center justify-center rounded-full bg-red-500"
-          }
-          onClick={onClose}
-        >
+        <button type="button" className={"group relative flex h-3 w-3 items-center justify-center rounded-full bg-red-500"} onClick={onClose}>
           <CloseIcon />
         </button>
         <button
@@ -63,22 +48,12 @@ const AppWindowHeader = (props: AppWindowHeaderProps): JSX.Element => {
         >
           {!isMaximized && <MinimizeIcon />}
         </button>
-        <button
-          type="button"
-          className={
-            "group relative flex h-3 w-3 items-center justify-center rounded-full bg-green-500"
-          }
-          onClick={onMaximize}
-        >
+        <button type="button" className={"group relative flex h-3 w-3 items-center justify-center rounded-full bg-green-500"} onClick={onMaximize}>
           <MaximizeIcon />
         </button>
       </div>
       <div className="flex-1 text-center">
-        <span
-          className={`text-sm ${disableResizeControl ? "text-white" : "text-gray-700"}`}
-        >
-          {appName}
-        </span>
+        <span className={`text-sm ${disableResizeControl ? "text-white" : "text-gray-700"}`}>{appName}</span>
       </div>
       <div className="w-12" />
     </div>

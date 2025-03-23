@@ -25,21 +25,7 @@ interface RnDProps {
 
 // RnD: Resizable and Draggable (react-rnd)
 const RnD = (props: RnDProps): JSX.Element => {
-  const {
-    ref,
-    size,
-    position,
-    zIndex,
-    children,
-    className,
-    minWidth,
-    minHeight,
-    windowWidth,
-    windowHeight,
-    disableResizeControl,
-    updateRnDRect,
-    onZIndex,
-  } = props;
+  const { ref, size, position, zIndex, children, className, minWidth, minHeight, windowWidth, windowHeight, disableResizeControl, updateRnDRect, onZIndex } = props;
 
   const { width: w, height: h } = size;
   const { x, y } = position;

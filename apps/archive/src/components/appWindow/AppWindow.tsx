@@ -74,9 +74,7 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
           windowHeight={windowHeight}
           disableResizeControl={config.disableResizeControl}
           updateRnDRect={setAppRect}
-          className={`flex flex-col overflow-hidden rounded-lg shadow-lg shadow-black/30 ${
-            isAnimating ? "minimize-animation" : ""
-          }`}
+          className={`flex flex-col overflow-hidden rounded-lg shadow-lg shadow-black/30 ${isAnimating ? "minimize-animation" : ""}`}
           onZIndex={onZIndex}
         >
           <AppWindowHeader
@@ -89,9 +87,7 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
             onMinimize={handleMinimize}
             onMaximize={handleMaximize}
           />
-          <div className="main-content h-screen flex-grow overflow-y-auto overflow-x-hidden bg-white">
-            {app.component}
-          </div>
+          <div className="main-content h-screen flex-grow overflow-y-auto overflow-x-hidden bg-white">{app.component}</div>
         </RnD>
       )}
     </>
