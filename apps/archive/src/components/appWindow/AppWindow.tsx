@@ -4,7 +4,7 @@ import { useWindowControls } from "../../hooks/useWindowControls";
 import { useWindowSize } from "../../hooks/useWindowsize";
 import type { Application } from "../../types/types";
 import RnD from "../RnD";
-import AppWindowHeader from "./AppWindowHeader";
+import WindowControls from "./WindowControls";
 
 export const MIN_WIDTH = 500;
 export const MIN_HEIGHT = 400;
@@ -19,6 +19,7 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
   const config = app.config;
   const appWindowRef = useRef<HTMLDivElement>(null);
   const { width: windowWidth, height: windowHeight } = useWindowSize();
+  
   const [windowState, windowActions] = useWindowControls();
   const { isClosed, isMinimized, isMaximized, isAnimating } = windowState;
   const { handleClose, handleMinimize, handleMaximize } = windowActions;
@@ -54,14 +55,12 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
           windowHeight={windowHeight}
           disableResizeControl={config.disableResizeControl}
           updateRnDRect={setAppRect}
-          className={`flex flex-col overflow-hidden rounded-lg shadow-lg shadow-black/30 ${isAnimating ? "minimize-animation" : ""}`}
+          className={`flex flex-col overflow-hidden rounded-lg shadow-lg shadow-black/40 border border-gray-100 ${isAnimating ? "minimize-animation" : ""}`}
           onZIndex={onZIndex}
         >
-          <AppWindowHeader
-            appName={app.name}
+          <WindowControls
             isMaximized={isMaximized}
             appRect={{ x, y, w, h }}
-            disableResizeControl={config.disableResizeControl}
             onSetAppRect={setAppRect}
             onClose={handleClose}
             onMinimize={handleMinimize}

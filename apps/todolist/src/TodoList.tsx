@@ -19,8 +19,11 @@ const todoItems: TodoItem[] = [
   { id: 6, text: "useWindowsize hook 리팩토링 및 hook 추가", completed: false },
   { id: 7, text: "class to context api", completed: true },
   { id: 8, text: "resume 페이지 생성", completed: false },
-  { id: 9, text: "todolist 페이지 리팩토링", completed: false },
+  { id: 9, text: "todolist 페이지 리팩토링 -----> still const..", completed: false },
   { id: 10, text: "biome 적용하기", completed: true },
+  { id: 11, text: "screenshot updater", completed: true },
+  { id: 12, text: "dev server 실험", completed: false  },
+  { id: 13, text: "useWindowControls hook 추가", completed: true },
 ];
 
 function TodoList() {
