@@ -19,7 +19,7 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
   const config = app.config;
   const appWindowRef = useRef<HTMLDivElement>(null);
   const { width: windowWidth, height: windowHeight } = useWindowSize();
-  
+
   const [windowState, windowActions] = useWindowControls();
   const { isClosed, isMinimized, isMaximized, isAnimating } = windowState;
   const { handleClose, handleMinimize, handleMaximize } = windowActions;

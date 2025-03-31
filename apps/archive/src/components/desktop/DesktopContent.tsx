@@ -34,14 +34,16 @@ export const DesktopContent = (): JSX.Element => {
   }, [addApplication]);
 
   return (
-    <div className="h-screen w-screen bg-light bg-cover dark:bg-dark">
+    <div className="h-screen w-screen bg-light bg-cover dark:bg-dark transition-all duration-500 ease-in-out">
       <button
         type="button"
-        className="absolute right-5 top-5 rounded-full bg-gray-200 p-2 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700"
+        className="absolute right-5 top-5 rounded-full bg-gray-100 p-2 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors duration-500"
         aria-label={`Switch to ${desktopMode === "light" ? "dark" : "light"} mode`}
         onClick={toggleDesktopMode}
       >
+      <span className="transition-opacity duration-300 opacity-100">
         {desktopMode === "light" ? "🌞" : "🌙"}
+      </span>
       </button>
 
       {applications.map((app) => (
