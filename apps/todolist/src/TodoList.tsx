@@ -1,3 +1,5 @@
+"use client";
+
 import "./index.css";
 
 interface TodoItem {
@@ -22,7 +24,7 @@ const todoItems: TodoItem[] = [
   { id: 9, text: "todolist 페이지 리팩토링 -----> still const..", completed: false },
   { id: 10, text: "biome 적용하기", completed: true },
   { id: 11, text: "screenshot updater", completed: true },
-  { id: 12, text: "dev server 실험", completed: false  },
+  { id: 12, text: "dev server 실험", completed: false },
   { id: 13, text: "useWindowControls hook 추가", completed: true },
 ];
 

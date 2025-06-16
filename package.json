@@ -10,6 +10,7 @@
         "build": "pnpm --filter \"archive\" build",
         "dev": "pnpm --filter \"archive\" dev",
         "archive": "pnpm --filter=@devom/archive",
+        "archive-next": "pnpm --filter=@devom/archive-next",
         "todolist": "pnpm --filter=@devom/todolist"
     },
     "devDependencies": {

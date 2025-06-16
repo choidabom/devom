@@ -41,9 +41,7 @@ export const DesktopContent = (): JSX.Element => {
         aria-label={`Switch to ${desktopMode === "light" ? "dark" : "light"} mode`}
         onClick={toggleDesktopMode}
       >
-      <span className="transition-opacity duration-300 opacity-100">
-        {desktopMode === "light" ? "🌞" : "🌙"}
-      </span>
+        <span className="transition-opacity duration-300 opacity-100">{desktopMode === "light" ? "🌞" : "🌙"}</span>
       </button>
 
       {applications.map((app) => (
