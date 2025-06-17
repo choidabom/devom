@@ -30,7 +30,7 @@ This package runs automatically through GitHub Actions. The workflow performs th
 ## Workflow Configuration (update-screenshot.yml)
 
 ```yaml
-// .github/workflows/update-screenshot.yml
+// .github/workflows/blog-screenshot-automation.yml
 name: Blog Screenshot Automation
 
 permissions:
@@ -38,42 +38,63 @@ permissions:
   contents: write
 
 on:
-  workflow_dispatch:     
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
 
 jobs:
   capture-and-update:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/screenshot-updater  
+        working-directory: packages/screenshot-updater
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Set up pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
-          
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Install dependencies
         run: |
           cd ../..
-          pnpm install
+          pnpm install --frozen-lockfile
           cd packages/screenshot-updater
+
+      - name: Validate screenshot updater setup
+        run: |
+          if [ ! -f "package.json" ]; then
+            echo "Error: package.json not found in screenshot-updater directory"
+            exit 1
+          fi
           
+          if ! pnpm list | grep -q "screenshot"; then
+            echo "Warning: No screenshot-related packages found"
+          fi
+
       - name: Capture screenshot
-        run: pnpm start
-        
-      - name: Verify screenshot exists
+        run: |
+          echo "Starting screenshot capture..."
+          pnpm start
+
+      - name: Verify and validate screenshot
         run: |
           ls -lah
-          if [ ! -f blog.png ]; then
+          
+          if [ ! -f "blog.png" ]; then
             echo "Error: blog.png not found!"
             exit 1
           fi
@@ -130,9 +151,6 @@ The workflow_run setting triggers a workflow when another workflow completes. In
 - `branches: - master`: Limits the trigger to changes pushed to the master branch.
 
 This ensures that after the blog screenshot is updated, the deployment workflow will automatically be triggered.
-
-
-
 
 ## Dependencies
 
