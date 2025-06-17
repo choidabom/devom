@@ -40,5 +40,7 @@ jobs:
 
       - name: Deploy to ${{ github.event.inputs.stage }}
         if: github.event.inputs.stage == 'dev' || github.event.inputs.stage == 'alpha'
-        working-directory: packages
-        run: pnpm workspace @devom/api deploy:${{ github.event.inputs.stage }}
+        run: pnpm --filter @devom/api deploy:${{ github.event.inputs.stage }}
+
+        # working-directory: packages/api
+        # run: pnpm run deploy:${{ github.event.inputs.stage }}
