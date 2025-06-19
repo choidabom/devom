@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: master
+  pull_request: 
+    branches: master
+  workflow_dispatch:
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4  
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Biome lint
+        run: pnpm biome lint .
+
+      - name: Run Biome format check
+        run: pnpm biome format . --check
+
+
+  build-test:
+    name: Build Test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build packages
+        run: pnpm build:packages
+
+      - name: Build apps
+        run: |
+          pnpm --filter=@devom/todolist build
+          pnpm --filter=@devom/archive build

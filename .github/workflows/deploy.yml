@@ -12,11 +12,12 @@ on:
       - master
     paths: 
       - "apps/archive/**"
-      - "apps/todolist/**"
+      - "apps/todolist/**"  
       - "packages/utils/**"
   workflow_run:
     workflows: 
       - "Blog Screenshot Automation"
+      - "CI"  # CI 성공 후 배포
     types:
       - completed
     branches:
@@ -25,9 +26,10 @@ on:
 jobs: 
   build:
     if: |
-      github.event.workflow_run.conclusion == 'success' || 
-      github.event_name == 'push' || 
-      github.event_name == 'workflow_dispatch'
+      (github.event.workflow_run.workflow.name == 'CI' && github.event.workflow_run.conclusion == 'success') ||
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     outputs:
       page_url: ${{ steps.set_output.outputs.page_url }}
@@ -48,13 +50,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build dependencies (utils)
-        run: pnpm --filter=@devom/utils build
-        working-directory: packages/utils
-
-      - name: Build dependencies (todolist)
-        run: pnpm --filter=@devom/todolist build
-        working-directory: apps/todolist
+      - name: Build dependencies
+        run: |
+          pnpm --filter=@devom/utils build
+          pnpm --filter=@devom/todolist build
 
       - name: Build Archive App
         run: pnpm build
