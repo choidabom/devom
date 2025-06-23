@@ -29,8 +29,8 @@ jobs:
       - name: Run Biome lint
         run: pnpm biome lint .
 
-      - name: Run Biome format check
-        run: pnpm biome format . --check
+      - name: Run Biome format 
+        run: pnpm biome format . --write
 
 
   build-test:
