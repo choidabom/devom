@@ -46,7 +46,7 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
 
-      - name: Deploy to ${{ github.event.inputs.stage }}
+      - name: Deploy to ${{ env.DEPLOY_STAGE }}
         if: env.DEPLOY_STAGE == 'dev' || env.DEPLOY_STAGE == 'alpha'
         working-directory: packages/api
-        run: pnpm run deploy:${{ github.event.inputs.stage }}
+        run: pnpm run deploy:${{ env.DEPLOY_STAGE }}
