@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 
 export async function captureScreenshot(url: string, outputPath: string) {
-  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({ args: ["--no-sandbox", "--disable-setuid-sandbox"] });
 
   try {
     const page = await browser.newPage();
