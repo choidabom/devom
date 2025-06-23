@@ -10,10 +10,24 @@ on:
         options:
           - dev
           - alpha
+        default: dev
+  workflow_run:
+    workflows: ["ci"]
+    types:
+      - completed
+    branches:
+      - master
+
+env:
+  DEPLOY_STAGE: ${{ github.event.inputs.stage || 'dev' }}
+  NODE_VERSION: 20
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' || 
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,7 +37,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20 
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -33,8 +47,6 @@ jobs:
           pnpm install --frozen-lockfile
 
       - name: Deploy to ${{ github.event.inputs.stage }}
-        if: github.event.inputs.stage == 'dev' || github.event.inputs.stage == 'alpha'
-        run: pnpm --filter @devom/api deploy:${{ github.event.inputs.stage }}
-
-        # working-directory: packages/api
-        # run: pnpm run deploy:${{ github.event.inputs.stage }}
+        if: env.DEPLOY_STAGE == 'dev' || env.DEPLOY_STAGE == 'alpha'
+        working-directory: packages/api
+        run: pnpm run deploy:${{ github.event.inputs.stage }}
