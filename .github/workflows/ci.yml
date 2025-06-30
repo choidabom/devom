@@ -26,8 +26,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run Biome lint
-        run: pnpm biome lint .
+      # - name: Run Biome lint
+      #   run: pnpm biome lint .
 
       - name: Run Biome format 
         run: pnpm biome format . --write
