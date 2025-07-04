@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "installCommand": "cd ../.. && pnpm install",
+  "buildCommand": "cd ../.. && pnpm --filter @devom/archive-next... build",
+  "env": {
+    "PNPM_FLAGS": "--shamefully-hoist"
+  }
+}
