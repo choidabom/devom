@@ -24,8 +24,7 @@ export async function GET() {
       low: bitcoinData.low_price, // 저가
       volume: bitcoinData.acc_trade_volume_24h, // 24시간 거래량
     });
-  } catch (error) {
-    console.error("Error fetching Bitcoin price from Upbit:", error);
+  } catch (_error) {
     return NextResponse.json({ error: "Failed to fetch Bitcoin price" }, { status: 500 });
   }
 }

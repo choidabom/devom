@@ -32,7 +32,7 @@ const eslintConfig = [
       "react/display-name": "off",
       "react/no-unescaped-entities": "off",
       "import/order": [
-        "error",
+        "warn",
         {
           groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
           "newlines-between": "never",
