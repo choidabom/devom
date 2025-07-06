@@ -7,6 +7,6 @@ if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
       <TodoList />
-    </StrictMode>,
+    </StrictMode>
   );
 }

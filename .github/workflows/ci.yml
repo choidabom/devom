@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches: master
-  pull_request: 
+  pull_request:
     branches: master
   workflow_dispatch:
 
@@ -26,12 +26,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # - name: Run Biome lint
-      #   run: pnpm biome lint .
+      - name: Run ESLint
+        run: pnpm lint
 
-      - name: Run Biome format 
-        run: pnpm biome format . --write
-
+      - name: Run Prettier format check
+        run: pnpm format:check
 
   build-test:
     name: Build Test

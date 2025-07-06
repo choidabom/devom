@@ -80,7 +80,7 @@ jobs:
             echo "Error: package.json not found in screenshot-updater directory"
             exit 1
           fi
-          
+
           if ! pnpm list | grep -q "screenshot"; then
             echo "Warning: No screenshot-related packages found"
           fi
@@ -93,7 +93,7 @@ jobs:
       - name: Verify and validate screenshot
         run: |
           ls -lah
-          
+
           if [ ! -f "blog.png" ]; then
             echo "Error: blog.png not found!"
             exit 1
@@ -110,7 +110,7 @@ jobs:
           git config --global user.email 'actions@github.com'
           git add ../../apps/archive/public/image/blog.png
           git commit -m "add: update blog screenshot ($(date +'%Y-%m-%d'))"
-          git push 
+          git push
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
 ```
@@ -119,35 +119,33 @@ jobs:
 
 ```yaml
 // .github/workflows/deploy.yml
-
-...
-
+---
 on:
   workflow_dispatch:
   push:
-    branches: 
+    branches:
       - master
-    paths: 
+    paths:
       - "apps/archive/**"
       - "apps/todolist/**"
       - "packages/utils/**"
   workflow_run:
-    workflows: 
+    workflows:
       - "Blog Screenshot Automation"
     types:
       - completed
     branches:
       - master
-
 ```
 
 ### Workflow Explanation
+
 The workflow_run setting triggers a workflow when another workflow completes. In this case, the deployment workflow is triggered after the Blog Screenshot Automation workflow completes.
 
 - `workflows: - "Blog Screenshot Automation"`: Specifies that the deployment workflow will be triggered after the Blog Screenshot Automation workflow completes.
 
 - `types: - completed`: Ensures the deployment workflow runs regardless of whether the Blog Screenshot Automation workflow succeeds or fails.
-`
+  `
 - `branches: - master`: Limits the trigger to changes pushed to the master branch.
 
 This ensures that after the blog screenshot is updated, the deployment workflow will automatically be triggered.

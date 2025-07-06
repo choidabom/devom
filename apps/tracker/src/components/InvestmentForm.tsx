@@ -1,11 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { formatBTC } from "@/lib/utils";
 import type { Investment } from "@/types/bitcoin";
-import { useEffect, useState } from "react";
 
 function getCurrentDateString(): string {
   const isoString = new Date().toISOString();
@@ -15,22 +15,13 @@ function getCurrentDateString(): string {
 
 interface InvestmentFormProps {
   onAddInvestment?: (investment: Omit<Investment, "id" | "btcAmount">) => void;
-  onUpdateInvestment?: (
-    id: string,
-    investment: Omit<Investment, "id" | "btcAmount">
-  ) => void;
+  onUpdateInvestment?: (id: string, investment: Omit<Investment, "id" | "btcAmount">) => void;
   currentPrice?: number;
   editingInvestment?: Investment | null;
   mode?: "add" | "edit";
 }
 
-export function InvestmentForm({
-  onAddInvestment,
-  onUpdateInvestment,
-  currentPrice,
-  editingInvestment,
-  mode = "add",
-}: InvestmentFormProps) {
+export function InvestmentForm({ onAddInvestment, onUpdateInvestment, currentPrice, editingInvestment, mode = "add" }: InvestmentFormProps) {
   const [investmentAmount, setInvestmentAmount] = useState("");
   const [buyPrice, setBuyPrice] = useState("");
   const [date, setDate] = useState(() => getCurrentDateString());
@@ -103,48 +94,20 @@ export function InvestmentForm({
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="date">날짜</Label>
-          <Input
-            id="date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
+          <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="investment">투자금액 (원)</Label>
-          <Input
-            id="investment"
-            type="number"
-            placeholder="1,000,000"
-            value={investmentAmount}
-            onChange={(e) => setInvestmentAmount(e.target.value)}
-            required
-            min="0"
-          />
+          <Input id="investment" type="number" placeholder="1,000,000" value={investmentAmount} onChange={(e) => setInvestmentAmount(e.target.value)} required min="0" />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="buyPrice">매수 시세 (원)</Label>
           <div className="space-y-2">
-            <Input
-              id="buyPrice"
-              type="number"
-              placeholder="100,000,000"
-              value={buyPrice}
-              onChange={(e) => setBuyPrice(e.target.value)}
-              required
-              min="0"
-            />
+            <Input id="buyPrice" type="number" placeholder="100,000,000" value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} required min="0" />
             {currentPrice && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full sm:w-auto text-xs"
-                onClick={() => setBuyPrice(currentPrice.toString())}
-              >
+              <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto text-xs" onClick={() => setBuyPrice(currentPrice.toString())}>
                 현재가 적용 ({currentPrice.toLocaleString()}원)
               </Button>
             )}
@@ -154,33 +117,17 @@ export function InvestmentForm({
         <div className="space-y-2">
           <Label>매수 수량</Label>
           <div className="h-10 px-3 py-2 border border-input rounded-md bg-muted text-sm flex items-center">
-            {calculateBTCAmount() > 0
-              ? formatBTC(calculateBTCAmount())
-              : "0 BTC"}
+            {calculateBTCAmount() > 0 ? formatBTC(calculateBTCAmount()) : "0 BTC"}
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="notes">메모 (선택사항)</Label>
-          <Input
-            id="notes"
-            placeholder="매수 이유 또는 기타 메모"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
+          <Input id="notes" placeholder="매수 이유 또는 기타 메모" value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
       </div>
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={
-          !investmentAmount ||
-          !buyPrice ||
-          parseFloat(investmentAmount) <= 0 ||
-          parseFloat(buyPrice) <= 0
-        }
-      >
+      <Button type="submit" className="w-full" disabled={!investmentAmount || !buyPrice || parseFloat(investmentAmount) <= 0 || parseFloat(buyPrice) <= 0}>
         {buttonText}
       </Button>
     </form>

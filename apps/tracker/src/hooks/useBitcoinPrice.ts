@@ -1,7 +1,7 @@
 "use client";
 
-import type { BitcoinPrice } from "@/types/bitcoin";
 import { useEffect, useState } from "react";
+import type { BitcoinPrice } from "@/types/bitcoin";
 
 export function useBitcoinPrice() {
   const [price, setPrice] = useState<BitcoinPrice | null>(null);

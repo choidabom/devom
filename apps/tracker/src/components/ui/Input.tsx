@@ -1,10 +1,6 @@
 import { cn } from "@/lib/utils";
 
-function Input({
-  className,
-  type,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({ className, type, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       type={type}

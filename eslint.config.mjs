@@ -1,13 +1,14 @@
-import { dirname } from "node:path"
-import { fileURLToPath } from "node:url"
-import { FlatCompat } from "@eslint/eslintrc"
+import { FlatCompat } from "@eslint/eslintrc";
+import importPlugin from "eslint-plugin-import";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
-})
+});
 
 const eslintConfig = [
   {
@@ -16,15 +17,31 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript", "prettier"),
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+    plugins: {
+      import: importPlugin,
+    },
     rules: {
       "no-console": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/ban-types": "off",
       "prefer-const": "error",
       "no-var": "error",
+      semi: ["error", "always"],
       "@next/next/no-img-element": "warn",
       "react/display-name": "off",
       "react/no-unescaped-entities": "off",
+      "import/order": [
+        "error",
+        {
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
+          "newlines-between": "never",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
+      ],
     },
   },
   {
@@ -42,6 +59,6 @@ const eslintConfig = [
       "no-console": "off",
     },
   },
-]
+];
 
-export default eslintConfig 
+export default eslintConfig;

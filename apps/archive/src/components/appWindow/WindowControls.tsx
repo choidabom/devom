@@ -7,12 +7,7 @@ import { MinimizeIcon } from "../icon/MinimizeIcon";
 interface WindowControlsProps {
   isMaximized: boolean;
   appRect: { x: number; y: number; w: number; h: number };
-  onSetAppRect: (DOMRect: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  }) => void;
+  onSetAppRect: (DOMRect: { x: number; y: number; w: number; h: number }) => void;
   onClose: () => void;
   onMinimize: () => void;
   onMaximize: () => void;

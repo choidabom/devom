@@ -1,14 +1,13 @@
-
 {
-    "name": "@devom/api",
-    "version": "0.0.0",
-    "description": "Deploy Workflows Test",
-    "scripts": {
-        "deploy:dev": "echo 'Deploying to dev environment...' && node scripts/deploy.js dev",
-        "deploy:alpha": "echo 'Deploying to alpha environment...' && node scripts/deploy.js alpha",
-        "deploy:real": "echo 'Deploying to real environment...' && node scripts/deploy.js real"
-    },
-    "dependencies": {
-        "dotenv": "^16.0.3"
-    }
+  "name": "@devom/api",
+  "version": "0.0.0",
+  "description": "Deploy Workflows Test",
+  "scripts": {
+    "deploy:dev": "echo 'Deploying to dev environment...' && node scripts/deploy.js dev",
+    "deploy:alpha": "echo 'Deploying to alpha environment...' && node scripts/deploy.js alpha",
+    "deploy:real": "echo 'Deploying to real environment...' && node scripts/deploy.js real"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3"
+  }
 }

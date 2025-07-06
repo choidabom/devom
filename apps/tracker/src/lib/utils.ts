@@ -21,11 +21,7 @@ export function formatPercentage(percentage: number): string {
   return `${sign}${percentage.toFixed(2)}%`;
 }
 
-export function calculateProfit(
-  investmentAmount: number,
-  buyPrice: number,
-  currentPrice: number
-): { profit: number; profitPercentage: number; currentValue: number } {
+export function calculateProfit(investmentAmount: number, buyPrice: number, currentPrice: number): { profit: number; profitPercentage: number; currentValue: number } {
   const btcAmount = investmentAmount / buyPrice;
   const currentValue = btcAmount * currentPrice;
   const profit = currentValue - investmentAmount;

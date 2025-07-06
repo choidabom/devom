@@ -2,8 +2,8 @@ import { TodoList } from "@devom/todolist";
 import { type JSX, useEffect, useRef } from "react";
 import { useApplications } from "../../context/useApplications";
 import { useDesktopMode } from "../../hooks/useDesktopMode";
-import AppWindow from "../appWindow/AppWindow";
 import Blog from "../application/Blog";
+import AppWindow from "../appWindow/AppWindow";
 
 export const DesktopContent = (): JSX.Element => {
   const initializedRef = useRef<boolean>(false);

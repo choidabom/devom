@@ -1,7 +1,7 @@
 "use client";
 
-import type { Investment, PortfolioSummary } from "@/types/bitcoin";
 import { useEffect, useState } from "react";
+import type { Investment, PortfolioSummary } from "@/types/bitcoin";
 
 const STORAGE_KEY = "bitcoin-investments";
 
@@ -38,10 +38,7 @@ export function useInvestments() {
     setInvestments((prev) => prev.filter((inv) => inv.id !== id));
   };
 
-  const updateInvestment = (
-    id: string,
-    updatedData: Omit<Investment, "id">
-  ) => {
+  const updateInvestment = (id: string, updatedData: Omit<Investment, "id">) => {
     setInvestments((prev) =>
       prev.map((inv) =>
         inv.id === id
@@ -55,9 +52,7 @@ export function useInvestments() {
     );
   };
 
-  const calculatePortfolioSummary = (
-    currentPrice: number
-  ): PortfolioSummary => {
+  const calculatePortfolioSummary = (currentPrice: number): PortfolioSummary => {
     if (investments.length === 0) {
       return {
         totalInvestment: 0,
@@ -69,10 +64,7 @@ export function useInvestments() {
       };
     }
 
-    const totalInvestment = investments.reduce(
-      (sum, inv) => sum + inv.investmentAmount,
-      0
-    );
+    const totalInvestment = investments.reduce((sum, inv) => sum + inv.investmentAmount, 0);
     const totalBTC = investments.reduce((sum, inv) => sum + inv.btcAmount, 0);
     const currentValue = totalBTC * currentPrice;
     const totalProfit = currentValue - totalInvestment;

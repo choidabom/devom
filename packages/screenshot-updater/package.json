@@ -1,19 +1,19 @@
 {
-    "name": "screenshot-updater",
-    "private": true,
-    "version": "1.0.0",
-    "type": "module",
-    "scripts": {
-        "start": "tsx src/index.ts",
-        "lint": "pnpm biome check --fix --unsafe"
-    },
-    "dependencies": {
-        "@devom/ts-config": "workspace:*",
-        "puppeteer": "catalog:"
-    },
-    "devDependencies": {
-        "dotenv": "catalog:",
-        "tsx": "catalog:",
-        "typescript": "catalog:"
-    }
+  "name": "screenshot-updater",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "lint": "pnpm biome check --fix --unsafe"
+  },
+  "dependencies": {
+    "@devom/ts-config": "workspace:*",
+    "puppeteer": "catalog:"
+  },
+  "devDependencies": {
+    "dotenv": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
 }

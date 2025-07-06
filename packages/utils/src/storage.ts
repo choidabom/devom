@@ -34,7 +34,7 @@ class LocalStorage implements IStorage {
       localStorage.setItem(TEST_KEY, "test");
       localStorage.removeItem(TEST_KEY);
       return true;
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   }
@@ -65,7 +65,7 @@ class SessionStorage implements IStorage {
       sessionStorage.setItem(TEST_KEY, "test");
       sessionStorage.removeItem(TEST_KEY);
       return true;
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   }

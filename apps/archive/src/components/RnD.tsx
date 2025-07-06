@@ -14,12 +14,7 @@ interface RnDProps {
   windowWidth: number;
   windowHeight: number;
   disableResizeControl?: boolean;
-  updateRnDRect: (RnDRect: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  }) => void;
+  updateRnDRect: (RnDRect: { x: number; y: number; w: number; h: number }) => void;
   onZIndex: () => void;
 }
 

@@ -1,40 +1,40 @@
 {
-    "name": "@devom/todolist",
-    "private": true,
-    "version": "0.0.0",
-    "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-        ".": {
-            "development": "./src/index.ts",
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs"
-        },
-        "./index.css": "./dist/index.css"
+  "name": "@devom/todolist",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
-    "scripts": {
-        "dev": "vite",
-        "build": "tsc -b && vite build",
-        "preview": "vite preview",
-        "lint": "pnpm biome check --write"
-    },
-    "lint-staged": {
-        "*.{ts,tsx,js,jsx,json,md,mjs,mts,yml,yaml}": "pnpm biome check --write"
-    },
-    "dependencies": {
-        "@devom/ts-config": "workspace:*",
-        "@devom/utils": "workspace:*",
-        "react": "catalog:react18",
-        "react-dom": "catalog:react18"
-    },
-    "devDependencies": {
-        "@types/react": "catalog:react18",
-        "@types/react-dom": "catalog:react18",
-        "@vitejs/plugin-react": "catalog:",
-        "autoprefixer": "catalog:",
-        "postcss": "catalog:",
-        "tailwindcss": "catalog:",
-        "vite-plugin-dts": "catalog:"
-    }
+    "./index.css": "./dist/index.css"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "pnpm biome check --write"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,mjs,mts,yml,yaml}": "pnpm biome check --write"
+  },
+  "dependencies": {
+    "@devom/ts-config": "workspace:*",
+    "@devom/utils": "workspace:*",
+    "react": "catalog:react18",
+    "react-dom": "catalog:react18"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:react18",
+    "@types/react-dom": "catalog:react18",
+    "@vitejs/plugin-react": "catalog:",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "vite-plugin-dts": "catalog:"
+  }
 }

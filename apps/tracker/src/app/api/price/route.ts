@@ -3,12 +3,9 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     // 업비트 API를 사용해서 비트코인 시세 조회 (KRW-BTC)
-    const response = await fetch(
-      "https://api.upbit.com/v1/ticker?markets=KRW-BTC",
-      {
-        next: { revalidate: 60 }, // 1분 캐시
-      }
-    );
+    const response = await fetch("https://api.upbit.com/v1/ticker?markets=KRW-BTC", {
+      next: { revalidate: 60 }, // 1분 캐시
+    });
 
     if (!response.ok) {
       throw new Error("Failed to fetch Bitcoin price from Upbit");
@@ -29,9 +26,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Error fetching Bitcoin price from Upbit:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch Bitcoin price" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch Bitcoin price" }, { status: 500 });
   }
 }
