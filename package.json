@@ -6,7 +6,12 @@
     "scripts": {
         "preinstall": "npx only-allow pnpm",
         "build:packages": "pnpm --filter \"@devom/*\" build",
-        "lint": "pnpm --filter \"@devom/*\" lint",
+        "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+        "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+        "lint:apps": "pnpm --filter \"@devom/*\" lint",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "format:fix": "prettier --write . && pnpm lint:fix",
         "build": "pnpm --filter \"archive\" build",
         "dev": "pnpm --filter \"archive\" dev",
         "archive": "pnpm --filter=@devom/archive",
@@ -14,9 +19,15 @@
         "todolist": "pnpm --filter=@devom/todolist"
     },
     "devDependencies": {
-        "@biomejs/biome": "catalog:",
+        "@eslint/eslintrc": "^3",
+        "@typescript-eslint/eslint-plugin": "^8",
+        "@typescript-eslint/parser": "^8",
+        "eslint": "^9",
+        "eslint-config-next": "15.3.3",
+        "eslint-config-prettier": "^10.1.5",
         "husky": "catalog:",
         "lint-staged": "catalog:",
+        "prettier": "^3",
         "typescript": "catalog:",
         "vite": "catalog:"
     },
