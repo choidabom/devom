@@ -15,9 +15,6 @@ catalogs:
     autoprefixer:
       specifier: ^10.4.20
       version: 10.4.20
-    dotenv:
-      specifier: ^16.4.7
-      version: 16.4.7
     husky:
       specifier: ^9.1.7
       version: 9.1.7
@@ -27,18 +24,9 @@ catalogs:
     postcss:
       specifier: ^8.4.49
       version: 8.5.3
-    puppeteer:
-      specifier: ^24.4.0
-      version: 24.4.0
     tailwindcss:
       specifier: ^3.4.14
       version: 3.4.17
-    ts-node:
-      specifier: ^10.9.2
-      version: 10.9.2
-    tsx:
-      specifier: ^4.19.3
-      version: 4.19.3
     typescript:
       specifier: ^5.7.3
       version: 5.8.2
@@ -109,6 +97,9 @@ importers:
       prettier:
         specifier: ^3
         version: 3.6.2
+      puppeteer:
+        specifier: ^24.0.0
+        version: 24.4.0(typescript@5.8.2)
       typescript:
         specifier: 'catalog:'
         version: 5.8.2
@@ -290,41 +281,6 @@ importers:
       dotenv:
         specifier: ^16.0.3
         version: 16.4.7
-
-  packages/fp:
-    dependencies:
-      '@devom/ts-config':
-        specifier: workspace:*
-        version: link:../ts-config
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 22.13.9
-      ts-node:
-        specifier: 'catalog:'
-        version: 10.9.2(@types/node@22.13.9)(typescript@5.8.2)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.8.2
-
-  packages/screenshot-updater:
-    dependencies:
-      '@devom/ts-config':
-        specifier: workspace:*
-        version: link:../ts-config
-      puppeteer:
-        specifier: 'catalog:'
-        version: 24.4.0(typescript@5.8.2)
-    devDependencies:
-      dotenv:
-        specifier: 'catalog:'
-        version: 16.4.7
-      tsx:
-        specifier: 'catalog:'
-        version: 4.19.3
-      typescript:
-        specifier: 'catalog:'
-        version: 5.8.2
 
   packages/ts-config: {}
 
@@ -1708,11 +1664,6 @@ packages:
   acorn-walk@8.3.4:
     resolution: {integrity: sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g==}
     engines: {node: '>=0.4.0'}
-
-  acorn@8.14.0:
-    resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
 
   acorn@8.15.0:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
@@ -3255,6 +3206,7 @@ packages:
   puppeteer@24.4.0:
     resolution: {integrity: sha512-E4JhJzjS8AAI+6N/b+Utwarhz6zWl3+MR725fal+s3UlOlX2eWdsvYYU+Q5bXMjs9eZEGkNQroLkn7j11s2k1Q==}
     engines: {node: '>=18'}
+    deprecated: < 24.9.0 is no longer supported
     hasBin: true
 
   queue-microtask@1.2.3:
@@ -4075,6 +4027,7 @@ snapshots:
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
+    optional: true
 
   '@emnapi/core@1.4.3':
     dependencies:
@@ -4416,6 +4369,7 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+    optional: true
 
   '@microsoft/api-extractor-model@7.28.13(@types/node@22.13.10)':
     dependencies:
@@ -4538,7 +4492,7 @@ snapshots:
       extract-zip: 2.0.1
       progress: 2.0.3
       proxy-agent: 6.5.0
-      semver: 7.7.1
+      semver: 7.7.2
       tar-fs: 3.0.8
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -4896,13 +4850,17 @@ snapshots:
 
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
-  '@tsconfig/node10@1.0.11': {}
+  '@tsconfig/node10@1.0.11':
+    optional: true
 
-  '@tsconfig/node12@1.0.11': {}
+  '@tsconfig/node12@1.0.11':
+    optional: true
 
-  '@tsconfig/node14@1.0.3': {}
+  '@tsconfig/node14@1.0.3':
+    optional: true
 
-  '@tsconfig/node16@1.0.4': {}
+  '@tsconfig/node16@1.0.4':
+    optional: true
 
   '@tybys/wasm-util@0.9.0':
     dependencies:
@@ -5196,9 +5154,8 @@ snapshots:
 
   acorn-walk@8.3.4:
     dependencies:
-      acorn: 8.14.0
-
-  acorn@8.14.0: {}
+      acorn: 8.15.0
+    optional: true
 
   acorn@8.15.0: {}
 
@@ -5232,7 +5189,8 @@ snapshots:
       normalize-path: 3.0.0
       picomatch: 2.3.1
 
-  arg@4.1.3: {}
+  arg@4.1.3:
+    optional: true
 
   arg@5.0.2: {}
 
@@ -5517,7 +5475,8 @@ snapshots:
     optionalDependencies:
       typescript: 5.8.2
 
-  create-require@1.1.1: {}
+  create-require@1.1.1:
+    optional: true
 
   cross-spawn@7.0.6:
     dependencies:
@@ -5589,7 +5548,8 @@ snapshots:
 
   didyoumean@1.2.2: {}
 
-  diff@4.0.2: {}
+  diff@4.0.2:
+    optional: true
 
   dlv@1.1.3: {}
 
@@ -6591,7 +6551,8 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  make-error@1.3.6: {}
+  make-error@1.3.6:
+    optional: true
 
   math-intrinsics@1.1.0: {}
 
@@ -7489,7 +7450,7 @@ snapshots:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
       '@types/node': 22.13.10
-      acorn: 8.14.0
+      acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
@@ -7508,7 +7469,7 @@ snapshots:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
       '@types/node': 22.13.9
-      acorn: 8.14.0
+      acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
@@ -7517,6 +7478,7 @@ snapshots:
       typescript: 5.8.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+    optional: true
 
   tsconfig-paths@3.15.0:
     dependencies:
@@ -7533,6 +7495,7 @@ snapshots:
       get-tsconfig: 4.10.0
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   type-check@0.4.0:
     dependencies:
@@ -7641,7 +7604,8 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  v8-compile-cache-lib@3.0.1: {}
+  v8-compile-cache-lib@3.0.1:
+    optional: true
 
   validator@13.12.0: {}
 
@@ -7833,7 +7797,8 @@ snapshots:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
 
-  yn@3.1.1: {}
+  yn@3.1.1:
+    optional: true
 
   yocto-queue@0.1.0: {}
 

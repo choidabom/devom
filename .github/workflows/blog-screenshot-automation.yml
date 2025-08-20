@@ -29,15 +29,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Install Puppeteer in script directory
-        run: |
-          cd .github/scripts
-          pnpm init -y
-          pnpm add puppeteer
-
       - name: Capture screenshot
         run: |
-          npx puppeteer .github/scripts/screenshot-script.js
+          node .github/scripts/screenshot-script.js
         env:
           BLOG_URL: ${{ secrets.BLOG_URL }}
 

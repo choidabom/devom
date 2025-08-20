@@ -29,6 +29,7 @@
     "husky": "catalog:",
     "lint-staged": "catalog:",
     "prettier": "^3",
+    "puppeteer": "^24.0.0",
     "typescript": "catalog:",
     "vite": "catalog:"
   },
