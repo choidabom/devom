@@ -1,6 +1,0 @@
-{
-  "extends": "@devom/ts-config/node.json",
-  "compilerOptions": {
-    "module": "NodeNext"
-  }
-}
