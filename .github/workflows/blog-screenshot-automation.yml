@@ -23,12 +23,21 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Puppeteer
-        run: npm install puppeteer
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Puppeteer in script directory
+        run: |
+          cd .github/scripts
+          pnpm init -y
+          pnpm add puppeteer
 
       - name: Capture screenshot
         run: |
-          node .github/scripts/screenshot-script.js
+          npx puppeteer .github/scripts/screenshot-script.js
         env:
           BLOG_URL: ${{ secrets.BLOG_URL }}
 
