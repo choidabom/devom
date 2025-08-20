@@ -10,9 +10,6 @@ on:
 jobs:
   capture-and-update:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/screenshot-updater
 
     steps:
       - name: Checkout repository
@@ -26,50 +23,33 @@ jobs:
         with:
           node-version: 20
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: |
-          cd ../..
-          pnpm install --frozen-lockfile
-          cd packages/screenshot-updater
-
-      - name: Validate screenshot updater setup
-        run: |
-          if [ ! -f "package.json" ]; then
-            echo "Error: package.json not found in screenshot-updater directory"
-            exit 1
-          fi
-
-          if ! pnpm list | grep -q "screenshot"; then
-            echo "Warning: No screenshot-related packages found"
-          fi
+      - name: Install Puppeteer
+        run: npm install puppeteer
 
       - name: Capture screenshot
         run: |
-          echo "Starting screenshot capture..."
-          pnpm start
+          node .github/scripts/screenshot-script.js
+        env:
+          BLOG_URL: ${{ secrets.BLOG_URL }}
 
-      - name: Verify and validate screenshot
+      - name: Verify screenshot
         run: |
-          ls -lah
-
           if [ ! -f "blog.png" ]; then
             echo "Error: blog.png not found!"
             exit 1
           fi
+          echo "Screenshot captured successfully"
 
       - name: Move screenshots to blog directory
         run: |
-          mv blog.png ../../apps/archive/public/image/
-          ls -lah ../../apps/archive/public/image/
+          mv blog.png apps/archive/public/image/
+          ls -lah apps/archive/public/image/
 
       - name: Commit and push changes
         run: |
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
-          git add ../../apps/archive/public/image/blog.png
+          git add apps/archive/public/image/blog.png
           git commit -m "add: update blog screenshot ($(date +'%Y-%m-%d'))"
           git push
         env:
