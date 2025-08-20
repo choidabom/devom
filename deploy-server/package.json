@@ -1,0 +1,19 @@
+{
+  "name": "@devom/services",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.26.0",
+    "@fastify/cors": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.2",
+    "typescript": "^5.7.3",
+    "tsx": "^4.19.3"
+  }
+}

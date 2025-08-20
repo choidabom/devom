@@ -1,6 +1,7 @@
 packages:
   - "apps/**"
   - "packages/**"
+  - "deploy-server/**"
 
 catalog:
   "@biomejs/biome": "1.9.4"
