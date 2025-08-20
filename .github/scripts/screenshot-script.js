@@ -1,4 +1,4 @@
-const puppeteer = require("puppeteer");
+import puppeteer from "puppeteer";
 
 async function captureScreenshot(url, outputPath) {
   const browser = await puppeteer.launch({ args: ["--no-sandbox", "--disable-setuid-sandbox"] });
