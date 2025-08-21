@@ -1,7 +1,11 @@
 import puppeteer from "puppeteer";
 
 async function captureScreenshot(url, outputPath) {
-  const browser = await puppeteer.launch({ args: ["--no-sandbox", "--disable-setuid-sandbox"] });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-web-security", "--disable-features=VizDisplayCompositor"],
+    executablePath: process.env.CHROME_BIN || undefined,
+  });
 
   try {
     const page = await browser.newPage();
