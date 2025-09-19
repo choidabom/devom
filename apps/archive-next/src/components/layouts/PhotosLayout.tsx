@@ -1,4 +1,7 @@
-import { FileSystem } from "@/components/FileSystem";
+interface PhotosLayoutProps {
+  title: string;
+  description?: string;
+}
 
 // Sample photo data - in a real app, this would come from a CMS or API
 const photos = [
@@ -24,34 +27,30 @@ const photos = [
   { id: 20, src: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=400&fit=crop", title: "Urban Skyline", category: "Architecture" },
 ];
 
-export default function PhotosPage() {
+export function PhotosLayout({ title, description }: PhotosLayoutProps) {
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-neutral-900 dark:text-neutral-100">
-      <FileSystem items={{ amount: 20, label: "photos" }} currentPath="/archive/photos">
-        <div className="w-full h-full flex flex-col">
-          <div className="mb-8 flex-shrink-0">
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">Photos</h1>
-            <p className="text-neutral-600 dark:text-neutral-400">A curated collection of photography and visual content</p>
-          </div>
+    <div className="w-full h-full flex flex-col">
+      <div className="mb-8 flex-shrink-0">
+        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">{title}</h1>
+        {description && <p className="text-neutral-600 dark:text-neutral-400">{description}</p>}
+      </div>
 
-          {/* Photo Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {photos.map((photo) => (
-              <div
-                key={photo.id}
-                className="group relative aspect-square overflow-hidden rounded-lg bg-neutral-100 dark:bg-neutral-800 cursor-pointer transition-transform hover:scale-105"
-              >
-                <img src={photo.src} alt={photo.title} className="w-full h-full object-cover transition-opacity group-hover:opacity-90" loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                  <h3 className="font-medium text-sm truncate">{photo.title}</h3>
-                  <p className="text-xs text-neutral-300">{photo.category}</p>
-                </div>
-              </div>
-            ))}
+      {/* Photo Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {photos.map((photo) => (
+          <div
+            key={photo.id}
+            className="group relative aspect-square overflow-hidden rounded-lg bg-neutral-100 dark:bg-neutral-800 cursor-pointer transition-transform hover:scale-105"
+          >
+            <img src={photo.src} alt={photo.title} className="w-full h-full object-cover transition-opacity group-hover:opacity-90" loading="lazy" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute bottom-0 left-0 right-0 p-3 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+              <h3 className="font-medium text-sm truncate">{photo.title}</h3>
+              <p className="text-xs text-neutral-300">{photo.category}</p>
+            </div>
           </div>
-        </div>
-      </FileSystem>
+        ))}
+      </div>
     </div>
   );
 }
