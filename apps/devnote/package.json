@@ -1,0 +1,27 @@
+{
+  "name": "@devom/devnote",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./dist/*": "./dist/*",
+    "./index.html": "./dist/index.html"
+  },
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "lint": "pnpm biome check --write"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,mjs,mts,yml,yaml}": "pnpm biome check --write"
+  },
+  "dependencies": {
+    "@devom/ts-config": "workspace:*"
+  },
+  "devDependencies": {
+    "vitepress": "2.0.0-alpha.12",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
+}

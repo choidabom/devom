@@ -7,4 +7,10 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react()] as PluginOption[],
+  server: {
+    fs: {
+      allow: [".."],
+    },
+  },
+  publicDir: "dist",
 });

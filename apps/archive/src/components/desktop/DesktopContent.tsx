@@ -1,8 +1,8 @@
-import { TodoList } from "@devom/todolist";
 import { type JSX, useEffect, useRef } from "react";
 import { useApplications } from "../../context/useApplications";
 import { useDesktopMode } from "../../hooks/useDesktopMode";
 import Blog from "../application/Blog";
+import Devnote from "../application/Devnote";
 import AppWindow from "../appWindow/AppWindow";
 
 export const DesktopContent = (): JSX.Element => {
@@ -22,14 +22,26 @@ export const DesktopContent = (): JSX.Element => {
         minWidth: 640,
         minHeight: 640,
       });
-      addApplication("todolist", <TodoList />, {
-        width: 800,
-        height: 650,
-        left: 350,
-        top: 100,
-        minWidth: 500,
-        minHeight: 640,
+      // addApplication("todolist", <TodoList />, {
+      //   width: 800,
+      //   height: 650,
+      //   left: 350,
+      //   top: 100,
+      //   minWidth: 500,
+      //   minHeight: 640,
+      // });
+      addApplication("devnote", <Devnote />, {
+        width: 500,
+        height: 750,
+        left: 750,
+        top: 30,
       });
+      // addApplication("resume", <Resume />, {
+      //   width: 500,
+      //   height: 750,
+      //   left: 750,
+      //   top: 30,
+      // });
     }
   }, [addApplication]);
 
