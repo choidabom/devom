@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "cd ../.. && pnpm install",
+  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile",
   "buildCommand": "cd ../.. && pnpm --filter @devom/archive-next... build",
   "env": {
     "PNPM_FLAGS": "--shamefully-hoist"
