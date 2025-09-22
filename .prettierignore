@@ -11,3 +11,4 @@ public
 coverage
 *.min.js
 *.bundle.js 
+.vitepress
