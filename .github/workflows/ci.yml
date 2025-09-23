@@ -55,5 +55,4 @@ jobs:
 
       - name: Build apps
         run: |
-          pnpm --filter=@devom/todolist build
           pnpm --filter=@devom/archive build

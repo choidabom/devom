@@ -1,5 +1,0 @@
-{
-  "extends": ["@devom/ts-config/react.json", "@devom/ts-config/library.json"],
-  "include": [/* 컴파일에 포함할 파일들을 지정함. */ "src"],
-  "exclude": [/* 컴파일에서 제외할 디렉토리를 지정함. */ "node_modules", "dist"]
-}
