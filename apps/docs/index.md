@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: "devom's devnote"
+  name: "devom's docs"
   tagline: "archiving and laboratory"
   actions:
     - theme: brand

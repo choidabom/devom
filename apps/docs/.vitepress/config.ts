@@ -2,11 +2,11 @@ import { defineConfig } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "devnote",
+  title: "docs",
   description: "devom's development notes",
-  // archive 앱에서 iframe으로 사용하기 위해 항상 /devnote/ base 사용
-  base: "/devnote/",
-  outDir: "../archive/dist/devnote",
+  // archive 앱에서 iframe으로 사용하기 위해 항상 /docs/ base 사용
+  base: "/docs/",
+  outDir: "../archive/dist/docs",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [{ text: "Home", link: "/" }],

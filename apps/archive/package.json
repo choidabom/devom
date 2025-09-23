@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm build:devnote && vite",
-    "build": "vite build && pnpm build:devnote",
-    "build:devnote": "pnpm --filter @devom/devnote build",
+    "dev": "pnpm build:docs && vite",
+    "build": "vite build && pnpm build:docs",
+    "build:docs": "pnpm --filter @devom/docs build",
     "preview": "vite preview",
     "lint": "pnpm biome check --write"
   },
@@ -16,7 +16,7 @@
   "dependencies": {
     "@devom/utils": "workspace:*",
     "@devom/ts-config": "workspace:*",
-    "@devom/devnote": "workspace:*",
+    "@devom/docs": "workspace:*",
     "react": "catalog:react19",
     "react-dom": "catalog:react19"
   },

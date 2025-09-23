@@ -1,12 +1,12 @@
 import type { JSX } from "react";
 
-const Devnote = (): JSX.Element => {
+const Docs = (): JSX.Element => {
   return (
     <div className="h-full w-full relative">
       <iframe
-        src="/devnote/index.html"
+        src="/docs/index.html"
         className="w-full h-full border-0"
-        title="Devnote"
+        title="Docs"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
         loading="lazy"
       />
@@ -14,4 +14,4 @@ const Devnote = (): JSX.Element => {
   );
 };
 
-export default Devnote;
+export default Docs;

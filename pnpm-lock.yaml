@@ -99,9 +99,9 @@ importers:
 
   apps/archive:
     dependencies:
-      '@devom/devnote':
+      '@devom/docs':
         specifier: workspace:*
-        version: link:../devnote
+        version: link:../docs
       '@devom/ts-config':
         specifier: workspace:*
         version: link:../../packages/ts-config
@@ -171,7 +171,7 @@ importers:
         specifier: ^5
         version: 5.8.2
 
-  apps/devnote:
+  apps/docs:
     dependencies:
       '@devom/ts-config':
         specifier: workspace:*
