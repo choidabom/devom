@@ -6,7 +6,7 @@ export default defineConfig({
   description: "devom's development notes",
   // archive 앱에서 iframe으로 사용하기 위해 항상 /docs/ base 사용
   base: "/docs/",
-  outDir: "../archive/dist/docs",
+  outDir: "../archive/public/docs",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [{ text: "Home", link: "/" }],
