@@ -10,11 +10,7 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "preview": "vitepress preview",
-    "lint": "pnpm biome check --write"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,md,mjs,mts,yml,yaml}": "pnpm biome check --write"
+    "preview": "vitepress preview"
   },
   "devDependencies": {
     "vitepress": "2.0.0-alpha.12",
