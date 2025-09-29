@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { ApplicationProvider } from "../../context/ApplicationContext";
 import { DesktopContent } from "./DesktopContent";
 
