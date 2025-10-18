@@ -27,21 +27,9 @@ const eslintConfig = [
       "@typescript-eslint/ban-types": "off",
       "prefer-const": "error",
       "no-var": "error",
-      semi: ["error", "always"],
       "@next/next/no-img-element": "off",
       "react/display-name": "off",
       "react/no-unescaped-entities": "off",
-      "import/order": [
-        "warn",
-        {
-          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
-          "newlines-between": "never",
-          alphabetize: {
-            order: "asc",
-            caseInsensitive: true,
-          },
-        },
-      ],
     },
   },
   {

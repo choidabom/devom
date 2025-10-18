@@ -12,3 +12,4 @@ coverage
 *.min.js
 *.bundle.js 
 .vitepress
+.mdx
