@@ -1,58 +1,58 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Label } from "@/components/ui/Label";
-import { formatBTC } from "@/lib/utils";
-import type { Investment } from "@/types/bitcoin";
+import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
+import { Label } from "@/components/ui/Label"
+import { formatBTC } from "@/lib/utils"
+import type { Investment } from "@/types/bitcoin"
 
 function getCurrentDateString(): string {
-  const isoString = new Date().toISOString();
-  const datePart = isoString.split("T")[0];
-  return datePart || isoString.substring(0, 10);
+  const isoString = new Date().toISOString()
+  const datePart = isoString.split("T")[0]
+  return datePart || isoString.substring(0, 10)
 }
 
 interface InvestmentFormProps {
-  onAddInvestment?: (investment: Omit<Investment, "id" | "btcAmount">) => void;
-  onUpdateInvestment?: (id: string, investment: Omit<Investment, "id" | "btcAmount">) => void;
-  currentPrice?: number;
-  editingInvestment?: Investment | null;
-  mode?: "add" | "edit";
+  onAddInvestment?: (investment: Omit<Investment, "id" | "btcAmount">) => void
+  onUpdateInvestment?: (id: string, investment: Omit<Investment, "id" | "btcAmount">) => void
+  currentPrice?: number
+  editingInvestment?: Investment | null
+  mode?: "add" | "edit"
 }
 
 export function InvestmentForm({ onAddInvestment, onUpdateInvestment, currentPrice, editingInvestment, mode = "add" }: InvestmentFormProps) {
-  const [investmentAmount, setInvestmentAmount] = useState("");
-  const [buyPrice, setBuyPrice] = useState("");
-  const [date, setDate] = useState(() => getCurrentDateString());
-  const [notes, setNotes] = useState("");
+  const [investmentAmount, setInvestmentAmount] = useState("")
+  const [buyPrice, setBuyPrice] = useState("")
+  const [date, setDate] = useState(() => getCurrentDateString())
+  const [notes, setNotes] = useState("")
 
   // 수정 모드일 때 기존 데이터로 폼 초기화
   useEffect(() => {
     if (mode === "edit" && editingInvestment) {
-      setInvestmentAmount(editingInvestment.investmentAmount.toString());
-      setBuyPrice(editingInvestment.buyPrice.toString());
+      setInvestmentAmount(editingInvestment.investmentAmount.toString())
+      setBuyPrice(editingInvestment.buyPrice.toString())
       // editingInvestment.date는 Investment 타입에서 string으로 정의됨
       if (typeof editingInvestment.date === "string") {
-        setDate(editingInvestment.date);
+        setDate(editingInvestment.date)
       } else {
-        setDate(getCurrentDateString());
+        setDate(getCurrentDateString())
       }
-      setNotes(editingInvestment.notes || "");
+      setNotes(editingInvestment.notes || "")
     } else if (mode === "add") {
       // 추가 모드일 때 폼 초기화
-      setInvestmentAmount("");
-      setBuyPrice("");
-      setDate(getCurrentDateString());
-      setNotes("");
+      setInvestmentAmount("")
+      setBuyPrice("")
+      setDate(getCurrentDateString())
+      setNotes("")
     }
-  }, [mode, editingInvestment]);
+  }, [mode, editingInvestment])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    const amount = parseFloat(investmentAmount);
-    const price = parseFloat(buyPrice);
+    const amount = parseFloat(investmentAmount)
+    const price = parseFloat(buyPrice)
 
     if (amount > 0 && price > 0) {
       const investmentData = {
@@ -60,34 +60,34 @@ export function InvestmentForm({ onAddInvestment, onUpdateInvestment, currentPri
         investmentAmount: amount,
         buyPrice: price,
         notes: notes.trim() || undefined,
-      };
+      }
 
       if (mode === "edit" && editingInvestment && onUpdateInvestment) {
-        onUpdateInvestment(editingInvestment.id, investmentData);
+        onUpdateInvestment(editingInvestment.id, investmentData)
       } else if (mode === "add" && onAddInvestment) {
-        onAddInvestment(investmentData);
+        onAddInvestment(investmentData)
       }
 
       // 추가 모드일 때만 폼 초기화
       if (mode === "add") {
-        setInvestmentAmount("");
-        setBuyPrice("");
-        setNotes("");
+        setInvestmentAmount("")
+        setBuyPrice("")
+        setNotes("")
       }
     }
-  };
+  }
 
   const calculateBTCAmount = () => {
-    const amount = parseFloat(investmentAmount);
-    const price = parseFloat(buyPrice);
+    const amount = parseFloat(investmentAmount)
+    const price = parseFloat(buyPrice)
     if (amount > 0 && price > 0) {
-      return amount / price;
+      return amount / price
     }
-    return 0;
-  };
+    return 0
+  }
 
-  const isAddMode = mode === "add";
-  const buttonText = isAddMode ? "투자 기록 추가" : "투자 기록 수정";
+  const isAddMode = mode === "add"
+  const buttonText = isAddMode ? "투자 기록 추가" : "투자 기록 수정"
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -131,5 +131,5 @@ export function InvestmentForm({ onAddInvestment, onUpdateInvestment, currentPri
         {buttonText}
       </Button>
     </form>
-  );
+  )
 }

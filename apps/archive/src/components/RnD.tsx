@@ -1,29 +1,29 @@
-import { inrange } from "@devom/utils";
-import type { JSX } from "react";
-import { registerDragEvent } from "../utils/registerDragEvent";
+import { inrange } from "@devom/utils"
+import type { JSX } from "react"
+import { registerDragEvent } from "../utils/registerDragEvent"
 
 interface RnDProps {
-  ref: React.RefObject<HTMLDivElement | null>;
-  size: { width: number; height: number };
-  position: { x: number; y: number };
-  zIndex: number;
-  children?: React.ReactNode;
-  className?: string;
-  minWidth: number;
-  minHeight: number;
-  windowWidth: number;
-  windowHeight: number;
-  disableResizeControl?: boolean;
-  updateRnDRect: (RnDRect: { x: number; y: number; w: number; h: number }) => void;
-  onZIndex: () => void;
+  ref: React.RefObject<HTMLDivElement | null>
+  size: { width: number; height: number }
+  position: { x: number; y: number }
+  zIndex: number
+  children?: React.ReactNode
+  className?: string
+  minWidth: number
+  minHeight: number
+  windowWidth: number
+  windowHeight: number
+  disableResizeControl?: boolean
+  updateRnDRect: (RnDRect: { x: number; y: number; w: number; h: number }) => void
+  onZIndex: () => void
 }
 
 // RnD: Resizable and Draggable (react-rnd)
 const RnD = (props: RnDProps): JSX.Element => {
-  const { ref, size, position, zIndex, children, className, minWidth, minHeight, windowWidth, windowHeight, disableResizeControl, updateRnDRect, onZIndex } = props;
+  const { ref, size, position, zIndex, children, className, minWidth, minHeight, windowWidth, windowHeight, disableResizeControl, updateRnDRect, onZIndex } = props
 
-  const { width: w, height: h } = size;
-  const { x, y } = position;
+  const { width: w, height: h } = size
+  const { x, y } = position
 
   return (
     <div
@@ -50,7 +50,7 @@ const RnD = (props: RnDProps): JSX.Element => {
                 y: inrange(y + deltaY, 0, y + h - minHeight),
                 w: inrange(w - deltaX, minWidth, x + w),
                 h: inrange(h - deltaY, minHeight, y + h),
-              });
+              })
             }, true)}
           />
           {/* 우상단 */}
@@ -62,7 +62,7 @@ const RnD = (props: RnDProps): JSX.Element => {
                 y: inrange(y + deltaY, 0, y + h - minHeight),
                 w: inrange(w + deltaX, minWidth, windowWidth - x),
                 h: inrange(h - deltaY, minHeight, y + h),
-              });
+              })
             }, true)}
           />
           {/* 좌하단 */}
@@ -74,7 +74,7 @@ const RnD = (props: RnDProps): JSX.Element => {
                 y,
                 w: inrange(w - deltaX, minWidth, x + w),
                 h: inrange(h + deltaY, minHeight, windowHeight - y),
-              });
+              })
             }, true)}
           />
           {/* 우하단 */}
@@ -86,7 +86,7 @@ const RnD = (props: RnDProps): JSX.Element => {
                 y,
                 w: inrange(w + deltaX, minWidth, windowWidth - x),
                 h: inrange(h + deltaY, minHeight, windowHeight - y),
-              });
+              })
             }, true)}
           />
 
@@ -99,7 +99,7 @@ const RnD = (props: RnDProps): JSX.Element => {
                 y,
                 w: inrange(w - deltaX, minWidth, x + w),
                 h,
-              });
+              })
             }, true)}
           />
           {/* 우 */}
@@ -111,7 +111,7 @@ const RnD = (props: RnDProps): JSX.Element => {
                 y,
                 w: inrange(w + deltaX, minWidth, windowWidth - x),
                 h,
-              });
+              })
             }, true)}
           />
         </>
@@ -125,7 +125,7 @@ const RnD = (props: RnDProps): JSX.Element => {
             y: inrange(y + deltaY, 0, y + h - minHeight),
             w,
             h: inrange(h - deltaY, minHeight, y + h),
-          });
+          })
         }, true)}
       />
       {/* 하 */}
@@ -137,12 +137,12 @@ const RnD = (props: RnDProps): JSX.Element => {
             y,
             w,
             h: inrange(h + deltaY, minHeight, windowHeight - y),
-          });
+          })
         }, true)}
       />
       {children}
     </div>
-  );
-};
+  )
+}
 
-export default RnD;
+export default RnD

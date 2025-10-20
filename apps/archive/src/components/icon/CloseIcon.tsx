@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { JSX } from "react"
 
 export const CloseIcon = (): JSX.Element => (
   <svg
@@ -12,4 +12,4 @@ export const CloseIcon = (): JSX.Element => (
     <title id="close-icon">Close</title>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
-);
+)

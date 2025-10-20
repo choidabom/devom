@@ -1,20 +1,20 @@
-import type { JSX } from "react";
-import { registerDragEvent } from "../../utils/registerDragEvent";
-import { CloseIcon } from "../icon/CloseIcon";
-import { MaximizeIcon } from "../icon/MaximizeIcon";
-import { MinimizeIcon } from "../icon/MinimizeIcon";
+import type { JSX } from "react"
+import { registerDragEvent } from "../../utils/registerDragEvent"
+import { CloseIcon } from "../icon/CloseIcon"
+import { MaximizeIcon } from "../icon/MaximizeIcon"
+import { MinimizeIcon } from "../icon/MinimizeIcon"
 
 interface WindowControlsProps {
-  isMaximized: boolean;
-  appRect: { x: number; y: number; w: number; h: number };
-  onSetAppRect: (DOMRect: { x: number; y: number; w: number; h: number }) => void;
-  onClose: () => void;
-  onMinimize: () => void;
-  onMaximize: () => void;
+  isMaximized: boolean
+  appRect: { x: number; y: number; w: number; h: number }
+  onSetAppRect: (DOMRect: { x: number; y: number; w: number; h: number }) => void
+  onClose: () => void
+  onMinimize: () => void
+  onMaximize: () => void
 }
 
 const WindowControls = (props: WindowControlsProps): JSX.Element => {
-  const { isMaximized, appRect, onSetAppRect, onClose, onMinimize, onMaximize } = props;
+  const { isMaximized, appRect, onSetAppRect, onClose, onMinimize, onMaximize } = props
 
   return (
     <div
@@ -26,7 +26,7 @@ const WindowControls = (props: WindowControlsProps): JSX.Element => {
           y: Math.max(0, appRect.y + deltaY),
           w: appRect.w,
           h: appRect.h,
-        });
+        })
       })}
     >
       <div className="m-1 flex space-x-2">
@@ -46,7 +46,7 @@ const WindowControls = (props: WindowControlsProps): JSX.Element => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default WindowControls;
+export default WindowControls

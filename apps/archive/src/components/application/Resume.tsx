@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { JSX } from "react"
 
 const Resume = (): JSX.Element => {
   return (
@@ -16,7 +16,7 @@ const Resume = (): JSX.Element => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Resume;
+export default Resume

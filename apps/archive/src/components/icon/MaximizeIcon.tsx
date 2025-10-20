@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { JSX } from "react"
 
 export const MaximizeIcon = (): JSX.Element => (
   <svg
@@ -12,4 +12,4 @@ export const MaximizeIcon = (): JSX.Element => (
     <title id="maximize-icon">Maximize</title>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
   </svg>
-);
+)

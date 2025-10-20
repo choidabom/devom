@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 function Input({ className, type, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
@@ -10,7 +10,7 @@ function Input({ className, type, ...props }: React.InputHTMLAttributes<HTMLInpu
       )}
       {...props}
     />
-  );
+  )
 }
 
-export { Input };
+export { Input }

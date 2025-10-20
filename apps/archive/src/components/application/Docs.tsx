@@ -1,5 +1,5 @@
-import type { JSX } from "react";
-import React from "react";
+import type { JSX } from "react"
+import React from "react"
 
 const Docs = React.memo((): JSX.Element => {
   return (
@@ -15,7 +15,7 @@ const Docs = React.memo((): JSX.Element => {
         style={{ isolation: "isolate" }}
       />
     </div>
-  );
-});
+  )
+})
 
-export default Docs;
+export default Docs

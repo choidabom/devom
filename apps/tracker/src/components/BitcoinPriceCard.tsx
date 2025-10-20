@@ -1,27 +1,27 @@
-"use client";
+"use client"
 
-import { RefreshCw, TrendingDown, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { formatCurrency } from "@/lib/utils";
-import type { BitcoinPrice } from "@/types/bitcoin";
+import { RefreshCw, TrendingDown, TrendingUp } from "lucide-react"
+import { Button } from "@/components/ui/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
+import { formatCurrency } from "@/lib/utils"
+import type { BitcoinPrice } from "@/types/bitcoin"
 
 interface BitcoinPriceCardProps {
-  price: BitcoinPrice | null;
-  isLoading: boolean;
-  onRefresh: () => void;
+  price: BitcoinPrice | null
+  isLoading: boolean
+  onRefresh: () => void
 }
 
 export function BitcoinPriceCard({ price, isLoading, onRefresh }: BitcoinPriceCardProps) {
   const formatLastUpdate = (timestamp: number) => {
-    const date = new Date(timestamp);
+    const date = new Date(timestamp)
     return date.toLocaleString("ko-KR", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
-  };
+    })
+  }
 
   return (
     <Card>
@@ -85,5 +85,5 @@ export function BitcoinPriceCard({ price, isLoading, onRefresh }: BitcoinPriceCa
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

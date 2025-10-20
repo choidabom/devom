@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { JSX } from "react"
 
 export const MinimizeIcon = (): JSX.Element => (
   <svg
@@ -12,4 +12,4 @@ export const MinimizeIcon = (): JSX.Element => (
     <title id="minimize-icon">Minimize</title>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 12h12" />
   </svg>
-);
+)

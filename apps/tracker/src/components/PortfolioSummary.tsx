@@ -1,16 +1,16 @@
-"use client";
+"use client"
 
-import { Bitcoin, TrendingDown, TrendingUp, Wallet } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { formatBTC, formatCurrency, formatPercentage } from "@/lib/utils";
-import type { PortfolioSummary } from "@/types/bitcoin";
+import { Bitcoin, TrendingDown, TrendingUp, Wallet } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
+import { formatBTC, formatCurrency, formatPercentage } from "@/lib/utils"
+import type { PortfolioSummary } from "@/types/bitcoin"
 
 interface PortfolioSummaryProps {
-  summary: PortfolioSummary;
+  summary: PortfolioSummary
 }
 
 export function PortfolioSummary({ summary }: PortfolioSummaryProps) {
-  const isProfitable = summary.totalProfit >= 0;
+  const isProfitable = summary.totalProfit >= 0
 
   if (summary.totalInvestment === 0) {
     return (
@@ -22,7 +22,7 @@ export function PortfolioSummary({ summary }: PortfolioSummaryProps) {
           <p className="text-center text-muted-foreground">아직 투자 기록이 없습니다.</p>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -69,5 +69,5 @@ export function PortfolioSummary({ summary }: PortfolioSummaryProps) {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

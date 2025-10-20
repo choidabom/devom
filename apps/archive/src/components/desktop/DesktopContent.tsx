@@ -1,18 +1,18 @@
-import { type JSX, useEffect, useRef } from "react";
-import { useApplications } from "../../context/useApplications";
-import { useDesktopMode } from "../../hooks/useDesktopMode";
-import Blog from "../application/Blog";
-import Docs from "../application/Docs";
-import AppWindow from "../appWindow/AppWindow";
+import { type JSX, useEffect, useRef } from "react"
+import { useApplications } from "../../context/useApplications"
+import { useDesktopMode } from "../../hooks/useDesktopMode"
+import Blog from "../application/Blog"
+import Docs from "../application/Docs"
+import AppWindow from "../appWindow/AppWindow"
 
 export const DesktopContent = (): JSX.Element => {
-  const initializedRef = useRef<boolean>(false);
-  const { desktopMode, toggleDesktopMode } = useDesktopMode();
-  const { applications, addApplication, setZIndexToFront } = useApplications();
+  const initializedRef = useRef<boolean>(false)
+  const { desktopMode, toggleDesktopMode } = useDesktopMode()
+  const { applications, addApplication, setZIndexToFront } = useApplications()
 
   useEffect(() => {
     if (!initializedRef.current) {
-      initializedRef.current = true;
+      initializedRef.current = true
 
       addApplication("blog", <Blog />, {
         width: 800,
@@ -21,15 +21,15 @@ export const DesktopContent = (): JSX.Element => {
         top: 70,
         minWidth: 640,
         minHeight: 640,
-      });
+      })
       addApplication("docs", <Docs />, {
         width: 500,
         height: 750,
         left: 750,
         top: 30,
-      });
+      })
     }
-  }, [addApplication]);
+  }, [addApplication])
 
   return (
     <div className="h-screen w-screen bg-light bg-cover dark:bg-dark transition-all duration-500 ease-in-out">
@@ -46,5 +46,5 @@ export const DesktopContent = (): JSX.Element => {
         <AppWindow key={app.id} app={app} onZIndex={() => setZIndexToFront(app.id)} />
       ))}
     </div>
-  );
-};
+  )
+}

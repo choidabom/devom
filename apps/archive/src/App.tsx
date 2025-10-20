@@ -1,8 +1,8 @@
-import type { JSX } from "react";
-import { Desktop } from "./components/desktop/Desktop";
+import type { JSX } from "react"
+import { Desktop } from "./components/desktop/Desktop"
 
 const App = (): JSX.Element => {
-  return <Desktop />;
-};
+  return <Desktop />
+}
 
-export default App;
+export default App

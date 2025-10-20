@@ -1,14 +1,14 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import importPlugin from "eslint-plugin-import";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { FlatCompat } from "@eslint/eslintrc"
+import importPlugin from "eslint-plugin-import"
+import { dirname } from "node:path"
+import { fileURLToPath } from "node:url"
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
-});
+})
 
 const eslintConfig = [
   {
@@ -47,6 +47,6 @@ const eslintConfig = [
       "no-console": "off",
     },
   },
-];
+]
 
-export default eslintConfig;
+export default eslintConfig

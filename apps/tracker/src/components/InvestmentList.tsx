@@ -1,86 +1,86 @@
-"use client";
+"use client"
 
-import { ChevronDown, ChevronUp, Edit, Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
-import { calculateProfit, formatBTC, formatCurrency, formatPercentage } from "@/lib/utils";
-import type { Investment } from "@/types/bitcoin";
+import { ChevronDown, ChevronUp, Edit, Plus, Trash2 } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Button } from "@/components/ui/Button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table"
+import { calculateProfit, formatBTC, formatCurrency, formatPercentage } from "@/lib/utils"
+import type { Investment } from "@/types/bitcoin"
 
-type SortKey = "date" | "investmentAmount" | "buyPrice" | "btcAmount" | "currentValue" | "profit" | "profitPercentage";
-type SortOrder = "asc" | "desc";
+type SortKey = "date" | "investmentAmount" | "buyPrice" | "btcAmount" | "currentValue" | "profit" | "profitPercentage"
+type SortOrder = "asc" | "desc"
 
 interface InvestmentListProps {
-  investments: Investment[];
-  currentPrice: number;
-  onRemoveInvestment: (id: string) => void;
-  onAddNewClick?: () => void;
-  onEditInvestment?: (investment: Investment) => void;
+  investments: Investment[]
+  currentPrice: number
+  onRemoveInvestment: (id: string) => void
+  onAddNewClick?: () => void
+  onEditInvestment?: (investment: Investment) => void
 }
 
 export function InvestmentList({ investments, currentPrice, onRemoveInvestment, onAddNewClick, onEditInvestment }: InvestmentListProps) {
-  const [sortKey, setSortKey] = useState<SortKey>("date");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [sortKey, setSortKey] = useState<SortKey>("date")
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
     } else {
-      setSortKey(key);
-      setSortOrder("desc");
+      setSortKey(key)
+      setSortOrder("desc")
     }
-  };
+  }
 
   const sortedInvestments = useMemo(() => {
     return [...investments].sort((a, b) => {
-      let aValue: number;
-      let bValue: number;
+      let aValue: number
+      let bValue: number
 
       switch (sortKey) {
         case "date":
-          aValue = new Date(a.date).getTime();
-          bValue = new Date(b.date).getTime();
-          break;
+          aValue = new Date(a.date).getTime()
+          bValue = new Date(b.date).getTime()
+          break
         case "investmentAmount":
-          aValue = a.investmentAmount;
-          bValue = b.investmentAmount;
-          break;
+          aValue = a.investmentAmount
+          bValue = b.investmentAmount
+          break
         case "buyPrice":
-          aValue = a.buyPrice;
-          bValue = b.buyPrice;
-          break;
+          aValue = a.buyPrice
+          bValue = b.buyPrice
+          break
         case "btcAmount":
-          aValue = a.btcAmount;
-          bValue = b.btcAmount;
-          break;
+          aValue = a.btcAmount
+          bValue = b.btcAmount
+          break
         case "currentValue":
-          aValue = calculateProfit(a.investmentAmount, a.buyPrice, currentPrice).currentValue;
-          bValue = calculateProfit(b.investmentAmount, b.buyPrice, currentPrice).currentValue;
-          break;
+          aValue = calculateProfit(a.investmentAmount, a.buyPrice, currentPrice).currentValue
+          bValue = calculateProfit(b.investmentAmount, b.buyPrice, currentPrice).currentValue
+          break
         case "profit":
-          aValue = calculateProfit(a.investmentAmount, a.buyPrice, currentPrice).profit;
-          bValue = calculateProfit(b.investmentAmount, b.buyPrice, currentPrice).profit;
-          break;
+          aValue = calculateProfit(a.investmentAmount, a.buyPrice, currentPrice).profit
+          bValue = calculateProfit(b.investmentAmount, b.buyPrice, currentPrice).profit
+          break
         case "profitPercentage":
-          aValue = calculateProfit(a.investmentAmount, a.buyPrice, currentPrice).profitPercentage;
-          bValue = calculateProfit(b.investmentAmount, b.buyPrice, currentPrice).profitPercentage;
-          break;
+          aValue = calculateProfit(a.investmentAmount, a.buyPrice, currentPrice).profitPercentage
+          bValue = calculateProfit(b.investmentAmount, b.buyPrice, currentPrice).profitPercentage
+          break
         default:
-          return 0;
+          return 0
       }
 
       if (sortOrder === "asc") {
-        return aValue - bValue;
+        return aValue - bValue
       } else {
-        return bValue - aValue;
+        return bValue - aValue
       }
-    });
-  }, [investments, sortKey, sortOrder, currentPrice]);
+    })
+  }, [investments, sortKey, sortOrder, currentPrice])
 
   const SortableHeader = ({ sortKey: key, children, className }: { sortKey: SortKey; children: React.ReactNode; className?: string }) => {
-    const isActive = sortKey === key;
-    const SortIcon = sortOrder === "asc" ? ChevronUp : ChevronDown;
+    const isActive = sortKey === key
+    const SortIcon = sortOrder === "asc" ? ChevronUp : ChevronDown
 
     return (
       <TableHead className={className}>
@@ -93,8 +93,8 @@ export function InvestmentList({ investments, currentPrice, onRemoveInvestment, 
           {isActive && <SortIcon className="h-3 w-3" />}
         </Button>
       </TableHead>
-    );
-  };
+    )
+  }
 
   if (investments.length === 0) {
     return (
@@ -116,7 +116,7 @@ export function InvestmentList({ investments, currentPrice, onRemoveInvestment, 
           </div>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -151,8 +151,8 @@ export function InvestmentList({ investments, currentPrice, onRemoveInvestment, 
             </TableHeader>
             <TableBody>
               {sortedInvestments.map((investment) => {
-                const profit = calculateProfit(investment.investmentAmount, investment.buyPrice, currentPrice);
-                const isProfitable = profit.profit >= 0;
+                const profit = calculateProfit(investment.investmentAmount, investment.buyPrice, currentPrice)
+                const isProfitable = profit.profit >= 0
 
                 return (
                   <TableRow key={investment.id}>
@@ -161,10 +161,10 @@ export function InvestmentList({ investments, currentPrice, onRemoveInvestment, 
                         .toLocaleDateString("ko-KR")
                         .replace(/\./g, ".")
                         .replace(/(\d{4})\.(\d{1,2})\.(\d{1,2})\.$/, (year, month, day) => {
-                          const yy = year.slice(-2);
-                          const mm = month.padStart(2, "0");
-                          const dd = day.padStart(2, "0");
-                          return `${yy}.${mm}.${dd}`;
+                          const yy = year.slice(-2)
+                          const mm = month.padStart(2, "0")
+                          const dd = day.padStart(2, "0")
+                          return `${yy}.${mm}.${dd}`
                         })}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">{formatCurrency(investment.investmentAmount)}</TableCell>
@@ -197,12 +197,12 @@ export function InvestmentList({ investments, currentPrice, onRemoveInvestment, 
                       </div>
                     </TableCell>
                   </TableRow>
-                );
+                )
               })}
             </TableBody>
           </Table>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

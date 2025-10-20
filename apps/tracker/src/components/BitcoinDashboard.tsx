@@ -1,57 +1,57 @@
-"use client";
+"use client"
 
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/Sheet";
-import { useBitcoinPrice } from "@/hooks/useBitcoinPrice";
-import { useInvestments } from "@/hooks/useInvestments";
-import type { Investment } from "@/types/bitcoin";
-import { useState } from "react";
-import { BitcoinPriceCard } from "./BitcoinPriceCard";
-import { InvestmentForm } from "./InvestmentForm";
-import { InvestmentList } from "./InvestmentList";
-import { PortfolioSummary } from "./PortfolioSummary";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/Sheet"
+import { useBitcoinPrice } from "@/hooks/useBitcoinPrice"
+import { useInvestments } from "@/hooks/useInvestments"
+import type { Investment } from "@/types/bitcoin"
+import { useState } from "react"
+import { BitcoinPriceCard } from "./BitcoinPriceCard"
+import { InvestmentForm } from "./InvestmentForm"
+import { InvestmentList } from "./InvestmentList"
+import { PortfolioSummary } from "./PortfolioSummary"
 
 export function BitcoinDashboard() {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
-  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null)
+  const [formMode, setFormMode] = useState<"add" | "edit">("add")
 
-  const { price, isLoading, refetch } = useBitcoinPrice();
-  const { investments, addInvestment, removeInvestment, updateInvestment, calculatePortfolioSummary } = useInvestments();
+  const { price, isLoading, refetch } = useBitcoinPrice()
+  const { investments, addInvestment, removeInvestment, updateInvestment, calculatePortfolioSummary } = useInvestments()
 
-  const currentPrice = price?.price || 0;
-  const portfolioSummary = calculatePortfolioSummary(currentPrice);
+  const currentPrice = price?.price || 0
+  const portfolioSummary = calculatePortfolioSummary(currentPrice)
 
   const handleAddInvestment = (investment: Omit<Investment, "id" | "btcAmount">) => {
-    addInvestment(investment);
-    setIsFormOpen(false);
-  };
+    addInvestment(investment)
+    setIsFormOpen(false)
+  }
 
   const handleUpdateInvestment = (id: string, investment: Omit<Investment, "id" | "btcAmount">) => {
-    const btcAmount = investment.investmentAmount / investment.buyPrice;
-    updateInvestment(id, { ...investment, btcAmount });
-    setIsFormOpen(false);
-    setEditingInvestment(null);
-  };
+    const btcAmount = investment.investmentAmount / investment.buyPrice
+    updateInvestment(id, { ...investment, btcAmount })
+    setIsFormOpen(false)
+    setEditingInvestment(null)
+  }
 
   const handleAddNewClick = () => {
-    setFormMode("add");
-    setEditingInvestment(null);
-    setIsFormOpen(true);
-  };
+    setFormMode("add")
+    setEditingInvestment(null)
+    setIsFormOpen(true)
+  }
 
   const handleEditInvestment = (investment: Investment) => {
-    setFormMode("edit");
-    setEditingInvestment(investment);
-    setIsFormOpen(true);
-  };
+    setFormMode("edit")
+    setEditingInvestment(investment)
+    setIsFormOpen(true)
+  }
 
   const handleFormClose = () => {
-    setIsFormOpen(false);
-    setEditingInvestment(null);
-  };
+    setIsFormOpen(false)
+    setEditingInvestment(null)
+  }
 
-  const drawerTitle = formMode === "add" ? "새 투자 기록 추가" : "투자 기록 수정";
-  const drawerDescription = formMode === "add" ? "비트코인 투자 기록을 추가하여 포트폴리오를 관리하세요." : "투자 기록을 수정하여 정확한 포트폴리오를 유지하세요.";
+  const drawerTitle = formMode === "add" ? "새 투자 기록 추가" : "투자 기록 수정"
+  const drawerDescription = formMode === "add" ? "비트코인 투자 기록을 추가하여 포트폴리오를 관리하세요." : "투자 기록을 수정하여 정확한 포트폴리오를 유지하세요."
 
   return (
     <div className="space-y-8">
@@ -87,5 +87,5 @@ export function BitcoinDashboard() {
         </SheetContent>
       </Sheet>
     </div>
-  );
+  )
 }

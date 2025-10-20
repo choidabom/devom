@@ -1,4 +1,4 @@
-import { BitcoinDashboard } from "@/components/BitcoinDashboard";
+import { BitcoinDashboard } from "@/components/BitcoinDashboard"
 
 export default function Home() {
   return (
@@ -9,5 +9,5 @@ export default function Home() {
       </div>
       <BitcoinDashboard />
     </main>
-  );
+  )
 }
