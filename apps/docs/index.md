@@ -6,8 +6,8 @@ hero:
   tagline: "archiving and laboratory"
   actions:
     - theme: brand
-      text: Todo List 보기
-      link: /todo-list
+      text: gogosing
+      link: /dev/todo-list
     - theme: alt
       text: GitHub에서 보기
       link: https://github.com/choidabom/devom

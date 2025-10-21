@@ -23,10 +23,10 @@ export const DesktopContent = (): JSX.Element => {
         minHeight: 640,
       })
       addApplication("docs", <Docs />, {
-        width: 500,
-        height: 750,
-        left: 750,
-        top: 30,
+        width: 1000,
+        height: 630,
+        left: 380,
+        top: 140,
       })
     }
   }, [addApplication])
