@@ -14,8 +14,7 @@
     "format:fix": "prettier --write . && pnpm lint:fix",
     "build": "pnpm --filter \"archive\" build",
     "dev": "pnpm --filter \"archive\" dev",
-    "archive": "pnpm --filter=@devom/archive",
-    "archive-next": "pnpm --filter=@devom/archive-next"
+    "archive": "pnpm --filter=@devom/archive"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
