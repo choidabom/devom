@@ -8,6 +8,6 @@
     "deploy:real": "echo 'Deploying to real environment...' && node scripts/deploy.js real"
   },
   "dependencies": {
-    "dotenv": "^16.0.3"
+    "dotenv": "catalog:"
   }
 }

@@ -4,29 +4,40 @@ packages:
   - "deploy-server/**"
 
 catalog:
-  husky: "^9.1.7"
-  lint-staged: "^15.4.3"
-  typescript: "^5.7.3"
+  # TypeScript 생태계
+  typescript: "^5.9.3"
+  "@types/node": "^24.10.0"
   ts-node: "^10.9.2"
-  "@types/node": "^22.13.2"
+  tsx: "^4.20.6"
+
+  # Build Tools
+  vite: "^7.2.2"
+  vite-plugin-dts: "^4.5.4"
+  "@vitejs/plugin-react": "^5.1.0"
+
+  # CSS/Styling
+  tailwindcss: "^3.4.14"
   autoprefixer: "^10.4.20"
   postcss: "^8.4.49"
-  tailwindcss: "^3.4.14"
-  vite: "^5.0.0"
-  vite-plugin-dts: "^3.2.0"
-  "@vitejs/plugin-react": "^4.3.4"
-  tsx: "^4.19.3"
-  puppeteer: "^24.4.0"
-  dotenv: "^16.4.7"
+
+  # Linting & Formatting
+  eslint: "^9"
+  prettier: "^3"
+  "@typescript-eslint/eslint-plugin": "^8"
+  "@typescript-eslint/parser": "^8.34.0"
+  "eslint-config-prettier": "^10.1.5"
+
+  # Git Hooks
+  husky: "^9.1.7"
+  lint-staged: "^16.2.6"
+
+  # Utilities
+  dotenv: "^17.2.3"
+  puppeteer: "^24.29.1"
 
 catalogs:
-  react18:
-    react: "^18.3.1"
-    react-dom: "^18.3.1"
-    "@types/react": "^18.3.18"
-    "@types/react-dom": "^18.3.5"
   react19:
-    react: ^19.0.0
-    react-dom: ^19.0.0
+    react: "^19.0.0"
+    react-dom: "^19.0.0"
     "@types/react": "^19.0.4"
     "@types/react-dom": "^19.0.2"
