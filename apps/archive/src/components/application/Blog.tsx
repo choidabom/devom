@@ -8,7 +8,13 @@ const Blog = (): JSX.Element => {
 
   return (
     <div className="h-full w-full">
-      <img aria-label="Blog Image" src="./image/blog.png" onKeyDown={() => handleAddBlogLink()} />
+      <button
+        onClick={handleAddBlogLink}
+        className="h-full w-full border-none bg-transparent p-0 cursor-pointer"
+        aria-label="Open Blog in new tab"
+      >
+        <img src="./image/blog.png" alt="Blog preview" className="h-full w-full object-cover" />
+      </button>
     </div>
   )
 }

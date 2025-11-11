@@ -22,7 +22,7 @@ export const ApplicationProvider = ({ children }: { children: ReactNode }): Reac
 
   const setZIndexToFront = useCallback((id: number) => {
     setApplications((prev) => {
-      const maxZIndex = Math.max(...prev.map((app) => app.config.zIndex))
+      const maxZIndex = Math.max(0, ...prev.map((app) => app.config.zIndex))
       return prev.map((app) => (app.id === id ? { ...app, config: { ...app.config, zIndex: maxZIndex + 1 } } : app))
     })
   }, [])

@@ -1,5 +1,5 @@
 import type { JSX } from "react"
-import { useRef, useState } from "react"
+import { memo, useRef, useState } from "react"
 import { useWindowControls } from "../../hooks/useWindowControls"
 import { useWindowSize } from "../../hooks/useWindowsize"
 import type { Application } from "../../types/types"
@@ -73,4 +73,4 @@ const AppWindow = (props: AppWindowProps): JSX.Element | null => {
   )
 }
 
-export default AppWindow
+export default memo(AppWindow)

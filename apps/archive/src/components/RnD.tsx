@@ -1,5 +1,6 @@
 import { inrange } from "@devom/utils"
 import type { JSX } from "react"
+import { memo } from "react"
 import { registerDragEvent } from "../utils/registerDragEvent"
 
 interface RnDProps {
@@ -145,4 +146,4 @@ const RnD = (props: RnDProps): JSX.Element => {
   )
 }
 
-export default RnD
+export default memo(RnD)

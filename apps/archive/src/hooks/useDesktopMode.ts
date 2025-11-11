@@ -7,7 +7,10 @@ export const useDesktopMode = (): {
   desktopMode: DesktopMode
   toggleDesktopMode: () => void
 } => {
-  const [desktopMode, setDesktopMode] = useState<DesktopMode>("light")
+  const [desktopMode, setDesktopMode] = useState<DesktopMode>(() => {
+    const savedTheme = safeLocalStorage.getItem("theme") as DesktopMode | null
+    return savedTheme || "light"
+  })
 
   const toggleDesktopMode = (): void => {
     setDesktopMode((currentMode) => {
@@ -20,15 +23,8 @@ export const useDesktopMode = (): {
   }
 
   useEffect(() => {
-    const theme = safeLocalStorage.getItem("theme") as DesktopMode
-    // wip: I just want to setup light mode ..
-
-    // const preferDark = window.matchMedia(
-    //   "(prefers-color-scheme: dark)",
-    // ).matches;
-    // const mode = theme || (preferDark ? "dark" : "light");
-    document.documentElement.classList.add(theme)
-    setDesktopMode(theme)
+    // Apply initial theme class to documentElement
+    document.documentElement.classList.add(desktopMode)
 
     return (): void => {
       document.documentElement.classList.remove("light", "dark")

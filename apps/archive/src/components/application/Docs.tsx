@@ -5,7 +5,7 @@ const Docs = React.memo((): JSX.Element => {
   return (
     <div className="h-full w-full relative">
       <iframe
-        src="https://archive.devom.dev/dev/todo-list"
+        src="https://archive.devom.dev/dev/todo-list.html"
         className="w-full h-full border-0"
         title="Docs"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation allow-downloads allow-modals"

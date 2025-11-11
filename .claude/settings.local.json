@@ -3,7 +3,10 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(find:*)",
-      "Bash(pnpm build:packages:*)"
+      "Bash(pnpm build:packages:*)",
+      "Bash(pnpm --filter @devom/archive lint:*)",
+      "Bash(pnpm --filter @devom/archive lint:apps:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
