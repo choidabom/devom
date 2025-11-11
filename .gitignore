@@ -22,3 +22,15 @@ dist-ssr
 *.sw?
 *.tsbuildinfo
 .vercel
+
+# Devom Working Files (gitignored)
+.devom/epics/EPIC-*
+.devom/.current-epic
+
+# Build artifacts
+build/
+.next/
+out/
+coverage/
+storybook-static/
+.turbo/
