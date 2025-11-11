@@ -13,3 +13,6 @@ coverage
 *.bundle.js 
 .vitepress
 .mdx
+.turbo
+.claude
+.devom
