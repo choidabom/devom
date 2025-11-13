@@ -6,7 +6,9 @@
       "Bash(pnpm build:packages:*)",
       "Bash(pnpm --filter @devom/archive lint:*)",
       "Bash(pnpm --filter @devom/archive lint:apps:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(pnpm add:*)",
+      "Bash(*)"
     ],
     "deny": [],
     "ask": []
