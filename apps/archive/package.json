@@ -4,15 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm build:docs && vite",
-    "build": "vite build && pnpm build:docs",
-    "build:docs": "pnpm --filter @devom/docs build",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@devom/utils": "workspace:*",
     "@devom/ts-config": "workspace:*",
-    "@devom/docs": "workspace:*",
+    "@devom/utils": "workspace:*",
+    "framer-motion": "^12.23.24",
     "react": "catalog:react19",
     "react-dom": "catalog:react19"
   },
