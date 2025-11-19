@@ -318,7 +318,7 @@
 /* Card specific styles */
 .card-year {
   color: var(--text-secondary);
-  opacity: 0.2;
+  opacity: 0.8;
 }
 
 .card-image {

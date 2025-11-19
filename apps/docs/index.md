@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: gogosing
-      link: /dev/todo-list
+      link: /dev/laboratory
     - theme: alt
       text: GitHub에서 보기
       link: https://github.com/choidabom/devom

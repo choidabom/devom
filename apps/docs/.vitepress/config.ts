@@ -6,14 +6,14 @@ export default defineConfig({
   description: "devom's development notes",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    nav: [{ text: "Home", link: "/dev/todo-list" }],
+    nav: [{ text: "Home", link: "/dev/laboratory" }],
 
     sidebar: [
 
       {
         text: "Development Notes",
         items: [
-          { text: "Todo List", link: "/dev/todo-list" },
+          { text: "todolist", link: "/dev/laboratory" },
           // { text: "TypeScript 설정 최적화", link: "/dev/tsconfig-optimization" },
           // { text: "GitHub Pages로 배포", link: "/dev/github-pages-deployment" },
           // { text: "Vite 개발 환경 최적화", link: "/dev/vite-development-setup" },

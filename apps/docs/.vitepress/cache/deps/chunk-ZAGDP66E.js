@@ -12455,7 +12455,7 @@ var initDirectivesForSSR = () => {
   }
 };
 
-// ../../node_modules/.pnpm/vue@3.5.21_typescript@5.8.2/node_modules/vue/dist/vue.runtime.esm-bundler.js
+// ../../node_modules/.pnpm/vue@3.5.21_typescript@5.9.3/node_modules/vue/dist/vue.runtime.esm-bundler.js
 function initDev() {
   {
     initCustomFormatter();
@@ -12643,41 +12643,4 @@ export {
   initDirectivesForSSR,
   compile2 as compile
 };
-/*! Bundled license information:
-
-@vue/shared/dist/shared.esm-bundler.js:
-  (**
-  * @vue/shared v3.5.21
-  * (c) 2018-present Yuxi (Evan) You and Vue contributors
-  * @license MIT
-  **)
-
-@vue/reactivity/dist/reactivity.esm-bundler.js:
-  (**
-  * @vue/reactivity v3.5.21
-  * (c) 2018-present Yuxi (Evan) You and Vue contributors
-  * @license MIT
-  **)
-
-@vue/runtime-core/dist/runtime-core.esm-bundler.js:
-  (**
-  * @vue/runtime-core v3.5.21
-  * (c) 2018-present Yuxi (Evan) You and Vue contributors
-  * @license MIT
-  **)
-
-@vue/runtime-dom/dist/runtime-dom.esm-bundler.js:
-  (**
-  * @vue/runtime-dom v3.5.21
-  * (c) 2018-present Yuxi (Evan) You and Vue contributors
-  * @license MIT
-  **)
-
-vue/dist/vue.runtime.esm-bundler.js:
-  (**
-  * vue v3.5.21
-  * (c) 2018-present Yuxi (Evan) You and Vue contributors
-  * @license MIT
-  **)
-*/
-//# sourceMappingURL=chunk-EYP52NP3.js.map
+//# sourceMappingURL=chunk-ZAGDP66E.js.map
