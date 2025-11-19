@@ -17,11 +17,7 @@ interface TodayInfo {
  * @param year - The year displayed in the calendar
  * @param today - Today's date info (year, month, date)
  */
-export const useCalendarScroll = (
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>,
-  year: number,
-  today: TodayInfo
-) => {
+export const useCalendarScroll = (scrollContainerRef: React.RefObject<HTMLDivElement | null>, year: number, today: TodayInfo) => {
   const scrollToToday = useCallback(() => {
     if (!scrollContainerRef.current || year !== today.year) return
 
