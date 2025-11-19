@@ -1,0 +1,333 @@
+/* Timeline Calendar Container */
+.calendar-timeline-container {
+  background: var(--card-bg);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.08);
+  padding: var(--spacing-md);
+  max-width: calc(100vw);
+}
+
+/* Timeline Scroll Container */
+.calendar-timeline-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  user-select: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  will-change: scroll-position;
+}
+
+.calendar-timeline-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.calendar-timeline-scroll.dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
+.calendar-timeline-scroll.dragging * {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Timeline Days Container */
+.calendar-timeline-days {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  min-width: max-content;
+  padding-bottom: var(--spacing-sm);
+}
+
+/* Timeline Day Wrapper */
+.calendar-timeline-day-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Month Label */
+.calendar-timeline-month-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  background: var(--card-bg-subtle);
+  border-radius: 2px;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+}
+
+/* Timeline Day Cell */
+.calendar-timeline-day {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 2px;
+  transition: var(--transition-fast);
+  cursor: default;
+  background: var(--card-bg-subtle);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.calendar-timeline-day-number {
+  font-size: 9px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Today's Date */
+.calendar-timeline-day-today {
+  position: relative;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+}
+
+.calendar-timeline-day-today .calendar-timeline-day-number {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Timeline Day with Image */
+.calendar-timeline-day-with-image {
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: white;
+  width: 40px;
+  height: 40px;
+  transition: var(--transition-normal);
+}
+
+.calendar-timeline-day-with-image:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.calendar-timeline-day-image-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.calendar-timeline-day-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: var(--transition-fast);
+}
+
+.calendar-timeline-day-with-image:hover .calendar-timeline-day-image {
+  transform: scale(1.1);
+}
+
+.calendar-timeline-day-number-overlay {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  font-size: 7px;
+  font-weight: 700;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1.2;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Responsive */
+@media only screen and (max-width: 768px) {
+  .calendar-timeline-container {
+    padding: var(--spacing-md);
+  }
+
+  .calendar-timeline-day {
+    width: 22px;
+    height: 22px;
+  }
+
+  .calendar-timeline-day-number {
+    font-size: 8px;
+  }
+
+  .calendar-timeline-day-with-image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .calendar-timeline-day-with-image:hover {
+    width: 44px;
+    height: 44px;
+  }
+
+  .calendar-timeline-month-label {
+    font-size: 9px;
+  }
+}
+
+@media only screen and (max-width: 576px) {
+  .calendar-timeline-container {
+    padding: var(--spacing-sm);
+  }
+
+  .calendar-timeline-days {
+    gap: 2px;
+  }
+
+  .calendar-timeline-day {
+    width: 20px;
+    height: 20px;
+  }
+
+  .calendar-timeline-day-number {
+    font-size: 8px;
+  }
+
+  .calendar-timeline-day-with-image {
+    width: 32px;
+    height: 32px;
+  }
+
+  .calendar-timeline-day-with-image:hover {
+    width: 42px;
+    height: 42px;
+  }
+
+  .calendar-timeline-month-label {
+    font-size: 9px;
+  }
+
+  .calendar-timeline-day-number-overlay {
+    font-size: 8px;
+  }
+}
+
+/* Image Preview */
+.calendar-image-preview-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(249, 249, 249, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  animation: fadeIn 0.2s ease;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.calendar-image-preview-card {
+  position: relative;
+  max-width: 420px;
+  background: white;
+  border-radius: 2px;
+  padding: 18px 18px 70px 18px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.12),
+    0 8px 16px rgba(0, 0, 0, 0.1),
+    0 16px 24px rgba(0, 0, 0, 0.08);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: default;
+  transform: rotate(-1deg);
+  transition: transform 0.3s ease;
+}
+
+.calendar-image-preview-card:hover {
+  transform: rotate(0deg);
+}
+
+.calendar-image-preview-date {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  right: 18px;
+  text-align: center;
+  padding: 14px;
+  font-size: var(--font-sm);
+  font-weight: 400;
+  color: #666;
+  background: transparent;
+  font-family:
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+.calendar-image-preview-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 480px;
+  object-fit: cover;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+@media only screen and (max-width: 576px) {
+  .calendar-image-preview-container {
+    padding: var(--spacing-md);
+  }
+
+  .calendar-image-preview-card {
+    max-width: 90%;
+    padding: 12px 12px 50px 12px;
+  }
+
+  .calendar-image-preview-date {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    font-size: 11px;
+    padding: 8px;
+  }
+
+  .calendar-image-preview-img {
+    max-height: 320px;
+  }
+}

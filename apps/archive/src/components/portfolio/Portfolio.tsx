@@ -1,13 +1,11 @@
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
-import { defaultFocusedCard } from "../../context/CardsContext"
 import "../../styles/portfolio.css"
 import { Tooltip } from "../common/Tooltip"
 import { Cards } from "./Cards"
 
 export const Portfolio = () => {
-  const [focusedCard, setFocusedCard] = useState<string | null>(defaultFocusedCard.focusedCard)
-  const [tooltipVisible, setTooltipVisible] = useState(false)
+  const [tooltipVisible, setTooltipVisible] = useState<boolean>(false)
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null)
 
   const handleShowTooltip = (position: { x: number; y: number }) => {
@@ -26,7 +24,7 @@ export const Portfolio = () => {
   }, [tooltipVisible])
 
   return (
-    <motion.div className="portfolio-container" onHoverStart={() => setFocusedCard(null)}>
+    <motion.div className="portfolio-container">
       {/* <GuestbookIcon /> */}
       <Cards onShowTooltip={handleShowTooltip} />
       <Tooltip message="Work in Progress" isVisible={tooltipVisible} position={tooltipPosition || undefined} />
