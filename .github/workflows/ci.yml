@@ -27,10 +27,10 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Run ESLint
-        run: pnpm lint
+        run: npx eslint . --ext .ts,.tsx,.js,.jsx
 
       - name: Run Prettier format check
-        run: pnpm format:check
+        run: npx prettier '**/*.{ts,tsx,js,jsx,json,md,cjs,mjs,mts,yml,yaml}' --check
 
   build-test:
     name: Build Test

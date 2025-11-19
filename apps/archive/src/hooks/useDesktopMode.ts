@@ -29,7 +29,7 @@ export const useDesktopMode = (): {
     return (): void => {
       document.documentElement.classList.remove("light", "dark")
     }
-  }, [])
+  }, [desktopMode])
 
   return { desktopMode, toggleDesktopMode }
 }

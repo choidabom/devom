@@ -14,11 +14,9 @@ This is a monorepo project organized with pnpm workspaces. The repository contai
 pnpm dev                    # Start archive app (default)
 pnpm build                  # Build archive app
 pnpm build:packages         # Build all packages (@devom/*)
-pnpm lint                   # Run ESLint
-pnpm lint:fix               # Run ESLint with auto-fix
-pnpm format                 # Format with Prettier
-pnpm format:check           # Check formatting
-pnpm format:fix             # Format and fix linting issues
+pnpm lint                   # Run ESLint and Prettier together
+pnpm lint:eslint            # Run ESLint with auto-fix
+pnpm lint:prettier          # Format with Prettier
 ```
 
 ### Application-specific commands
@@ -218,8 +216,9 @@ pnpm build             # Build archive app (default)
 ### Linting and Formatting
 
 ```bash
-pnpm format:fix        # Format all files and fix lint issues
-pnpm lint:apps         # Lint all apps individually
+pnpm lint              # Run ESLint and Prettier together (auto-fix)
+pnpm lint:eslint       # Run ESLint with auto-fix only
+pnpm lint:prettier     # Format with Prettier only
 ```
 
 ### Adding Dependencies
