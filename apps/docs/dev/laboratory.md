@@ -21,10 +21,10 @@
 - archive
   - ~~archive 페이지 디자인 개선~~ (25.11.17)
   - ~~Calendar (가제:날짤) 추가~~ (25.11.19)
-  - Next.js로 이사
-  - mini terminal
-  - Clarity 실험
+  - ~~Clarity 등록 및 GA4, GTM 연결~~ (25.11.20)
   - guestbook 추가
+  - Next.js로 이사/배포
+  - mini-terminal
 - docs
   - TypeScript 설정 최적화 문서 작성
   - GitHub Pages로 배포 가이드 작성
