@@ -13,7 +13,7 @@ export default defineConfig({
       {
         text: "Development Notes",
         items: [
-          { text: "todolist", link: "/dev/laboratory" },
+          { text: "laboratory", link: "/dev/laboratory" },
           // { text: "TypeScript 설정 최적화", link: "/dev/tsconfig-optimization" },
           // { text: "GitHub Pages로 배포", link: "/dev/github-pages-deployment" },
           // { text: "Vite 개발 환경 최적화", link: "/dev/vite-development-setup" },
