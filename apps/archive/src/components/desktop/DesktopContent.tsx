@@ -1,9 +1,11 @@
+"use client"
+
 import { type JSX, useEffect, useRef } from "react"
-import { useApplications } from "../../context/useApplications"
-import { useDesktopMode } from "../../hooks/useDesktopMode"
-import Blog from "../application/Blog"
-import Docs from "../application/Docs"
-import AppWindow from "../appWindow/AppWindow"
+import { useApplications } from "@/context/useApplications"
+import { useDesktopMode } from "@/hooks/useDesktopMode"
+import Blog from "@/components/application/Blog"
+import Docs from "@/components/application/Docs"
+import AppWindow from "@/components/appWindow/AppWindow"
 
 export const DesktopContent = (): JSX.Element => {
   const initializedRef = useRef<boolean>(false)

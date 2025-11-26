@@ -1,4 +1,4 @@
-import { PortfolioWork } from "../types/portfolio"
+import { PortfolioWork } from "@/types/portfolio"
 
 export const portfolioWorks: PortfolioWork[] = [
   {
@@ -32,7 +32,7 @@ export const portfolioWorks: PortfolioWork[] = [
     year: "2025",
     category: "documentation",
     width: 400,
-    height: 400,
+    height: 600,
     url: "/docs",
     hasControls: true,
     contentType: "iframe",
@@ -56,7 +56,7 @@ export const portfolioWorks: PortfolioWork[] = [
     year: "Always",
     category: "healing",
     width: 200,
-    height: 400,
+    height: 300,
     url: "/dark-theme",
     contentType: "image",
   },
@@ -77,8 +77,8 @@ export const portfolioWorks: PortfolioWork[] = [
     external: false,
     year: "2006",
     category: "inspiration",
-    width: 360,
-    height: 300,
+    width: 450,
+    height: 200,
     url: "/devil-wears-prada",
     contentType: "image",
   },

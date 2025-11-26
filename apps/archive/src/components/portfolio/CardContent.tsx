@@ -1,5 +1,7 @@
+"use client"
+
 import { memo, ReactNode } from "react"
-import { PortfolioWork } from "../../types/portfolio"
+import { PortfolioWork } from "@/types/portfolio"
 
 interface CardContentProps {
   item: PortfolioWork
@@ -20,13 +22,17 @@ export const CardContent = memo(({ item, onGuestbookClick }: CardContentProps) =
         <img
           src={item.img_url}
           alt={item.id}
-          width={item.width}
-          height={item.height}
           draggable={false}
           className={`card-image `}
           onClick={handleImageClick}
           onMouseDown={(e) => onGuestbookClick && e.stopPropagation()}
-          style={{ cursor: onGuestbookClick ? "pointer" : "default" }}
+          style={{
+            cursor: onGuestbookClick ? "pointer" : "default",
+            width: `${item.width}px`,
+            height: `${item.height}px`,
+            objectFit: "cover",
+            display: "block",
+          }}
         />
       )
     }

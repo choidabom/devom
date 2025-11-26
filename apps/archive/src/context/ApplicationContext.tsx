@@ -1,6 +1,8 @@
+"use client"
+
 import { type ReactNode, useCallback, useState } from "react"
-import type { Application } from "../types/types"
-import { ApplicationContext } from "./types"
+import type { Application } from "@/types/types"
+import { ApplicationContext } from "@/context/types"
 
 let nextId = 0
 

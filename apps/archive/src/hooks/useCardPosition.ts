@@ -1,6 +1,5 @@
-import { useRef, useCallback, useState } from "react"
-import { CardPosition } from "../types/portfolio"
-import { PortfolioWork } from "../types/portfolio"
+import { CardPosition, PortfolioWork } from "@/types/portfolio"
+import { useCallback, useRef, useState } from "react"
 
 /**
  * Better seeded random number generator using multiplicative hash
@@ -39,9 +38,10 @@ export const useCardPosition = (works: PortfolioWork[], screen: Window | undefin
 
   const getRandomPosition = useCallback(
     (index: number): CardPosition => {
-      if (!positionsRef.current[index] && screen !== undefined) {
-        const randomX = seededRandom(index, 0) * (100 - (works[index].width / screen.innerWidth) * 100)
-        const randomY = seededRandom(index, 1) * (100 - (works[index].height / (screen.innerHeight - 200)) * 100)
+      const work = works[index]
+      if (!positionsRef.current[index] && screen !== undefined && work) {
+        const randomX = seededRandom(index, 0) * (100 - (work.width / screen.innerWidth) * 100)
+        const randomY = seededRandom(index, 1) * (100 - (work.height / (screen.innerHeight - 200)) * 100)
         positionsRef.current[index] = { x: `${randomX}vw`, y: `${randomY}vh` }
       }
       return positionsRef.current[index] || { x: "0vw", y: "0vh" }

@@ -12,8 +12,5 @@ export type { Application } from "./types"
 // Portfolio types
 export type { CardPosition, PortfolioWork } from "./portfolio"
 
-// Blog types
-export type { BlogCategory, BlogPost } from "./blog"
-
-// Guestbook types
-export type { GuestbookEntry } from "./guestbook"
+// Calendar types
+export type { CalendarDay } from "./calendar"

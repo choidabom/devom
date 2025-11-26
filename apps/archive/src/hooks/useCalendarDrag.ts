@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { DECELERATION_FACTOR, DRAG_THRESHOLD, MIN_VELOCITY, MOMENTUM_MULTIPLIER, MOMENTUM_THRESHOLD, SCROLL_MULTIPLIER } from "../constants/calendar"
+import { DECELERATION_FACTOR, DRAG_THRESHOLD, MIN_VELOCITY, MOMENTUM_MULTIPLIER, MOMENTUM_THRESHOLD, SCROLL_MULTIPLIER } from "@/constants/calendar"
 
 /**
  * 드래그 상태를 관리하는 인터페이스

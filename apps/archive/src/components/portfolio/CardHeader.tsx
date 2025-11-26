@@ -1,7 +1,9 @@
+"use client"
+
 import { DragControls } from "framer-motion"
 import { memo } from "react"
-import { PortfolioWork } from "../../types/portfolio"
-import { RightArrow, UpRightArrow } from "../icon/Arrows"
+import { PortfolioWork } from "@/types/portfolio"
+import { RightArrow, UpRightArrow } from "@/components/icon/Arrows"
 
 interface CardHeaderProps {
   item: PortfolioWork

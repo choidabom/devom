@@ -1,5 +1,5 @@
 import { type ReactNode, createContext } from "react"
-import type { Application } from "../types/types"
+import type { Application } from "@/types/types"
 
 export interface ApplicationContextType {
   applications: Application[]

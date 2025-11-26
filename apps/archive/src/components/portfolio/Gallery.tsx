@@ -1,7 +1,9 @@
+"use client"
+
 import { AnimatePresence, motion } from "framer-motion"
 import { memo, useState } from "react"
-import { portfolioWorks } from "../../data/portfolio"
-import { DetailCard } from "./DetailCard"
+import { portfolioWorks } from "@/data/portfolio"
+import { DetailCard } from "@/components/portfolio/DetailCard"
 
 export const Gallery = memo(() => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)

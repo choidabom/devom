@@ -1,13 +1,15 @@
+"use client"
+
 import { motion } from "framer-motion"
 import { useContext, useEffect, useState } from "react"
-import { CardsContext } from "../../context/CardsContext"
-import { portfolioWorks } from "../../data/portfolio"
-import { useCardControls } from "../../hooks/useCardControls"
-import { useCardPosition } from "../../hooks/useCardPosition"
-import { useCardZIndex } from "../../hooks/useCardZIndex"
-import { CardContent } from "./CardContent"
-import { CardHeader } from "./CardHeader"
-import { DetailCard } from "./DetailCard"
+import { CardsContext } from "@/context/CardsContext"
+import { portfolioWorks } from "@/data/portfolio"
+import { useCardControls } from "@/hooks/useCardControls"
+import { useCardPosition } from "@/hooks/useCardPosition"
+import { useCardZIndex } from "@/hooks/useCardZIndex"
+import { CardContent } from "@/components/portfolio/CardContent"
+import { CardHeader } from "@/components/portfolio/CardHeader"
+import { DetailCard } from "@/components/portfolio/DetailCard"
 
 interface CardsProps {
   onShowTooltip?: (position: { x: number; y: number }) => void

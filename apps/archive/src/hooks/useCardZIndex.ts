@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 export const useCardZIndex = (totalCards: number) => {
   const [zIndices, setZIndices] = useState<{ [key: number]: number }>({})
@@ -19,8 +19,10 @@ export const useCardZIndex = (totalCards: number) => {
   const bringToFront = useCallback((index: number) => {
     setZIndices((prev) => {
       const newZIndices = { ...prev }
-      newZIndices[-1] += 1
-      newZIndices[index] = newZIndices[-1]
+      const currentMax = newZIndices[-1] ?? 100
+      const newMax = currentMax + 1
+      newZIndices[-1] = newMax
+      newZIndices[index] = newMax
       return newZIndices
     })
   }, [])

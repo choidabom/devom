@@ -16,20 +16,27 @@ export interface CardActions {
 
 export type CardControlsState = Record<number, CardState>
 
+const DEFAULT_CARD_STATE: CardState = {
+  isClosed: false,
+  isMinimized: false,
+  isMaximized: false,
+  isAnimating: false,
+}
+
 export const useCardControls = (): [CardControlsState, CardActions] => {
   const [cardStates, setCardStates] = useState<CardControlsState>({})
 
   const handleClose = useCallback((index: number) => {
     setCardStates((prev) => ({
       ...prev,
-      [index]: { ...prev[index], isClosed: true, isAnimating: true },
+      [index]: { ...DEFAULT_CARD_STATE, ...prev[index], isClosed: true, isAnimating: true },
     }))
 
     // Remove animation state after animation completes
     setTimeout(() => {
       setCardStates((prev) => ({
         ...prev,
-        [index]: { ...prev[index], isAnimating: false },
+        [index]: { ...DEFAULT_CARD_STATE, ...prev[index], isAnimating: false },
       }))
     }, 500)
   }, [])
@@ -38,6 +45,7 @@ export const useCardControls = (): [CardControlsState, CardActions] => {
     setCardStates((prev) => ({
       ...prev,
       [index]: {
+        ...DEFAULT_CARD_STATE,
         ...prev[index],
         isMinimized: !prev[index]?.isMinimized,
         isMaximized: false,
@@ -49,6 +57,7 @@ export const useCardControls = (): [CardControlsState, CardActions] => {
     setCardStates((prev) => ({
       ...prev,
       [index]: {
+        ...DEFAULT_CARD_STATE,
         ...prev[index],
         isMaximized: !prev[index]?.isMaximized,
         isMinimized: false,

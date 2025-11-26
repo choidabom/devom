@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react"
-import { getDaysInMonth, SCROLL_DELAY } from "../constants/calendar"
+import { getDaysInMonth, SCROLL_DELAY } from "@/constants/calendar"
 
 interface TodayInfo {
   year: number

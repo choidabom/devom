@@ -1,6 +1,8 @@
+"use client"
+
+import { DesktopContent } from "@/components/desktop/DesktopContent"
+import { ApplicationProvider } from "@/context/ApplicationContext"
 import { JSX } from "react"
-import { ApplicationProvider } from "../../context/ApplicationContext"
-import { DesktopContent } from "./DesktopContent"
 
 export const Desktop = (): JSX.Element => {
   return (

@@ -1,10 +1,12 @@
+"use client"
+
 import type { JSX } from "react"
 import { memo, useRef, useState } from "react"
-import { useWindowControls } from "../../hooks/useWindowControls"
-import { useWindowSize } from "../../hooks/useWindowsize"
-import type { Application } from "../../types/types"
-import RnD from "../RnD"
-import WindowControls from "./WindowControls"
+import { useWindowControls } from "@/hooks/useWindowControls"
+import { useWindowSize } from "@/hooks/useWindowsize"
+import type { Application } from "@/types/types"
+import RnD from "@/components/RnD"
+import WindowControls from "@/components/appWindow/WindowControls"
 
 export const MIN_WIDTH = 500
 export const MIN_HEIGHT = 400

@@ -1,8 +1,10 @@
+"use client"
+
 import type { JSX } from "react"
-import { registerDragEvent } from "../../utils/registerDragEvent"
-import { CloseIcon } from "../icon/CloseIcon"
-import { MaximizeIcon } from "../icon/MaximizeIcon"
-import { MinimizeIcon } from "../icon/MinimizeIcon"
+import { registerDragEvent } from "@/utils/registerDragEvent"
+import { CloseIcon } from "@/components/icon/CloseIcon"
+import { MaximizeIcon } from "@/components/icon/MaximizeIcon"
+import { MinimizeIcon } from "@/components/icon/MinimizeIcon"
 
 interface WindowControlsProps {
   isMaximized: boolean

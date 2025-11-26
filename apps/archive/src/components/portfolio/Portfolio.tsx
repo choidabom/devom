@@ -1,6 +1,8 @@
+"use client"
+
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
-import "../../styles/portfolio.css"
+import "@/styles/portfolio.css"
 import { Tooltip } from "../common/Tooltip"
 import { Cards } from "./Cards"
 

@@ -1,10 +1,13 @@
+"use client"
+
+import { generateYearDays, getTodayInfo, MAX_DATE, MAX_MONTH, MIN_DATE, MIN_MONTH, MONTH_NAMES } from "@/constants/calendar"
+import calendarImageMap from "@/data/calendar-manifest.json"
+import { useCalendarDrag } from "@/hooks/useCalendarDrag"
+import { useCalendarImagePreview } from "@/hooks/useCalendarImagePreview"
+import { useCalendarScroll } from "@/hooks/useCalendarScroll"
+import "@/styles/calendar.css"
+import type { CalendarDay } from "@/types/calendar"
 import { useCallback, useMemo } from "react"
-import { generateYearDays, getTodayInfo, MAX_DATE, MAX_MONTH, MIN_DATE, MIN_MONTH, MONTH_NAMES } from "../../constants/calendar"
-import { useCalendarDrag } from "../../hooks/useCalendarDrag"
-import { useCalendarImagePreview } from "../../hooks/useCalendarImagePreview"
-import { useCalendarScroll } from "../../hooks/useCalendarScroll"
-import "../../styles/calendar.css"
-import type { CalendarDay } from "../../types/calendar"
 
 interface DayInfo {
   month: number
@@ -51,17 +54,11 @@ export const Calendar = () => {
 
   /**
    * /public/calendar 폴더에서 이미지 파일을 자동으로 가져와 날짜별로 매핑
-   * Vite의 import.meta.glob을 사용하여 빌드 시점에 모든 이미지를 로드
+   * Next.js에서는 calendar-manifest.json을 사용하여 이미지 경로를 관리
    */
   const imageDays = useMemo(() => {
-    const calendarImageMap = import.meta.glob<string>(`/public/calendar/*.{jpeg,jpg,png,webp,gif}`, {
-      eager: true,
-      query: "?url",
-      import: "default",
-    })
-
     return Object.keys(calendarImageMap)
-      .map((imagePath) => parseImageDayFromFilename(imagePath, calendarImageMap[imagePath] as string, year))
+      .map((imagePath) => parseImageDayFromFilename(imagePath, calendarImageMap[imagePath as keyof typeof calendarImageMap], year))
       .filter((day): day is CalendarDay => day !== null)
   }, [year])
 

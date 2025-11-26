@@ -1,7 +1,9 @@
+"use client"
+
 import { inrange } from "@devom/utils"
 import type { JSX } from "react"
 import { memo } from "react"
-import { registerDragEvent } from "../utils/registerDragEvent"
+import { registerDragEvent } from "@/utils/registerDragEvent"
 
 interface RnDProps {
   ref: React.RefObject<HTMLDivElement | null>
