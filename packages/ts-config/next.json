@@ -4,7 +4,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "bundler",
     "jsx": "preserve",
     "plugins": [
       {
