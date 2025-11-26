@@ -19,7 +19,7 @@ export const portfolioWorks: PortfolioWork[] = [
     year: "2023 ~",
     category: "code design",
     width: 400,
-    height: 250,
+    height: 400,
     url: "/blog",
     hasControls: true,
     contentType: "image",

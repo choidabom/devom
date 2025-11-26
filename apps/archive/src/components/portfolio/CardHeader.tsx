@@ -1,9 +1,8 @@
 "use client"
 
-import { DragControls } from "framer-motion"
-import { memo } from "react"
-import { PortfolioWork } from "@/types/portfolio"
 import { RightArrow, UpRightArrow } from "@/components/icon/Arrows"
+import { PortfolioWork } from "@/types/portfolio"
+import { memo } from "react"
 
 interface CardHeaderProps {
   item: PortfolioWork
@@ -13,19 +12,19 @@ interface CardHeaderProps {
   onMaximize?: (index: number) => void
   onTitleClick?: () => void
   onShowTooltip?: (position: { x: number; y: number }) => void
-  dragControls?: DragControls
+  isMaximized?: boolean
+  onDoubleClick?: () => void
 }
 
-export const CardHeader = memo(({ item, index, onClose, onMinimize, onMaximize, onTitleClick, onShowTooltip, dragControls }: CardHeaderProps) => {
+export const CardHeader = memo(({ item, index, onClose, onMinimize, onMaximize, onTitleClick, onShowTooltip, isMaximized, onDoubleClick }: CardHeaderProps) => {
   return (
     <div
       className="card-header"
-      onPointerDown={(event) => {
-        const target = event.target as HTMLElement
+      onDoubleClick={(e) => {
+        const target = e.target as HTMLElement
         if (target.closest("a,button")) return
-        dragControls?.start(event)
+        onDoubleClick?.()
       }}
-      style={{ cursor: "grab" }}
     >
       {item.hasControls && (
         <div className="window-controls">
@@ -38,12 +37,13 @@ export const CardHeader = memo(({ item, index, onClose, onMinimize, onMaximize, 
             }}
           />
           <button
-            className="window-control-btn window-control-minimize"
+            className={`window-control-btn window-control-minimize ${isMaximized ? "maximized" : ""}`}
             aria-label="Minimize"
             onClick={(e) => {
               e.stopPropagation()
               onMinimize?.(index)
             }}
+            onDoubleClick={(e) => e.stopPropagation()}
           />
           <button
             className="window-control-btn window-control-maximize"
@@ -52,6 +52,7 @@ export const CardHeader = memo(({ item, index, onClose, onMinimize, onMaximize, 
               e.stopPropagation()
               onMaximize?.(index)
             }}
+            onDoubleClick={(e) => e.stopPropagation()}
           />
         </div>
       )}

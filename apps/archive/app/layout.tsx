@@ -4,8 +4,17 @@ import "./globals.css"
 import { Providers } from "./providers"
 
 export const metadata: Metadata = {
-  title: "devom's archive",
-  description: "Portfolio and archive website with macOS-inspired desktop UI",
+  title: "devom",
+  description: "devom's archive",
+  icons: {
+    icon: "/icon/devom.svg",
+  },
+  openGraph: {
+    title: "devom",
+    description: "devom's archive",
+    images: ["/image/wip.png"],
+    siteName: "devom's archive",
+  },
 }
 
 export default function RootLayout({

@@ -31,11 +31,13 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T &
  */
 export const useWindowSize = (debounceMs = 150): { width: number; height: number } => {
   const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
   })
 
   useEffect(() => {
+    if (typeof window === "undefined") return
+
     const handleWindowResize = (): void => {
       setWindowSize({
         width: window.innerWidth,
@@ -48,6 +50,9 @@ export const useWindowSize = (debounceMs = 150): { width: number; height: number
 
     // resize event: only occurs on the window object and fires continuously when the browser window is resized
     window.addEventListener("resize", debouncedResize)
+
+    // 초기 크기 설정
+    handleWindowResize()
 
     return (): void => {
       debouncedResize.cancel()

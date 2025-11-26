@@ -1,7 +1,7 @@
 "use client"
 
-import { memo, ReactNode } from "react"
 import { PortfolioWork } from "@/types/portfolio"
+import { memo, ReactNode } from "react"
 
 interface CardContentProps {
   item: PortfolioWork
@@ -28,8 +28,8 @@ export const CardContent = memo(({ item, onGuestbookClick }: CardContentProps) =
           onMouseDown={(e) => onGuestbookClick && e.stopPropagation()}
           style={{
             cursor: onGuestbookClick ? "pointer" : "default",
-            width: `${item.width}px`,
-            height: `${item.height}px`,
+            width: "100%",
+            height: "100%",
             objectFit: "cover",
             display: "block",
           }}
@@ -43,8 +43,8 @@ export const CardContent = memo(({ item, onGuestbookClick }: CardContentProps) =
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           style={{
-            width: item.width,
-            height: item.height,
+            width: "100%",
+            height: "100%",
             position: "relative",
           }}
         >
@@ -74,8 +74,8 @@ export const CardContent = memo(({ item, onGuestbookClick }: CardContentProps) =
         <div
           className="card-component"
           style={{
-            width: item.width,
-            height: item.height,
+            width: "100%",
+            height: "100%",
             position: "relative",
             overflow: "hidden",
             borderRadius: "var(--radius-sm)",
