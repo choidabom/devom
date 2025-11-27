@@ -4,16 +4,17 @@ import "./globals.css"
 import { Providers } from "./providers"
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://devom.dev"),
   title: "devom",
   description: "devom's archive",
   icons: {
     icon: "/icon/devom.svg",
   },
   openGraph: {
-    title: "devom",
-    description: "devom's archive",
+    type: "website",
+    url: "https://devom.dev",
+    siteName: "devom",
     images: ["/image/wip.png"],
-    siteName: "devom's archive",
   },
 }
 
