@@ -25,3 +25,7 @@ dist-ssr
 *.sw?
 *.tsbuildinfo
 .vercel
+
+# Proxy
+proxy/ssl/*.pem
+proxy/logs/
