@@ -1,5 +1,4 @@
 {
   "version": 2,
-  "outputDirectory": ".vitepress/dist",
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- apps/docs/"
+  "outputDirectory": ".vitepress/dist"
 }

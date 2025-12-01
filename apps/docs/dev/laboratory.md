@@ -23,8 +23,10 @@
   - ~~Calendar (가제:날짤) 추가~~ (25.11.19)
   - ~~Clarity 등록 및 GA4, GTM 연결~~ (25.11.20)
   - ~~Next.js로 이사/배포(Github Pages)~~ (25.11.26)
+  - ~~local HTTPS 개발 환경 구축~~ (25.11.29)
   - guestbook 추가
   - mini-terminal
+  - OAuth 인증 구현
 - docs
   - TypeScript 설정 최적화 문서 작성
   - GitHub Pages로 배포 가이드 작성
@@ -33,5 +35,8 @@
   - 모노레포로 애플리케이션 분리 문서 작성
   - Dev Server 실험 문서 작성
   - 성능 최적화 과정 정리
+- hOmE sErvEr
+  - N100 구매 + a
+- deploy server
 
-_마지막 업데이트: 2025년 11월_
+_마지막 업데이트: 2025년 12월 1일_
