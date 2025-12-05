@@ -59,18 +59,6 @@ export function Cursor({ presence }: CursorProps): JSX.Element | null {
         zIndex: 40,
       }}
     >
-      {/* 커서 아이콘 - 항상 표시 */}
-      <div
-        style={{
-          width: "20px",
-          height: "20px",
-          borderRadius: "50%",
-          backgroundColor: presence.color,
-          border: "2px solid white",
-          boxShadow: `0 0 10px ${presence.color}80, 0 2px 8px rgba(0, 0, 0, 0.2)`,
-        }}
-      />
-
       {/* 메시지가 있으면 말풍선 표시 */}
       {hasMessage ? (
         <motion.div
@@ -81,8 +69,8 @@ export function Cursor({ presence }: CursorProps): JSX.Element | null {
           className="messageBubble"
           style={{
             position: "absolute",
-            left: "16px",
-            top: "8px",
+            left: "0",
+            top: "0",
             backgroundColor: presence.color,
             boxShadow: `0 0 20px ${presence.color}66, 0 4px 12px rgba(0, 0, 0, 0.15)`,
             padding: "8px 16px",
@@ -106,8 +94,8 @@ export function Cursor({ presence }: CursorProps): JSX.Element | null {
           <div
             style={{
               position: "absolute",
-              left: "16px",
-              top: "8px",
+              left: "0",
+              top: "0",
               padding: "8px 16px",
               borderRadius: "16px",
               backgroundColor: presence.color,
