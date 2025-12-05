@@ -3,8 +3,10 @@ services:
     build: .
     container_name: devom-proxy
     ports:
-      - "127.0.0.2:80:80"
-      - "127.0.0.2:443:443"
+      # 포트 바인딩 형식: "호스트IP:호스트포트:컨테이너포트"
+      # - "80:80" 또는 "443:443"으로 설정하면 0.0.0.0(모든 인터페이스)에 바인딩됨
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
     volumes:
       - ./ssl:/etc/nginx/ssl:ro
       - ./conf.d:/etc/nginx/conf.d:ro

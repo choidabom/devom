@@ -31,16 +31,11 @@ mkcert local.devom.dev
 
 ### 3. 도메인 설정
 
-> 127.0.0.1의 80/443 포트가 이미 다른 프로그램(회사 프록시 등)에서 사용 중일 때, 127.0.0.2를 사용하면 포트 충돌을 피할 수 있다. 127.0.0.0/8 전체 대역이 loopback으로 사용 가능하므로, 필요하면 127.0.0.3, 127.0.0.4 등도 사용할 수 있다.
->
-> 포트 충돌이 없다면 127.0.0.1을 사용해도 됩니다 (docker-compose.yml에서 포트 설정을 `80:80`, `443:443`으로 변경).
+> 127.0.0.1의 80/443 포트가 이미 다른 프로그램(회사 프록시 등)에서 사용 중일 때는 포트 충돌이 발생할 수 있다. 그 경우 다른 포트(8080, 8443 등)를 사용하거나, 127.0.0.2와 같은 다른 loopback IP를 사용할 수 있다.
 
 ```bash
-# 127.0.0.2 loopback alias 생성
-sudo ifconfig lo0 alias 127.0.0.2 up
-
 # /etc/hosts 파일에 추가
-echo "127.0.0.2 local.devom.dev" | sudo tee -a /etc/hosts
+echo "127.0.0.1 local.devom.dev" | sudo tee -a /etc/hosts
 ```
 
 ### 4. 프록시 시작
@@ -71,7 +66,7 @@ https://local.devom.dev
     ↓
     ① DNS 조회: /etc/hosts
     ↓
-127.0.0.2:443 (Docker Nginx)
+127.0.0.1:443 (Docker Nginx)
     ↓
     ② SSL/TLS Handshake
     ↓
@@ -95,11 +90,11 @@ Next.js 개발 서버 (Archive App)
 #### 2. DNS 해석
 
 - `/etc/hosts` 파일 조회
-- `local.devom.dev` → `127.0.0.2`로 변환
+- `local.devom.dev` → `127.0.0.1`로 변환
 
 #### 3. TCP 연결
 
-- 브라우저가 `127.0.0.2:443`으로 연결 시도
+- 브라우저가 `127.0.0.1:443`으로 연결 시도
 - Docker Nginx 컨테이너가 해당 포트를 리스닝
 
 #### 4. SSL/TLS Handshake
@@ -134,14 +129,14 @@ Next.js 개발 서버 (Archive App)
 
 ### 핵심 구성 요소
 
-| 구성 요소                | 역할                                                      |
-| ------------------------ | --------------------------------------------------------- |
-| **127.0.0.2**            | 기본 loopback(127.0.0.1)과 분리된 별도 IP, 포트 충돌 방지 |
-| **/etc/hosts**           | local.devom.dev 도메인을 127.0.0.2로 매핑                 |
-| **mkcert**               | 로컬 개발용 신뢰할 수 있는 SSL 인증서 생성                |
-| **Docker Nginx**         | HTTPS 종료 및 리버스 프록시 역할                          |
-| **host.docker.internal** | Docker 컨테이너가 호스트 머신에 접근하기 위한 특수 DNS    |
-| **Next.js Dev Server**   | 실제 애플리케이션 (localhost:3000)                        |
+| 구성 요소                | 역할                                                   |
+| ------------------------ | ------------------------------------------------------ |
+| **127.0.0.1**            | 기본 loopback IP, 로컬 개발 환경                       |
+| **/etc/hosts**           | local.devom.dev 도메인을 127.0.0.1로 매핑              |
+| **mkcert**               | 로컬 개발용 신뢰할 수 있는 SSL 인증서 생성             |
+| **Docker Nginx**         | HTTPS 종료 및 리버스 프록시 역할                       |
+| **host.docker.internal** | Docker 컨테이너가 호스트 머신에 접근하기 위한 특수 DNS |
+| **Next.js Dev Server**   | 실제 애플리케이션 (localhost:3000)                     |
 
 ## 디렉토리 구조
 
