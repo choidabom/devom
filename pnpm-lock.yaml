@@ -123,9 +123,15 @@ importers:
       '@devom/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@yorkie-js/react':
+        specifier: 0.6.41-rc
+        version: 0.6.41-rc(react@19.2.0)
       framer-motion:
         specifier: ^12.23.24
         version: 12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      geist:
+        specifier: ^1.5.1
+        version: 1.5.1(next@16.0.7(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
       next:
         specifier: ^16.0.7
         version: 16.0.7(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -346,6 +352,20 @@ packages:
   '@babel/types@7.28.5':
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
+
+  '@bufbuild/protobuf@2.10.1':
+    resolution: {integrity: sha512-ckS3+vyJb5qGpEYv/s1OebUHDi/xSNtfgw1wqKZo7MR9F2z+qXr0q5XagafAG/9O0QPVIUfST0smluYSTpYFkg==}
+
+  '@connectrpc/connect-web@2.1.1':
+    resolution: {integrity: sha512-J8317Q2MaFRCT1jzVR1o06bZhDIBmU0UAzWx6xOIXzOq8+k71/+k7MUF7AwcBUX+34WIvbm5syRgC5HXQA8fOg==}
+    peerDependencies:
+      '@bufbuild/protobuf': ^2.7.0
+      '@connectrpc/connect': 2.1.1
+
+  '@connectrpc/connect@2.1.1':
+    resolution: {integrity: sha512-JzhkaTvM73m2K1URT6tv53k2RwngSmCXLZJgK580qNQOXRzZRR/BCMfZw3h+90JpnG6XksP5bYT+cz0rpUzUWQ==}
+    peerDependencies:
+      '@bufbuild/protobuf': ^2.7.0
 
   '@docsearch/css@4.3.2':
     resolution: {integrity: sha512-K3Yhay9MgkBjJJ0WEL5MxnACModX9xuNt3UlQQkDEDZJZ0+aeWKtOkxHNndMRkMBnHdYvQjxkm6mdlneOtU1IQ==}
@@ -1598,6 +1618,18 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
+  '@yorkie-js/react@0.6.41-rc':
+    resolution: {integrity: sha512-f9qWu7N8jz7Lz8B3SQnRTqQH4pe0nGwbJwKLcMp8Sg7mdT/CFpvw07H3qIFjMn2WFOixaLMjrfq+QLEctFujSQ==}
+    peerDependencies:
+      react: ^18 || ^19
+
+  '@yorkie-js/schema@0.6.41-rc':
+    resolution: {integrity: sha512-bJer/hsyv0sgTBpJIs+MbHRXASa4yQMdc3ggSMjj5GtOP7M9jTL1C3lVhVo6drrxglmt8PdUO/lngZrzKYd/fQ==}
+
+  '@yorkie-js/sdk@0.6.41-rc':
+    resolution: {integrity: sha512-V/YJB1QL2tmKNh5mLgbXCRETGfkWW8qjmM7PM3O86qU0jQtAGCO0uJKVjGzCxN4Vy6Zhodsm0ETd7/HE80jMmg==}
+    engines: {node: '>=18.0.0', npm: '>=7.1.0', pnpm: '>=9.6.0'}
+
   abstract-logging@2.0.1:
     resolution: {integrity: sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==}
 
@@ -2427,6 +2459,11 @@ packages:
   functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
 
+  geist@1.5.1:
+    resolution: {integrity: sha512-mAHZxIsL2o3ZITFaBVFBnwyDOw+zNLYum6A6nIjpzCGIO8QtC3V76XF2RnZTyLx1wlDTmMDy8jg3Ib52MIjGvQ==}
+    peerDependencies:
+      next: '>=13.2.0'
+
   generator-function@2.0.1:
     resolution: {integrity: sha512-SFdFmIJi+ybC0vjlHN0ZGVGHc3lgE0DxPAT0djjVg+kjOnSqclqmj0KQ7ykTOLP6YxoqOvuAODGdcHJn+43q3g==}
     engines: {node: '>= 0.4'}
@@ -2909,6 +2946,9 @@ packages:
   log-update@6.1.0:
     resolution: {integrity: sha512-9ie8ItPR6tjY5uYJh8K/Zrv/RMZ5VOlOWvtZdEHYSTFKZfIBPQa9tOAEeAWhd+AnIneLJ22w5fjOYtoutpWq5w==}
     engines: {node: '>=18'}
+
+  long@5.3.2:
+    resolution: {integrity: sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -4176,6 +4216,17 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
+  '@bufbuild/protobuf@2.10.1': {}
+
+  '@connectrpc/connect-web@2.1.1(@bufbuild/protobuf@2.10.1)(@connectrpc/connect@2.1.1(@bufbuild/protobuf@2.10.1))':
+    dependencies:
+      '@bufbuild/protobuf': 2.10.1
+      '@connectrpc/connect': 2.1.1(@bufbuild/protobuf@2.10.1)
+
+  '@connectrpc/connect@2.1.1(@bufbuild/protobuf@2.10.1)':
+    dependencies:
+      '@bufbuild/protobuf': 2.10.1
+
   '@docsearch/css@4.3.2': {}
 
   '@docsearch/js@4.3.2':
@@ -5323,6 +5374,21 @@ snapshots:
     dependencies:
       vue: 3.5.25(typescript@5.9.3)
 
+  '@yorkie-js/react@0.6.41-rc(react@19.2.0)':
+    dependencies:
+      '@yorkie-js/sdk': 0.6.41-rc
+      react: 19.2.0
+
+  '@yorkie-js/schema@0.6.41-rc': {}
+
+  '@yorkie-js/sdk@0.6.41-rc':
+    dependencies:
+      '@bufbuild/protobuf': 2.10.1
+      '@connectrpc/connect': 2.1.1(@bufbuild/protobuf@2.10.1)
+      '@connectrpc/connect-web': 2.1.1(@bufbuild/protobuf@2.10.1)(@connectrpc/connect@2.1.1(@bufbuild/protobuf@2.10.1))
+      '@yorkie-js/schema': 0.6.41-rc
+      long: 5.3.2
+
   abstract-logging@2.0.1: {}
 
   acorn-jsx@5.3.2(acorn@8.15.0):
@@ -6336,6 +6402,10 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
+  geist@1.5.1(next@16.0.7(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)):
+    dependencies:
+      next: 16.0.7(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+
   generator-function@2.0.1: {}
 
   gensync@1.0.0-beta.2: {}
@@ -6806,6 +6876,8 @@ snapshots:
       slice-ansi: 7.1.2
       strip-ansi: 7.1.2
       wrap-ansi: 9.0.2
+
+  long@5.3.2: {}
 
   loose-envify@1.4.0:
     dependencies:
