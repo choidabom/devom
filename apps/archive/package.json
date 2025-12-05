@@ -7,13 +7,13 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx"
   },
   "dependencies": {
     "@devom/ts-config": "workspace:*",
     "@devom/utils": "workspace:*",
     "framer-motion": "^12.23.24",
-    "next": "^15.1.4",
+    "next": "^16.0.7",
     "next-themes": "^0.4.4",
     "react": "catalog:react19",
     "react-dom": "catalog:react19"
@@ -23,7 +23,7 @@
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
     "eslint": "catalog:",
-    "eslint-config-next": "^15.1.4",
+    "eslint-config-next": "^16.0.7",
     "typescript": "catalog:"
   }
 }

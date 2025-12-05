@@ -20,7 +20,7 @@
     "@typescript-eslint/eslint-plugin": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-next": "15.3.3",
+    "eslint-config-next": "^16.0.7",
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-import": "^2.32.0",
     "husky": "catalog:",
