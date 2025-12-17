@@ -6,9 +6,9 @@ packages:
 catalog:
   # TypeScript 생태계
   typescript: "^5.9.3"
-  "@types/node": "^24.10.0"
+  "@types/node": "^25.0.3"
   ts-node: "^10.9.2"
-  tsx: "^4.20.6"
+  tsx: "^4.21.0"
 
   # Build Tools
   vite: "^7.2.2"
@@ -36,8 +36,8 @@ catalog:
   puppeteer: "^24.29.1"
 
 catalogs:
-  react19:
-    react: "^19.0.1"
-    react-dom: "^19.0.1"
+  react:
+    react: "^19.2.3"
+    react-dom: "^19.2.3"
     "@types/react": "^19.0.4"
     "@types/react-dom": "^19.0.2"
