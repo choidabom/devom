@@ -33,6 +33,7 @@ export function UserMenu() {
           fontSize: "14px",
           cursor: "pointer",
           boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          color: "#333",
         }}
       >
         {user ? "Sign Out" : "Sign in with GitHub"}
