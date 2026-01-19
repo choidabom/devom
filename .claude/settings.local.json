@@ -1,14 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cat:*)",
-      "Bash(find:*)",
-      "Bash(pnpm build:packages:*)",
-      "Bash(pnpm --filter @devom/archive lint:*)",
-      "Bash(pnpm --filter @devom/archive lint:apps:*)",
-      "Bash(tree:*)",
-      "Bash(pnpm add:*)",
-      "Bash(*)"
+      "Bash(npx add-skill:*)",
+      "Bash(git clone:*)",
+      "Bash(xargs basename:*)"
     ],
     "deny": [],
     "ask": []
