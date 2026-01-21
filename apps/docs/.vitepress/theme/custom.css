@@ -43,3 +43,34 @@
   --vp-c-bg-code: #3a3a3a; /* 어두운 배경 */
   --vp-c-text-code: #e8e8e8; /* 더 부드러운 흰색 텍스트 */
 }
+
+/* Content width override - 풀 너비 사용 */
+.vp-doc {
+  max-width: 100% !important;
+}
+
+.VPDoc.has-aside .content-container {
+  max-width: 100% !important;
+}
+
+/* BilingualContent가 있는 페이지에서만 적용 */
+.vp-doc .bilingual-layout {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* 제목 아래 여백 최소화 */
+.vp-doc h1 {
+  margin-bottom: 0 !important;
+}
+
+/* 제목과 BilingualContent 사이 간격 조정 */
+.vp-doc h1 + .bilingual-tabs {
+  margin-top: 1rem;
+}
+
+/* h2 개요 위 여백 제거 */
+.vp-doc .tab-panel h2:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
