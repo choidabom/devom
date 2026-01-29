@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx add-skill:*)",
       "Bash(git clone:*)",
-      "Bash(xargs basename:*)"
+      "Bash(xargs basename:*)",
+      "Bash(pnpm install:*)"
     ],
     "deny": [],
     "ask": []
