@@ -6,9 +6,11 @@ import { memo, ReactNode } from "react"
 interface CardContentProps {
   item: PortfolioWork
   onGuestbookClick?: () => void
+  isTopmost?: boolean
+  onBringToFront?: () => void
 }
 
-export const CardContent = memo(({ item, onGuestbookClick }: CardContentProps) => {
+export const CardContent = memo(({ item, onGuestbookClick, isTopmost = true, onBringToFront }: CardContentProps) => {
   const handleImageClick = (e: React.MouseEvent) => {
     if (onGuestbookClick) {
       e.stopPropagation()
@@ -64,6 +66,33 @@ export const CardContent = memo(({ item, onGuestbookClick }: CardContentProps) =
               pointerEvents: "auto",
             }}
           />
+          {/* Overlay to catch clicks when card is not topmost */}
+          {!isTopmost && (
+            <div
+              className="iframe-overlay"
+              onMouseDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onBringToFront?.()
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onBringToFront?.()
+              }}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                background: "transparent",
+                cursor: "pointer",
+                zIndex: 10,
+                pointerEvents: "auto",
+              }}
+            />
+          )}
         </div>
       )
     }

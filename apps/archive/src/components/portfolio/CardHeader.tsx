@@ -11,7 +11,7 @@ interface CardHeaderProps {
   onMinimize?: (index: number) => void
   onMaximize?: (index: number) => void
   onTitleClick?: () => void
-  onShowTooltip?: (position: { x: number; y: number }) => void
+  onShowTooltip?: (position: { x: number; y: number }, message?: string) => void
   isMaximized?: boolean
   onDoubleClick?: () => void
 }
@@ -77,17 +77,28 @@ export const CardHeader = memo(({ item, index, onClose, onMinimize, onMaximize, 
 
           // For all other cards, show tooltip near the clicked element
           const rect = e.currentTarget.getBoundingClientRect()
-          onShowTooltip?.({
-            x: rect.right + 10,
-            y: rect.top + rect.height / 2 - 15,
-          })
+          onShowTooltip?.(
+            {
+              x: rect.right + 10,
+              y: rect.top + rect.height / 2 - 15,
+            },
+            item.tooltipMessage
+          )
         }}
         style={{ cursor: "pointer" }}
       >
         <span>{item.id}</span>
         {item.external ? <UpRightArrow /> : <RightArrow />}
       </a>
-      <span className="card-name card-year">{item.year}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        {item.status && (
+          <div className="status-indicator" title={`Status: ${item.status}`}>
+            <span className={`status-dot ${item.status}`} />
+            <span className="status-text">{item.status}</span>
+          </div>
+        )}
+        {item.year && <span className="card-name card-year">{item.year}</span>}
+      </div>
     </div>
   )
 })

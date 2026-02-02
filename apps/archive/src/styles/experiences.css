@@ -1,0 +1,127 @@
+.experiences-section {
+  width: 100%;
+}
+
+.experiences-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.experience-card {
+  background-color: var(--card-bg);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: none;
+  transition: all var(--transition-smooth);
+}
+
+:root[data-theme="dark"] .experience-card {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.experience-card:hover {
+  transform: none;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="dark"] .experience-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.experience-main {
+  flex: 1;
+}
+
+.experience-company {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
+  font-family: var(--font-heading);
+}
+
+.experience-role {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.experience-period {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+  font-family: var(--font-heading);
+}
+
+:root[data-theme="dark"] .experience-period {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.experience-description {
+  font-size: 12px;
+  line-height: var(--leading-relaxed);
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  opacity: 0.85;
+}
+
+.experience-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.experience-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+:root[data-theme="dark"] .experience-tag {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.experience-tag:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+:root[data-theme="dark"] .experience-tag:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+@media only screen and (max-width: 768px) {
+  .experience-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .experience-period {
+    align-self: flex-start;
+  }
+
+  .experience-card {
+    padding: var(--spacing-lg);
+  }
+}

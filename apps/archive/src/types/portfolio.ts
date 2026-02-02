@@ -15,6 +15,8 @@ export interface PortfolioWork {
   contentType: "image" | "iframe" | "component"
   description?: string | ReactNode
   isGuestbook?: boolean
+  status?: "live" | "building" | "archived"
+  tooltipMessage?: string
 }
 
 export interface CardPosition {
