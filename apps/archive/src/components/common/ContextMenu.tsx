@@ -5,15 +5,25 @@ import "@/styles/context-menu.css"
 
 type LayoutMode = "free" | "centered"
 
-interface MenuItem {
-  label: string
-  icon?: string
-  onClick?: () => void
-  divider?: boolean
-  checked?: boolean
-  disabled?: boolean
-  submenu?: MenuItem[]
-}
+type MenuItem =
+  | {
+      label: string
+      icon?: string
+      onClick?: () => void
+      checked?: boolean
+      disabled?: boolean
+      submenu?: MenuItem[]
+      divider?: never
+    }
+  | {
+      divider: true
+      label?: never
+      icon?: never
+      onClick?: never
+      checked?: never
+      disabled?: never
+      submenu?: never
+    }
 
 interface ContextMenuProps {
   x: number

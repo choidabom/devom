@@ -22,7 +22,7 @@ interface CommandPaletteProps {
   onRestoreAll: () => void
 }
 
-export const CommandPalette = ({ layout, onLayoutChange, showCalendar, onCalendarToggle, onArrangeCards, onRestoreAll }: CommandPaletteProps) => {
+export const CommandPalette = ({ layout: _layout, onLayoutChange, showCalendar, onCalendarToggle, onArrangeCards, onRestoreAll }: CommandPaletteProps) => {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -99,7 +99,7 @@ export const CommandPalette = ({ layout, onLayoutChange, showCalendar, onCalenda
   const groupedCommands = filteredCommands.reduce(
     (acc, cmd) => {
       if (!acc[cmd.category]) acc[cmd.category] = []
-      acc[cmd.category].push(cmd)
+      acc[cmd.category]!.push(cmd)
       return acc
     },
     {} as Record<string, Command[]>
@@ -208,7 +208,7 @@ export const CommandPalette = ({ layout, onLayoutChange, showCalendar, onCalenda
             Object.entries(groupedCommands).map(([category, cmds]) => (
               <div key={category} className="command-group">
                 <div className="command-group-title">{category}</div>
-                {cmds.map((cmd, idx) => {
+                {cmds.map((cmd, _idx) => {
                   const globalIndex = filteredCommands.indexOf(cmd)
                   return (
                     <button

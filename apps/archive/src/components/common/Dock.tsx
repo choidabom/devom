@@ -14,7 +14,7 @@ interface DockProps {
   onCardRestore?: (index: number) => void
 }
 
-export const Dock = ({ layout, onLayoutChange, showCalendar, onCalendarToggle, minimizedCards = [], onCardRestore }: DockProps) => {
+export const Dock = ({ layout: _layout, onLayoutChange: _onLayoutChange, showCalendar, onCalendarToggle, minimizedCards = [], onCardRestore }: DockProps) => {
   // Start with light to match server render, then sync with actual theme
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [mounted, setMounted] = useState(false)
@@ -33,10 +33,6 @@ export const Dock = ({ layout, onLayoutChange, showCalendar, onCalendarToggle, m
     setTheme(newTheme)
     document.documentElement.setAttribute("data-theme", newTheme)
     localStorage.setItem("devom-theme", newTheme)
-  }
-
-  const handleLayoutToggle = (mode: LayoutMode) => {
-    onLayoutChange(mode)
   }
 
   return (
