@@ -42,7 +42,15 @@ export const useCardPosition = (works: PortfolioWork[], screen: Window | undefin
       const work = works[index]
       if (!positionsRef.current[index] && screen !== undefined && work) {
         const randomX = seededRandom(index, 0) * (100 - (work.width / screen.innerWidth) * 100)
-        const randomY = seededRandom(index, 1) * (100 - (work.height / (screen.innerHeight - 200)) * 100)
+        let randomY = seededRandom(index, 1) * (100 - (work.height / (screen.innerHeight - 200)) * 100)
+
+        // Docs 카드는 Calendar 높이(약 100-120px = 15vh) 이상에 위치
+        if (work.id === "Docs") {
+          const calendarHeightVh = 15
+          const maxY = 100 - (work.height / (screen.innerHeight - 200)) * 100
+          randomY = calendarHeightVh + seededRandom(index, 1) * (maxY - calendarHeightVh)
+        }
+
         positionsRef.current[index] = { x: `${randomX}vw`, y: `${randomY}vh` }
       }
       return positionsRef.current[index] || { x: "0vw", y: "0vh" }
