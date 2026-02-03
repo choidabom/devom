@@ -55,10 +55,11 @@ export const registerDragEvent = (onDragChange: (deltaX: number, deltaY: number)
       }
       const handleMouseUp = (): void => {
         document.removeEventListener("mousemove", handleMouseMove)
+        document.removeEventListener("mouseup", handleMouseUp)
       }
 
       document.addEventListener("mousemove", handleMouseMove)
-      document.addEventListener("mouseup", handleMouseUp)
+      document.addEventListener("mouseup", handleMouseUp, { once: true })
     },
   }
 }

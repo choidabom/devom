@@ -1,8 +1,9 @@
 "use client"
 
+import { memo } from "react"
+
 import { RightArrow, UpRightArrow } from "@/components/icon/Arrows"
 import { PortfolioWork } from "@/types/portfolio"
-import { memo } from "react"
 
 interface CardHeaderProps {
   item: PortfolioWork

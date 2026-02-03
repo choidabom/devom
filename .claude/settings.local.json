@@ -4,7 +4,13 @@
       "Bash(npx add-skill:*)",
       "Bash(git clone:*)",
       "Bash(xargs basename:*)",
-      "Bash(pnpm install:*)"
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm --filter @devom/archive build:*)",
+      "Bash(npx eslint:*)",
+      "Bash(python3:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

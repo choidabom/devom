@@ -1,10 +1,13 @@
 "use client"
 
-import { ReactNode, useState } from "react"
-import { CardsContext } from "./CardsContext"
+import { ReactNode, useMemo, useState } from "react"
+
+import { CardsContext } from "@/context/CardsContext"
 
 export function CardsProvider({ children }: { children: ReactNode }) {
   const [focusedCard, setFocusedCard] = useState<string | null>(null)
 
-  return <CardsContext.Provider value={{ focusedCard, setFocusedCard }}>{children}</CardsContext.Provider>
+  const value = useMemo(() => ({ focusedCard, setFocusedCard }), [focusedCard])
+
+  return <CardsContext.Provider value={value}>{children}</CardsContext.Provider>
 }

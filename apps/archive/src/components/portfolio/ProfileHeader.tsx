@@ -1,6 +1,6 @@
 "use client"
 
-import { ActivityHeatmap } from "./ActivityHeatmap"
+import { ActivityHeatmap } from "@/components/portfolio/ActivityHeatmap"
 import "@/styles/profile-header.css"
 
 export const ProfileHeader = () => {

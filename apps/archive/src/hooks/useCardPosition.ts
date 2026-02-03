@@ -1,5 +1,6 @@
-import { CardPosition, PortfolioWork } from "@/types/portfolio"
 import { useCallback, useRef, useState } from "react"
+
+import { CardPosition, PortfolioWork } from "@/types/portfolio"
 
 /**
  * Better seeded random number generator using multiplicative hash

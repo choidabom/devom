@@ -1,11 +1,11 @@
+import type { ReactNode } from "react"
 import { motion } from "framer-motion"
 
 interface DetailCardProps {
-  id: string
   title: string
   year: string
   category: string
-  description: string | React.ReactNode
+  description: string | ReactNode
   url: string
   onClose: () => void
 }

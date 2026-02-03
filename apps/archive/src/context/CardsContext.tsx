@@ -5,9 +5,13 @@ export interface CardsContextType {
   setFocusedCard: (id: string | null) => void
 }
 
-export const defaultFocusedCard: CardsContextType = {
-  focusedCard: null,
-  setFocusedCard: () => {},
+function throwContextError(): never {
+  throw new Error("CardsContext not initialized. Wrap component with CardsProvider.")
 }
 
-export const CardsContext = createContext<CardsContextType>(defaultFocusedCard)
+const defaultCardsContext: CardsContextType = {
+  focusedCard: null,
+  setFocusedCard: throwContextError,
+}
+
+export const CardsContext = createContext<CardsContextType>(defaultCardsContext)

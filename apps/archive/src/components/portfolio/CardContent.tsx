@@ -1,7 +1,8 @@
 "use client"
 
-import { PortfolioWork } from "@/types/portfolio"
 import { memo, ReactNode } from "react"
+
+import { PortfolioWork } from "@/types/portfolio"
 
 interface CardContentProps {
   item: PortfolioWork

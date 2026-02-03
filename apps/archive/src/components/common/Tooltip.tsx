@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
-import "../../styles/tooltip.css"
+
+import "@/styles/tooltip.css"
 
 interface TooltipProps {
   message: string

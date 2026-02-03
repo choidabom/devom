@@ -1,9 +1,10 @@
 "use client"
 
-import { AnimatePresence, motion } from "framer-motion"
 import { memo, useState } from "react"
-import { portfolioWorks } from "@/data/portfolio"
+import { AnimatePresence, motion } from "framer-motion"
+
 import { DetailCard } from "@/components/portfolio/DetailCard"
+import { portfolioWorks } from "@/data/portfolio"
 
 export const Gallery = memo(() => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
@@ -45,7 +46,6 @@ export const Gallery = memo(() => {
       <AnimatePresence>
         {selectedCard && selectedCard.description && (
           <DetailCard
-            id={selectedCard.id}
             title={selectedCard.id}
             year={selectedCard.year}
             category={selectedCard.category}

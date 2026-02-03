@@ -1,9 +1,10 @@
 "use client"
 
-import { createClient } from "@/lib/supabase/client"
+import { useEffect } from "react"
 import type { User } from "@supabase/supabase-js"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect } from "react"
+
+import { createClient } from "@/lib/supabase/client"
 
 const supabase = createClient()
 

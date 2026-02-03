@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import "@/styles/context-menu.css"
+import { useTheme } from "next-themes"
 
-type LayoutMode = "free" | "centered"
+import "@/styles/context-menu.css"
 
 type MenuItem =
   | {
@@ -29,17 +29,14 @@ interface ContextMenuProps {
   x: number
   y: number
   onClose: () => void
-  layout: LayoutMode
-  onLayoutChange: (mode: LayoutMode) => void
   showCalendar: boolean
   onCalendarToggle: () => void
-  onArrangeCards: (mode: "grid" | "circle" | "cascade") => void
-  onRestoreAll: () => void
 }
 
-export const ContextMenu = ({ x, y, onClose, layout, onLayoutChange, showCalendar, onCalendarToggle, onArrangeCards, onRestoreAll }: ContextMenuProps) => {
+export const ContextMenu = ({ x, y, onClose, showCalendar, onCalendarToggle }: ContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ x, y })
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     const handleClick = () => onClose()
@@ -93,54 +90,20 @@ export const ContextMenu = ({ x, y, onClose, layout, onLayoutChange, showCalenda
 
   const menuItems: MenuItem[] = [
     {
-      label: "Arrange Cards",
-      icon: "📐",
-      submenu: [
-        { label: "Grid", onClick: () => onArrangeCards("grid") },
-        { label: "Circle", onClick: () => onArrangeCards("circle") },
-        { label: "Cascade", onClick: () => onArrangeCards("cascade") },
-      ],
-    },
-    { label: "Restore All", icon: "↩️", onClick: onRestoreAll },
-    { divider: true },
-    {
-      label: "Free Mode",
-      icon: layout === "free" ? "✓" : "",
-      onClick: () => onLayoutChange("free"),
-      checked: layout === "free",
-    },
-    {
-      label: "Centered Mode",
-      icon: layout === "centered" ? "✓" : "",
-      onClick: () => onLayoutChange("centered"),
-      checked: layout === "centered",
-    },
-    { divider: true },
-    {
       label: showCalendar ? "Hide Calendar" : "Show Calendar",
-      icon: "📅",
       onClick: onCalendarToggle,
-      disabled: layout !== "free",
     },
     {
       label: "Toggle Dark Mode",
-      icon: "🌙",
-      onClick: () => {
-        const currentTheme = document.documentElement.getAttribute("data-theme")
-        const newTheme = currentTheme === "light" ? "dark" : "light"
-        document.documentElement.setAttribute("data-theme", newTheme)
-        localStorage.setItem("devom-theme", newTheme)
-      },
+      onClick: () => setTheme(theme === "light" ? "dark" : "light"),
     },
     { divider: true },
     {
       label: "View Source",
-      icon: "🔗",
-      onClick: () => window.open("https://github.com/dabom-choi/devom", "_blank"),
+      onClick: () => window.open("https://github.com/choidabom/devom", "_blank"),
     },
     {
       label: "Refresh",
-      icon: "🔄",
       onClick: () => window.location.reload(),
     },
   ]
@@ -197,7 +160,7 @@ export const ContextMenu = ({ x, y, onClose, layout, onLayoutChange, showCalenda
               }
             }}
           >
-            <span className="context-menu-icon">{item.icon}</span>
+            {item.icon && <span className="context-menu-icon">{item.icon}</span>}
             <span className="context-menu-label">{item.label}</span>
             {item.submenu && <span className="context-menu-arrow">▶</span>}
             {item.submenu && (

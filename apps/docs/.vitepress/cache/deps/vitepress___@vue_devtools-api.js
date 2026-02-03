@@ -1,4 +1,4 @@
-// ../../node_modules/.pnpm/@vue+devtools-shared@8.0.2/node_modules/@vue/devtools-shared/dist/index.js
+// ../../node_modules/.pnpm/@vue+devtools-shared@8.0.5/node_modules/@vue/devtools-shared/dist/index.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -28,7 +28,7 @@ var isInChromePanel = typeof target.chrome !== "undefined" && !!target.chrome.de
 var isInIframe = isBrowser && target.self !== target.top;
 var isInElectron = typeof navigator !== "undefined" && navigator.userAgent?.toLowerCase().includes("electron");
 var isNuxtApp = typeof window !== "undefined" && !!window.__NUXT__;
-var require_rfdc = __commonJS({ "../../node_modules/.pnpm/rfdc@1.4.1/node_modules/rfdc/index.js": (exports, module) => {
+var require_rfdc = __commonJS({ "../../node_modules/.pnpm/rfdc@1.4.1/node_modules/rfdc/index.js": ((exports, module) => {
   module.exports = rfdc$1;
   function copyBuffer(cur) {
     if (cur instanceof Buffer) return Buffer.from(cur);
@@ -160,7 +160,7 @@ var require_rfdc = __commonJS({ "../../node_modules/.pnpm/rfdc@1.4.1/node_module
       return o2;
     }
   }
-} });
+}) });
 var import_rfdc = __toESM(require_rfdc(), 1);
 var classifyRE = /(?:^|[-_/])(\w)/g;
 function toUpper(_, c) {
@@ -460,11 +460,11 @@ function createHooks() {
   return new Hookable();
 }
 
-// ../../node_modules/.pnpm/birpc@2.5.0/node_modules/birpc/dist/index.mjs
+// ../../node_modules/.pnpm/birpc@2.8.0/node_modules/birpc/dist/index.mjs
 var { clearTimeout: clearTimeout2, setTimeout: setTimeout2 } = globalThis;
 var random = Math.random.bind(Math);
 
-// ../../node_modules/.pnpm/@vue+devtools-kit@8.0.2/node_modules/@vue/devtools-kit/dist/index.js
+// ../../node_modules/.pnpm/@vue+devtools-kit@8.0.5/node_modules/@vue/devtools-kit/dist/index.js
 var __create2 = Object.create;
 var __defProp2 = Object.defineProperty;
 var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
@@ -522,9 +522,7 @@ function getInstanceName(instance) {
   return "Anonymous Component";
 }
 function getUniqueComponentId(instance) {
-  const appId = instance?.appContext?.app?.__VUE_DEVTOOLS_NEXT_APP_RECORD_ID__ ?? 0;
-  const instanceId = instance === instance?.root ? "root" : instance.uid;
-  return `${appId}:${instanceId}`;
+  return `${instance?.appContext?.app?.__VUE_DEVTOOLS_NEXT_APP_RECORD_ID__ ?? 0}:${instance === instance?.root ? "root" : instance.uid}`;
 }
 function getComponentInstance(appRecord, instanceId) {
   instanceId = instanceId || `${appRecord.id}:root`;
@@ -741,10 +739,7 @@ function inspectFn(e) {
 function selectComponentFn(e, cb) {
   e.preventDefault();
   e.stopPropagation();
-  if (inspectInstance) {
-    const uniqueComponentId = getUniqueComponentId(inspectInstance);
-    cb(uniqueComponentId);
-  }
+  if (inspectInstance) cb(getUniqueComponentId(inspectInstance));
 }
 var inspectComponentHighLighterSelectFn = null;
 function cancelInspectComponentHighLighter() {
@@ -844,14 +839,14 @@ function getComponentInspector() {
     else setup();
   });
 }
-var ReactiveFlags = function(ReactiveFlags$1) {
+var ReactiveFlags = (function(ReactiveFlags$1) {
   ReactiveFlags$1["SKIP"] = "__v_skip";
   ReactiveFlags$1["IS_REACTIVE"] = "__v_isReactive";
   ReactiveFlags$1["IS_READONLY"] = "__v_isReadonly";
   ReactiveFlags$1["IS_SHALLOW"] = "__v_isShallow";
   ReactiveFlags$1["RAW"] = "__v_raw";
   return ReactiveFlags$1;
-}({});
+})({});
 function isReadonly(value) {
   return !!(value && value[ReactiveFlags.IS_READONLY]);
 }
@@ -960,7 +955,7 @@ var RefStateEditor = class {
 var stateEditor = new StateEditor();
 var TIMELINE_LAYERS_STATE_STORAGE_ID = "__VUE_DEVTOOLS_KIT_TIMELINE_LAYERS_STATE__";
 function getTimelineLayersStateFromStorage() {
-  if (!isBrowser || typeof localStorage === "undefined" || localStorage === null) return {
+  if (typeof window === "undefined" || !isBrowser || typeof localStorage === "undefined" || localStorage === null) return {
     recordingState: false,
     mouseEventEnabled: false,
     keyboardEventEnabled: false,
@@ -968,7 +963,7 @@ function getTimelineLayersStateFromStorage() {
     performanceEventEnabled: false,
     selected: ""
   };
-  const state = localStorage.getItem(TIMELINE_LAYERS_STATE_STORAGE_ID);
+  const state = typeof localStorage.getItem !== "undefined" ? localStorage.getItem(TIMELINE_LAYERS_STATE_STORAGE_ID) : null;
   return state ? JSON.parse(state) : {
     recordingState: false,
     mouseEventEnabled: false,
@@ -1027,7 +1022,7 @@ function getActiveInspectors() {
 function getInspector(id, app) {
   return devtoolsInspector.find((inspector) => inspector.options.id === id && (app ? inspector.descriptor.app === app : true));
 }
-var DevToolsV6PluginAPIHookKeys = function(DevToolsV6PluginAPIHookKeys$1) {
+var DevToolsV6PluginAPIHookKeys = (function(DevToolsV6PluginAPIHookKeys$1) {
   DevToolsV6PluginAPIHookKeys$1["VISIT_COMPONENT_TREE"] = "visitComponentTree";
   DevToolsV6PluginAPIHookKeys$1["INSPECT_COMPONENT"] = "inspectComponent";
   DevToolsV6PluginAPIHookKeys$1["EDIT_COMPONENT_STATE"] = "editComponentState";
@@ -1038,8 +1033,8 @@ var DevToolsV6PluginAPIHookKeys = function(DevToolsV6PluginAPIHookKeys$1) {
   DevToolsV6PluginAPIHookKeys$1["TIMELINE_CLEARED"] = "timelineCleared";
   DevToolsV6PluginAPIHookKeys$1["SET_PLUGIN_SETTINGS"] = "setPluginSettings";
   return DevToolsV6PluginAPIHookKeys$1;
-}({});
-var DevToolsContextHookKeys = function(DevToolsContextHookKeys$1) {
+})({});
+var DevToolsContextHookKeys = (function(DevToolsContextHookKeys$1) {
   DevToolsContextHookKeys$1["ADD_INSPECTOR"] = "addInspector";
   DevToolsContextHookKeys$1["SEND_INSPECTOR_TREE"] = "sendInspectorTree";
   DevToolsContextHookKeys$1["SEND_INSPECTOR_STATE"] = "sendInspectorState";
@@ -1052,8 +1047,8 @@ var DevToolsContextHookKeys = function(DevToolsContextHookKeys$1) {
   DevToolsContextHookKeys$1["COMPONENT_HIGHLIGHT"] = "componentHighlight";
   DevToolsContextHookKeys$1["COMPONENT_UNHIGHLIGHT"] = "componentUnhighlight";
   return DevToolsContextHookKeys$1;
-}({});
-var DevToolsMessagingHookKeys = function(DevToolsMessagingHookKeys$1) {
+})({});
+var DevToolsMessagingHookKeys = (function(DevToolsMessagingHookKeys$1) {
   DevToolsMessagingHookKeys$1["SEND_INSPECTOR_TREE_TO_CLIENT"] = "sendInspectorTreeToClient";
   DevToolsMessagingHookKeys$1["SEND_INSPECTOR_STATE_TO_CLIENT"] = "sendInspectorStateToClient";
   DevToolsMessagingHookKeys$1["SEND_TIMELINE_EVENT_TO_CLIENT"] = "sendTimelineEventToClient";
@@ -1063,7 +1058,7 @@ var DevToolsMessagingHookKeys = function(DevToolsMessagingHookKeys$1) {
   DevToolsMessagingHookKeys$1["DEVTOOLS_CONNECTED_UPDATED"] = "devtoolsConnectedUpdated";
   DevToolsMessagingHookKeys$1["ROUTER_INFO_UPDATED"] = "routerInfoUpdated";
   return DevToolsMessagingHookKeys$1;
-}({});
+})({});
 function createDevToolsCtxHooks() {
   const hooks$1 = createHooks();
   hooks$1.hook(DevToolsContextHookKeys.ADD_INSPECTOR, ({ inspector, plugin }) => {
@@ -1323,10 +1318,7 @@ function getPluginSettings(pluginId, fallbackValue) {
     const localSettings = localStorage.getItem(localKey);
     if (localSettings) return JSON.parse(localSettings);
   }
-  if (pluginId) {
-    const item = devtoolsPluginBuffer.find((item$1) => item$1[0].id === pluginId)?.[0] ?? null;
-    return _getSettings(item?.settings ?? {});
-  }
+  if (pluginId) return _getSettings((devtoolsPluginBuffer.find((item) => item[0].id === pluginId)?.[0] ?? null)?.settings ?? {});
   return _getSettings(fallbackValue);
 }
 function initPluginSettings(pluginId, settings) {
@@ -1352,7 +1344,7 @@ function setPluginSettings(pluginId, key, value) {
     }));
   }, DevToolsV6PluginAPIHookKeys.SET_PLUGIN_SETTINGS);
 }
-var DevToolsHooks = function(DevToolsHooks$1) {
+var DevToolsHooks = (function(DevToolsHooks$1) {
   DevToolsHooks$1["APP_INIT"] = "app:init";
   DevToolsHooks$1["APP_UNMOUNT"] = "app:unmount";
   DevToolsHooks$1["COMPONENT_UPDATED"] = "component:updated";
@@ -1368,7 +1360,7 @@ var DevToolsHooks = function(DevToolsHooks$1) {
   DevToolsHooks$1["APP_CONNECTED"] = "app:connected";
   DevToolsHooks$1["SETUP_DEVTOOLS_PLUGIN"] = "devtools-plugin:setup";
   return DevToolsHooks$1;
-}({});
+})({});
 var devtoolsHooks = target.__VUE_DEVTOOLS_HOOK ??= createHooks();
 var on = {
   vueAppInit(fn) {
@@ -1753,7 +1745,7 @@ target.__VUE_DEVTOOLS_KIT_CONTEXT__ ??= {
   api: createDevToolsApi(hooks)
 };
 var devtoolsContext = target.__VUE_DEVTOOLS_KIT_CONTEXT__;
-var require_speakingurl$1 = __commonJS2({ "../../node_modules/.pnpm/speakingurl@14.0.1/node_modules/speakingurl/lib/speakingurl.js": (exports, module) => {
+var require_speakingurl$1 = __commonJS2({ "../../node_modules/.pnpm/speakingurl@14.0.1/node_modules/speakingurl/lib/speakingurl.js": ((exports, module) => {
   (function(root) {
     var charMap = {
       "À": "A",
@@ -3168,10 +3160,10 @@ var require_speakingurl$1 = __commonJS2({ "../../node_modules/.pnpm/speakingurl@
     } catch (e) {
     }
   })(exports);
-} });
-var require_speakingurl = __commonJS2({ "../../node_modules/.pnpm/speakingurl@14.0.1/node_modules/speakingurl/index.js": (exports, module) => {
+}) });
+var require_speakingurl = __commonJS2({ "../../node_modules/.pnpm/speakingurl@14.0.1/node_modules/speakingurl/index.js": ((exports, module) => {
   module.exports = require_speakingurl$1();
-} });
+}) });
 var import_speakingurl = __toESM2(require_speakingurl(), 1);
 var appRecordInfo = target.__VUE_DEVTOOLS_NEXT_APP_RECORD_INFO__ ??= {
   id: 0,
@@ -3201,8 +3193,7 @@ function updateDevToolsClientDetected(params) {
     ...devtoolsState.devtoolsClientDetected,
     ...params
   };
-  const devtoolsClientVisible = Object.values(devtoolsState.devtoolsClientDetected).some(Boolean);
-  toggleHighPerfMode(!devtoolsClientVisible);
+  toggleHighPerfMode(!Object.values(devtoolsState.devtoolsClientDetected).some(Boolean));
 }
 target.__VUE_DEVTOOLS_UPDATE_CLIENT_DETECTED__ ??= updateDevToolsClientDetected;
 var DoubleIndexedKV = class {
@@ -3733,8 +3724,7 @@ function copy(target$1, options = {}) {
   return [...props, ...symbols].reduce((carry, key) => {
     if (isArray$1(options.props) && !options.props.includes(key)) return carry;
     const val = target$1[key];
-    const newVal = copy(val, options);
-    assignProp(carry, key, newVal, target$1, options.nonenumerable);
+    assignProp(carry, key, copy(val, options), target$1, options.nonenumerable);
     return carry;
   }, {});
 }

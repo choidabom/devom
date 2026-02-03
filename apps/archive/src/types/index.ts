@@ -6,9 +6,6 @@
 // Common types
 export type { Category, ContentType, Position, Rect, Size, WindowState } from "./common"
 
-// Application types
-export type { Application } from "./types"
-
 // Portfolio types
 export type { CardPosition, PortfolioWork } from "./portfolio"
 

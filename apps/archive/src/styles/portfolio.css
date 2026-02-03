@@ -512,56 +512,6 @@ button:active {
   transform: scale(1.02);
 }
 
-/* Desktop Icon */
-.desktop-icon {
-  position: fixed;
-  bottom: 30px;
-  left: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  z-index: 100;
-  user-select: none;
-}
-
-.desktop-icon-image {
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.guestbook-icon-emoji {
-  font-size: 48px;
-  line-height: 1;
-  user-select: none;
-}
-
-.desktop-icon-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-/* Minimize Animation */
-.minimize-animation {
-  animation: minimize 0.5s ease-out forwards;
-}
-
-@keyframes minimize {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(0.1);
-    opacity: 0;
-  }
-}
-
 /* Card animations - flying in from different directions */
 @keyframes toss-0 {
   0% {

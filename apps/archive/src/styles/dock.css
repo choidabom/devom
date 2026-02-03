@@ -98,17 +98,6 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
-.dock-user-menu {
-  padding: 0;
-  width: auto;
-  height: auto;
-}
-
-/* Hide UserMenu's own positioning since it's inside dock */
-.dock-user-menu > div {
-  position: static !important;
-}
-
 /* Minimized Apps */
 .dock-minimized-app {
   position: relative;

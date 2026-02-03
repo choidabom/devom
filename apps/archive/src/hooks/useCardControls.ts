@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { ANIMATION_DURATION } from "@/constants/animation"
 
 export interface CardState {
   isClosed: boolean
@@ -25,20 +26,30 @@ const DEFAULT_CARD_STATE: CardState = {
 
 export const useCardControls = (): [CardControlsState, CardActions] => {
   const [cardStates, setCardStates] = useState<CardControlsState>({})
+  const timersRef = useRef<Map<number, NodeJS.Timeout>>(new Map())
 
   const handleClose = useCallback((index: number) => {
+    // Clear existing timer
+    const existingTimer = timersRef.current.get(index)
+    if (existingTimer) {
+      clearTimeout(existingTimer)
+    }
+
     setCardStates((prev) => ({
       ...prev,
       [index]: { ...DEFAULT_CARD_STATE, ...prev[index], isClosed: true, isAnimating: true },
     }))
 
     // Remove animation state after animation completes
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setCardStates((prev) => ({
         ...prev,
         [index]: { ...DEFAULT_CARD_STATE, ...prev[index], isAnimating: false },
       }))
-    }, 500)
+      timersRef.current.delete(index)
+    }, ANIMATION_DURATION.CLOSE)
+
+    timersRef.current.set(index, timer)
   }, [])
 
   const handleMinimize = useCallback((index: number) => {
@@ -71,6 +82,14 @@ export const useCardControls = (): [CardControlsState, CardActions] => {
       delete newState[index]
       return newState
     })
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach((timer) => clearTimeout(timer))
+      timersRef.current.clear()
+    }
   }, [])
 
   return [cardStates, { handleClose, handleMinimize, handleMaximize, resetCard }]

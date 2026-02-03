@@ -1,0 +1,5 @@
+export const LAYOUT_CONSTANTS = {
+  DOCK_OFFSET_X: 20,
+  DOCK_OFFSET_Y: 80,
+  MINIMIZED_CARD_SIZE: 40,
+} as const
