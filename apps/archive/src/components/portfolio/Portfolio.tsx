@@ -8,6 +8,7 @@ import { Dock } from "@/components/common/Dock"
 import { Tooltip } from "@/components/common/Tooltip"
 import { Calendar } from "@/components/portfolio/Calendar"
 import { Cards } from "@/components/portfolio/Cards"
+import { useCardControls } from "@/hooks/useCardControls"
 import { usePortfolioState } from "@/hooks/usePortfolioState"
 import "@/styles/portfolio.css"
 
@@ -15,6 +16,7 @@ export const Portfolio = () => {
   const [state, actions] = usePortfolioState()
   const { tooltipVisible, tooltipPosition, tooltipMessage, showCalendar, minimizedCards, contextMenu } = state
   const { handleShowTooltip, handleContextMenu, setMinimizedCards, setContextMenu, setShowCalendar } = actions
+  const [cardStates, { handleClose, handleMinimize, handleMaximize }] = useCardControls()
 
   const handleCalendarToggle = useCallback(() => {
     setShowCalendar(!showCalendar)
@@ -26,9 +28,16 @@ export const Portfolio = () => {
 
   return (
     <motion.div className="portfolio-container" onContextMenu={handleContextMenu}>
-      <Dock showCalendar={showCalendar} onCalendarToggle={handleCalendarToggle} minimizedCards={minimizedCards} />
+      <Dock showCalendar={showCalendar} onCalendarToggle={handleCalendarToggle} minimizedCards={minimizedCards} onCardRestore={handleMinimize} />
 
-      <Cards onShowTooltip={handleShowTooltip} onMinimizedCardsChange={setMinimizedCards} />
+      <Cards
+        onShowTooltip={handleShowTooltip}
+        onMinimizedCardsChange={setMinimizedCards}
+        cardStates={cardStates}
+        onClose={handleClose}
+        onMinimize={handleMinimize}
+        onMaximize={handleMaximize}
+      />
 
       <AnimatePresence>
         {showCalendar && (

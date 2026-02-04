@@ -6,7 +6,7 @@ import { Card } from "@/components/portfolio/Card"
 import { DetailCard } from "@/components/portfolio/DetailCard"
 import { CardsContext } from "@/context/CardsContext"
 import { portfolioWorks } from "@/data/portfolio"
-import { useCardControls } from "@/hooks/useCardControls"
+import type { CardControlsState } from "@/hooks/useCardControls"
 import { useCardPosition } from "@/hooks/useCardPosition"
 import { useCardZIndex } from "@/hooks/useCardZIndex"
 import { useWindowSize } from "@/hooks/useWindowsize"
@@ -15,9 +15,13 @@ import type { PortfolioWork } from "@/types/portfolio"
 interface CardsProps {
   onShowTooltip?: (position: { x: number; y: number }, message?: string) => void
   onMinimizedCardsChange?: (minimizedCards: Array<{ index: number; id: string; img_url?: string }>) => void
+  cardStates: CardControlsState
+  onClose: (index: number) => void
+  onMinimize: (index: number) => void
+  onMaximize: (index: number) => void
 }
 
-export const Cards = ({ onShowTooltip, onMinimizedCardsChange }: CardsProps) => {
+export const Cards = ({ onShowTooltip, onMinimizedCardsChange, cardStates, onClose, onMinimize, onMaximize }: CardsProps) => {
   const [screen, setScreen] = useState<Window | undefined>(undefined)
   const [loading, setLoading] = useState(true)
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
@@ -26,7 +30,6 @@ export const Cards = ({ onShowTooltip, onMinimizedCardsChange }: CardsProps) => 
 
   const { getRandomPosition } = useCardPosition(portfolioWorks, screen)
   const { zIndices, bringToFront } = useCardZIndex(portfolioWorks.length)
-  const [cardStates, { handleClose, handleMinimize, handleMaximize }] = useCardControls()
 
   const [cardRects, setCardRects] = useState<Record<number, { x: number; y: number; w: number; h: number }>>({})
 
@@ -122,9 +125,9 @@ export const Cards = ({ onShowTooltip, onMinimizedCardsChange }: CardsProps) => 
             cardRect={cardRect}
             windowWidth={windowWidth}
             windowHeight={windowHeight}
-            onClose={handleClose}
-            onMinimize={handleMinimize}
-            onMaximize={handleMaximize}
+            onClose={onClose}
+            onMinimize={onMinimize}
+            onMaximize={onMaximize}
             onShowTooltip={onShowTooltip}
             onTitleClick={handleTitleClick}
             onBringToFront={bringToFront}

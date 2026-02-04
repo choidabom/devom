@@ -64,6 +64,11 @@ export const CardHeader = memo(({ item, index, onClose, onMinimize, onMaximize, 
           e.stopPropagation()
           e.preventDefault()
 
+          // Don't do anything if maximized
+          if (isMaximized) {
+            return
+          }
+
           // If it's a guestbook card, use custom handler
           if (item.isGuestbook) {
             onTitleClick?.()
@@ -86,7 +91,7 @@ export const CardHeader = memo(({ item, index, onClose, onMinimize, onMaximize, 
             item.tooltipMessage
           )
         }}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: isMaximized ? "default" : "pointer" }}
       >
         <span>{item.id}</span>
         {item.external ? <UpRightArrow /> : <RightArrow />}
