@@ -64,9 +64,10 @@ export async function buildProject(deployInfo: DeploymentInfo): Promise<BuildRes
     }
     logger.debug("pnpm install stdout:", installOutput)
 
-    // Build project
-    logger.info("Running pnpm build...")
-    const { stdout: buildOutput, stderr: buildError } = await execAsync("pnpm build", {
+    // Build project (filtered for specific app)
+    const buildCommand = `pnpm --filter ${config.buildFilter} build`
+    logger.info(`Running ${buildCommand}...`)
+    const { stdout: buildOutput, stderr: buildError } = await execAsync(buildCommand, {
       cwd: workDir,
       timeout: config.buildTimeout,
     })
@@ -76,8 +77,23 @@ export async function buildProject(deployInfo: DeploymentInfo): Promise<BuildRes
     }
     logger.debug("pnpm build stdout:", buildOutput)
 
-    // Check for build output
-    const possibleDirs = ["dist", ".next", "build", "out"]
+    // Check for build output (support monorepo structure)
+    const possibleDirs = [
+      // Next.js standalone (priority)
+      "apps/archive/.next/standalone",
+      "apps/tracker/.next/standalone",
+      ".next/standalone",
+      // Other build outputs
+      "dist",
+      ".next",
+      "build",
+      "out",
+      // Monorepo paths
+      "apps/archive/.next",
+      "apps/archive/dist",
+      "apps/archive/build",
+      "apps/archive/out",
+    ]
     let outputDir: string | undefined
 
     for (const dir of possibleDirs) {
@@ -94,7 +110,9 @@ export async function buildProject(deployInfo: DeploymentInfo): Promise<BuildRes
     }
 
     if (!outputDir) {
-      throw new Error("No build output directory found (checked: dist, .next, build, out)")
+      throw new Error(
+        "No build output directory found (checked: dist, .next, build, out, apps/archive/*)",
+      )
     }
 
     const duration = Date.now() - startTime

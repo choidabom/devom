@@ -79,7 +79,7 @@ async function handlePushEvent(payload: PushWebhookPayload) {
       await buildDockerImage(deployInfo, buildResult.outputDir!)
 
       // 4. Run container
-      await runContainer(deployInfo)
+      await runContainer(deployInfo, buildResult.outputDir!)
 
       logger.info(`[${deployInfo.containerName}] Deployment completed successfully`)
       logger.info(`[${deployInfo.containerName}] URL: http://${deployInfo.subdomain}`)
@@ -136,7 +136,7 @@ async function handlePullRequestEvent(payload: PullRequestWebhookPayload) {
         await buildDockerImage(prInfo, buildResult.outputDir!)
 
         // 4. Run container
-        await runContainer(prInfo)
+        await runContainer(prInfo, buildResult.outputDir!)
 
         logger.info(`[${prInfo.containerName}] PR preview deployed successfully`)
         logger.info(`[${prInfo.containerName}] URL: http://${prInfo.subdomain}`)

@@ -24,6 +24,9 @@ export const config = {
     process.env.ALLOWED_BRANCH_REGEX || "^(feature|fix|hotfix|master|main).*$",
   ),
 
+  // Build
+  buildFilter: process.env.BUILD_FILTER || "@devom/archive",
+
   // Server
   port: parseInt(process.env.PORT || "3000", 10),
   buildTimeout: parseInt(process.env.BUILD_TIMEOUT || "600000", 10),
