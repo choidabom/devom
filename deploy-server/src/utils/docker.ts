@@ -10,7 +10,11 @@ const docker = new Dockerode()
 /**
  * Create Dockerfile for static site or Next.js standalone
  */
-async function createDockerfile(workDir: string, outputDir: string): Promise<void> {
+async function createDockerfile(
+  workDir: string,
+  outputDir: string,
+  hasPublicDir: boolean = false,
+): Promise<void> {
   // Check if this is a Next.js standalone build
   const isNextStandalone = outputDir.includes(".next/standalone")
 
@@ -21,6 +25,9 @@ async function createDockerfile(workDir: string, outputDir: string): Promise<voi
     // Extract app directory (e.g., "apps/archive" from "apps/archive/.next/standalone")
     const appDir = outputDir.replace("/.next/standalone", "")
 
+    // Build public directory copy line if it exists
+    const publicCopyLine = hasPublicDir ? `\n# Copy public files\nCOPY ${appDir}/public ./public\n` : ""
+
     dockerfile = `FROM node:20-alpine
 
 WORKDIR /app
@@ -29,11 +36,7 @@ WORKDIR /app
 COPY ${outputDir} ./
 
 # Copy static files
-COPY ${appDir}/.next/static ./.next/static
-
-# Copy public files if they exist
-COPY ${appDir}/public ./public 2>/dev/null || true
-
+COPY ${appDir}/.next/static ./.next/static${publicCopyLine}
 ENV NODE_ENV production
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
@@ -113,9 +116,6 @@ export async function buildDockerImage(
 
   logger.info(`Building Docker image: ${imageName}`)
 
-  // Create Dockerfile
-  await createDockerfile(workDir, outputDir)
-
   // Only create nginx.conf for static sites
   const srcFiles = ["Dockerfile", outputDir]
   if (!isNextStandalone) {
@@ -124,11 +124,27 @@ export async function buildDockerImage(
   }
 
   // For Next.js standalone, include additional directories
+  let hasPublicDir = false
   if (isNextStandalone) {
     const appDir = outputDir.replace("/.next/standalone", "")
     srcFiles.push(`${appDir}/.next/static`)
-    srcFiles.push(`${appDir}/public`)
+
+    // Check if public directory exists
+    const publicPath = path.join(workDir, `${appDir}/public`)
+    try {
+      const stats = await fs.stat(publicPath)
+      if (stats.isDirectory()) {
+        srcFiles.push(`${appDir}/public`)
+        hasPublicDir = true
+      }
+    } catch {
+      // Public directory doesn't exist, skip it
+      logger.debug("No public directory found, skipping")
+    }
   }
+
+  // Create Dockerfile
+  await createDockerfile(workDir, outputDir, hasPublicDir)
 
   // Build image using tar stream
   const tarStream = await docker.buildImage(
