@@ -28,7 +28,7 @@ export const Portfolio = () => {
 
   return (
     <motion.div className="portfolio-container" onContextMenu={handleContextMenu}>
-      <Dock showCalendar={showCalendar} onCalendarToggle={handleCalendarToggle} minimizedCards={minimizedCards} onCardRestore={handleMinimize} />
+      {/* <Dock showCalendar={showCalendar} onCalendarToggle={handleCalendarToggle} minimizedCards={minimizedCards} onCardRestore={handleMinimize} /> */}
 
       <Cards
         onShowTooltip={handleShowTooltip}
