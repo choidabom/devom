@@ -1,10 +1,10 @@
 "use client"
 
-import { useCallback } from "react"
 import { AnimatePresence, motion } from "framer-motion"
+import { useCallback } from "react"
 
 import { ContextMenu } from "@/components/common/ContextMenu"
-import { Dock } from "@/components/common/Dock"
+// import { Dock } from "@/components/common/Dock"
 import { Tooltip } from "@/components/common/Tooltip"
 import { Calendar } from "@/components/portfolio/Calendar"
 import { Cards } from "@/components/portfolio/Cards"
