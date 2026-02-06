@@ -26,7 +26,7 @@ async function createDockerfile(
     const appDir = outputDir.replace("/.next/standalone", "")
 
     // Build public directory copy line if it exists
-    const publicCopyLine = hasPublicDir ? `\n# Copy public files\nCOPY ${appDir}/public ./public\n` : ""
+    const publicCopyLine = hasPublicDir ? `\n# Copy public files\nCOPY ${appDir}/public ./${appDir}/public\n` : ""
 
     dockerfile = `FROM node:20-alpine
 
@@ -36,7 +36,7 @@ WORKDIR /app
 COPY ${outputDir} ./
 
 # Copy static files
-COPY ${appDir}/.next/static ./.next/static${publicCopyLine}
+COPY ${appDir}/.next/static ./${appDir}/.next/static${publicCopyLine}
 ENV NODE_ENV production
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
