@@ -14,7 +14,7 @@ import "@/styles/portfolio.css"
 
 export const Portfolio = () => {
   const [state, actions] = usePortfolioState()
-  const { tooltipVisible, tooltipPosition, tooltipMessage, showCalendar, minimizedCards, contextMenu } = state
+  const { tooltipVisible, tooltipPosition, tooltipMessage, showCalendar, minimizedCards: _minimizedCards, contextMenu } = state
   const { handleShowTooltip, handleContextMenu, setMinimizedCards, setContextMenu, setShowCalendar } = actions
   const [cardStates, { handleClose, handleMinimize, handleMaximize }] = useCardControls()
 
