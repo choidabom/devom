@@ -10,7 +10,8 @@
       "Bash(npx eslint:*)",
       "Bash(python3:*)",
       "Bash(pnpm tsc:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []

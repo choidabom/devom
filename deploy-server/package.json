@@ -8,12 +8,18 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "dockerode": "^4.0.9",
+    "dotenv": "catalog:",
     "fastify": "^4.26.0",
-    "@fastify/cors": "^9.0.1"
+    "p-queue": "^9.1.0",
+    "simple-git": "^3.30.0",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@types/dockerode": "^4.0.1",
     "@types/node": "^22.13.2",
-    "typescript": "^5.7.3",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
   }
 }

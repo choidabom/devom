@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      # Enable Docker provider
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=deploy-network"
+
+      # Entry points
+      - "--entrypoints.web.address=:80"
+
+      # API and dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+
+      # Logging
+      - "--log.level=INFO"
+      - "--accesslog=true"
+
+    ports:
+      - "8000:80"     # HTTP (mapped to 8000 to avoid conflicts)
+      - "8080:8080"   # Traefik Dashboard
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    networks:
+      - deploy-network
+
+    labels:
+      - "traefik.enable=true"
+      # Dashboard router
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+
+networks:
+  deploy-network:
+    name: deploy-network
+    driver: bridge

@@ -1,0 +1,14 @@
+{
+  "action": "opened",
+  "number": 123,
+  "pull_request": {
+    "head": {
+      "ref": "feature/test-pr",
+      "sha": "a1b2c3d4e5f6789012345678901234567890abcd"
+    }
+  },
+  "repository": {
+    "clone_url": "https://github.com/dabom/devom.git",
+    "ssh_url": "git@github.com:dabom/devom.git"
+  }
+}

@@ -60,12 +60,14 @@ pnpm archive dev            # Same as pnpm --filter @devom/archive dev
   - Exported as static HTML for embedding in archive
   - Includes deployment guides, setup instructions, and TODO lists
 
-- **deploy-server**: Experimental branch-based deployment automation
-  - Fastify-based webhook server
+- **deploy-server**: Branch-based deployment automation (IMPLEMENTED)
+  - Fastify-based webhook server with HMAC verification
   - Handles GitHub webhooks for automatic PR preview deployments
   - Docker-based build and deployment pipeline
-  - Traefik integration for subdomain routing
-  - **Status**: Planning/experimental phase
+  - Traefik integration for dynamic subdomain routing
+  - Build queue management with p-queue
+  - Automated cleanup on PR close
+  - **Status**: Fully implemented, ready for testing
 
 #### Support Packages
 
