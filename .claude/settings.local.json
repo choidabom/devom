@@ -11,7 +11,8 @@
       "Bash(python3:*)",
       "Bash(pnpm tsc:*)",
       "Bash(cat:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
