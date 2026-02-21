@@ -67,24 +67,30 @@ export const Portfolio = () => {
 
       <AnimatePresence>
         {showGuestbook && (
-          <motion.div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0, 0, 0, 0.3)",
-              zIndex: 9999,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={handleGuestbookToggle}
-          >
+          <>
             <motion.div
               style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0, 0, 0, 0.3)",
+                zIndex: 9999,
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={handleGuestbookToggle}
+            />
+            <motion.div
+              drag
+              dragMomentum={false}
+              dragElastic={0}
+              style={{
+                position: "fixed",
+                left: "50%",
+                top: "50%",
+                x: "-50%",
+                y: "-50%",
                 width: "500px",
                 height: "700px",
                 maxWidth: "90vw",
@@ -92,16 +98,16 @@ export const Portfolio = () => {
                 borderRadius: "12px",
                 overflow: "hidden",
                 boxShadow: "0 10px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+                zIndex: 10000,
               }}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              onClick={(e) => e.stopPropagation()}
             >
               <Guestbook onClose={handleGuestbookToggle} isFloating />
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
 
