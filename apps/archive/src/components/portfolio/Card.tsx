@@ -1,6 +1,6 @@
 "use client"
 
-import { memo, useCallback, useMemo } from "react"
+import { memo, useCallback, useMemo, useRef } from "react"
 import { motion } from "framer-motion"
 
 import { CardContent } from "@/components/portfolio/CardContent"
@@ -48,6 +48,8 @@ export const Card = memo(function Card({
 }: CardProps) {
   const isMaximized = item.hasControls ? (cardState?.isMaximized ?? false) : false
   const isMinimized = item.hasControls ? (cardState?.isMinimized ?? false) : false
+  const cardRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
 
   // Calculate dock position (center bottom)
   const dockX = windowWidth / 2 - LAYOUT_CONSTANTS.DOCK_OFFSET_X
@@ -75,20 +77,20 @@ export const Card = memo(function Card({
   }, [index, onBringToFront])
 
   const handleDragStart = useCallback(() => {
-    const cardElement = document.querySelector(`.card-${index}`)
-    if (cardElement) {
-      const iframe = cardElement.querySelector("iframe")
+    isDraggingRef.current = true
+    if (cardRef.current) {
+      const iframe = cardRef.current.querySelector("iframe")
       if (iframe) {
         iframe.style.pointerEvents = "none"
       }
     }
-  }, [index])
+  }, [])
 
   const handleDragEnd = useCallback(
     (_: unknown, info: { offset: { x: number; y: number } }) => {
-      const cardElement = document.querySelector(`.card-${index}`)
-      if (cardElement) {
-        const iframe = cardElement.querySelector("iframe")
+      isDraggingRef.current = false
+      if (cardRef.current) {
+        const iframe = cardRef.current.querySelector("iframe")
         if (iframe) {
           iframe.style.pointerEvents = "auto"
         }
@@ -105,7 +107,7 @@ export const Card = memo(function Card({
         })
       }
     },
-    [index, isMaximized, cardRect, onUpdateCardRect]
+    [isMaximized, cardRect, index, onUpdateCardRect]
   )
 
   const animateProps = useMemo(
@@ -130,6 +132,14 @@ export const Card = memo(function Card({
     []
   )
 
+  const dragTransition = useMemo(
+    () => ({
+      power: 0,
+      timeConstant: 0,
+    }),
+    []
+  )
+
   const cardStyle = useMemo(
     () => ({
       width: "100%",
@@ -147,6 +157,7 @@ export const Card = memo(function Card({
       dragMomentum={false}
       dragPropagation={false}
       dragElastic={0}
+      dragTransition={dragTransition}
       initial={{ x: cardX, y: cardY, width: cardWidth, height: cardHeight, opacity: 1, scale: 1 }}
       animate={animateProps}
       transition={transitionProps}
@@ -158,9 +169,8 @@ export const Card = memo(function Card({
       onTouchStart={handleMouseDown}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      whileHover={!isMaximized ? { translateY: -4 } : undefined}
     >
-      <div className={`card-${index} card`} style={cardStyle}>
+      <div ref={cardRef} className={`card-${index} card`} style={cardStyle}>
         <CardHeader
           item={item}
           index={index}
