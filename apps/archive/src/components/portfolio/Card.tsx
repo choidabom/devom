@@ -95,8 +95,8 @@ export const Card = memo(function Card({
       }
 
       if (!isMaximized && cardRect) {
-        const newX = Math.max(0, Math.min(cardRect.x + info.offset.x, windowWidth - cardRect.w))
-        const newY = Math.max(0, Math.min(cardRect.y + info.offset.y, windowHeight - cardRect.h))
+        const newX = cardRect.x + info.offset.x
+        const newY = cardRect.y + info.offset.y
         onUpdateCardRect(index, {
           x: newX,
           y: newY,
@@ -105,17 +105,7 @@ export const Card = memo(function Card({
         })
       }
     },
-    [index, isMaximized, cardRect, windowWidth, windowHeight, onUpdateCardRect]
-  )
-
-  const dragConstraints = useMemo(
-    () => ({
-      left: 0,
-      top: 0,
-      right: windowWidth - cardRect.w,
-      bottom: windowHeight - cardRect.h,
-    }),
-    [windowWidth, windowHeight, cardRect.w, cardRect.h]
+    [index, isMaximized, cardRect, onUpdateCardRect]
   )
 
   const animateProps = useMemo(
@@ -144,7 +134,6 @@ export const Card = memo(function Card({
     () => ({
       width: "100%",
       height: "100%",
-      filter: cardInFocus ? "unset" : "blur(12px)",
       opacity: cardInFocus ? 1 : 0,
     }),
     [cardInFocus]
@@ -156,7 +145,6 @@ export const Card = memo(function Card({
       className="card-container"
       drag={!isMaximized}
       dragMomentum={false}
-      dragConstraints={dragConstraints}
       dragPropagation={false}
       dragElastic={0}
       initial={{ x: cardX, y: cardY, width: cardWidth, height: cardHeight, opacity: 1, scale: 1 }}
