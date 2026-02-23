@@ -161,7 +161,7 @@ button:active {
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   padding: 4px 8px;
@@ -222,7 +222,8 @@ button:active {
 }
 
 @keyframes pulse-live {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     box-shadow: 0 0 0 0 rgba(40, 200, 64, 0.6);
   }
@@ -233,7 +234,8 @@ button:active {
 }
 
 @keyframes pulse-building {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     box-shadow: 0 0 0 0 rgba(255, 149, 0, 0.6);
   }
@@ -308,7 +310,7 @@ button:active {
   font-size: var(--font-xs);
   text-decoration: none;
   font-family: var(--font-heading);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.02em;
 }
 
@@ -683,7 +685,7 @@ button:active {
 
 .detail-card-title {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: #5a4a2f;
   margin: 0 0 var(--spacing-sm) 0;
   letter-spacing: -0.01em;
@@ -752,7 +754,7 @@ button:active {
   color: #5a4a2f;
   text-decoration: none;
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   transition: var(--transition-fast);
   padding: 6px 12px;
   background: rgba(255, 255, 255, 0.5);
@@ -933,11 +935,7 @@ button:active {
 }
 
 /* Large Screen Enhancements - both width and height */
-@media only screen and (min-width: 1200px) and (min-height: 850px) {
-  .card {
-    scale: 1.2;
-  }
-
+@media only screen and (min-width: 1500px) and (min-height: 850px) {
   .card:hover {
     transform: translateY(-5px);
   }
@@ -997,7 +995,7 @@ button:active {
 .view-mode-btn {
   padding: 8px 16px;
   font-size: var(--font-sm);
-  font-weight: 500;
+  font-weight: 400;
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-sm);
@@ -1081,7 +1079,7 @@ button:active {
 .gallery-item-title {
   margin: 0;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--text-primary);
   font-family: var(--font-heading);
 }

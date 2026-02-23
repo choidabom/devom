@@ -7,8 +7,8 @@ import calendarImageMap from "@/data/calendar-manifest.json"
 import { useCalendarDrag } from "@/hooks/useCalendarDrag"
 import { useCalendarImagePreview } from "@/hooks/useCalendarImagePreview"
 import { useCalendarScroll } from "@/hooks/useCalendarScroll"
-import type { CalendarDay } from "@/types/calendar"
 import "@/styles/calendar.css"
+import type { CalendarDay } from "@/types/calendar"
 
 interface DayInfo {
   month: number

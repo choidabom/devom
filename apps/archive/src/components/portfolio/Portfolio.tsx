@@ -7,7 +7,6 @@ import { ContextMenu } from "@/components/common/ContextMenu"
 import { Dock } from "@/components/common/Dock"
 import { Tooltip } from "@/components/common/Tooltip"
 import { Guestbook } from "@/components/guestbook/Guestbook"
-import { Calendar } from "@/components/portfolio/Calendar"
 import { Cards } from "@/components/portfolio/Cards"
 import { useCardControls } from "@/hooks/useCardControls"
 import { usePortfolioState } from "@/hooks/usePortfolioState"
@@ -15,14 +14,10 @@ import "@/styles/portfolio.css"
 
 export const Portfolio = () => {
   const [state, actions] = usePortfolioState()
-  const { tooltipVisible, tooltipPosition, tooltipMessage, showCalendar, minimizedCards, contextMenu } = state
-  const { handleShowTooltip, handleContextMenu, setMinimizedCards, setContextMenu, setShowCalendar } = actions
+  const { tooltipVisible, tooltipPosition, tooltipMessage, minimizedCards, contextMenu } = state
+  const { handleShowTooltip, handleContextMenu, setMinimizedCards, setContextMenu } = actions
   const [cardStates, { handleClose, handleMinimize, handleMaximize }] = useCardControls()
   const [showGuestbook, setShowGuestbook] = useState(false)
-
-  const handleCalendarToggle = useCallback(() => {
-    setShowCalendar(!showCalendar)
-  }, [showCalendar, setShowCalendar])
 
   const handleGuestbookToggle = useCallback(() => {
     setShowGuestbook(!showGuestbook)
@@ -34,14 +29,7 @@ export const Portfolio = () => {
 
   return (
     <motion.div className="portfolio-container" onContextMenu={handleContextMenu}>
-      <Dock
-        showCalendar={showCalendar}
-        onCalendarToggle={handleCalendarToggle}
-        minimizedCards={minimizedCards}
-        onCardRestore={handleMinimize}
-        showGuestbook={showGuestbook}
-        onGuestbookToggle={handleGuestbookToggle}
-      />
+      <Dock minimizedCards={minimizedCards} onCardRestore={handleMinimize} showGuestbook={showGuestbook} onGuestbookToggle={handleGuestbookToggle} />
 
       <Cards
         onShowTooltip={handleShowTooltip}
@@ -51,19 +39,6 @@ export const Portfolio = () => {
         onMinimize={handleMinimize}
         onMaximize={handleMaximize}
       />
-
-      <AnimatePresence>
-        {showCalendar && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <Calendar />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {showGuestbook && (
@@ -111,7 +86,7 @@ export const Portfolio = () => {
         )}
       </AnimatePresence>
 
-      {contextMenu && <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={handleContextMenuClose} showCalendar={showCalendar} onCalendarToggle={handleCalendarToggle} />}
+      {contextMenu && <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={handleContextMenuClose} />}
 
       <Tooltip message={tooltipMessage} isVisible={tooltipVisible} position={tooltipPosition || undefined} />
     </motion.div>

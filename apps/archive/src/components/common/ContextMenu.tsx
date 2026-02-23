@@ -29,11 +29,9 @@ interface ContextMenuProps {
   x: number
   y: number
   onClose: () => void
-  showCalendar: boolean
-  onCalendarToggle: () => void
 }
 
-export const ContextMenu = ({ x, y, onClose, showCalendar, onCalendarToggle }: ContextMenuProps) => {
+export const ContextMenu = ({ x, y, onClose }: ContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ x, y })
   const { theme, setTheme } = useTheme()
@@ -89,10 +87,6 @@ export const ContextMenu = ({ x, y, onClose, showCalendar, onCalendarToggle }: C
   }, [x, y])
 
   const menuItems: MenuItem[] = [
-    {
-      label: showCalendar ? "Hide Calendar" : "Show Calendar",
-      onClick: onCalendarToggle,
-    },
     {
       label: "Toggle Dark Mode",
       onClick: () => setTheme(theme === "light" ? "dark" : "light"),
