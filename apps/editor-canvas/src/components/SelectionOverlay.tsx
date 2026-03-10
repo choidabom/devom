@@ -9,9 +9,10 @@ interface SelectionOverlayProps {
   elementId: string
   documentStore: DocumentStore
   bridge: MessageBridge
+  zoom?: number
 }
 
-export const SelectionOverlay = observer(function SelectionOverlay({ elementId, documentStore, bridge }: SelectionOverlayProps) {
+export const SelectionOverlay = observer(function SelectionOverlay({ elementId, documentStore, bridge, zoom = 1 }: SelectionOverlayProps) {
   const element = documentStore.getElement(elementId)
   const inAutoLayout = element ? isAutoLayoutChild(element, (id) => documentStore.getElement(id)) : false
   const resizeCleanupRef = useRef<(() => void) | null>(null)
@@ -28,7 +29,7 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
   const _w = element?.style.width
   const _h = element?.style.height
 
-  // Measure actual DOM element bounds after render
+  // Measure actual DOM element bounds after render (convert screen → canvas space)
   useLayoutEffect(() => {
     const targetEl = document.querySelector(`[data-element-id="${elementId}"]`) as HTMLElement | null
     const parent = overlayRef.current?.parentElement
@@ -38,12 +39,12 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
     const targetRect = targetEl.getBoundingClientRect()
 
     setBounds({
-      left: targetRect.left - parentRect.left,
-      top: targetRect.top - parentRect.top,
-      width: targetRect.width,
-      height: targetRect.height,
+      left: (targetRect.left - parentRect.left) / zoom,
+      top: (targetRect.top - parentRect.top) / zoom,
+      width: targetRect.width / zoom,
+      height: targetRect.height / zoom,
     })
-  }, [elementId, _l, _t, _w, _h])
+  }, [elementId, _l, _t, _w, _h, zoom])
 
   // ResizeObserver for external size changes (e.g. content-sized elements)
   useEffect(() => {
@@ -55,15 +56,15 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
       const parentRect = parent.getBoundingClientRect()
       const targetRect = targetEl.getBoundingClientRect()
       setBounds({
-        left: targetRect.left - parentRect.left,
-        top: targetRect.top - parentRect.top,
-        width: targetRect.width,
-        height: targetRect.height,
+        left: (targetRect.left - parentRect.left) / zoom,
+        top: (targetRect.top - parentRect.top) / zoom,
+        width: targetRect.width / zoom,
+        height: targetRect.height / zoom,
       })
     })
     observer.observe(targetEl)
     return () => observer.disconnect()
-  }, [elementId])
+  }, [elementId, zoom])
 
   if (!element || element.parentId === null || !bounds) {
     // Render invisible ref anchor so overlayRef is available for measurement
@@ -124,8 +125,8 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
     }
 
     const onMove = (me: PointerEvent) => {
-      const dx = me.clientX - startX
-      const dy = me.clientY - startY
+      const dx = (me.clientX - startX) / zoom
+      const dy = (me.clientY - startY) / zoom
 
       let newWidth = startWidth
       let newHeight = startHeight

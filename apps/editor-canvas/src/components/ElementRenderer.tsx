@@ -37,9 +37,10 @@ interface ElementRendererProps {
   documentStore: DocumentStore
   bridge: MessageBridge
   editorMode: "edit" | "interact"
+  zoom?: number
 }
 
-export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, onInsertionIndicator, onDropHighlight, documentStore, bridge, editorMode }: ElementRendererProps) {
+export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, onInsertionIndicator, onDropHighlight, documentStore, bridge, editorMode, zoom = 1 }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
 
@@ -114,7 +115,8 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       })
       .filter((t): t is NonNullable<typeof t> => t !== null && t.dom !== null)
 
-    // Collect other elements' bounds for snap calculation
+    // Collect other elements' bounds for snap calculation (canvas space)
+    const z = zoom
     const otherBounds: Bounds[] = []
     const allElements = documentStore.getAllElements()
     for (const el of allElements) {
@@ -126,10 +128,10 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       const parentRect = parentDom.getBoundingClientRect()
       const elRect = dom.getBoundingClientRect()
       otherBounds.push({
-        left: elRect.left - parentRect.left,
-        top: elRect.top - parentRect.top,
-        width: elRect.width,
-        height: elRect.height,
+        left: (elRect.left - parentRect.left) / z,
+        top: (elRect.top - parentRect.top) / z,
+        width: elRect.width / z,
+        height: elRect.height / z,
       })
     }
 
@@ -161,8 +163,8 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     }
 
     const onMove = (me: PointerEvent) => {
-      const dx = me.clientX - startX
-      const dy = me.clientY - startY
+      const dx = (me.clientX - startX) / z
+      const dy = (me.clientY - startY) / z
 
       // Calculate snap based on primary element's projected position
       const projectedBounds: Bounds = {
@@ -226,8 +228,8 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         return  // Skip the normal absolute move logic
       }
 
-      const dx = me.clientX - startX + lastSnapDx
-      const dy = me.clientY - startY + lastSnapDy
+      const dx = (me.clientX - startX) / z + lastSnapDx
+      const dy = (me.clientY - startY) / z + lastSnapDy
       const moves: Array<{ id: string; x: number; y: number }> = []
 
       for (const t of dragTargets) {
@@ -293,7 +295,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       if (!hasMoved && Math.abs(dx) + Math.abs(dy) < 3) return
       hasMoved = true
 
-      target.style.transform = `translate(${dx}px, ${dy}px)`
+      target.style.transform = `translate(${dx / z}px, ${dy / z}px)`
       target.style.opacity = "0.7"
       target.style.zIndex = "1000"
 
@@ -385,7 +387,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     >
       {content}
       {element.children.map((childId) => (
-        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} />
+        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
       ))}
     </div>
   )

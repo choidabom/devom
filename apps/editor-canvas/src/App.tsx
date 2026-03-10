@@ -24,6 +24,9 @@ function rectsIntersect(
   return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
 }
 
+const MIN_ZOOM = 0.1
+const MAX_ZOOM = 5
+
 export const App = observer(function App() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
@@ -33,6 +36,12 @@ export const App = observer(function App() {
   const [editorMode, setEditorMode] = useState<"edit" | "interact">("edit")
   const [insertionIndicator, setInsertionIndicator] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
   const [dropHighlightId, setDropHighlightId] = useState<string | null>(null)
+
+  // Viewport: zoom & pan
+  const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
+  const outerRef = useRef<HTMLDivElement>(null)
+  const spaceHeldRef = useRef(false)
+  const panDragRef = useRef<{ x: number; y: number } | null>(null)
 
   const handleShellMessage = useCallback((msg: EditorMessage) => {
     switch (msg.type) {
@@ -79,12 +88,36 @@ export const App = observer(function App() {
       // Don't forward keystrokes when typing in input/textarea
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === "INPUT" || tag === "TEXTAREA") {
-        // Still forward modifier shortcuts (Cmd+Z, etc.)
         if (e.metaKey || e.ctrlKey) {
           e.preventDefault()
           bridge.send({
             type: "KEY_EVENT",
             payload: { key: e.key, code: e.code, metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey },
+          })
+        }
+        return
+      }
+      // Space for pan mode
+      if (e.code === "Space" && !e.repeat) {
+        e.preventDefault()
+        spaceHeldRef.current = true
+        return
+      }
+      // Keyboard zoom: Cmd+=/- and Cmd+0
+      if ((e.metaKey || e.ctrlKey) && (e.code === "Equal" || e.code === "Minus" || e.code === "Digit0")) {
+        e.preventDefault()
+        if (e.code === "Digit0") {
+          setViewport({ zoom: 1, panX: 0, panY: 0 })
+        } else {
+          const factor = e.code === "Equal" ? 1.2 : 1 / 1.2
+          setViewport(prev => {
+            const el = outerRef.current
+            if (!el) return prev
+            const rect = el.getBoundingClientRect()
+            const cx = rect.width / 2, cy = rect.height / 2
+            const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prev.zoom * factor))
+            const scale = newZoom / prev.zoom
+            return { zoom: newZoom, panX: cx - (cx - prev.panX) * scale, panY: cy - (cy - prev.panY) * scale }
           })
         }
         return
@@ -98,10 +131,38 @@ export const App = observer(function App() {
         payload: { key: e.key, code: e.code, metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey },
       })
     }
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "Space") spaceHeldRef.current = false
+    }
     window.addEventListener("keydown", onKeyDown)
+    window.addEventListener("keyup", onKeyUp)
 
-    return () => { dispose(); window.removeEventListener("keydown", onKeyDown) }
+    return () => { dispose(); window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp) }
   }, [handleShellMessage])
+
+  // Wheel: Cmd+wheel = zoom, plain wheel = pan
+  useEffect(() => {
+    const el = outerRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      if (e.metaKey || e.ctrlKey) {
+        const rect = el.getBoundingClientRect()
+        const mx = e.clientX - rect.left
+        const my = e.clientY - rect.top
+        const factor = e.deltaY > 0 ? 0.95 : 1.05
+        setViewport(prev => {
+          const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prev.zoom * factor))
+          const scale = newZoom / prev.zoom
+          return { zoom: newZoom, panX: mx - (mx - prev.panX) * scale, panY: my - (my - prev.panY) * scale }
+        })
+      } else {
+        setViewport(prev => ({ ...prev, panX: prev.panX - e.deltaX, panY: prev.panY - e.deltaY }))
+      }
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
 
   const root = documentStore.root
   if (!root) return null
@@ -118,6 +179,11 @@ export const App = observer(function App() {
   const handleCanvasPointerDown = (e: React.PointerEvent) => {
     const target = e.currentTarget as HTMLElement
     target.setPointerCapture(e.pointerId)
+    // Space+drag → pan
+    if (spaceHeldRef.current) {
+      panDragRef.current = { x: e.clientX, y: e.clientY }
+      return
+    }
     const rect = target.getBoundingClientRect()
     marqueeRef.current = {
       startX: e.clientX - rect.left,
@@ -127,6 +193,14 @@ export const App = observer(function App() {
   }
 
   const handleCanvasPointerMove = (e: React.PointerEvent) => {
+    // Pan drag
+    if (panDragRef.current) {
+      const dx = e.clientX - panDragRef.current.x
+      const dy = e.clientY - panDragRef.current.y
+      panDragRef.current = { x: e.clientX, y: e.clientY }
+      setViewport(prev => ({ ...prev, panX: prev.panX + dx, panY: prev.panY + dy }))
+      return
+    }
     if (!marqueeRef.current) return
     const target = e.currentTarget as HTMLElement
     const rect = target.getBoundingClientRect()
@@ -152,6 +226,12 @@ export const App = observer(function App() {
   const handleCanvasPointerUp = (e: React.PointerEvent) => {
     const target = e.currentTarget as HTMLElement
     target.releasePointerCapture(e.pointerId)
+
+    // End pan drag
+    if (panDragRef.current) {
+      panDragRef.current = null
+      return
+    }
 
     if (marqueeRef.current?.active && marquee) {
       const selRect = {
@@ -184,7 +264,7 @@ export const App = observer(function App() {
 
       setSelectedIds(ids)
       bridge.send({ type: "MARQUEE_SELECT", payload: { ids } })
-    } else if (e.target === e.currentTarget) {
+    } else if (!marqueeRef.current?.active) {
       setSelectedIds([])
       bridge.send({ type: "CANVAS_CLICKED" })
     }
@@ -193,40 +273,48 @@ export const App = observer(function App() {
     marqueeRef.current = null
   }
 
+  const { zoom, panX, panY } = viewport
+
   return (
     <div
-      style={{ width: "100%", height: "100%", background: "#eeeef2", position: "relative" }}
-      onPointerDown={editorMode === "edit" ? handleCanvasPointerDown : undefined}
-      onPointerMove={editorMode === "edit" ? handleCanvasPointerMove : undefined}
-      onPointerUp={editorMode === "edit" ? handleCanvasPointerUp : undefined}
+      ref={outerRef}
+      style={{ width: "100%", height: "100%", background: "#eeeef2", position: "relative", overflow: "hidden", cursor: spaceHeldRef.current ? "grab" : undefined }}
+      onPointerDown={handleCanvasPointerDown}
+      onPointerMove={handleCanvasPointerMove}
+      onPointerUp={handleCanvasPointerUp}
     >
-      <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} />
-      {editorMode === "edit" && !isDragging && selectedIds.map(id => (
-        <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} />
-      ))}
-      {editorMode === "edit" && <SnapGuides lines={snapLines} />}
+      {/* Viewport transform wrapper (canvas space) */}
+      <div style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: '0 0', position: 'absolute' }}>
+        <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+        {editorMode === "edit" && !isDragging && selectedIds.map(id => (
+          <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} zoom={zoom} />
+        ))}
+        {editorMode === "edit" && <SnapGuides lines={snapLines} />}
+        {dropHighlightId && (() => {
+          const dom = document.querySelector(`[data-element-id="${dropHighlightId}"]`) as HTMLElement | null
+          if (!dom) return null
+          const parentEl = dom.offsetParent as HTMLElement | null
+          if (!parentEl) return null
+          const parentRect = parentEl.getBoundingClientRect()
+          const domRect = dom.getBoundingClientRect()
+          return (
+            <div style={{
+              position: 'absolute',
+              left: (domRect.left - parentRect.left) / zoom,
+              top: (domRect.top - parentRect.top) / zoom,
+              width: domRect.width / zoom,
+              height: domRect.height / zoom,
+              border: '2px solid #3b82f6',
+              borderRadius: 4,
+              pointerEvents: 'none',
+              zIndex: 9998,
+            }} />
+          )
+        })()}
+      </div>
+
+      {/* Screen-space overlays */}
       {insertionIndicator && <InsertionIndicator {...insertionIndicator} />}
-      {dropHighlightId && (() => {
-        const dom = document.querySelector(`[data-element-id="${dropHighlightId}"]`) as HTMLElement | null
-        if (!dom) return null
-        const parentEl = dom.offsetParent as HTMLElement | null
-        if (!parentEl) return null
-        const parentRect = parentEl.getBoundingClientRect()
-        const domRect = dom.getBoundingClientRect()
-        return (
-          <div style={{
-            position: 'absolute',
-            left: domRect.left - parentRect.left,
-            top: domRect.top - parentRect.top,
-            width: domRect.width,
-            height: domRect.height,
-            border: '2px solid #3b82f6',
-            borderRadius: 4,
-            pointerEvents: 'none',
-            zIndex: 9998,
-          }} />
-        )
-      })()}
       {marquee && (
         <div style={{
           position: "absolute",
@@ -241,6 +329,19 @@ export const App = observer(function App() {
         }} />
       )}
 
+      {/* Zoom indicator */}
+      <div style={{
+        position: "absolute", bottom: 12, right: 12,
+        display: "flex", alignItems: "center", gap: 4,
+        background: "rgba(255,255,255,0.9)", borderRadius: 6,
+        padding: "4px 8px", fontSize: 11, color: "#64748b",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.1)", pointerEvents: "auto",
+        userSelect: "none",
+      }}>
+        <button onClick={() => setViewport(prev => { const nz = Math.max(MIN_ZOOM, prev.zoom / 1.2); const el = outerRef.current; if (!el) return prev; const r = el.getBoundingClientRect(); const cx = r.width/2, cy = r.height/2; const s = nz/prev.zoom; return {zoom: nz, panX: cx-(cx-prev.panX)*s, panY: cy-(cy-prev.panY)*s} })} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#64748b", padding: "0 2px" }}>−</button>
+        <span onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })} style={{ cursor: "pointer", minWidth: 36, textAlign: "center" }}>{Math.round(zoom * 100)}%</span>
+        <button onClick={() => setViewport(prev => { const nz = Math.min(MAX_ZOOM, prev.zoom * 1.2); const el = outerRef.current; if (!el) return prev; const r = el.getBoundingClientRect(); const cx = r.width/2, cy = r.height/2; const s = nz/prev.zoom; return {zoom: nz, panX: cx-(cx-prev.panX)*s, panY: cy-(cy-prev.panY)*s} })} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#64748b", padding: "0 2px" }}>+</button>
+      </div>
     </div>
   )
 })
