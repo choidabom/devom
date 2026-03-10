@@ -339,13 +339,13 @@ const PropertiesPanel = observer(function PropertiesPanel() {
     historyStore.pushSnapshot()
     const parsed = /^\d+(\.\d+)?$/.test(value) ? Number(value) : value
     documentStore.updateStyle(element.id, { [key]: parsed })
-    bridge.send({ type: "UPDATE_STYLE", payload: { id: element.id, style: { [key]: parsed } } })
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
   const updateProp = (key: string, value: string) => {
     historyStore.pushSnapshot()
     documentStore.updateProps(element.id, { [key]: value })
-    bridge.send({ type: "UPDATE_PROPS", payload: { id: element.id, props: { [key]: value } } })
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
   const isShadcn = element.type.startsWith("sc:")
