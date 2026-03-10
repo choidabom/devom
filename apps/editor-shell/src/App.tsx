@@ -77,6 +77,16 @@ export const App = observer(function App() {
           if ((k.metaKey || k.ctrlKey) && k.key === "d") handleDuplicate()
           break
         }
+        case "REORDER_CHILD":
+          historyStore.pushSnapshot()
+          documentStore.reorderChild(msg.payload.parentId, msg.payload.childId, msg.payload.newIndex)
+          syncToCanvas()
+          break
+        case "REPARENT_ELEMENT":
+          historyStore.pushSnapshot()
+          documentStore.reparentElement(msg.payload.id, msg.payload.newParentId, msg.payload.index, msg.payload.dropPosition)
+          syncToCanvas()
+          break
       }
     })
 
