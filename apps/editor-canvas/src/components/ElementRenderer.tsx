@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import type { DocumentStore } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
+import { getContainerStyles, getChildSizingStyles } from "@devom/editor-core"
 import { calcSnap, type SnapLine, type Bounds } from "../utils/snap"
 
 interface ElementRendererProps {
@@ -32,6 +33,14 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   const isSelected = selectedIds.includes(elementId)
   const isRoot = element.parentId === null
 
+  // Auto Layout styles
+  const containerStyles = getContainerStyles(element)
+  const parent = element.parentId ? documentStore.getElement(element.parentId) : undefined
+  const inAutoLayout = parent?.layoutMode === 'flex'
+  const childSizingStyles = inAutoLayout
+    ? getChildSizingStyles(element, parent.layoutProps.direction)
+    : {}
+
   const handleClick = (e: React.MouseEvent) => {
     if (editorMode === "interact") return
     e.stopPropagation()
@@ -50,6 +59,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   const handlePointerDown = (e: React.PointerEvent) => {
     if (editorMode === "interact") return
     if (element.locked || isRoot) return
+    if (inAutoLayout) return  // Auto-layout drag handled separately
     if (element.style.position !== "absolute") return
     e.stopPropagation()
     e.preventDefault()
@@ -196,9 +206,12 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       data-element-id={element.id}
       style={{
         ...element.style,
+        ...(inAutoLayout ? { position: 'relative' as const, left: undefined, top: undefined } : {}),
+        ...containerStyles,
+        ...childSizingStyles,
         outline: editorMode === "edit" && isSelected ? "1.5px dashed #6366f1" : undefined,
         outlineOffset: editorMode === "edit" && isSelected ? 2 : undefined,
-        cursor: editorMode === "interact" ? undefined : (element.locked || isRoot ? "default" : "move"),
+        cursor: editorMode === "interact" ? undefined : (element.locked || isRoot ? "default" : (inAutoLayout ? "grab" : "move")),
         userSelect: editorMode === "interact" ? undefined : "none",
       }}
       onClick={handleClick}
