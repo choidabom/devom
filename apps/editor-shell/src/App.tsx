@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import type { EditorMessage, ElementType } from "@devom/editor-core"
+import { exportToJSON, exportToJSX, exportToHTML } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "./stores"
 
 export const App = observer(function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const [showExport, setShowExport] = useState(false)
 
   useEffect(() => {
     const dispose = bridge.onMessage((msg: EditorMessage) => {
@@ -121,6 +123,8 @@ export const App = observer(function App() {
         <Divider />
         <ToolButton label="↶" title="Undo" onClick={handleUndo} disabled={!historyStore.canUndo} />
         <ToolButton label="↷" title="Redo" onClick={handleRedo} disabled={!historyStore.canRedo} />
+        <Divider />
+        <ToolButton label="Export" onClick={() => setShowExport(true)} />
         {selected && !selected.locked && (
           <>
             <Divider />
@@ -161,6 +165,7 @@ export const App = observer(function App() {
           </div>
         </div>
       </div>
+      {showExport && <ExportModal onClose={() => setShowExport(false)} />}
     </div>
   )
 })
@@ -316,3 +321,58 @@ function PropRow({ label, value, onChange }: { label: string; value: string | nu
     </div>
   )
 }
+
+const ExportModal = observer(function ExportModal({ onClose }: { onClose: () => void }) {
+  const [format, setFormat] = useState<"json" | "jsx" | "html">("json")
+  const [copied, setCopied] = useState(false)
+  const data = documentStore.toSerializable()
+
+  const output = format === "json"
+    ? exportToJSON(data.elements, data.rootId)
+    : format === "jsx"
+    ? exportToJSX(data.elements, data.rootId)
+    : exportToHTML(data.elements, data.rootId)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(output)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
+      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
+    }} onClick={onClose}>
+      <div style={{
+        background: "#1e293b", borderRadius: 8, width: 600, maxHeight: "80vh",
+        display: "flex", flexDirection: "column", border: "1px solid #334155",
+      }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #334155" }}>
+          <div style={{ display: "flex", gap: 4 }}>
+            {(["json", "jsx", "html"] as const).map(f => (
+              <button key={f} onClick={() => setFormat(f)} style={{
+                padding: "4px 12px", background: format === f ? "#3b82f6" : "transparent",
+                color: "#e2e8f0", border: "1px solid #334155", borderRadius: 4, cursor: "pointer", fontSize: 12, textTransform: "uppercase",
+              }}>{f}</button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={handleCopy} style={{
+              padding: "4px 12px", background: "#3b82f6", color: "#fff",
+              border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12,
+            }}>{copied ? "Copied!" : "Copy"}</button>
+            <button onClick={onClose} style={{
+              padding: "4px 8px", background: "transparent", color: "#94a3b8",
+              border: "1px solid #334155", borderRadius: 4, cursor: "pointer", fontSize: 14,
+            }}>✕</button>
+          </div>
+        </div>
+        <textarea value={output} readOnly style={{
+          flex: 1, minHeight: 300, padding: 16, background: "#0f172a", color: "#e2e8f0",
+          border: "none", fontFamily: "monospace", fontSize: 12, resize: "none",
+        }} />
+      </div>
+    </div>
+  )
+})
