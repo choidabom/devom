@@ -36,7 +36,13 @@ export class MessageBridge {
     if (event.origin !== this.allowedOrigin) return
     if (!isEditorMessage(event.data)) return
     const { message } = event.data
-    this.handlers.forEach((handler) => handler(message))
+    this.handlers.forEach((handler) => {
+      try {
+        handler(message)
+      } catch (err) {
+        console.error("[MessageBridge] Handler error:", err)
+      }
+    })
   }
 
   destroy() {

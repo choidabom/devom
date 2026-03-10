@@ -2,8 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import { DocumentStore, MessageBridge, type EditorMessage } from "@devom/editor-core"
 
+const SHELL_ORIGIN = import.meta.env.VITE_SHELL_ORIGIN || "http://localhost:4000"
+
 const documentStore = new DocumentStore()
-const bridge = new MessageBridge("http://localhost:4000")
+const bridge = new MessageBridge(SHELL_ORIGIN)
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => bridge.destroy())
+}
 
 export const App = observer(function App() {
   const initialized = useRef(false)
@@ -70,6 +76,12 @@ interface ElementRendererProps {
 
 const ElementRenderer = observer(function ElementRenderer({ elementId, selectedId, onSelect }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
+  const dragCleanupRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    return () => { dragCleanupRef.current?.() }
+  }, [])
+
   if (!element || !element.visible) return null
 
   const isSelected = selectedId === elementId
@@ -102,6 +114,13 @@ const ElementRenderer = observer(function ElementRenderer({ elementId, selectedI
     const startLeft = parseInt(String(element.style.left ?? 0))
     const startTop = parseInt(String(element.style.top ?? 0))
 
+    const cleanup = () => {
+      target.releasePointerCapture(e.pointerId)
+      target.removeEventListener("pointermove", onMove)
+      target.removeEventListener("pointerup", onUp)
+      dragCleanupRef.current = null
+    }
+
     const onMove = (me: PointerEvent) => {
       const dx = me.clientX - startX
       const dy = me.clientY - startY
@@ -112,9 +131,7 @@ const ElementRenderer = observer(function ElementRenderer({ elementId, selectedI
     }
 
     const onUp = () => {
-      target.releasePointerCapture(e.pointerId)
-      target.removeEventListener("pointermove", onMove)
-      target.removeEventListener("pointerup", onUp)
+      cleanup()
       bridge.send({
         type: "ELEMENT_MOVED",
         payload: {
@@ -125,6 +142,7 @@ const ElementRenderer = observer(function ElementRenderer({ elementId, selectedI
       })
     }
 
+    dragCleanupRef.current = cleanup
     target.addEventListener("pointermove", onMove)
     target.addEventListener("pointerup", onUp)
   }
@@ -203,22 +221,28 @@ function getElementContent(type: string, props: Record<string, unknown>): React.
 
 const SelectionOverlay = observer(function SelectionOverlay({ elementId }: { elementId: string }) {
   const element = documentStore.getElement(elementId)
+  const resizeCleanupRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    return () => { resizeCleanupRef.current?.() }
+  }, [])
+
   if (!element || element.parentId === null) return null
 
-  const targetElement = document.querySelector(`[data-element-id="${elementId}"]`) as HTMLElement
-  if (!targetElement) return null
-
-  const rect = targetElement.getBoundingClientRect()
+  const elWidth = typeof element.style.width === "number" ? element.style.width : 100
+  const elHeight = typeof element.style.height === "number" ? element.style.height : 100
+  const elLeft = typeof element.style.left === "number" ? element.style.left : 0
+  const elTop = typeof element.style.top === "number" ? element.style.top : 0
 
   const handles = [
     { position: "nw", cursor: "nw-resize", x: -3, y: -3 },
-    { position: "n", cursor: "n-resize", x: rect.width / 2 - 3, y: -3 },
-    { position: "ne", cursor: "ne-resize", x: rect.width - 3, y: -3 },
-    { position: "e", cursor: "e-resize", x: rect.width - 3, y: rect.height / 2 - 3 },
-    { position: "se", cursor: "se-resize", x: rect.width - 3, y: rect.height - 3 },
-    { position: "s", cursor: "s-resize", x: rect.width / 2 - 3, y: rect.height - 3 },
-    { position: "sw", cursor: "sw-resize", x: -3, y: rect.height - 3 },
-    { position: "w", cursor: "w-resize", x: -3, y: rect.height / 2 - 3 },
+    { position: "n", cursor: "n-resize", x: elWidth / 2 - 3, y: -3 },
+    { position: "ne", cursor: "ne-resize", x: elWidth - 3, y: -3 },
+    { position: "e", cursor: "e-resize", x: elWidth - 3, y: elHeight / 2 - 3 },
+    { position: "se", cursor: "se-resize", x: elWidth - 3, y: elHeight - 3 },
+    { position: "s", cursor: "s-resize", x: elWidth / 2 - 3, y: elHeight - 3 },
+    { position: "sw", cursor: "sw-resize", x: -3, y: elHeight - 3 },
+    { position: "w", cursor: "w-resize", x: -3, y: elHeight / 2 - 3 },
   ]
 
   const handlePointerDown = (e: React.PointerEvent, position: string) => {
@@ -230,10 +254,17 @@ const SelectionOverlay = observer(function SelectionOverlay({ elementId }: { ele
 
     const startX = e.clientX
     const startY = e.clientY
-    const startWidth = parseInt(String(element.style.width ?? rect.width))
-    const startHeight = parseInt(String(element.style.height ?? rect.height))
-    const startLeft = parseInt(String(element.style.left ?? 0))
-    const startTop = parseInt(String(element.style.top ?? 0))
+    const startWidth = elWidth
+    const startHeight = elHeight
+    const startLeft = elLeft
+    const startTop = elTop
+
+    const cleanup = () => {
+      target.releasePointerCapture(e.pointerId)
+      target.removeEventListener("pointermove", onMove)
+      target.removeEventListener("pointerup", onUp)
+      resizeCleanupRef.current = null
+    }
 
     const onMove = (me: PointerEvent) => {
       const dx = me.clientX - startX
@@ -264,22 +295,18 @@ const SelectionOverlay = observer(function SelectionOverlay({ elementId }: { ele
     }
 
     const onUp = () => {
-      target.releasePointerCapture(e.pointerId)
-      target.removeEventListener("pointermove", onMove)
-      target.removeEventListener("pointerup", onUp)
-
-      const finalWidth = parseInt(String(element.style.width ?? rect.width))
-      const finalHeight = parseInt(String(element.style.height ?? rect.height))
+      cleanup()
       bridge.send({
         type: "ELEMENT_RESIZED",
         payload: {
           id: element.id,
-          width: finalWidth,
-          height: finalHeight,
+          width: typeof element.style.width === "number" ? element.style.width : startWidth,
+          height: typeof element.style.height === "number" ? element.style.height : startHeight,
         },
       })
     }
 
+    resizeCleanupRef.current = cleanup
     target.addEventListener("pointermove", onMove)
     target.addEventListener("pointerup", onUp)
   }
@@ -288,10 +315,10 @@ const SelectionOverlay = observer(function SelectionOverlay({ elementId }: { ele
     <div
       style={{
         position: "absolute",
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
+        left: elLeft,
+        top: elTop,
+        width: elWidth,
+        height: elHeight,
         pointerEvents: "none",
       }}
     >

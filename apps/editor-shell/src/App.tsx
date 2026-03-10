@@ -152,7 +152,7 @@ export const App = observer(function App() {
         <div style={{ flex: 1, position: "relative", background: "#1e293b" }}>
           <iframe
             ref={iframeRef}
-            src={import.meta.env.VITE_CANVAS_URL || "http://localhost:4001"}
+            src={import.meta.env.VITE_CANVAS_ORIGIN || "http://localhost:4001"}
             style={{ width: "100%", height: "100%", border: "none" }}
             title="Editor Canvas"
           />
