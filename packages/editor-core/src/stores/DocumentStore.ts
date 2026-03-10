@@ -100,6 +100,62 @@ export class DocumentStore {
     this.elements.delete(id)
   }
 
+  pasteElements(elements: EditorElement[], offset = 20): string[] {
+    const newIds: string[] = []
+    for (const el of elements) {
+      const parentId = el.parentId ?? this.rootId
+      const parent = this.elements.get(parentId) ?? this.elements.get(this.rootId)
+      if (!parent) continue
+
+      const newId = nanoid()
+      const cloned: EditorElement = {
+        ...JSON.parse(JSON.stringify(el)),
+        id: newId,
+        parentId: parent.id,
+        name: `${el.type}-${newId.slice(0, 4)}`,
+        children: [],
+        style: {
+          ...JSON.parse(JSON.stringify(el.style)),
+          ...(typeof el.style.left === "number" ? { left: el.style.left + offset } : {}),
+          ...(typeof el.style.top === "number" ? { top: el.style.top + offset } : {}),
+        },
+      }
+
+      this.elements.set(newId, cloned)
+      parent.children.push(newId)
+      newIds.push(newId)
+    }
+    return newIds
+  }
+
+  duplicateElements(ids: string[], offset = 20): string[] {
+    const newIds: string[] = []
+    for (const id of ids) {
+      const el = this.elements.get(id)
+      if (!el || el.locked || id === this.rootId || !el.parentId) continue
+      const parent = this.elements.get(el.parentId)
+      if (!parent) continue
+
+      const newId = nanoid()
+      const cloned: EditorElement = {
+        ...JSON.parse(JSON.stringify(el)),
+        id: newId,
+        name: `${el.type}-${newId.slice(0, 4)}`,
+        children: [],
+        style: {
+          ...JSON.parse(JSON.stringify(el.style)),
+          ...(typeof el.style.left === "number" ? { left: el.style.left + offset } : {}),
+          ...(typeof el.style.top === "number" ? { top: el.style.top + offset } : {}),
+        },
+      }
+
+      this.elements.set(newId, cloned)
+      parent.children.push(newId)
+      newIds.push(newId)
+    }
+    return newIds
+  }
+
   updateStyle(id: string, style: Partial<CSSProperties>) {
     const element = this.elements.get(id)
     if (!element || element.locked) return

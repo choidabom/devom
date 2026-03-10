@@ -7,7 +7,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
   if (elements.length === 0) return null
 
   const isMulti = elements.length > 1
-  const element = elements[0]
+  const element = elements[0]!
 
   const updateStyle = (key: string, value: string) => {
     historyStore.pushSnapshot()
@@ -30,9 +30,10 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
   const allSameType = elements.every(el => el.type === element.type)
 
   const MIXED = "mixed"
-  const sharedStyle = (key: string, fallback: string | number = "") => {
+  const sharedStyle = (key: string, fallback: string | number = ""): string | number => {
     const vals = elements.map(el => (el.style as Record<string, unknown>)[key] ?? fallback)
-    return vals.every(v => v === vals[0]) ? vals[0] : MIXED
+    const first = vals[0] as string | number
+    return vals.every(v => v === first) ? first : MIXED
   }
   const sharedProp = (key: string, fallback: string = "") => {
     const vals = elements.map(el => (el.props as Record<string, unknown>)[key] ?? fallback)

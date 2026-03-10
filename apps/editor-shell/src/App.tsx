@@ -9,6 +9,11 @@ import { PropertiesPanel } from "./components/PropertiesPanel"
 import { ExportModal } from "./components/ExportModal"
 import { LayoutGuide } from "./components/LayoutGuide"
 
+import type { EditorElement } from "@devom/editor-core"
+
+// Module-level clipboard for copy/paste
+let clipboard: EditorElement[] = []
+
 export const App = observer(function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [showExport, setShowExport] = useState(false)
@@ -61,6 +66,9 @@ export const App = observer(function App() {
             if (k.shiftKey) handleRedo()
             else handleUndo()
           }
+          if ((k.metaKey || k.ctrlKey) && k.key === "c") handleCopy()
+          if ((k.metaKey || k.ctrlKey) && k.key === "v") handlePaste()
+          if ((k.metaKey || k.ctrlKey) && k.key === "d") handleDuplicate()
           break
         }
       }
@@ -128,22 +136,62 @@ export const App = observer(function App() {
     syncToCanvas()
   }, [syncToCanvas])
 
+  const handleCopy = useCallback(() => {
+    const elements = selectionStore.selectedElements.filter(el => !el.locked && el.id !== documentStore.rootId)
+    if (elements.length === 0) return
+    clipboard = elements.map(el => JSON.parse(JSON.stringify(el)))
+  }, [])
+
+  const handlePaste = useCallback(() => {
+    if (clipboard.length === 0) return
+    historyStore.pushSnapshot()
+    const newIds = documentStore.pasteElements(clipboard)
+    selectionStore.setIds(newIds)
+    syncToCanvas()
+    bridge.send({ type: "SELECT_ELEMENT", payload: { ids: newIds } })
+  }, [syncToCanvas])
+
+  const handleDuplicate = useCallback(() => {
+    const ids = selectionStore.selectedIds.filter(id => {
+      const el = documentStore.getElement(id)
+      return el && !el.locked && el.id !== documentStore.rootId
+    })
+    if (ids.length === 0) return
+    historyStore.pushSnapshot()
+    const newIds = documentStore.duplicateElements(ids)
+    selectionStore.setIds(newIds)
+    syncToCanvas()
+    bridge.send({ type: "SELECT_ELEMENT", payload: { ids: newIds } })
+  }, [syncToCanvas])
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === "INPUT") return
+
       if (e.key === "Delete" || e.key === "Backspace") {
-        if (document.activeElement?.tagName !== "INPUT") {
-          handleDelete()
-        }
+        handleDelete()
       }
       if ((e.metaKey || e.ctrlKey) && e.key === "z") {
         e.preventDefault()
         if (e.shiftKey) handleRedo()
         else handleUndo()
       }
+      if ((e.metaKey || e.ctrlKey) && e.key === "c") {
+        e.preventDefault()
+        handleCopy()
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "v") {
+        e.preventDefault()
+        handlePaste()
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "d") {
+        e.preventDefault()
+        handleDuplicate()
+      }
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [handleDelete, handleUndo, handleRedo])
+  }, [handleDelete, handleUndo, handleRedo, handleCopy, handlePaste, handleDuplicate])
 
   const selectedElements = selectionStore.selectedElements
   const hasSelection = selectedElements.length > 0 && selectedElements.some(el => !el.locked)
