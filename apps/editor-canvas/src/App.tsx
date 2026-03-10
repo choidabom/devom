@@ -4,7 +4,7 @@ import { DocumentStore, MessageBridge, type EditorMessage } from "@devom/editor-
 import { ElementRenderer } from "./components/ElementRenderer"
 import { SelectionOverlay } from "./components/SelectionOverlay"
 import { SnapGuides } from "./components/SnapGuides"
-import { ContextMenu } from "./components/ContextMenu"
+
 import type { SnapLine } from "./utils/snap"
 
 const SHELL_ORIGIN = import.meta.env.VITE_SHELL_ORIGIN || "http://localhost:4000"
@@ -184,7 +184,7 @@ export const App = observer(function App() {
           pointerEvents: "none",
         }} />
       )}
-      <ContextMenu documentStore={documentStore} selectedIds={selectedIds} bridge={bridge} />
+
     </div>
   )
 })

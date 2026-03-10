@@ -71,18 +71,6 @@ export const App = observer(function App() {
           if ((k.metaKey || k.ctrlKey) && k.key === "d") handleDuplicate()
           break
         }
-        case "CONTEXT_MENU_ACTION": {
-          const { action, ids } = msg.payload
-          historyStore.pushSnapshot()
-          for (const id of ids) {
-            const el = documentStore.getElement(id)
-            if (!el || id === documentStore.rootId) continue
-            const shouldBeLocked = action === "lock"
-            if (el.locked !== shouldBeLocked) documentStore.toggleLock(id)
-          }
-          syncToCanvas()
-          break
-        }
       }
     })
 
