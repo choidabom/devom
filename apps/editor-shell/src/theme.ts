@@ -1,0 +1,16 @@
+export const T = {
+  bg: "#eeeef2",
+  panel: "#ffffff",
+  panelBorder: "#e4e4e8",
+  panelRadius: 12,
+  panelShadow: "0 1px 4px rgba(0,0,0,0.06)",
+  accent: "#6366f1",
+  accentLight: "#ede9fe",
+  text: "#1e1e2e",
+  textSub: "#71717a",
+  textMuted: "#a1a1aa",
+  inputBg: "#f4f4f5",
+  inputBorder: "#e4e4e7",
+  border: "#e4e4e8",
+  hover: "#f4f4f5",
+} as const
