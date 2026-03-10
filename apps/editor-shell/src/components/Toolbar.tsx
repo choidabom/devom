@@ -5,6 +5,7 @@ import {
   AlignLeft, AlignCenterHorizontal, AlignRight,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowLeftRight, ArrowUpDown,
+  PanelTop, LayoutDashboard,
 } from "lucide-react"
 import type { ElementType } from "@devom/editor-core"
 import { T } from "../theme"
@@ -24,6 +25,8 @@ interface ToolbarProps {
   multiSelected: boolean
   editorMode: "edit" | "interact"
   onToggleMode: () => void
+  canvasMode: "canvas" | "page"
+  onToggleCanvasMode: () => void
 }
 
 const S = 15
@@ -51,7 +54,7 @@ const SHADCN_COMPONENTS: { type: ElementType; label: string; category: string }[
   { type: "sc:table", label: "Table", category: "Data" },
 ]
 
-export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode }: ToolbarProps) {
+export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode }: ToolbarProps) {
   const [showShadcn, setShowShadcn] = useState(false)
   const dropRef = useRef<HTMLDivElement>(null)
 
@@ -146,6 +149,12 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
           </>
         )}
         <ToolSep />
+        <ToolBtn
+          icon={canvasMode === "canvas" ? <PanelTop size={S} /> : <LayoutDashboard size={S} />}
+          title={canvasMode === "canvas" ? "Page Mode" : "Canvas Mode"}
+          onClick={onToggleCanvasMode}
+          active={canvasMode === "page"}
+        />
         <ToolBtn
           icon={editorMode === "edit" ? "▶" : "✎"}
           title={editorMode === "edit" ? "Interaction Mode (P)" : "Edit Mode (V)"}
