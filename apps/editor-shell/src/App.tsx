@@ -68,13 +68,13 @@ export const App = observer(function App() {
           if (k.key === "Delete" || k.key === "Backspace") {
             handleDelete()
           }
-          if ((k.metaKey || k.ctrlKey) && k.key === "z") {
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyZ") {
             if (k.shiftKey) handleRedo()
             else handleUndo()
           }
-          if ((k.metaKey || k.ctrlKey) && k.key === "c") handleCopy()
-          if ((k.metaKey || k.ctrlKey) && k.key === "v") handlePaste()
-          if ((k.metaKey || k.ctrlKey) && k.key === "d") handleDuplicate()
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyC") handleCopy()
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyV") handlePaste()
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyD") handleDuplicate()
           break
         }
         case "REORDER_CHILD":
@@ -274,6 +274,29 @@ export const App = observer(function App() {
     const onKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName === "INPUT") return
 
+      // Modifier shortcuts take priority — use e.code for Korean IME compatibility
+      if (e.metaKey || e.ctrlKey) {
+        if (e.code === "KeyZ") {
+          e.preventDefault()
+          if (e.shiftKey) handleRedo()
+          else handleUndo()
+        }
+        if (e.code === "KeyC") {
+          e.preventDefault()
+          handleCopy()
+        }
+        if (e.code === "KeyV") {
+          e.preventDefault()
+          handlePaste()
+        }
+        if (e.code === "KeyD") {
+          e.preventDefault()
+          handleDuplicate()
+        }
+        return
+      }
+
+      // Single-key mode switches (no modifier)
       if (e.key === "v" || e.key === "V") {
         if (editorMode !== "edit") {
           setEditorMode("edit")
@@ -292,23 +315,6 @@ export const App = observer(function App() {
 
       if (e.key === "Delete" || e.key === "Backspace") {
         handleDelete()
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === "z") {
-        e.preventDefault()
-        if (e.shiftKey) handleRedo()
-        else handleUndo()
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === "c") {
-        e.preventDefault()
-        handleCopy()
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === "v") {
-        e.preventDefault()
-        handlePaste()
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === "d") {
-        e.preventDefault()
-        handleDuplicate()
       }
     }
     window.addEventListener("keydown", onKeyDown)

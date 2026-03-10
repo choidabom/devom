@@ -76,6 +76,10 @@ export const App = observer(function App() {
     bridge.send({ type: "CANVAS_READY" })
 
     const onKeyDown = (e: KeyboardEvent) => {
+      // Prevent browser native undo/redo/copy/paste in iframe
+      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyV", "KeyD"].includes(e.code)) {
+        e.preventDefault()
+      }
       bridge.send({
         type: "KEY_EVENT",
         payload: { key: e.key, code: e.code, metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey },
