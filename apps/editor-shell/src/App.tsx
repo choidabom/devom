@@ -19,6 +19,7 @@ export const App = observer(function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [showExport, setShowExport] = useState(false)
   const [editorMode, setEditorMode] = useState<"edit" | "interact">("edit")
+  const [canvasMode, setCanvasMode] = useState<"canvas" | "page">("canvas")
 
   useEffect(() => {
     const dispose = bridge.onMessage((msg: EditorMessage) => {
@@ -262,6 +263,17 @@ export const App = observer(function App() {
     syncToCanvas()
   }, [syncToCanvas])
 
+  const handleToggleCanvasMode = useCallback(() => {
+    setCanvasMode(prev => {
+      const next = prev === 'canvas' ? 'page' : 'canvas'
+      historyStore.pushSnapshot()
+      documentStore.setCanvasMode(next)
+      syncToCanvas()
+      bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: next } })
+      return next
+    })
+  }, [syncToCanvas])
+
   const handleToggleMode = useCallback(() => {
     setEditorMode(prev => {
       const next = prev === "edit" ? "interact" : "edit"
@@ -341,6 +353,8 @@ export const App = observer(function App() {
           multiSelected={selectedElements.length >= 2}
           editorMode={editorMode}
           onToggleMode={handleToggleMode}
+          canvasMode={canvasMode}
+          onToggleCanvasMode={handleToggleCanvasMode}
         />
       </div>
 
