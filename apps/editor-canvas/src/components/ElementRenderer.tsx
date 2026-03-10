@@ -33,7 +33,6 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (element.locked) return
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     onSelect(element.id, e.shiftKey)
     bridge.send({
