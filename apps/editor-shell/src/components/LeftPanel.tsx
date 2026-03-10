@@ -1,6 +1,9 @@
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { Lock, Unlock } from "lucide-react"
+import {
+  Lock, Unlock, Square, Columns3, Type, LayoutGrid,
+  ImageIcon, MousePointerClick, TextCursorInput, ChevronRight,
+} from "lucide-react"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
@@ -24,8 +27,15 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
   const isSelected = selectionStore.selectedIds.includes(elementId)
   const isRoot = elementId === documentStore.rootId
 
-  const iconMap: Record<string, string> = { flex: "◇", grid: "▦", text: "T", image: "▲", button: "/b", input: "◉", "sc:button": "Btn", "sc:card": "Card", "sc:input": "Inp", "sc:badge": "Bdg" }
-  const icon = iconMap[element.type] ?? "◆"
+  const S = 12
+  const iconMap: Record<string, ReactNode> = {
+    div: <Square size={S} />, flex: <Columns3 size={S} />, grid: <LayoutGrid size={S} />,
+    text: <Type size={S} />, image: <ImageIcon size={S} />,
+    button: <MousePointerClick size={S} />, input: <TextCursorInput size={S} />,
+    "sc:button": <MousePointerClick size={S} />, "sc:card": <Square size={S} />,
+    "sc:input": <TextCursorInput size={S} />, "sc:badge": <Square size={S} />,
+  }
+  const icon = iconMap[element.type] ?? <Square size={S} />
 
   return (
     <div>
@@ -61,9 +71,9 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
         }}
       >
         {!isRoot && element.children.length > 0 && (
-          <span style={{ fontSize: 10, opacity: 0.5 }}>›</span>
+          <ChevronRight size={10} style={{ opacity: 0.5, flexShrink: 0 }} />
         )}
-        <span style={{ fontSize: 11, opacity: isSelected ? 0.8 : 0.5 }}>{icon}</span>
+        <span style={{ opacity: isSelected ? 0.8 : 0.5, display: "flex", flexShrink: 0 }}>{icon}</span>
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{element.name}</span>
         {!isRoot && (
           <span
