@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react"
-import type { EditorElement, ElementBounds, LayoutProps, SizingProps } from "./types"
+import type { CanvasMode, EditorElement, ElementBounds, LayoutProps, PageViewportWidth, SizingProps } from "./types"
 
 // Shell -> Canvas messages
 export type ShellToCanvasMessage =
@@ -16,6 +16,8 @@ export type ShellToCanvasMessage =
   | { type: "SET_LAYOUT_MODE"; payload: { id: string; mode: "none" | "flex" } }
   | { type: "UPDATE_LAYOUT_PROPS"; payload: { id: string; layoutProps: Partial<LayoutProps> } }
   | { type: "UPDATE_SIZING"; payload: { id: string; sizing: Partial<SizingProps> } }
+  | { type: "SET_CANVAS_MODE"; payload: { mode: CanvasMode } }
+  | { type: "SET_PAGE_VIEWPORT"; payload: { width: PageViewportWidth } }
 
 // Canvas -> Shell messages
 export type CanvasToShellMessage =
