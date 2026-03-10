@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react"
-import type { EditorElement, ElementBounds } from "./types"
+import type { EditorElement, ElementBounds, LayoutProps, SizingProps } from "./types"
 
 // Shell -> Canvas messages
 export type ShellToCanvasMessage =
@@ -13,6 +13,9 @@ export type ShellToCanvasMessage =
   | { type: "SET_VIEWPORT"; payload: { width: number; height: number } }
   | { type: "TOGGLE_LOCK"; payload: { ids: string[] } }
   | { type: "SET_MODE"; payload: { mode: "edit" | "interact" } }
+  | { type: "SET_LAYOUT_MODE"; payload: { id: string; mode: "none" | "flex" } }
+  | { type: "UPDATE_LAYOUT_PROPS"; payload: { id: string; layoutProps: Partial<LayoutProps> } }
+  | { type: "UPDATE_SIZING"; payload: { id: string; sizing: Partial<SizingProps> } }
 
 // Canvas -> Shell messages
 export type CanvasToShellMessage =
@@ -24,6 +27,8 @@ export type CanvasToShellMessage =
   | { type: "CANVAS_CLICKED" }
   | { type: "MARQUEE_SELECT"; payload: { ids: string[] } }
   | { type: "KEY_EVENT"; payload: { key: string; code: string; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean } }
+  | { type: "REORDER_CHILD"; payload: { parentId: string; childId: string; newIndex: number } }
+  | { type: "REPARENT_ELEMENT"; payload: { id: string; oldParentId: string; newParentId: string; index: number; dropPosition?: { x: number; y: number } } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 
