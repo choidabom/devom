@@ -70,73 +70,73 @@ export class DocumentStore {
       return id
     }
 
-    // Toss-inspired color palette
-    const toss = { blue: '#3182f6', bg: '#f2f4f6', card: '#ffffff', text: '#191f28', sub: '#8b95a1', border: '#e5e8eb', green: '#00c471', red: '#f04452' }
+    // Color palette
+    const c = { card: '#ffffff', text: '#0f172a', sub: '#64748b', border: '#e2e8f0' }
 
     // --- Header Section ---
-    add('text', this.rootId, { name: 'Title', style: { left: 20, top: 16, fontSize: 18, fontWeight: 700, color: toss.text }, props: { content: '송금하기' } })
-    add('text', this.rootId, { name: 'Description', style: { left: 20, top: 42, fontSize: 12, color: toss.sub }, props: { content: '토스에서 간편하게 송금해 보세요' } })
+    add('text', this.rootId, { name: 'Title', style: { left: 20, top: 16, fontSize: 18, fontWeight: 700, color: c.text }, props: { content: 'Dashboard' } })
+    add('text', this.rootId, { name: 'Description', style: { left: 20, top: 42, fontSize: 12, color: c.sub }, props: { content: 'Welcome back! Here is your workspace overview.' } })
 
     // --- Login Card (Auto Layout Column) ---
     const loginCard = add('div', this.rootId, {
       name: 'Login Card',
-      style: { left: 20, top: 70, width: 230, height: 'auto', backgroundColor: toss.card, borderRadius: 16, border: `1px solid ${toss.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+      style: { left: 20, top: 70, width: 230, height: 'auto', backgroundColor: c.card, borderRadius: 16, border: `1px solid ${c.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
       layoutMode: 'flex',
       layoutProps: { direction: 'column', gap: 10, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch', justifyContent: 'start' },
     })
     if (loginCard) {
-      add('sc:label', loginCard, { name: 'Email Label', style: { position: 'relative' }, props: { text: '이메일' } })
-      add('sc:input', loginCard, { name: 'Email Input', style: { position: 'relative', width: undefined }, props: { placeholder: 'hello@toss.im', type: 'email' } })
-      add('sc:label', loginCard, { name: 'PW Label', style: { position: 'relative' }, props: { text: '비밀번호' } })
+      add('sc:label', loginCard, { name: 'Email Label', style: { position: 'relative' }, props: { text: 'Email' } })
+      add('sc:input', loginCard, { name: 'Email Input', style: { position: 'relative', width: undefined }, props: { placeholder: 'you@example.com', type: 'email' } })
+      add('sc:label', loginCard, { name: 'PW Label', style: { position: 'relative' }, props: { text: 'Password' } })
       add('sc:input', loginCard, { name: 'PW Input', style: { position: 'relative', width: undefined }, props: { placeholder: '••••••••', type: 'password' } })
-      add('sc:button', loginCard, { name: 'Login Btn', style: { position: 'relative' }, props: { label: '로그인', variant: 'default' } })
+      add('sc:button', loginCard, { name: 'Login Btn', style: { position: 'relative' }, props: { label: 'Sign In', variant: 'default' } })
       add('sc:separator', loginCard, { name: 'Divider', style: { position: 'relative', width: undefined } })
-      add('sc:checkbox', loginCard, { name: 'Remember', style: { position: 'relative' }, props: { label: '로그인 유지', checked: false } })
+      add('sc:checkbox', loginCard, { name: 'Remember', style: { position: 'relative' }, props: { label: 'Remember me', checked: false } })
     }
 
     // --- Settings Card (Form Controls) ---
     const settingsCard = add('div', this.rootId, {
       name: 'Settings Card',
-      style: { left: 270, top: 70, width: 230, height: 'auto', backgroundColor: toss.card, borderRadius: 16, border: `1px solid ${toss.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+      style: { left: 270, top: 70, width: 230, height: 'auto', backgroundColor: c.card, borderRadius: 16, border: `1px solid ${c.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
       layoutMode: 'flex',
       layoutProps: { direction: 'column', gap: 12, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch', justifyContent: 'start' },
     })
     if (settingsCard) {
-      add('text', settingsCard, { name: 'Settings Title', style: { position: 'relative', fontSize: 15, fontWeight: 700, color: toss.text }, props: { content: '알림 설정' } })
-      add('sc:switch', settingsCard, { name: 'Push Toggle', style: { position: 'relative' }, props: { label: '푸시 알림', checked: true } })
-      add('sc:switch', settingsCard, { name: 'Email Toggle', style: { position: 'relative' }, props: { label: '이메일 알림', checked: false } })
+      add('text', settingsCard, { name: 'Settings Title', style: { position: 'relative', fontSize: 15, fontWeight: 700, color: c.text }, props: { content: 'Preferences' } })
+      add('sc:switch', settingsCard, { name: 'Push Toggle', style: { position: 'relative' }, props: { label: 'Push notifications', checked: true } })
+      add('sc:switch', settingsCard, { name: 'Email Toggle', style: { position: 'relative' }, props: { label: 'Email digest', checked: false } })
       add('sc:separator', settingsCard, { name: 'Settings Sep', style: { position: 'relative', width: undefined } })
-      add('sc:select', settingsCard, { name: 'Locale Select', style: { position: 'relative', width: undefined }, props: { placeholder: '언어 선택', options: ['한국어', 'English', '日本語'] } })
+      add('sc:select', settingsCard, { name: 'Language Select', style: { position: 'relative', width: undefined }, props: { placeholder: 'Language', options: ['English', 'Korean', 'Japanese'] } })
       add('sc:slider', settingsCard, { name: 'Volume', style: { position: 'relative', width: undefined }, props: { value: 70, min: 0, max: 100 } })
-      add('sc:radio-group', settingsCard, { name: 'Theme Radio', style: { position: 'relative' }, props: { label: '테마', options: ['라이트', '다크', '시스템'], value: '라이트' } })
+      add('sc:radio-group', settingsCard, { name: 'Theme Radio', style: { position: 'relative' }, props: { label: 'Theme', options: ['Light', 'Dark', 'System'], value: 'Light' } })
     }
 
-    // --- Status Section ---
-    add('sc:badge', this.rootId, { name: 'Badge Active', style: { left: 20, top: 420 }, props: { label: '성공', variant: 'default' } })
-    add('sc:badge', this.rootId, { name: 'Badge Pending', style: { left: 75, top: 420 }, props: { label: '대기중', variant: 'secondary' } })
-    add('sc:badge', this.rootId, { name: 'Badge Error', style: { left: 140, top: 420 }, props: { label: '실패', variant: 'destructive' } })
-    add('sc:badge', this.rootId, { name: 'Badge Info', style: { left: 195, top: 420 }, props: { label: '안내', variant: 'outline' } })
+    // --- Status Badges ---
+    add('sc:badge', this.rootId, { name: 'Badge Active', style: { left: 20, top: 420 }, props: { label: 'Active', variant: 'default' } })
+    add('sc:badge', this.rootId, { name: 'Badge Pending', style: { left: 80, top: 420 }, props: { label: 'Pending', variant: 'secondary' } })
+    add('sc:badge', this.rootId, { name: 'Badge Error', style: { left: 150, top: 420 }, props: { label: 'Error', variant: 'destructive' } })
+    add('sc:badge', this.rootId, { name: 'Badge Info', style: { left: 210, top: 420 }, props: { label: 'Info', variant: 'outline' } })
 
     // --- Alert ---
-    add('sc:alert', this.rootId, { name: 'Notice', style: { left: 20, top: 452, width: 230 }, props: { title: '점검 안내', description: '3/12 02:00~04:00 서비스 점검이 예정되어 있습니다.', variant: 'default' } })
+    add('sc:alert', this.rootId, { name: 'Notice', style: { left: 20, top: 452, width: 230 }, props: { title: 'Scheduled Maintenance', description: 'System will be down on 3/15 02:00–04:00 UTC for upgrades.', variant: 'default' } })
 
     // --- Progress ---
-    add('sc:progress', this.rootId, { name: 'Transfer Progress', style: { left: 270, top: 452, width: 230 }, props: { value: 75 } })
+    add('sc:progress', this.rootId, { name: 'Storage Progress', style: { left: 270, top: 452, width: 230 }, props: { value: 75 } })
 
     // --- Table ---
     add('sc:table', this.rootId, {
-      name: 'Transaction Table',
+      name: 'Members Table',
       style: { left: 20, top: 540, width: 480 },
       props: {
-        headers: ['이름', '상태', '금액'],
-        rows: [['김토스', '완료', '₩250,000'], ['이뱅크', '대기', '₩150,000'], ['박페이', '완료', '₩350,000']],
+        headers: ['Name', 'Role', 'Status'],
+        rows: [['Alice Kim', 'Admin', 'Active'], ['Bob Park', 'Editor', 'Pending'], ['Carol Lee', 'Viewer', 'Active']],
       },
     })
 
     // --- Bottom Row (Misc) ---
-    add('sc:avatar', this.rootId, { name: 'User Avatar', style: { left: 270, top: 486 }, props: { fallback: '토' } })
+    add('sc:avatar', this.rootId, { name: 'User Avatar', style: { left: 270, top: 486 }, props: { fallback: 'AK' } })
     add('sc:skeleton', this.rootId, { name: 'Loading', style: { left: 310, top: 486, width: 190, height: 20 } })
-    add('sc:toggle', this.rootId, { name: 'Favorite', style: { left: 310, top: 512 }, props: { label: '★ 즐겨찾기' } })
+    add('sc:toggle', this.rootId, { name: 'Bookmark', style: { left: 310, top: 512 }, props: { label: '★ Bookmark' } })
   }
 
   get root(): EditorElement | undefined {
