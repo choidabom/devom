@@ -2,18 +2,22 @@ import { useState } from "react"
 import type { ElementType } from "@devom/editor-core"
 import { T } from "../theme"
 
+export type AlignType = "left" | "center-h" | "right" | "top" | "center-v" | "bottom" | "distribute-h" | "distribute-v"
+
 interface ToolbarProps {
   onAdd: (type: ElementType) => void
   onUndo: () => void
   onRedo: () => void
   onExport: () => void
   onDelete: () => void
+  onAlign: (type: AlignType) => void
   canUndo: boolean
   canRedo: boolean
   hasSelection: boolean
+  multiSelected: boolean
 }
 
-export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, canUndo, canRedo, hasSelection }: ToolbarProps) {
+export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected }: ToolbarProps) {
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 16px", flexShrink: 0 }}>
       <div style={{
@@ -42,6 +46,20 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, canUndo, ca
           <>
             <ToolSep />
             <ToolBtn icon="🗑" title="Delete" onClick={onDelete} />
+          </>
+        )}
+        {multiSelected && (
+          <>
+            <ToolSep />
+            <ToolBtn icon="⫷" title="Align Left" onClick={() => onAlign("left")} />
+            <ToolBtn icon="⫿" title="Align Center" onClick={() => onAlign("center-h")} />
+            <ToolBtn icon="⫸" title="Align Right" onClick={() => onAlign("right")} />
+            <ToolBtn icon="⊤" title="Align Top" onClick={() => onAlign("top")} />
+            <ToolBtn icon="⊞" title="Align Middle" onClick={() => onAlign("center-v")} />
+            <ToolBtn icon="⊥" title="Align Bottom" onClick={() => onAlign("bottom")} />
+            <ToolSep />
+            <ToolBtn icon="⇔" title="Distribute Horizontally" onClick={() => onAlign("distribute-h")} />
+            <ToolBtn icon="⇕" title="Distribute Vertically" onClick={() => onAlign("distribute-v")} />
           </>
         )}
       </div>

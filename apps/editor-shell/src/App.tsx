@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite"
 import type { EditorMessage, ElementType } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "./stores"
 import { T } from "./theme"
-import { Toolbar } from "./components/Toolbar"
+import { Toolbar, type AlignType } from "./components/Toolbar"
 import { LeftPanel } from "./components/LeftPanel"
 import { PropertiesPanel } from "./components/PropertiesPanel"
 import { ExportModal } from "./components/ExportModal"
@@ -164,6 +164,90 @@ export const App = observer(function App() {
     bridge.send({ type: "SELECT_ELEMENT", payload: { ids: newIds } })
   }, [syncToCanvas])
 
+  const handleAlign = useCallback((type: AlignType) => {
+    const elements = selectionStore.selectedElements.filter(
+      el => !el.locked && el.id !== documentStore.rootId && el.style.position === "absolute"
+    )
+    if (elements.length < 2) return
+
+    historyStore.pushSnapshot()
+
+    const bounds = elements.map(el => ({
+      id: el.id,
+      left: typeof el.style.left === "number" ? el.style.left : 0,
+      top: typeof el.style.top === "number" ? el.style.top : 0,
+      width: typeof el.style.width === "number" ? el.style.width : 100,
+      height: typeof el.style.height === "number" ? el.style.height : 40,
+    }))
+
+    switch (type) {
+      case "left": {
+        const min = Math.min(...bounds.map(b => b.left))
+        for (const b of bounds) documentStore.updateStyle(b.id, { left: min })
+        break
+      }
+      case "right": {
+        const max = Math.max(...bounds.map(b => b.left + b.width))
+        for (const b of bounds) documentStore.updateStyle(b.id, { left: max - b.width })
+        break
+      }
+      case "center-h": {
+        const min = Math.min(...bounds.map(b => b.left))
+        const max = Math.max(...bounds.map(b => b.left + b.width))
+        const center = (min + max) / 2
+        for (const b of bounds) documentStore.updateStyle(b.id, { left: Math.round(center - b.width / 2) })
+        break
+      }
+      case "top": {
+        const min = Math.min(...bounds.map(b => b.top))
+        for (const b of bounds) documentStore.updateStyle(b.id, { top: min })
+        break
+      }
+      case "bottom": {
+        const max = Math.max(...bounds.map(b => b.top + b.height))
+        for (const b of bounds) documentStore.updateStyle(b.id, { top: max - b.height })
+        break
+      }
+      case "center-v": {
+        const min = Math.min(...bounds.map(b => b.top))
+        const max = Math.max(...bounds.map(b => b.top + b.height))
+        const center = (min + max) / 2
+        for (const b of bounds) documentStore.updateStyle(b.id, { top: Math.round(center - b.height / 2) })
+        break
+      }
+      case "distribute-h": {
+        if (bounds.length < 3) break
+        const sorted = [...bounds].sort((a, b) => a.left - b.left)
+        const first = sorted[0]!
+        const last = sorted[sorted.length - 1]!
+        const totalWidth = sorted.reduce((sum, b) => sum + b.width, 0)
+        const gap = (last.left + last.width - first.left - totalWidth) / (sorted.length - 1)
+        let x = first.left + first.width + gap
+        for (let i = 1; i < sorted.length - 1; i++) {
+          documentStore.updateStyle(sorted[i]!.id, { left: Math.round(x) })
+          x += sorted[i]!.width + gap
+        }
+        break
+      }
+      case "distribute-v": {
+        if (bounds.length < 3) break
+        const sorted = [...bounds].sort((a, b) => a.top - b.top)
+        const first = sorted[0]!
+        const last = sorted[sorted.length - 1]!
+        const totalHeight = sorted.reduce((sum, b) => sum + b.height, 0)
+        const gap = (last.top + last.height - first.top - totalHeight) / (sorted.length - 1)
+        let y = first.top + first.height + gap
+        for (let i = 1; i < sorted.length - 1; i++) {
+          documentStore.updateStyle(sorted[i]!.id, { top: Math.round(y) })
+          y += sorted[i]!.height + gap
+        }
+        break
+      }
+    }
+
+    syncToCanvas()
+  }, [syncToCanvas])
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName === "INPUT") return
@@ -205,9 +289,11 @@ export const App = observer(function App() {
           onRedo={handleRedo}
           onExport={() => setShowExport(true)}
           onDelete={handleDelete}
+          onAlign={handleAlign}
           canUndo={historyStore.canUndo}
           canRedo={historyStore.canRedo}
           hasSelection={hasSelection}
+          multiSelected={selectedElements.length >= 2}
         />
       </div>
 
