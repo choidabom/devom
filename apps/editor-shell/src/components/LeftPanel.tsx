@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import {
   Lock, Unlock, Square, Columns3, Type, LayoutGrid,
   ImageIcon, MousePointerClick, TextCursorInput, ChevronRight,
+  LayoutList,
 } from "lucide-react"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
@@ -36,6 +37,9 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
     "sc:input": <TextCursorInput size={S} />, "sc:badge": <Square size={S} />,
   }
   const icon = iconMap[element.type] ?? <Square size={S} />
+  const displayIcon = element.layoutMode === 'flex'
+    ? <LayoutList size={S} />
+    : icon
 
   return (
     <div>
@@ -73,8 +77,13 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
         {!isRoot && element.children.length > 0 && (
           <ChevronRight size={10} style={{ opacity: 0.5, flexShrink: 0 }} />
         )}
-        <span style={{ opacity: isSelected ? 0.8 : 0.5, display: "flex", flexShrink: 0 }}>{icon}</span>
+        <span style={{ opacity: isSelected ? 0.8 : 0.5, display: "flex", flexShrink: 0 }}>{displayIcon}</span>
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{element.name}</span>
+        {element.layoutMode === 'flex' && (
+          <span style={{ fontSize: 10, opacity: 0.4, flexShrink: 0 }}>
+            {element.layoutProps.direction === 'row' ? '→' : '↓'}
+          </span>
+        )}
         {!isRoot && (
           <span
             onClick={(e) => {
