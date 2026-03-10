@@ -39,9 +39,9 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   // Auto Layout styles
   const containerStyles = getContainerStyles(element)
   const parent = element.parentId ? documentStore.getElement(element.parentId) : undefined
-  const inAutoLayout = parent?.layoutMode === 'flex'
+  const inAutoLayout = parent?.layoutMode === 'flex' && !!parent?.layoutProps
   const childSizingStyles = inAutoLayout
-    ? getChildSizingStyles(element, parent.layoutProps.direction)
+    ? getChildSizingStyles(element, parent!.layoutProps.direction)
     : {}
 
   const handleClick = (e: React.MouseEvent) => {

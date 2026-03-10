@@ -78,7 +78,12 @@ export class DocumentStore {
   }
 
   addElementFromRemote(element: EditorElement) {
-    this.elements.set(element.id, element)
+    this.elements.set(element.id, {
+      ...element,
+      layoutMode: element.layoutMode ?? 'none',
+      layoutProps: element.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
+      sizing: element.sizing ?? { ...DEFAULT_SIZING },
+    })
     if (element.parentId) {
       const parent = this.elements.get(element.parentId)
       if (parent && !parent.children.includes(element.id)) {
@@ -284,7 +289,12 @@ export class DocumentStore {
   loadFromSerializable(data: { elements: Record<string, EditorElement>; rootId: string }) {
     this.elements.clear()
     for (const [key, el] of Object.entries(data.elements)) {
-      this.elements.set(key, el)
+      this.elements.set(key, {
+        ...el,
+        layoutMode: el.layoutMode ?? 'none',
+        layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
+        sizing: el.sizing ?? { ...DEFAULT_SIZING },
+      })
     }
     this.rootId = data.rootId
   }
