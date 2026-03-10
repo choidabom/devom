@@ -81,6 +81,7 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
   ]
 
   const handlePointerDown = (e: React.PointerEvent, position: string) => {
+    if (element.locked) return
     e.stopPropagation()
     e.preventDefault()
 
@@ -158,25 +159,48 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
         pointerEvents: "none",
       }}
     >
-      {handles.map((handle) => (
+      {element.locked ? (
         <div
-          key={handle.position}
-          onPointerDown={(e) => handlePointerDown(e, handle.position)}
           style={{
             position: "absolute",
-            left: handle.x,
-            top: handle.y,
-            width: 8,
-            height: 8,
+            top: -12,
+            left: elWidth / 2 - 10,
+            width: 20,
+            height: 20,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             background: "#fff",
-            border: "1.5px solid #6366f1",
-            borderRadius: 2,
-            cursor: handle.cursor,
-            pointerEvents: "auto",
+            border: "1.5px solid #94a3b8",
+            borderRadius: 4,
+            fontSize: 12,
+            pointerEvents: "none",
             boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
           }}
-        />
-      ))}
+        >
+          🔒
+        </div>
+      ) : (
+        handles.map((handle) => (
+          <div
+            key={handle.position}
+            onPointerDown={(e) => handlePointerDown(e, handle.position)}
+            style={{
+              position: "absolute",
+              left: handle.x,
+              top: handle.y,
+              width: 8,
+              height: 8,
+              background: "#fff",
+              border: "1.5px solid #6366f1",
+              borderRadius: 2,
+              cursor: handle.cursor,
+              pointerEvents: "auto",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+            }}
+          />
+        ))
+      )}
     </div>
   )
 })
