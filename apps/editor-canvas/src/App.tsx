@@ -12,7 +12,6 @@ if (import.meta.hot) {
 }
 
 export const App = observer(function App() {
-  const initialized = useRef(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const handleShellMessage = useCallback((msg: EditorMessage) => {
@@ -39,9 +38,6 @@ export const App = observer(function App() {
   }, [])
 
   useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
-
     bridge.setTarget(window.parent)
     const dispose = bridge.onMessage(handleShellMessage)
     bridge.send({ type: "CANVAS_READY" })
@@ -59,7 +55,7 @@ export const App = observer(function App() {
 
   return (
     <div
-      style={{ width: "100%", height: "100%", background: "#f1f5f9", position: "relative" }}
+      style={{ width: "100%", height: "100%", background: "#eeeef2", position: "relative" }}
       onClick={handleCanvasClick}
     >
       <ElementRenderer elementId={root.id} selectedId={selectedId} onSelect={setSelectedId} />
@@ -77,6 +73,7 @@ interface ElementRendererProps {
 const ElementRenderer = observer(function ElementRenderer({ elementId, selectedId, onSelect }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
+  const [dragDelta, setDragDelta] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     return () => { dragCleanupRef.current?.() }
@@ -111,8 +108,8 @@ const ElementRenderer = observer(function ElementRenderer({ elementId, selectedI
     target.setPointerCapture(e.pointerId)
     const startX = e.clientX
     const startY = e.clientY
-    const startLeft = parseInt(String(element.style.left ?? 0))
-    const startTop = parseInt(String(element.style.top ?? 0))
+    const startLeft = typeof element.style.left === "number" ? element.style.left : 0
+    const startTop = typeof element.style.top === "number" ? element.style.top : 0
 
     const cleanup = () => {
       target.releasePointerCapture(e.pointerId)
@@ -124,21 +121,20 @@ const ElementRenderer = observer(function ElementRenderer({ elementId, selectedI
     const onMove = (me: PointerEvent) => {
       const dx = me.clientX - startX
       const dy = me.clientY - startY
-      documentStore.updateStyle(element.id, {
-        left: startLeft + dx,
-        top: startTop + dy,
-      })
+      setDragDelta({ x: dx, y: dy })
     }
 
-    const onUp = () => {
+    const onUp = (me: PointerEvent) => {
       cleanup()
+      const dx = me.clientX - startX
+      const dy = me.clientY - startY
+      const finalLeft = startLeft + dx
+      const finalTop = startTop + dy
+      setDragDelta(null)
+      documentStore.updateStyle(element.id, { left: finalLeft, top: finalTop })
       bridge.send({
         type: "ELEMENT_MOVED",
-        payload: {
-          id: element.id,
-          x: parseInt(String(element.style.left ?? 0)),
-          y: parseInt(String(element.style.top ?? 0)),
-        },
+        payload: { id: element.id, x: finalLeft, y: finalTop },
       })
     }
 
@@ -154,8 +150,10 @@ const ElementRenderer = observer(function ElementRenderer({ elementId, selectedI
       data-element-id={element.id}
       style={{
         ...element.style,
-        outline: isSelected ? "2px solid #3b82f6" : undefined,
-        outlineOffset: isSelected ? -2 : undefined,
+        transform: dragDelta ? `translate(${dragDelta.x}px, ${dragDelta.y}px)` : undefined,
+        willChange: dragDelta ? "transform" : undefined,
+        outline: isSelected ? "1.5px dashed #6366f1" : undefined,
+        outlineOffset: isSelected ? 2 : undefined,
         cursor: element.locked || isRoot ? "default" : "move",
         userSelect: "none",
       }}
@@ -235,14 +233,14 @@ const SelectionOverlay = observer(function SelectionOverlay({ elementId }: { ele
   const elTop = typeof element.style.top === "number" ? element.style.top : 0
 
   const handles = [
-    { position: "nw", cursor: "nw-resize", x: -3, y: -3 },
-    { position: "n", cursor: "n-resize", x: elWidth / 2 - 3, y: -3 },
-    { position: "ne", cursor: "ne-resize", x: elWidth - 3, y: -3 },
-    { position: "e", cursor: "e-resize", x: elWidth - 3, y: elHeight / 2 - 3 },
-    { position: "se", cursor: "se-resize", x: elWidth - 3, y: elHeight - 3 },
-    { position: "s", cursor: "s-resize", x: elWidth / 2 - 3, y: elHeight - 3 },
-    { position: "sw", cursor: "sw-resize", x: -3, y: elHeight - 3 },
-    { position: "w", cursor: "w-resize", x: -3, y: elHeight / 2 - 3 },
+    { position: "nw", cursor: "nw-resize", x: -4, y: -4 },
+    { position: "n", cursor: "n-resize", x: elWidth / 2 - 4, y: -4 },
+    { position: "ne", cursor: "ne-resize", x: elWidth - 4, y: -4 },
+    { position: "e", cursor: "e-resize", x: elWidth - 4, y: elHeight / 2 - 4 },
+    { position: "se", cursor: "se-resize", x: elWidth - 4, y: elHeight - 4 },
+    { position: "s", cursor: "s-resize", x: elWidth / 2 - 4, y: elHeight - 4 },
+    { position: "sw", cursor: "sw-resize", x: -4, y: elHeight - 4 },
+    { position: "w", cursor: "w-resize", x: -4, y: elHeight / 2 - 4 },
   ]
 
   const handlePointerDown = (e: React.PointerEvent, position: string) => {
@@ -330,12 +328,14 @@ const SelectionOverlay = observer(function SelectionOverlay({ elementId }: { ele
             position: "absolute",
             left: handle.x,
             top: handle.y,
-            width: 6,
-            height: 6,
+            width: 8,
+            height: 8,
             background: "#fff",
-            border: "1px solid #3b82f6",
+            border: "1.5px solid #6366f1",
+            borderRadius: 2,
             cursor: handle.cursor,
             pointerEvents: "auto",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
           }}
         />
       ))}

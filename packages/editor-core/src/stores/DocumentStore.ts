@@ -128,7 +128,7 @@ export class DocumentStore {
   toSerializable(): { elements: Record<string, EditorElement>; rootId: string } {
     const elements: Record<string, EditorElement> = {}
     this.elements.forEach((el, key) => {
-      elements[key] = { ...el, style: { ...el.style }, children: [...el.children] }
+      elements[key] = JSON.parse(JSON.stringify(el))
     })
     return { elements, rootId: this.rootId }
   }
