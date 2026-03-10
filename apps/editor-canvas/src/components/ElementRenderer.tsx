@@ -8,6 +8,7 @@ import type { DocumentStore } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
 import { getContainerStyles, getChildSizingStyles } from "@devom/editor-core"
 import { calcSnap, type SnapLine, type Bounds } from "../utils/snap"
+import { findDropTarget, calcInsertionIndicator } from "../utils/autoLayoutDrag"
 
 interface ElementRendererProps {
   elementId: string
@@ -15,12 +16,14 @@ interface ElementRendererProps {
   onSelect: (id: string, shiftKey: boolean) => void
   onDragChange?: (dragging: boolean) => void
   onSnapLines?: (lines: SnapLine[]) => void
+  onInsertionIndicator?: (indicator: { x: number; y: number; width: number; height: number } | null) => void
+  onDropHighlight?: (containerId: string | null) => void
   documentStore: DocumentStore
   bridge: MessageBridge
   editorMode: "edit" | "interact"
 }
 
-export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, documentStore, bridge, editorMode }: ElementRendererProps) {
+export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, onInsertionIndicator, onDropHighlight, documentStore, bridge, editorMode }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
 
@@ -199,6 +202,114 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     target.addEventListener("pointercancel", onCancel)
   }
 
+  const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
+    if (editorMode === "interact") return
+    if (element.locked || isRoot) return
+    if (!inAutoLayout || !parent) return
+    e.stopPropagation()
+    e.preventDefault()
+
+    const target = e.currentTarget as HTMLElement
+    target.setPointerCapture(e.pointerId)
+    const startX = e.clientX
+    const startY = e.clientY
+    let hasMoved = false
+
+    onDragChange?.(true)
+
+    const cleanup = () => {
+      target.releasePointerCapture(e.pointerId)
+      target.removeEventListener("pointermove", onMove)
+      target.removeEventListener("pointerup", onUp)
+      target.removeEventListener("pointercancel", onCancel)
+      dragCleanupRef.current = null
+      onDragChange?.(false)
+      onInsertionIndicator?.(null)
+      onDropHighlight?.(null)
+      target.style.transform = ""
+      target.style.opacity = ""
+      target.style.zIndex = ""
+    }
+
+    const onMove = (me: PointerEvent) => {
+      const dx = me.clientX - startX
+      const dy = me.clientY - startY
+
+      if (!hasMoved && Math.abs(dx) + Math.abs(dy) < 3) return
+      hasMoved = true
+
+      target.style.transform = `translate(${dx}px, ${dy}px)`
+      target.style.opacity = "0.7"
+      target.style.zIndex = "1000"
+
+      const dropTarget = findDropTarget(me.clientX, me.clientY, [elementId], documentStore)
+
+      if (dropTarget) {
+        onDropHighlight?.(dropTarget.containerId)
+        const container = documentStore.getElement(dropTarget.containerId)
+        if (container) {
+          const indicator = calcInsertionIndicator(
+            dropTarget.containerId,
+            dropTarget.insertIndex,
+            container.layoutProps.direction,
+            [elementId],
+            documentStore,
+          )
+          onInsertionIndicator?.(indicator)
+        }
+      } else {
+        onDropHighlight?.(null)
+        onInsertionIndicator?.(null)
+      }
+    }
+
+    const onUp = (me: PointerEvent) => {
+      cleanup()
+
+      if (!hasMoved) return
+
+      const dropTarget = findDropTarget(me.clientX, me.clientY, [elementId], documentStore)
+
+      if (dropTarget && dropTarget.containerId === element.parentId) {
+        bridge.send({
+          type: "REORDER_CHILD",
+          payload: { parentId: dropTarget.containerId, childId: elementId, newIndex: dropTarget.insertIndex },
+        })
+      } else if (dropTarget) {
+        bridge.send({
+          type: "REPARENT_ELEMENT",
+          payload: {
+            id: elementId,
+            oldParentId: element.parentId!,
+            newParentId: dropTarget.containerId,
+            index: dropTarget.insertIndex,
+          },
+        })
+      } else {
+        const canvasRect = document.querySelector(`[data-element-id="${documentStore.rootId}"]`)?.getBoundingClientRect()
+        const dropX = canvasRect ? me.clientX - canvasRect.left : me.clientX
+        const dropY = canvasRect ? me.clientY - canvasRect.top : me.clientY
+        bridge.send({
+          type: "REPARENT_ELEMENT",
+          payload: {
+            id: elementId,
+            oldParentId: element.parentId!,
+            newParentId: documentStore.rootId,
+            index: 0,
+            dropPosition: { x: Math.round(dropX), y: Math.round(dropY) },
+          },
+        })
+      }
+    }
+
+    const onCancel = () => { cleanup() }
+
+    dragCleanupRef.current = cleanup
+    target.addEventListener("pointermove", onMove)
+    target.addEventListener("pointerup", onUp)
+    target.addEventListener("pointercancel", onCancel)
+  }
+
   const content = getElementContent(element.type, element.props, editorMode)
 
   return (
@@ -215,11 +326,11 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         userSelect: editorMode === "interact" ? undefined : "none",
       }}
       onClick={handleClick}
-      onPointerDown={handlePointerDown}
+      onPointerDown={inAutoLayout ? handleAutoLayoutPointerDown : handlePointerDown}
     >
       {content}
       {element.children.map((childId) => (
-        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} documentStore={documentStore} bridge={bridge} editorMode={editorMode} />
+        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} />
       ))}
     </div>
   )
