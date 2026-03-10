@@ -42,6 +42,7 @@ export interface EditorElement {
   layoutMode: 'none' | 'flex'
   layoutProps: LayoutProps
   sizing: SizingProps
+  canvasPosition: { left: number; top: number } | null
 }
 
 export interface EditorDocument {
@@ -92,6 +93,16 @@ export const DEFAULT_SIZING: SizingProps = {
   w: 'fixed',
   h: 'fixed',
 }
+
+export type CanvasMode = 'canvas' | 'page'
+
+export type PageViewportWidth = 1280 | 768 | 375
+
+export const PAGE_VIEWPORT_PRESETS = [
+  { label: 'Desktop', width: 1280 as PageViewportWidth },
+  { label: 'Tablet', width: 768 as PageViewportWidth },
+  { label: 'Mobile', width: 375 as PageViewportWidth },
+] as const
 
 export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
   div: {
