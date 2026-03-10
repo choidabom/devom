@@ -17,6 +17,7 @@ let clipboard: EditorElement[] = []
 export const App = observer(function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [showExport, setShowExport] = useState(false)
+  const [editorMode, setEditorMode] = useState<"edit" | "interact">("edit")
 
   useEffect(() => {
     const dispose = bridge.onMessage((msg: EditorMessage) => {
@@ -59,6 +60,11 @@ export const App = observer(function App() {
           break
         case "KEY_EVENT": {
           const k = msg.payload
+          if (k.key === "Escape" && editorMode === "interact") {
+            setEditorMode("edit")
+            bridge.send({ type: "SET_MODE", payload: { mode: "edit" } })
+            return
+          }
           if (k.key === "Delete" || k.key === "Backspace") {
             handleDelete()
           }
@@ -248,9 +254,34 @@ export const App = observer(function App() {
     syncToCanvas()
   }, [syncToCanvas])
 
+  const handleToggleMode = useCallback(() => {
+    setEditorMode(prev => {
+      const next = prev === "edit" ? "interact" : "edit"
+      bridge.send({ type: "SET_MODE", payload: { mode: next } })
+      if (next === "interact") selectionStore.clear()
+      return next
+    })
+  }, [])
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName === "INPUT") return
+
+      if (e.key === "v" || e.key === "V") {
+        if (editorMode !== "edit") {
+          setEditorMode("edit")
+          bridge.send({ type: "SET_MODE", payload: { mode: "edit" } })
+        }
+        return
+      }
+      if (e.key === "p" || e.key === "P") {
+        if (editorMode !== "interact") {
+          setEditorMode("interact")
+          selectionStore.clear()
+          bridge.send({ type: "SET_MODE", payload: { mode: "interact" } })
+        }
+        return
+      }
 
       if (e.key === "Delete" || e.key === "Backspace") {
         handleDelete()
@@ -275,7 +306,7 @@ export const App = observer(function App() {
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [handleDelete, handleUndo, handleRedo, handleCopy, handlePaste, handleDuplicate])
+  }, [handleDelete, handleUndo, handleRedo, handleCopy, handlePaste, handleDuplicate, editorMode])
 
   const selectedElements = selectionStore.selectedElements
   const hasSelection = selectedElements.length > 0 && selectedElements.some(el => !el.locked)
@@ -294,6 +325,8 @@ export const App = observer(function App() {
           canRedo={historyStore.canRedo}
           hasSelection={hasSelection}
           multiSelected={selectedElements.length >= 2}
+          editorMode={editorMode}
+          onToggleMode={handleToggleMode}
         />
       </div>
 
@@ -313,7 +346,12 @@ export const App = observer(function App() {
 
         <div data-guide="properties" style={{ width: 280, flexShrink: 0, padding: "0 8px 8px 8px" }}>
           <div style={{ background: T.panel, borderRadius: T.panelRadius, boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`, height: "100%", overflowY: "auto" }}>
-            {selectedElements.length > 0 ? <PropertiesPanel /> : (
+            {editorMode === "interact" ? (
+              <div style={{ padding: 20, color: T.textMuted, fontSize: 13, textAlign: "center" }}>
+                Interaction Mode<br />
+                <span style={{ fontSize: 11 }}>Press V to return to edit mode</span>
+              </div>
+            ) : selectedElements.length > 0 ? <PropertiesPanel /> : (
               <div style={{ padding: 20, color: T.textMuted, fontSize: 13, textAlign: "center" }}>
                 Select an element
               </div>

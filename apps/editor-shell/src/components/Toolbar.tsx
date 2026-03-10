@@ -23,11 +23,13 @@ interface ToolbarProps {
   canRedo: boolean
   hasSelection: boolean
   multiSelected: boolean
+  editorMode: "edit" | "interact"
+  onToggleMode: () => void
 }
 
 const S = 15
 
-export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected }: ToolbarProps) {
+export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode }: ToolbarProps) {
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 16px", flexShrink: 0 }}>
       <div style={{
@@ -49,6 +51,13 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
         <ToolBtn icon="Bdg" title="shadcn Badge" onClick={() => onAdd("sc:badge")} />
         <ToolSep />
         <ToolBtn icon={<Settings size={S} />} title="Export" onClick={onExport} />
+        <ToolSep />
+        <ToolBtn
+          icon={editorMode === "edit" ? "▶" : "✎"}
+          title={editorMode === "edit" ? "Interaction Mode (P)" : "Edit Mode (V)"}
+          onClick={onToggleMode}
+          active={editorMode === "interact"}
+        />
         <ToolSep />
         <ToolBtn icon={<Undo2 size={S} />} title="Undo" onClick={onUndo} disabled={!canUndo} />
         <ToolBtn icon={<Redo2 size={S} />} title="Redo" onClick={onRedo} disabled={!canRedo} />
