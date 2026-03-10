@@ -5,15 +5,21 @@ import { CheckIcon } from "lucide-react"
 interface CheckboxProps {
   checked?: boolean
   onCheckedChange?: (checked: boolean) => void
+  defaultChecked?: boolean
   disabled?: boolean
   id?: string
   className?: string
 }
 
-function Checkbox({ className, checked = false, onCheckedChange, disabled, id }: CheckboxProps) {
+function Checkbox({ className, checked: controlledChecked, onCheckedChange, defaultChecked = false, disabled, id }: CheckboxProps) {
+  const [internalChecked, setInternalChecked] = React.useState(defaultChecked)
+  const isChecked = controlledChecked ?? internalChecked
+
   const handleClick = () => {
     if (!disabled) {
-      onCheckedChange?.(!checked)
+      const next = !isChecked
+      setInternalChecked(next)
+      onCheckedChange?.(next)
     }
   }
 
@@ -21,7 +27,7 @@ function Checkbox({ className, checked = false, onCheckedChange, disabled, id }:
     <button
       type="button"
       role="checkbox"
-      aria-checked={checked}
+      aria-checked={isChecked}
       disabled={disabled}
       id={id}
       onClick={handleClick}
@@ -30,11 +36,11 @@ function Checkbox({ className, checked = false, onCheckedChange, disabled, id }:
         "flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-muted-foreground/40 transition-colors outline-none",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        checked && "border-primary bg-primary text-primary-foreground",
+        isChecked && "border-primary bg-primary text-primary-foreground",
         className
       )}
     >
-      {checked && <CheckIcon className="h-3 w-3" />}
+      {isChecked && <CheckIcon className="h-3 w-3" />}
     </button>
   )
 }

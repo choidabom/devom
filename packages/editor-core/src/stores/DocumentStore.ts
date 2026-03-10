@@ -80,7 +80,7 @@ export class DocumentStore {
     // --- Login Card (Auto Layout Column) ---
     const loginCard = add('div', this.rootId, {
       name: 'Login Card',
-      style: { left: 20, top: 70, width: 230, backgroundColor: toss.card, borderRadius: 16, border: `1px solid ${toss.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+      style: { left: 20, top: 70, width: 230, height: 'auto', backgroundColor: toss.card, borderRadius: 16, border: `1px solid ${toss.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
       layoutMode: 'flex',
       layoutProps: { direction: 'column', gap: 10, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch', justifyContent: 'start' },
     })
@@ -97,7 +97,7 @@ export class DocumentStore {
     // --- Settings Card (Form Controls) ---
     const settingsCard = add('div', this.rootId, {
       name: 'Settings Card',
-      style: { left: 270, top: 70, width: 230, backgroundColor: toss.card, borderRadius: 16, border: `1px solid ${toss.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+      style: { left: 270, top: 70, width: 230, height: 'auto', backgroundColor: toss.card, borderRadius: 16, border: `1px solid ${toss.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
       layoutMode: 'flex',
       layoutProps: { direction: 'column', gap: 12, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch', justifyContent: 'start' },
     })
