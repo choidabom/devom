@@ -11,11 +11,12 @@ interface ElementRendererProps {
   elementId: string
   selectedId: string | null
   onSelect: (id: string | null) => void
+  onDragChange?: (dragging: boolean) => void
   documentStore: DocumentStore
   bridge: MessageBridge
 }
 
-export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedId, onSelect, documentStore, bridge }: ElementRendererProps) {
+export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedId, onSelect, onDragChange, documentStore, bridge }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
   const [dragDelta, setDragDelta] = useState<{ x: number; y: number } | null>(null)
@@ -56,11 +57,14 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     const startLeft = typeof element.style.left === "number" ? element.style.left : 0
     const startTop = typeof element.style.top === "number" ? element.style.top : 0
 
+    onDragChange?.(true)
+
     const cleanup = () => {
       target.releasePointerCapture(e.pointerId)
       target.removeEventListener("pointermove", onMove)
       target.removeEventListener("pointerup", onUp)
       dragCleanupRef.current = null
+      onDragChange?.(false)
     }
 
     const onMove = (me: PointerEvent) => {
@@ -107,7 +111,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     >
       {content}
       {element.children.map((childId) => (
-        <ElementRenderer key={childId} elementId={childId} selectedId={selectedId} onSelect={onSelect} documentStore={documentStore} bridge={bridge} />
+        <ElementRenderer key={childId} elementId={childId} selectedId={selectedId} onSelect={onSelect} onDragChange={onDragChange} documentStore={documentStore} bridge={bridge} />
       ))}
     </div>
   )

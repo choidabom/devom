@@ -15,6 +15,7 @@ if (import.meta.hot) {
 
 export const App = observer(function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
   const handleShellMessage = useCallback((msg: EditorMessage) => {
     switch (msg.type) {
@@ -68,8 +69,8 @@ export const App = observer(function App() {
       style={{ width: "100%", height: "100%", background: "#eeeef2", position: "relative" }}
       onClick={handleCanvasClick}
     >
-      <ElementRenderer elementId={root.id} selectedId={selectedId} onSelect={setSelectedId} documentStore={documentStore} bridge={bridge} />
-      {selectedId && <SelectionOverlay elementId={selectedId} documentStore={documentStore} bridge={bridge} />}
+      <ElementRenderer elementId={root.id} selectedId={selectedId} onSelect={setSelectedId} onDragChange={setIsDragging} documentStore={documentStore} bridge={bridge} />
+      {selectedId && !isDragging && <SelectionOverlay elementId={selectedId} documentStore={documentStore} bridge={bridge} />}
     </div>
   )
 })
