@@ -57,8 +57,18 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     const startX = e.clientX
     const startY = e.clientY
 
-    // Collect all dragged elements (selected group or just this one)
+    // Block entire group drag if any selected element is locked
     const dragIds = selectedIds.includes(elementId) ? selectedIds : [elementId]
+    const hasLockedInGroup = dragIds.some(id => {
+      const el = documentStore.getElement(id)
+      return el?.locked
+    })
+    if (hasLockedInGroup) {
+      target.releasePointerCapture(e.pointerId)
+      return
+    }
+
+    // Collect all dragged elements (selected group or just this one)
     const dragTargets = dragIds
       .map(id => {
         const el = documentStore.getElement(id)
