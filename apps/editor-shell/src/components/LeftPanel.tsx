@@ -24,9 +24,11 @@ export const LeftPanel = observer(function LeftPanel() {
 const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId: string; depth: number }) {
   const element = documentStore.getElement(elementId)
   const [hovered, setHovered] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   if (!element) return null
   const isSelected = selectionStore.selectedIds.includes(elementId)
   const isRoot = elementId === documentStore.rootId
+  const hasChildren = element.children.length > 0
 
   const S = 12
   const iconMap: Record<string, ReactNode> = {
@@ -74,9 +76,16 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
           transition: "background 0.12s",
         }}
       >
-        {!isRoot && element.children.length > 0 && (
-          <ChevronRight size={10} style={{ opacity: 0.5, flexShrink: 0 }} />
-        )}
+        {hasChildren && !isRoot ? (
+          <span
+            onClick={(e) => { e.stopPropagation(); setCollapsed(!collapsed) }}
+            style={{ display: "flex", flexShrink: 0, cursor: "pointer", opacity: 0.5, transition: "transform 0.15s", transform: collapsed ? "rotate(0deg)" : "rotate(90deg)" }}
+          >
+            <ChevronRight size={10} />
+          </span>
+        ) : !isRoot ? (
+          <span style={{ width: 10, flexShrink: 0 }} />
+        ) : null}
         <span style={{ opacity: isSelected ? 0.8 : 0.5, display: "flex", flexShrink: 0 }}>{displayIcon}</span>
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{element.name}</span>
         {element.layoutMode === 'flex' && (
@@ -105,7 +114,7 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
           </span>
         )}
       </div>
-      {element.children.map((childId) => (
+      {!collapsed && element.children.map((childId) => (
         <LayerTree key={childId} elementId={childId} depth={depth + 1} />
       ))}
     </div>
