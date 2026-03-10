@@ -167,12 +167,49 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         t.dom!.style.willChange = "transform"
       }
 
-      onSnapLines?.(snap.lines)
+      // Check for auto-layout drop target
+      const dropTarget = findDropTarget(me.clientX, me.clientY, dragIds, documentStore)
+      if (dropTarget) {
+        onDropHighlight?.(dropTarget.containerId)
+        const container = documentStore.getElement(dropTarget.containerId)
+        if (container) {
+          const indicator = calcInsertionIndicator(
+            dropTarget.containerId, dropTarget.insertIndex,
+            container.layoutProps.direction, dragIds, documentStore,
+          )
+          onInsertionIndicator?.(indicator)
+        }
+        onSnapLines?.([])  // Disable snap when over a container
+      } else {
+        onDropHighlight?.(null)
+        onInsertionIndicator?.(null)
+        onSnapLines?.(snap.lines)
+      }
     }
 
     const onUp = (me: PointerEvent) => {
       cleanup()
       clearTransforms()
+
+      // Check if dropping into auto-layout container
+      const dropTarget = findDropTarget(me.clientX, me.clientY, dragIds, documentStore)
+      if (dropTarget) {
+        for (const t of dragTargets) {
+          bridge.send({
+            type: "REPARENT_ELEMENT",
+            payload: {
+              id: t.id,
+              oldParentId: documentStore.getElement(t.id)?.parentId ?? documentStore.rootId,
+              newParentId: dropTarget.containerId,
+              index: dropTarget.insertIndex,
+            },
+          })
+        }
+        onInsertionIndicator?.(null)
+        onDropHighlight?.(null)
+        return  // Skip the normal absolute move logic
+      }
+
       const dx = me.clientX - startX + lastSnapDx
       const dy = me.clientY - startY + lastSnapDy
       const moves: Array<{ id: string; x: number; y: number }> = []
@@ -194,6 +231,8 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     const onCancel = () => {
       cleanup()
       clearTransforms()
+      onInsertionIndicator?.(null)
+      onDropHighlight?.(null)
     }
 
     dragCleanupRef.current = cleanup
