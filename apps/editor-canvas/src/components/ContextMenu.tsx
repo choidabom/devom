@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Lock, Unlock } from "lucide-react"
 import type { DocumentStore } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
@@ -17,6 +17,7 @@ interface MenuState {
 
 export function ContextMenu({ documentStore, selectedIds, bridge }: ContextMenuProps) {
   const [menu, setMenu] = useState<MenuState | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onContextMenu = (e: MouseEvent) => {
@@ -31,14 +32,15 @@ export function ContextMenu({ documentStore, selectedIds, bridge }: ContextMenuP
       if (!el || el.parentId === null) return
       setMenu({ x: e.clientX, y: e.clientY, targetId: id })
     }
-    const onClickAway = () => setMenu(null)
+    const onClickAway = (e: PointerEvent) => {
+      if (menuRef.current?.contains(e.target as Node)) return
+      setMenu(null)
+    }
 
     window.addEventListener("contextmenu", onContextMenu)
-    window.addEventListener("click", onClickAway)
     window.addEventListener("pointerdown", onClickAway)
     return () => {
       window.removeEventListener("contextmenu", onContextMenu)
-      window.removeEventListener("click", onClickAway)
       window.removeEventListener("pointerdown", onClickAway)
     }
   }, [documentStore])
@@ -62,6 +64,7 @@ export function ContextMenu({ documentStore, selectedIds, bridge }: ContextMenuP
 
   return (
     <div
+      ref={menuRef}
       style={{
         position: "fixed",
         left: menu.x,
