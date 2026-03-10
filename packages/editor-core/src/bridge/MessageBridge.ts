@@ -6,8 +6,10 @@ type MessageHandler = (message: EditorMessage) => void
 export class MessageBridge {
   private handlers = new Set<MessageHandler>()
   private targetWindow: Window | null = null
+  private allowedOrigin: string
 
-  constructor(private targetOrigin: string = "*") {
+  constructor(targetOrigin: string) {
+    this.allowedOrigin = targetOrigin
     this.handleMessage = this.handleMessage.bind(this)
     window.addEventListener("message", this.handleMessage)
   }
@@ -22,7 +24,7 @@ export class MessageBridge {
       source: EDITOR_MESSAGE_SOURCE,
       message,
     }
-    this.targetWindow.postMessage(wrapped, this.targetOrigin)
+    this.targetWindow.postMessage(wrapped, this.allowedOrigin)
   }
 
   onMessage(handler: MessageHandler): () => void {
@@ -31,6 +33,7 @@ export class MessageBridge {
   }
 
   private handleMessage(event: MessageEvent) {
+    if (event.origin !== this.allowedOrigin) return
     if (!isEditorMessage(event.data)) return
     const { message } = event.data
     this.handlers.forEach((handler) => handler(message))

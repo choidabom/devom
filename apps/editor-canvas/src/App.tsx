@@ -1,58 +1,47 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import { DocumentStore, MessageBridge, type EditorMessage } from "@devom/editor-core"
 
 const documentStore = new DocumentStore()
-const bridge = new MessageBridge()
-
-function handleShellMessage(msg: EditorMessage) {
-  switch (msg.type) {
-    case "SYNC_DOCUMENT":
-      documentStore.loadFromSerializable(msg.payload)
-      break
-    case "ADD_ELEMENT":
-      documentStore.elements.set(msg.payload.id, msg.payload)
-      // Also add to parent's children if not already there
-      if (msg.payload.parentId) {
-        const parent = documentStore.getElement(msg.payload.parentId)
-        if (parent && !parent.children.includes(msg.payload.id)) {
-          parent.children.push(msg.payload.id)
-        }
-      }
-      break
-    case "DELETE_ELEMENT":
-      documentStore.removeElement(msg.payload.id)
-      break
-    case "UPDATE_STYLE":
-      documentStore.updateStyle(msg.payload.id, msg.payload.style)
-      break
-    case "UPDATE_PROPS":
-      documentStore.updateProps(msg.payload.id, msg.payload.props)
-      break
-    case "SELECT_ELEMENT":
-      setSelectedIdGlobal(msg.payload.id)
-      break
-  }
-}
-
-// Global setter for selected ID (set from App component)
-let setSelectedIdGlobal: (id: string | null) => void = () => {}
+const bridge = new MessageBridge("http://localhost:4000")
 
 export const App = observer(function App() {
   const initialized = useRef(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  // Expose setter globally for message handler
-  setSelectedIdGlobal = setSelectedId
+  const handleShellMessage = useCallback((msg: EditorMessage) => {
+    switch (msg.type) {
+      case "SYNC_DOCUMENT":
+        documentStore.loadFromSerializable(msg.payload)
+        break
+      case "ADD_ELEMENT":
+        documentStore.addElementFromRemote(msg.payload)
+        break
+      case "DELETE_ELEMENT":
+        documentStore.removeElement(msg.payload.id)
+        break
+      case "UPDATE_STYLE":
+        documentStore.updateStyle(msg.payload.id, msg.payload.style)
+        break
+      case "UPDATE_PROPS":
+        documentStore.updateProps(msg.payload.id, msg.payload.props)
+        break
+      case "SELECT_ELEMENT":
+        setSelectedId(msg.payload.id)
+        break
+    }
+  }, [])
 
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
 
     bridge.setTarget(window.parent)
-    bridge.onMessage(handleShellMessage)
+    const dispose = bridge.onMessage(handleShellMessage)
     bridge.send({ type: "CANVAS_READY" })
-  }, [])
+
+    return dispose
+  }, [handleShellMessage])
 
   const root = documentStore.root
   if (!root) return null

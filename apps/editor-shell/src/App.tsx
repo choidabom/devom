@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import type { EditorMessage, ElementType } from "@devom/editor-core"
 import { exportToJSON, exportToJSX, exportToHTML } from "@devom/editor-core"
@@ -44,6 +44,10 @@ export const App = observer(function App() {
       const onLoad = () => {
         if (iframe.contentWindow) {
           bridge.setTarget(iframe.contentWindow)
+          // Retry sync after short delay in case CANVAS_READY was missed
+          setTimeout(() => {
+            bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+          }, 100)
         }
       }
       iframe.addEventListener("load", onLoad)
@@ -51,11 +55,11 @@ export const App = observer(function App() {
     }
   }, [])
 
-  const syncToCanvas = () => {
+  const syncToCanvas = useCallback(() => {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
-  }
+  }, [])
 
-  const handleAddElement = (type: ElementType) => {
+  const handleAddElement = useCallback((type: ElementType) => {
     historyStore.pushSnapshot()
     const id = documentStore.addElement(type)
     if (id) {
@@ -65,33 +69,32 @@ export const App = observer(function App() {
         selectionStore.select(id)
       }
     }
-  }
+  }, [])
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (!selectionStore.selectedId) return
     historyStore.pushSnapshot()
     documentStore.removeElement(selectionStore.selectedId)
     selectionStore.clear()
     syncToCanvas()
-  }
+  }, [syncToCanvas])
 
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     historyStore.undo()
     selectionStore.clear()
     syncToCanvas()
-  }
+  }, [syncToCanvas])
 
-  const handleRedo = () => {
+  const handleRedo = useCallback(() => {
     historyStore.redo()
     selectionStore.clear()
     syncToCanvas()
-  }
+  }, [syncToCanvas])
 
   // Keyboard shortcuts
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Delete" || e.key === "Backspace") {
-        // Only if not focused on an input
         if (document.activeElement?.tagName !== "INPUT") {
           handleDelete()
         }
@@ -104,7 +107,7 @@ export const App = observer(function App() {
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [])
+  }, [handleDelete, handleUndo, handleRedo])
 
   const selected = selectionStore.selectedElement
 
@@ -149,7 +152,7 @@ export const App = observer(function App() {
         <div style={{ flex: 1, position: "relative", background: "#1e293b" }}>
           <iframe
             ref={iframeRef}
-            src="http://localhost:4001"
+            src={import.meta.env.VITE_CANVAS_URL || "http://localhost:4001"}
             style={{ width: "100%", height: "100%", border: "none" }}
             title="Editor Canvas"
           />

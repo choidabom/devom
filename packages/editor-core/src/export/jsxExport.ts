@@ -45,15 +45,22 @@ function getTag(el: EditorElement): string {
 }
 
 function getContent(el: EditorElement): string {
-  if (el.type === "text") return String(el.props.content ?? "")
-  if (el.type === "button") return String(el.props.label ?? "")
+  if (el.type === "text") return escapeAttr(String(el.props.content ?? ""))
+  if (el.type === "button") return escapeAttr(String(el.props.label ?? ""))
   return ""
 }
 
 function getPropsString(el: EditorElement): string {
-  if (el.type === "image" && el.props.src) return ` src="${el.props.src}" alt="${el.props.alt ?? ""}"`
-  if (el.type === "input") return ` placeholder="${el.props.placeholder ?? ""}"`
+  if (el.type === "image" && el.props.src) return ` src="${escapeAttr(String(el.props.src))}" alt="${escapeAttr(String(el.props.alt ?? ""))}"`
+  if (el.type === "input") return ` placeholder="${escapeAttr(String(el.props.placeholder ?? ""))}"`
   return ""
+}
+
+function escapeAttr(str: string): string {
+  return str.replace(/[<>&"']/g, (c) => {
+    const map: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#x27;" }
+    return map[c] ?? c
+  })
 }
 
 function styleToString(style: CSSProperties): string {

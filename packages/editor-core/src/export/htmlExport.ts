@@ -15,15 +15,22 @@ export function exportToHTML(elements: Record<string, EditorElement>, rootId: st
   return lines.join("\n")
 }
 
+function escapeHTML(str: string): string {
+  return str.replace(/[<>&"']/g, (c) => {
+    const map: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#x27;" }
+    return map[c] ?? c
+  })
+}
+
 function renderHTML(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number) {
   const pad = " ".repeat(indent)
   const tag = el.type === "image" ? "img" : el.type === "button" ? "button" : el.type === "input" ? "input" : "div"
   const styleStr = cssToInline(el.style)
-  const content = el.type === "text" ? String(el.props.content ?? "") : el.type === "button" ? String(el.props.label ?? "") : ""
+  const content = el.type === "text" ? escapeHTML(String(el.props.content ?? "")) : el.type === "button" ? escapeHTML(String(el.props.label ?? "")) : ""
 
-  let attrs = styleStr ? ` style="${styleStr}"` : ""
-  if (el.type === "image") attrs += ` src="${el.props.src ?? ""}" alt="${el.props.alt ?? ""}"`
-  if (el.type === "input") attrs += ` placeholder="${el.props.placeholder ?? ""}"`
+  let attrs = styleStr ? ` style="${escapeHTML(styleStr)}"` : ""
+  if (el.type === "image") attrs += ` src="${escapeHTML(String(el.props.src ?? ""))}" alt="${escapeHTML(String(el.props.alt ?? ""))}"`
+  if (el.type === "input") attrs += ` placeholder="${escapeHTML(String(el.props.placeholder ?? ""))}"`
 
   if (tag === "img" || tag === "input") {
     lines.push(`${pad}<${tag}${attrs} />`)

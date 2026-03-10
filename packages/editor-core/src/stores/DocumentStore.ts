@@ -67,6 +67,16 @@ export class DocumentStore {
     return id
   }
 
+  addElementFromRemote(element: EditorElement) {
+    this.elements.set(element.id, element)
+    if (element.parentId) {
+      const parent = this.elements.get(element.parentId)
+      if (parent && !parent.children.includes(element.id)) {
+        parent.children.push(element.id)
+      }
+    }
+  }
+
   removeElement(id: string) {
     const element = this.elements.get(id)
     if (!element || id === this.rootId) return
