@@ -42,7 +42,15 @@ export const App = observer(function App() {
     const dispose = bridge.onMessage(handleShellMessage)
     bridge.send({ type: "CANVAS_READY" })
 
-    return dispose
+    const onKeyDown = (e: KeyboardEvent) => {
+      bridge.send({
+        type: "KEY_EVENT",
+        payload: { key: e.key, code: e.code, metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, altKey: e.altKey },
+      })
+    }
+    window.addEventListener("keydown", onKeyDown)
+
+    return () => { dispose(); window.removeEventListener("keydown", onKeyDown) }
   }, [handleShellMessage])
 
   const root = documentStore.root

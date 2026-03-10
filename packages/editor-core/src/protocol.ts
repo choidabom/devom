@@ -19,6 +19,7 @@ export type CanvasToShellMessage =
   | { type: "ELEMENT_MOVED"; payload: { id: string; x: number; y: number } }
   | { type: "ELEMENT_RESIZED"; payload: { id: string; width: number; height: number } }
   | { type: "CANVAS_CLICKED" }
+  | { type: "KEY_EVENT"; payload: { key: string; code: string; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 

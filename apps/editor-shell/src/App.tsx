@@ -50,6 +50,17 @@ export const App = observer(function App() {
         case "CANVAS_CLICKED":
           selectionStore.clear()
           break
+        case "KEY_EVENT": {
+          const k = msg.payload
+          if (k.key === "Delete" || k.key === "Backspace") {
+            handleDelete()
+          }
+          if ((k.metaKey || k.ctrlKey) && k.key === "z") {
+            if (k.shiftKey) handleRedo()
+            else handleUndo()
+          }
+          break
+        }
       }
     })
 
