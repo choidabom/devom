@@ -48,6 +48,34 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </div>
       )}
 
+      {/* Lock toggle */}
+      <div style={{ padding: "0 14px 10px", borderBottom: `1px solid ${T.border}`, marginBottom: 10 }}>
+        <button
+          onClick={() => {
+            historyStore.pushSnapshot()
+            for (const el of elements) {
+              documentStore.toggleLock(el.id)
+            }
+            bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+          }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "5px 10px",
+            background: elements.some(el => el.locked) ? T.accent : T.inputBg,
+            color: elements.some(el => el.locked) ? "#fff" : T.text,
+            border: `1px solid ${elements.some(el => el.locked) ? T.accent : T.inputBorder}`,
+            borderRadius: 6,
+            fontSize: 12,
+            cursor: "pointer",
+            width: "100%",
+          }}
+        >
+          {elements.some(el => el.locked) ? "🔒 Locked" : "🔓 Unlocked"}
+        </button>
+      </div>
+
       {/* Position — single select only */}
       {!isMulti && (
         <PropSection title="Position">
