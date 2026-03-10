@@ -100,6 +100,12 @@ export class DocumentStore {
     this.elements.delete(id)
   }
 
+  toggleLock(id: string) {
+    const element = this.elements.get(id)
+    if (!element || id === this.rootId) return
+    element.locked = !element.locked
+  }
+
   pasteElements(elements: EditorElement[], offset = 20): string[] {
     const newIds: string[] = []
     for (const el of elements) {
