@@ -23,6 +23,9 @@ export interface EditorElement {
   props: Record<string, unknown>
   locked: boolean
   visible: boolean
+  layoutMode: 'none' | 'flex'
+  layoutProps: LayoutProps
+  sizing: SizingProps
 }
 
 export interface EditorDocument {
@@ -38,6 +41,40 @@ export interface ElementBounds {
   y: number
   width: number
   height: number
+}
+
+export type SizingMode = 'fixed' | 'hug' | 'fill'
+
+export interface LayoutProps {
+  direction: 'row' | 'column'
+  gap: number
+  paddingTop: number
+  paddingRight: number
+  paddingBottom: number
+  paddingLeft: number
+  alignItems: 'start' | 'center' | 'end' | 'stretch'
+  justifyContent: 'start' | 'center' | 'end' | 'space-between'
+}
+
+export interface SizingProps {
+  w: SizingMode
+  h: SizingMode
+}
+
+export const DEFAULT_LAYOUT_PROPS: LayoutProps = {
+  direction: 'column',
+  gap: 8,
+  paddingTop: 8,
+  paddingRight: 8,
+  paddingBottom: 8,
+  paddingLeft: 8,
+  alignItems: 'start',
+  justifyContent: 'start',
+}
+
+export const DEFAULT_SIZING: SizingProps = {
+  w: 'fixed',
+  h: 'fixed',
 }
 
 export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
