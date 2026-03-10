@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { observer } from "mobx-react-lite"
-import { documentStore, selectionStore, bridge } from "../stores"
+import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
 export const LeftPanel = observer(function LeftPanel() {
@@ -63,7 +63,27 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
           <span style={{ fontSize: 10, opacity: 0.5 }}>›</span>
         )}
         <span style={{ fontSize: 11, opacity: isSelected ? 0.8 : 0.5 }}>{icon}</span>
-        {element.name}
+        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{element.name}</span>
+        {!isRoot && (
+          <span
+            onClick={(e) => {
+              e.stopPropagation()
+              historyStore.pushSnapshot()
+              documentStore.toggleLock(elementId)
+              bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+            }}
+            style={{
+              fontSize: 11,
+              opacity: element.locked ? 1 : 0,
+              cursor: "pointer",
+              padding: "0 2px",
+              transition: "opacity 0.15s",
+              ...(hovered && !element.locked ? { opacity: 0.3 } : {}),
+            }}
+          >
+            {element.locked ? "🔒" : "🔓"}
+          </span>
+        )}
       </div>
       {element.children.map((childId) => (
         <LayerTree key={childId} elementId={childId} depth={depth + 1} />
