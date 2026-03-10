@@ -39,6 +39,8 @@ export interface ElementBounds {
 export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
   div: {
     position: "absolute",
+    left: 100,
+    top: 100,
     width: 200,
     height: 100,
     backgroundColor: "#e2e8f0",
@@ -46,11 +48,15 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
   },
   text: {
     position: "absolute",
+    left: 100,
+    top: 100,
     fontSize: 16,
     color: "#1a202c",
   },
   image: {
     position: "absolute",
+    left: 100,
+    top: 100,
     width: 200,
     height: 200,
     objectFit: "cover",
@@ -58,6 +64,8 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
   },
   button: {
     position: "absolute",
+    left: 100,
+    top: 100,
     padding: "8px 16px",
     backgroundColor: "#3b82f6",
     color: "#ffffff",
@@ -68,6 +76,8 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
   },
   input: {
     position: "absolute",
+    left: 100,
+    top: 100,
     padding: "8px 12px",
     border: "1px solid #d1d5db",
     borderRadius: 6,

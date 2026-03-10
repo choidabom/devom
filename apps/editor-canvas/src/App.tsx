@@ -136,8 +136,8 @@ const ElementRenderer = observer(function ElementRenderer({ elementId, selectedI
       cleanup()
       const dx = me.clientX - startX
       const dy = me.clientY - startY
-      const finalLeft = startLeft + dx
-      const finalTop = startTop + dy
+      const finalLeft = Math.round(startLeft + dx)
+      const finalTop = Math.round(startTop + dy)
       setDragDelta(null)
       documentStore.updateStyle(element.id, { left: finalLeft, top: finalTop })
       bridge.send({
@@ -293,10 +293,10 @@ const SelectionOverlay = observer(function SelectionOverlay({ elementId }: { ele
       }
 
       documentStore.updateStyle(element.id, {
-        width: newWidth,
-        height: newHeight,
-        left: newLeft,
-        top: newTop,
+        width: Math.round(newWidth),
+        height: Math.round(newHeight),
+        left: Math.round(newLeft),
+        top: Math.round(newTop),
       })
     }
 
