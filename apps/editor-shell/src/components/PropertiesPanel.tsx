@@ -1,7 +1,10 @@
 import { observer } from "mobx-react-lite"
 import { Lock, Unlock } from "lucide-react"
+import { isAutoLayoutChild } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
+import { AutoLayoutSection } from "./AutoLayoutSection"
+import { SizingSection } from "./SizingSection"
 
 export const PropertiesPanel = observer(function PropertiesPanel() {
   const elements = selectionStore.selectedElements
@@ -27,8 +30,32 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
+  const toggleAutoLayout = () => {
+    historyStore.pushSnapshot()
+    const newMode = element.layoutMode === 'flex' ? 'none' : 'flex'
+    documentStore.setLayoutMode(element.id, newMode as 'none' | 'flex')
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
+  const updateLayoutProps = (props: Record<string, unknown>) => {
+    historyStore.pushSnapshot()
+    for (const el of elements) {
+      documentStore.updateLayoutProps(el.id, props as any)
+    }
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
+  const updateSizing = (sizing: Record<string, unknown>) => {
+    historyStore.pushSnapshot()
+    for (const el of elements) {
+      documentStore.updateSizing(el.id, sizing as any)
+    }
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
   const isShadcn = element.type.startsWith("sc:")
   const allSameType = elements.every(el => el.type === element.type)
+  const inAutoLayout = !isMulti && isAutoLayoutChild(element, (id) => documentStore.getElement(id))
 
   const MIXED = "mixed"
   const sharedStyle = (key: string, fallback: string | number = ""): string | number => {
@@ -77,8 +104,17 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </button>
       </div>
 
-      {/* Position — single select only */}
+      {/* Auto Layout — single select only */}
       {!isMulti && (
+        <AutoLayoutSection
+          element={element}
+          onToggle={toggleAutoLayout}
+          onUpdate={updateLayoutProps}
+        />
+      )}
+
+      {/* Position — single select only, absolute positioning */}
+      {!isMulti && !inAutoLayout && (
         <PropSection title="Position">
           <PropGrid>
             <PropCompact label="X" value={element.style.left ?? 0} onChange={(v) => updateStyle("left", v)} />
@@ -87,8 +123,17 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {/* Size — single select only */}
-      {!isMulti && (!isShadcn || element.type === "sc:card" || element.type === "sc:input") && (
+      {/* Sizing — single select, only for auto-layout children */}
+      {!isMulti && inAutoLayout && (
+        <SizingSection
+          element={element}
+          onUpdateSizing={updateSizing}
+          onUpdateStyle={updateStyle}
+        />
+      )}
+
+      {/* Size — single select only, not in auto-layout */}
+      {!isMulti && !inAutoLayout && (!isShadcn || element.type === "sc:card" || element.type === "sc:input") && (
         <PropSection title="Size">
           <PropGrid>
             <PropCompact label="W" value={element.style.width ?? "auto"} onChange={(v) => updateStyle("width", v)} />
@@ -147,20 +192,6 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
           <PropRow label="Gap" value={sharedStyle("gap", 0)} onChange={(v) => updateStyle("gap", v)} />
         </div>
       </PropSection>
-
-      {/* Container — single select only */}
-      {!isMulti && (element.type === "flex" || element.type === "grid") && (
-        <PropSection title="Container">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {element.type === "flex" && (
-              <PropSelect label="Direction" value={String(element.style.flexDirection ?? "row")} options={["row", "column", "row-reverse", "column-reverse"]} onChange={(v) => updateStyle("flexDirection", v)} />
-            )}
-            {element.type === "grid" && (
-              <PropRow label="Columns" value={element.style.gridTemplateColumns ?? "1fr 1fr"} onChange={(v) => updateStyle("gridTemplateColumns", v)} />
-            )}
-          </div>
-        </PropSection>
-      )}
     </div>
   )
 })
