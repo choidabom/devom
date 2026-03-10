@@ -1,7 +1,6 @@
 import { type ReactNode, useState, useRef, useEffect } from "react"
 import {
-  Plus, Square, Columns3, Type, LayoutGrid, ImageIcon,
-  MousePointerClick, TextCursorInput,
+  Plus, Type, ImageIcon,
   Undo2, Redo2, Trash2, Settings, ChevronDown,
   AlignLeft, AlignCenterHorizontal, AlignRight,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
@@ -72,13 +71,8 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
         background: T.panel, borderRadius: 10, boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`,
       }}>
         <ToolBtn icon={<Plus size={S} />} title="Frame" onClick={() => onAdd("div")} />
-        <ToolBtn icon={<Square size={S} />} title="Div" onClick={() => onAdd("div")} />
-        <ToolBtn icon={<Columns3 size={S} />} title="Flex" onClick={() => onAdd("flex")} />
         <ToolBtn icon={<Type size={S} />} title="Text" onClick={() => onAdd("text")} />
-        <ToolBtn icon={<LayoutGrid size={S} />} title="Grid" onClick={() => onAdd("grid")} />
         <ToolBtn icon={<ImageIcon size={S} />} title="Image" onClick={() => onAdd("image")} />
-        <ToolBtn icon={<MousePointerClick size={S} />} title="Button" onClick={() => onAdd("button")} />
-        <ToolBtn icon={<TextCursorInput size={S} />} title="Input" onClick={() => onAdd("input")} />
         <ToolSep />
 
         {/* shadcn/ui dropdown */}
@@ -129,13 +123,6 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
         <ToolSep />
         <ToolBtn icon={<Settings size={S} />} title="Export" onClick={onExport} />
         <ToolSep />
-        <ToolBtn
-          icon={editorMode === "edit" ? "▶" : "✎"}
-          title={editorMode === "edit" ? "Interaction Mode (P)" : "Edit Mode (V)"}
-          onClick={onToggleMode}
-          active={editorMode === "interact"}
-        />
-        <ToolSep />
         <ToolBtn icon={<Undo2 size={S} />} title="Undo" onClick={onUndo} disabled={!canUndo} />
         <ToolBtn icon={<Redo2 size={S} />} title="Redo" onClick={onRedo} disabled={!canRedo} />
         {hasSelection && (
@@ -158,6 +145,13 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
             <ToolBtn icon={<ArrowUpDown size={S} />} title="Distribute Vertically" onClick={() => onAlign("distribute-v")} />
           </>
         )}
+        <ToolSep />
+        <ToolBtn
+          icon={editorMode === "edit" ? "▶" : "✎"}
+          title={editorMode === "edit" ? "Interaction Mode (P)" : "Edit Mode (V)"}
+          onClick={onToggleMode}
+          active={editorMode === "interact"}
+        />
       </div>
     </div>
   )
