@@ -16,9 +16,10 @@ interface ElementRendererProps {
   onSnapLines?: (lines: SnapLine[]) => void
   documentStore: DocumentStore
   bridge: MessageBridge
+  editorMode: "edit" | "interact"
 }
 
-export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, documentStore, bridge }: ElementRendererProps) {
+export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, documentStore, bridge, editorMode }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
 
@@ -32,6 +33,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   const isRoot = element.parentId === null
 
   const handleClick = (e: React.MouseEvent) => {
+    if (editorMode === "interact") return
     e.stopPropagation()
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     onSelect(element.id, e.shiftKey)
@@ -46,6 +48,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   }
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (editorMode === "interact") return
     if (element.locked || isRoot) return
     if (element.style.position !== "absolute") return
     e.stopPropagation()
@@ -186,30 +189,30 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     target.addEventListener("pointercancel", onCancel)
   }
 
-  const content = getElementContent(element.type, element.props)
+  const content = getElementContent(element.type, element.props, editorMode)
 
   return (
     <div
       data-element-id={element.id}
       style={{
         ...element.style,
-        outline: isSelected ? "1.5px dashed #6366f1" : undefined,
-        outlineOffset: isSelected ? 2 : undefined,
-        cursor: element.locked || isRoot ? "default" : "move",
-        userSelect: "none",
+        outline: editorMode === "edit" && isSelected ? "1.5px dashed #6366f1" : undefined,
+        outlineOffset: editorMode === "edit" && isSelected ? 2 : undefined,
+        cursor: editorMode === "interact" ? undefined : (element.locked || isRoot ? "default" : "move"),
+        userSelect: editorMode === "interact" ? undefined : "none",
       }}
       onClick={handleClick}
       onPointerDown={handlePointerDown}
     >
       {content}
       {element.children.map((childId) => (
-        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} documentStore={documentStore} bridge={bridge} />
+        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} documentStore={documentStore} bridge={bridge} editorMode={editorMode} />
       ))}
     </div>
   )
 })
 
-function getElementContent(type: string, props: Record<string, unknown>): React.ReactNode {
+function getElementContent(type: string, props: Record<string, unknown>, editorMode: "edit" | "interact"): React.ReactNode {
   switch (type) {
     case "text":
       return String(props.content ?? "Text")
@@ -228,7 +231,7 @@ function getElementContent(type: string, props: Record<string, unknown>): React.
             color: "inherit",
             padding: 0,
           }}
-          readOnly
+          readOnly={editorMode === "edit"}
         />
       )
     case "image":
@@ -279,7 +282,7 @@ function getElementContent(type: string, props: Record<string, unknown>): React.
         <Input
           placeholder={String(props.placeholder ?? "")}
           type={String(props.type ?? "text")}
-          readOnly
+          readOnly={editorMode === "edit"}
         />
       )
     case "sc:badge":

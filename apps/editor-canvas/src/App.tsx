@@ -29,6 +29,7 @@ export const App = observer(function App() {
   const [snapLines, setSnapLines] = useState<SnapLine[]>([])
   const [marquee, setMarquee] = useState<{ startX: number; startY: number; endX: number; endY: number } | null>(null)
   const marqueeRef = useRef<{ startX: number; startY: number; active: boolean } | null>(null)
+  const [editorMode, setEditorMode] = useState<"edit" | "interact">("edit")
 
   const handleShellMessage = useCallback((msg: EditorMessage) => {
     switch (msg.type) {
@@ -49,6 +50,10 @@ export const App = observer(function App() {
         break
       case "SELECT_ELEMENT":
         setSelectedIds(msg.payload.ids)
+        break
+      case "SET_MODE":
+        setEditorMode(msg.payload.mode)
+        if (msg.payload.mode === "interact") setSelectedIds([])
         break
     }
   }, [])
@@ -162,15 +167,15 @@ export const App = observer(function App() {
   return (
     <div
       style={{ width: "100%", height: "100%", background: "#eeeef2", position: "relative" }}
-      onPointerDown={handleCanvasPointerDown}
-      onPointerMove={handleCanvasPointerMove}
-      onPointerUp={handleCanvasPointerUp}
+      onPointerDown={editorMode === "edit" ? handleCanvasPointerDown : undefined}
+      onPointerMove={editorMode === "edit" ? handleCanvasPointerMove : undefined}
+      onPointerUp={editorMode === "edit" ? handleCanvasPointerUp : undefined}
     >
-      <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} documentStore={documentStore} bridge={bridge} />
-      {!isDragging && selectedIds.map(id => (
+      <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} documentStore={documentStore} bridge={bridge} editorMode={editorMode} />
+      {editorMode === "edit" && !isDragging && selectedIds.map(id => (
         <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} />
       ))}
-      <SnapGuides lines={snapLines} />
+      {editorMode === "edit" && <SnapGuides lines={snapLines} />}
       {marquee && (
         <div style={{
           position: "absolute",
