@@ -8,6 +8,10 @@ export type ElementType =
   | "input"
   | "flex"
   | "grid"
+  | "sc:button"
+  | "sc:card"
+  | "sc:input"
+  | "sc:badge"
 
 export interface EditorElement {
   id: string
@@ -104,5 +108,27 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
     minHeight: 50,
     backgroundColor: "rgba(168,85,247,0.05)",
     border: "1px dashed #c4b5fd",
+  },
+  "sc:button": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+  },
+  "sc:card": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 350,
+  },
+  "sc:input": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 250,
+  },
+  "sc:badge": {
+    position: "absolute",
+    left: 100,
+    top: 100,
   },
 }

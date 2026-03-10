@@ -10,10 +10,18 @@
   },
   "dependencies": {
     "@devom/editor-core": "workspace:*",
+    "@radix-ui/react-slot": "^1.2.4",
+    "autoprefixer": "catalog:",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",
+    "postcss": "catalog:",
     "react": "catalog:react",
-    "react-dom": "catalog:react"
+    "react-dom": "catalog:react",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "catalog:",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@devom/ts-config": "workspace:*",

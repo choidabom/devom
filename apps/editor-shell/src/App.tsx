@@ -212,6 +212,12 @@ function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, canUndo, canRedo, 
         <ToolBtn icon="▲" title="Image" onClick={() => onAdd("image")} />
         <ToolBtn icon="/b" title="Button" onClick={() => onAdd("button")} />
         <ToolBtn icon="◉" title="Input" onClick={() => onAdd("input")} />
+        <ToolSep />
+        <ToolBtn icon="Btn" title="shadcn Button" onClick={() => onAdd("sc:button")} />
+        <ToolBtn icon="Card" title="shadcn Card" onClick={() => onAdd("sc:card")} />
+        <ToolBtn icon="Inp" title="shadcn Input" onClick={() => onAdd("sc:input")} />
+        <ToolBtn icon="Bdg" title="shadcn Badge" onClick={() => onAdd("sc:badge")} />
+        <ToolSep />
         <ToolBtn icon="⚙" title="Export" onClick={onExport} />
         <ToolSep />
         <ToolBtn icon="↩" title="Undo" onClick={onUndo} disabled={!canUndo} />
@@ -278,7 +284,8 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
   const isSelected = selectionStore.selectedId === elementId
   const isRoot = elementId === documentStore.rootId
 
-  const icon = element.type === "flex" ? "◇" : element.type === "grid" ? "▦" : element.type === "text" ? "T" : element.type === "image" ? "▲" : element.type === "button" ? "/b" : element.type === "input" ? "◉" : "◆"
+  const iconMap: Record<string, string> = { flex: "◇", grid: "▦", text: "T", image: "▲", button: "/b", input: "◉", "sc:button": "Btn", "sc:card": "Card", "sc:input": "Inp", "sc:badge": "Bdg" }
+  const icon = iconMap[element.type] ?? "◆"
 
   return (
     <div>
@@ -335,6 +342,14 @@ const PropertiesPanel = observer(function PropertiesPanel() {
     bridge.send({ type: "UPDATE_STYLE", payload: { id: element.id, style: { [key]: parsed } } })
   }
 
+  const updateProp = (key: string, value: string) => {
+    historyStore.pushSnapshot()
+    documentStore.updateProps(element.id, { [key]: value })
+    bridge.send({ type: "UPDATE_PROPS", payload: { id: element.id, props: { [key]: value } } })
+  }
+
+  const isShadcn = element.type.startsWith("sc:")
+
   return (
     <div style={{ padding: "12px 0" }}>
       {/* Position */}
@@ -345,26 +360,69 @@ const PropertiesPanel = observer(function PropertiesPanel() {
         </PropGrid>
       </PropSection>
 
-      {/* Size */}
-      <PropSection title="Size">
-        <PropGrid>
-          <PropCompact label="W" value={element.style.width ?? "auto"} onChange={(v) => updateStyle("width", v)} />
-          <PropCompact label="H" value={element.style.height ?? "auto"} onChange={(v) => updateStyle("height", v)} />
-        </PropGrid>
-      </PropSection>
+      {/* Size — only for non-shadcn or card */}
+      {(!isShadcn || element.type === "sc:card" || element.type === "sc:input") && (
+        <PropSection title="Size">
+          <PropGrid>
+            <PropCompact label="W" value={element.style.width ?? "auto"} onChange={(v) => updateStyle("width", v)} />
+            <PropCompact label="H" value={element.style.height ?? "auto"} onChange={(v) => updateStyle("height", v)} />
+          </PropGrid>
+        </PropSection>
+      )}
 
-      {/* Style */}
-      <PropSection title="Style">
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-          <PropRow label="Visible" value="Yes" onChange={() => {}} />
-          <PropRow label="Opacity" value={element.style.opacity ?? 1} onChange={(v) => updateStyle("opacity", v)} />
-          <PropRow label="Radius" value={element.style.borderRadius ?? 0} onChange={(v) => updateStyle("borderRadius", v)} />
-          <PropRow label="Fill" value={element.style.backgroundColor ?? ""} onChange={(v) => updateStyle("backgroundColor", v)} color />
-          <PropRow label="Color" value={element.style.color ?? ""} onChange={(v) => updateStyle("color", v)} color />
-          <PropRow label="Padding" value={element.style.padding ?? 0} onChange={(v) => updateStyle("padding", v)} />
-          <PropRow label="Gap" value={element.style.gap ?? 0} onChange={(v) => updateStyle("gap", v)} />
-        </div>
-      </PropSection>
+      {/* shadcn Component Props */}
+      {element.type === "sc:button" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Label" value={element.props.label as string ?? "Button"} onChange={(v) => updateProp("label", v)} />
+            <PropRow label="Variant" value={element.props.variant as string ?? "default"} onChange={(v) => updateProp("variant", v)} />
+            <PropRow label="Size" value={element.props.size as string ?? "default"} onChange={(v) => updateProp("size", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {element.type === "sc:card" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Title" value={element.props.title as string ?? ""} onChange={(v) => updateProp("title", v)} />
+            <PropRow label="Desc" value={element.props.description as string ?? ""} onChange={(v) => updateProp("description", v)} />
+            <PropRow label="Content" value={element.props.content as string ?? ""} onChange={(v) => updateProp("content", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {element.type === "sc:input" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Placeholder" value={element.props.placeholder as string ?? ""} onChange={(v) => updateProp("placeholder", v)} />
+            <PropRow label="Type" value={element.props.type as string ?? "text"} onChange={(v) => updateProp("type", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {element.type === "sc:badge" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Label" value={element.props.label as string ?? "Badge"} onChange={(v) => updateProp("label", v)} />
+            <PropRow label="Variant" value={element.props.variant as string ?? "default"} onChange={(v) => updateProp("variant", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {/* Style — only for non-shadcn elements */}
+      {!isShadcn && (
+        <PropSection title="Style">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Visible" value="Yes" onChange={() => {}} />
+            <PropRow label="Opacity" value={element.style.opacity ?? 1} onChange={(v) => updateStyle("opacity", v)} />
+            <PropRow label="Radius" value={element.style.borderRadius ?? 0} onChange={(v) => updateStyle("borderRadius", v)} />
+            <PropRow label="Fill" value={element.style.backgroundColor ?? ""} onChange={(v) => updateStyle("backgroundColor", v)} color />
+            <PropRow label="Color" value={element.style.color ?? ""} onChange={(v) => updateStyle("color", v)} color />
+            <PropRow label="Padding" value={element.style.padding ?? 0} onChange={(v) => updateStyle("padding", v)} />
+            <PropRow label="Gap" value={element.style.gap ?? 0} onChange={(v) => updateStyle("gap", v)} />
+          </div>
+        </PropSection>
+      )}
 
       {/* Container */}
       {(element.type === "flex" || element.type === "grid") && (

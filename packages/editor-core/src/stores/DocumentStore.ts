@@ -151,6 +151,14 @@ export class DocumentStore {
         return { label: "Button" }
       case "input":
         return { placeholder: "Enter text..." }
+      case "sc:button":
+        return { label: "Button", variant: "default", size: "default" }
+      case "sc:card":
+        return { title: "Card Title", description: "Card description", content: "Card content here." }
+      case "sc:input":
+        return { placeholder: "Type something...", type: "text" }
+      case "sc:badge":
+        return { label: "Badge", variant: "default" }
       default:
         return {}
     }

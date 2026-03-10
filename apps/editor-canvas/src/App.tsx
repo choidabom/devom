@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import { DocumentStore, MessageBridge, type EditorMessage } from "@devom/editor-core"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 
 const SHELL_ORIGIN = import.meta.env.VITE_SHELL_ORIGIN || "http://localhost:4000"
 
@@ -219,6 +223,41 @@ function getElementContent(type: string, props: Record<string, unknown>): React.
         >
           Image
         </div>
+      )
+    case "sc:button":
+      return (
+        <Button
+          variant={(props.variant as "default" | "destructive" | "outline" | "secondary" | "ghost" | "link") ?? "default"}
+          size={(props.size as "default" | "sm" | "lg" | "icon") ?? "default"}
+        >
+          {String(props.label ?? "Button")}
+        </Button>
+      )
+    case "sc:card":
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>{String(props.title ?? "Card Title")}</CardTitle>
+            <CardDescription>{String(props.description ?? "")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>{String(props.content ?? "")}</p>
+          </CardContent>
+        </Card>
+      )
+    case "sc:input":
+      return (
+        <Input
+          placeholder={String(props.placeholder ?? "")}
+          type={String(props.type ?? "text")}
+          readOnly
+        />
+      )
+    case "sc:badge":
+      return (
+        <Badge variant={(props.variant as "default" | "secondary" | "destructive" | "outline") ?? "default"}>
+          {String(props.label ?? "Badge")}
+        </Badge>
       )
     default:
       return null
