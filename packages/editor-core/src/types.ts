@@ -12,6 +12,22 @@ export type ElementType =
   | "sc:card"
   | "sc:input"
   | "sc:badge"
+  | "sc:checkbox"
+  | "sc:switch"
+  | "sc:label"
+  | "sc:textarea"
+  | "sc:avatar"
+  | "sc:separator"
+  | "sc:progress"
+  | "sc:skeleton"
+  | "sc:slider"
+  | "sc:tabs"
+  | "sc:alert"
+  | "sc:toggle"
+  | "sc:select"
+  | "sc:table"
+  | "sc:accordion"
+  | "sc:radio-group"
 
 export interface EditorElement {
   id: string
@@ -164,6 +180,97 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
     width: 250,
   },
   "sc:badge": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+  },
+  "sc:checkbox": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+  },
+  "sc:switch": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+  },
+  "sc:label": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+  },
+  "sc:textarea": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 250,
+  },
+  "sc:avatar": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+  },
+  "sc:separator": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 200,
+  },
+  "sc:progress": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 200,
+  },
+  "sc:skeleton": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 200,
+    height: 20,
+  },
+  "sc:slider": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 200,
+  },
+  "sc:tabs": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 300,
+  },
+  "sc:alert": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 300,
+  },
+  "sc:toggle": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+  },
+  "sc:select": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 200,
+  },
+  "sc:table": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 400,
+  },
+  "sc:accordion": {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 300,
+  },
+  "sc:radio-group": {
     position: "absolute",
     left: 100,
     top: 100,

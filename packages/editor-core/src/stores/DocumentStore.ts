@@ -12,6 +12,7 @@ export class DocumentStore {
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true })
     this.initRoot()
+    this.initDemo()
   }
 
   private initRoot() {
@@ -37,6 +38,105 @@ export class DocumentStore {
       layoutProps: { ...DEFAULT_LAYOUT_PROPS },
       sizing: { ...DEFAULT_SIZING },
     })
+  }
+
+  private initDemo() {
+    const root = this.elements.get(this.rootId)
+    if (!root) return
+
+    const add = (
+      type: ElementType,
+      parentId: string,
+      overrides: { name?: string; style?: Partial<EditorElement['style']>; props?: Record<string, unknown>; layoutMode?: 'none' | 'flex'; layoutProps?: Partial<EditorElement['layoutProps']> } = {},
+    ): string => {
+      const id = nanoid()
+      const parent = this.elements.get(parentId)
+      if (!parent) return ''
+      this.elements.set(id, {
+        id,
+        type,
+        name: overrides.name ?? `${type}-${id.slice(0, 4)}`,
+        parentId,
+        children: [],
+        style: { ...DEFAULT_ELEMENT_STYLE[type], ...overrides.style },
+        props: { ...this.getDefaultProps(type), ...overrides.props },
+        locked: false,
+        visible: true,
+        layoutMode: overrides.layoutMode ?? 'none',
+        layoutProps: { ...DEFAULT_LAYOUT_PROPS, ...overrides.layoutProps },
+        sizing: { ...DEFAULT_SIZING },
+      })
+      parent.children.push(id)
+      return id
+    }
+
+    // Toss-inspired color palette
+    const toss = { blue: '#3182f6', bg: '#f2f4f6', card: '#ffffff', text: '#191f28', sub: '#8b95a1', border: '#e5e8eb', green: '#00c471', red: '#f04452' }
+
+    // --- Header Section ---
+    add('text', this.rootId, { name: 'Title', style: { left: 20, top: 16, fontSize: 18, fontWeight: 700, color: toss.text }, props: { content: '송금하기' } })
+    add('text', this.rootId, { name: 'Description', style: { left: 20, top: 42, fontSize: 12, color: toss.sub }, props: { content: '토스에서 간편하게 송금해 보세요' } })
+
+    // --- Login Card (Auto Layout Column) ---
+    const loginCard = add('div', this.rootId, {
+      name: 'Login Card',
+      style: { left: 20, top: 70, width: 230, backgroundColor: toss.card, borderRadius: 16, border: `1px solid ${toss.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+      layoutMode: 'flex',
+      layoutProps: { direction: 'column', gap: 10, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch', justifyContent: 'start' },
+    })
+    if (loginCard) {
+      add('sc:label', loginCard, { name: 'Email Label', style: { position: 'relative' }, props: { text: '이메일' } })
+      add('sc:input', loginCard, { name: 'Email Input', style: { position: 'relative', width: undefined }, props: { placeholder: 'hello@toss.im', type: 'email' } })
+      add('sc:label', loginCard, { name: 'PW Label', style: { position: 'relative' }, props: { text: '비밀번호' } })
+      add('sc:input', loginCard, { name: 'PW Input', style: { position: 'relative', width: undefined }, props: { placeholder: '••••••••', type: 'password' } })
+      add('sc:button', loginCard, { name: 'Login Btn', style: { position: 'relative' }, props: { label: '로그인', variant: 'default' } })
+      add('sc:separator', loginCard, { name: 'Divider', style: { position: 'relative', width: undefined } })
+      add('sc:checkbox', loginCard, { name: 'Remember', style: { position: 'relative' }, props: { label: '로그인 유지', checked: false } })
+    }
+
+    // --- Settings Card (Form Controls) ---
+    const settingsCard = add('div', this.rootId, {
+      name: 'Settings Card',
+      style: { left: 270, top: 70, width: 230, backgroundColor: toss.card, borderRadius: 16, border: `1px solid ${toss.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+      layoutMode: 'flex',
+      layoutProps: { direction: 'column', gap: 12, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch', justifyContent: 'start' },
+    })
+    if (settingsCard) {
+      add('text', settingsCard, { name: 'Settings Title', style: { position: 'relative', fontSize: 15, fontWeight: 700, color: toss.text }, props: { content: '알림 설정' } })
+      add('sc:switch', settingsCard, { name: 'Push Toggle', style: { position: 'relative' }, props: { label: '푸시 알림', checked: true } })
+      add('sc:switch', settingsCard, { name: 'Email Toggle', style: { position: 'relative' }, props: { label: '이메일 알림', checked: false } })
+      add('sc:separator', settingsCard, { name: 'Settings Sep', style: { position: 'relative', width: undefined } })
+      add('sc:select', settingsCard, { name: 'Locale Select', style: { position: 'relative', width: undefined }, props: { placeholder: '언어 선택', options: ['한국어', 'English', '日本語'] } })
+      add('sc:slider', settingsCard, { name: 'Volume', style: { position: 'relative', width: undefined }, props: { value: 70, min: 0, max: 100 } })
+      add('sc:radio-group', settingsCard, { name: 'Theme Radio', style: { position: 'relative' }, props: { label: '테마', options: ['라이트', '다크', '시스템'], value: '라이트' } })
+    }
+
+    // --- Status Section ---
+    add('sc:badge', this.rootId, { name: 'Badge Active', style: { left: 20, top: 420 }, props: { label: '성공', variant: 'default' } })
+    add('sc:badge', this.rootId, { name: 'Badge Pending', style: { left: 75, top: 420 }, props: { label: '대기중', variant: 'secondary' } })
+    add('sc:badge', this.rootId, { name: 'Badge Error', style: { left: 140, top: 420 }, props: { label: '실패', variant: 'destructive' } })
+    add('sc:badge', this.rootId, { name: 'Badge Info', style: { left: 195, top: 420 }, props: { label: '안내', variant: 'outline' } })
+
+    // --- Alert ---
+    add('sc:alert', this.rootId, { name: 'Notice', style: { left: 20, top: 452, width: 230 }, props: { title: '점검 안내', description: '3/12 02:00~04:00 서비스 점검이 예정되어 있습니다.', variant: 'default' } })
+
+    // --- Progress ---
+    add('sc:progress', this.rootId, { name: 'Transfer Progress', style: { left: 270, top: 452, width: 230 }, props: { value: 75 } })
+
+    // --- Table ---
+    add('sc:table', this.rootId, {
+      name: 'Transaction Table',
+      style: { left: 20, top: 540, width: 480 },
+      props: {
+        headers: ['이름', '상태', '금액'],
+        rows: [['김토스', '완료', '₩250,000'], ['이뱅크', '대기', '₩150,000'], ['박페이', '완료', '₩350,000']],
+      },
+    })
+
+    // --- Bottom Row (Misc) ---
+    add('sc:avatar', this.rootId, { name: 'User Avatar', style: { left: 270, top: 486 }, props: { fallback: '토' } })
+    add('sc:skeleton', this.rootId, { name: 'Loading', style: { left: 310, top: 486, width: 190, height: 20 } })
+    add('sc:toggle', this.rootId, { name: 'Favorite', style: { left: 310, top: 512 }, props: { label: '★ 즐겨찾기' } })
   }
 
   get root(): EditorElement | undefined {
@@ -317,6 +417,38 @@ export class DocumentStore {
         return { placeholder: "Type something...", type: "text" }
       case "sc:badge":
         return { label: "Badge", variant: "default" }
+      case "sc:checkbox":
+        return { label: "Agree to terms", checked: false }
+      case "sc:switch":
+        return { label: "Enable notifications", checked: false }
+      case "sc:label":
+        return { text: "Label" }
+      case "sc:textarea":
+        return { placeholder: "Enter text...", rows: 3 }
+      case "sc:avatar":
+        return { src: "", fallback: "AB" }
+      case "sc:separator":
+        return { orientation: "horizontal" }
+      case "sc:progress":
+        return { value: 60 }
+      case "sc:skeleton":
+        return { variant: "line" }
+      case "sc:slider":
+        return { value: 50, min: 0, max: 100, step: 1 }
+      case "sc:tabs":
+        return { tabs: ["Account", "Password", "Settings"], activeTab: "Account" }
+      case "sc:alert":
+        return { title: "Heads up!", description: "You can add components to your app.", variant: "default" }
+      case "sc:toggle":
+        return { label: "Bold", pressed: false }
+      case "sc:select":
+        return { placeholder: "Select option", options: ["Option 1", "Option 2", "Option 3"] }
+      case "sc:table":
+        return { headers: ["Name", "Status", "Amount"], rows: [["Alice", "Active", "₩250,000"], ["Bob", "Pending", "₩150,000"], ["Charlie", "Active", "₩350,000"]] }
+      case "sc:accordion":
+        return { items: [{ title: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." }, { title: "Is it styled?", content: "Yes. It comes with default styles." }] }
+      case "sc:radio-group":
+        return { label: "Plan", options: ["Free", "Pro", "Enterprise"], value: "Free" }
       default:
         return {}
     }

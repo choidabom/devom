@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@devom/editor-core": "workspace:*",
+    "@fontsource-variable/geist": "^5.2.8",
     "@radix-ui/react-slot": "^1.2.4",
     "autoprefixer": "catalog:",
     "class-variance-authority": "^0.7.1",

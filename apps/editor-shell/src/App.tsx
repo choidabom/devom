@@ -117,14 +117,11 @@ export const App = observer(function App() {
     historyStore.pushSnapshot()
     const id = documentStore.addElement(type)
     if (id) {
-      const element = documentStore.getElement(id)
-      if (element) {
-        bridge.send({ type: "ADD_ELEMENT", payload: { ...element, style: { ...element.style }, props: { ...element.props }, children: [...element.children] } })
-        selectionStore.select(id)
-        bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
-      }
+      selectionStore.select(id)
+      syncToCanvas()
+      bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
     }
-  }, [])
+  }, [syncToCanvas])
 
   const handleDelete = useCallback(() => {
     if (selectionStore.selectedIds.length === 0) return
