@@ -1,7 +1,7 @@
 import { makeAutoObservable, observable } from "mobx"
 import { nanoid } from "nanoid"
 import type { CSSProperties } from "react"
-import { DEFAULT_ELEMENT_STYLE, type EditorElement, type ElementType } from "../types"
+import { DEFAULT_ELEMENT_STYLE, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type EditorElement, type ElementType, type LayoutProps, type SizingProps } from "../types"
 
 export class DocumentStore {
   elements = observable.map<string, EditorElement>()
@@ -33,6 +33,9 @@ export class DocumentStore {
       props: {},
       locked: true,
       visible: true,
+      layoutMode: 'none' as const,
+      layoutProps: { ...DEFAULT_LAYOUT_PROPS },
+      sizing: { ...DEFAULT_SIZING },
     })
   }
 
@@ -64,6 +67,9 @@ export class DocumentStore {
       props: this.getDefaultProps(type),
       locked: false,
       visible: true,
+      layoutMode: 'none' as const,
+      layoutProps: { ...DEFAULT_LAYOUT_PROPS },
+      sizing: { ...DEFAULT_SIZING },
     }
 
     this.elements.set(id, element)
@@ -125,6 +131,9 @@ export class DocumentStore {
           ...(typeof el.style.left === "number" ? { left: el.style.left + offset } : {}),
           ...(typeof el.style.top === "number" ? { top: el.style.top + offset } : {}),
         },
+        layoutMode: el.layoutMode ?? 'none',
+        layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
+        sizing: el.sizing ?? { ...DEFAULT_SIZING },
       }
 
       this.elements.set(newId, cloned)
@@ -153,6 +162,9 @@ export class DocumentStore {
           ...(typeof el.style.left === "number" ? { left: el.style.left + offset } : {}),
           ...(typeof el.style.top === "number" ? { top: el.style.top + offset } : {}),
         },
+        layoutMode: el.layoutMode ?? 'none',
+        layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
+        sizing: el.sizing ?? { ...DEFAULT_SIZING },
       }
 
       this.elements.set(newId, cloned)
@@ -189,6 +201,76 @@ export class DocumentStore {
     // Add to new parent
     element.parentId = newParentId
     newParent.children.splice(index, 0, id)
+  }
+
+  setLayoutMode(id: string, mode: 'none' | 'flex') {
+    const element = this.elements.get(id)
+    if (!element || element.locked || id === this.rootId) return
+    element.layoutMode = mode
+    if (mode === 'flex') {
+      element.layoutProps = { ...DEFAULT_LAYOUT_PROPS }
+      for (const childId of element.children) {
+        const child = this.elements.get(childId)
+        if (!child) continue
+        const { position, left, top, ...rest } = child.style
+        child.style = { ...rest, position: 'relative' as const }
+      }
+    } else {
+      for (const childId of element.children) {
+        const child = this.elements.get(childId)
+        if (!child) continue
+        child.style = { ...child.style, position: 'absolute' as const, left: 0, top: 0 }
+      }
+    }
+  }
+
+  updateLayoutProps(id: string, props: Partial<LayoutProps>) {
+    const element = this.elements.get(id)
+    if (!element || element.layoutMode !== 'flex') return
+    Object.assign(element.layoutProps, props)
+  }
+
+  updateSizing(id: string, sizing: Partial<SizingProps>) {
+    const element = this.elements.get(id)
+    if (!element) return
+    Object.assign(element.sizing, sizing)
+  }
+
+  reorderChild(parentId: string, childId: string, newIndex: number) {
+    const parent = this.elements.get(parentId)
+    if (!parent) return
+    const oldIndex = parent.children.indexOf(childId)
+    if (oldIndex === -1) return
+    parent.children.splice(oldIndex, 1)
+    parent.children.splice(newIndex, 0, childId)
+  }
+
+  reparentElement(id: string, newParentId: string, index: number, dropPosition?: { x: number; y: number }) {
+    const element = this.elements.get(id)
+    const newParent = this.elements.get(newParentId)
+    if (!element || !newParent || id === this.rootId) return
+
+    const oldParent = element.parentId ? this.elements.get(element.parentId) : undefined
+    if (oldParent) {
+      const idx = oldParent.children.indexOf(id)
+      if (idx !== -1) oldParent.children.splice(idx, 1)
+    }
+
+    element.parentId = newParentId
+    newParent.children.splice(index, 0, id)
+
+    if (newParent.layoutMode === 'flex') {
+      const { position, left, top, ...rest } = element.style
+      element.style = { ...rest, position: 'relative' as const }
+      element.sizing = { ...DEFAULT_SIZING }
+    } else {
+      element.style = {
+        ...element.style,
+        position: 'absolute' as const,
+        left: dropPosition?.x ?? 0,
+        top: dropPosition?.y ?? 0,
+      }
+    }
   }
 
   toSerializable(): { elements: Record<string, EditorElement>; rootId: string } {
