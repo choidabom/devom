@@ -13,7 +13,9 @@
     "lint:prettier": "npx prettier '**/*.{ts,tsx,js,jsx,json,md,cjs,mjs,mts,yml,yaml}' --write",
     "update:catalog": "bash scripts/update-catalog.sh",
     "clean": "turbo run clean && rm -rf node_modules",
-    "archive": "pnpm --filter=@devom/archive"
+    "archive": "pnpm --filter=@devom/archive",
+    "editor": "turbo run dev --filter=@devom/editor-shell --filter=@devom/editor-canvas",
+    "editor:build": "pnpm --filter @devom/editor-core build && turbo run build --filter=@devom/editor-shell --filter=@devom/editor-canvas"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
