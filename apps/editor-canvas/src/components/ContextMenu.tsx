@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Lock, Unlock } from "lucide-react"
 import type { DocumentStore } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
 
@@ -87,7 +88,7 @@ export function ContextMenu({ documentStore, selectedIds, bridge }: ContextMenuP
         onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9" }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
       >
-        <span style={{ fontSize: 12 }}>{anyLocked ? "🔓" : "🔒"}</span>
+        {anyLocked ? <Unlock size={14} /> : <Lock size={14} />}
         {anyLocked ? "Unlock" : "Lock"}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { observer } from "mobx-react-lite"
+import { Lock, Unlock } from "lucide-react"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
@@ -72,7 +73,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
             width: "100%",
           }}
         >
-          {elements.some(el => el.locked) ? "🔒 Locked" : "🔓 Unlocked"}
+          {elements.some(el => el.locked) ? <><Lock size={14} /> Locked</> : <><Unlock size={14} /> Unlocked</>}
         </button>
       </div>
 

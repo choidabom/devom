@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
+import { Lock } from "lucide-react"
 import type { DocumentStore } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
 
@@ -178,7 +179,7 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
             boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
           }}
         >
-          🔒
+          <Lock size={12} />
         </div>
       ) : (
         handles.map((handle) => (

@@ -196,6 +196,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      lucide-react:
+        specifier: ^0.344.0
+        version: 0.344.0(react@19.2.3)
       mobx:
         specifier: ^6.13.7
         version: 6.15.0
@@ -245,6 +248,9 @@ importers:
       '@devom/editor-core':
         specifier: workspace:*
         version: link:../../packages/editor-core
+      lucide-react:
+        specifier: ^0.344.0
+        version: 0.344.0(react@19.2.3)
       mobx:
         specifier: ^6.13.7
         version: 6.15.0

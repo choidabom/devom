@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { observer } from "mobx-react-lite"
+import { Lock, Unlock } from "lucide-react"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
@@ -81,7 +82,7 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
               ...(hovered && !element.locked ? { opacity: 0.3 } : {}),
             }}
           >
-            {element.locked ? "🔒" : "🔓"}
+            {element.locked ? <Lock size={12} /> : <Unlock size={12} />}
           </span>
         )}
       </div>
