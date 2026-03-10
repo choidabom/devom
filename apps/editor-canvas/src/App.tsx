@@ -55,6 +55,15 @@ export const App = observer(function App() {
         setEditorMode(msg.payload.mode)
         if (msg.payload.mode === "interact") setSelectedIds([])
         break
+      case "SET_LAYOUT_MODE":
+        documentStore.setLayoutMode(msg.payload.id, msg.payload.mode)
+        break
+      case "UPDATE_LAYOUT_PROPS":
+        documentStore.updateLayoutProps(msg.payload.id, msg.payload.layoutProps)
+        break
+      case "UPDATE_SIZING":
+        documentStore.updateSizing(msg.payload.id, msg.payload.sizing)
+        break
     }
   }, [])
 
