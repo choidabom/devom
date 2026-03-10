@@ -6,17 +6,19 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import type { DocumentStore } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
+import { calcSnap, type SnapLine, type Bounds } from "../utils/snap"
 
 interface ElementRendererProps {
   elementId: string
   selectedIds: string[]
   onSelect: (id: string, shiftKey: boolean) => void
   onDragChange?: (dragging: boolean) => void
+  onSnapLines?: (lines: SnapLine[]) => void
   documentStore: DocumentStore
   bridge: MessageBridge
 }
 
-export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, documentStore, bridge }: ElementRendererProps) {
+export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, documentStore, bridge }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
 
@@ -71,7 +73,34 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       })
       .filter((t): t is NonNullable<typeof t> => t !== null && t.dom !== null)
 
+    // Collect other elements' bounds for snap calculation
+    const otherBounds: Bounds[] = []
+    const allElements = documentStore.getAllElements()
+    for (const el of allElements) {
+      if (dragIds.includes(el.id) || el.parentId === null || !el.visible) continue
+      const dom = document.querySelector(`[data-element-id="${el.id}"]`) as HTMLElement | null
+      if (!dom) continue
+      const parentDom = dom.offsetParent as HTMLElement | null
+      if (!parentDom) continue
+      const parentRect = parentDom.getBoundingClientRect()
+      const elRect = dom.getBoundingClientRect()
+      otherBounds.push({
+        left: elRect.left - parentRect.left,
+        top: elRect.top - parentRect.top,
+        width: elRect.width,
+        height: elRect.height,
+      })
+    }
+
+    if (dragTargets.length === 0) return
+
+    // Primary dragged element bounds for snap reference
+    const primaryTarget = dragTargets[0]!
+    const primaryDom = primaryTarget.dom!
+
     onDragChange?.(true)
+    let lastSnapDx = 0
+    let lastSnapDy = 0
 
     const clearTransforms = () => {
       for (const t of dragTargets) {
@@ -87,22 +116,40 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       target.removeEventListener("pointercancel", onCancel)
       dragCleanupRef.current = null
       onDragChange?.(false)
+      onSnapLines?.([])
     }
 
     const onMove = (me: PointerEvent) => {
       const dx = me.clientX - startX
       const dy = me.clientY - startY
+
+      // Calculate snap based on primary element's projected position
+      const projectedBounds: Bounds = {
+        left: primaryTarget.startLeft + dx,
+        top: primaryTarget.startTop + dy,
+        width: primaryDom.offsetWidth,
+        height: primaryDom.offsetHeight,
+      }
+      const snap = calcSnap(projectedBounds, otherBounds)
+      lastSnapDx = snap.dx
+      lastSnapDy = snap.dy
+
+      const snappedDx = dx + snap.dx
+      const snappedDy = dy + snap.dy
+
       for (const t of dragTargets) {
-        t.dom!.style.transform = `translate(${dx}px, ${dy}px)`
+        t.dom!.style.transform = `translate(${snappedDx}px, ${snappedDy}px)`
         t.dom!.style.willChange = "transform"
       }
+
+      onSnapLines?.(snap.lines)
     }
 
     const onUp = (me: PointerEvent) => {
       cleanup()
       clearTransforms()
-      const dx = me.clientX - startX
-      const dy = me.clientY - startY
+      const dx = me.clientX - startX + lastSnapDx
+      const dy = me.clientY - startY + lastSnapDy
       const moves: Array<{ id: string; x: number; y: number }> = []
 
       for (const t of dragTargets) {
@@ -113,7 +160,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       }
 
       if (moves.length === 1) {
-        bridge.send({ type: "ELEMENT_MOVED", payload: moves[0] })
+        bridge.send({ type: "ELEMENT_MOVED", payload: moves[0]! })
       } else {
         bridge.send({ type: "ELEMENTS_MOVED", payload: { moves } })
       }
@@ -147,7 +194,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     >
       {content}
       {element.children.map((childId) => (
-        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} documentStore={documentStore} bridge={bridge} />
+        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} documentStore={documentStore} bridge={bridge} />
       ))}
     </div>
   )

@@ -44,6 +44,10 @@ export class DocumentStore {
     return this.elements.get(id)
   }
 
+  getAllElements(): EditorElement[] {
+    return Array.from(this.elements.values())
+  }
+
   addElement(type: ElementType, parentId?: string): string {
     const id = nanoid()
     const targetParentId = parentId ?? this.rootId

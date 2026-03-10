@@ -3,6 +3,8 @@ import { observer } from "mobx-react-lite"
 import { DocumentStore, MessageBridge, type EditorMessage } from "@devom/editor-core"
 import { ElementRenderer } from "./components/ElementRenderer"
 import { SelectionOverlay } from "./components/SelectionOverlay"
+import { SnapGuides } from "./components/SnapGuides"
+import type { SnapLine } from "./utils/snap"
 
 const SHELL_ORIGIN = import.meta.env.VITE_SHELL_ORIGIN || "http://localhost:4000"
 
@@ -23,6 +25,7 @@ function rectsIntersect(
 export const App = observer(function App() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
+  const [snapLines, setSnapLines] = useState<SnapLine[]>([])
   const [marquee, setMarquee] = useState<{ startX: number; startY: number; endX: number; endY: number } | null>(null)
   const marqueeRef = useRef<{ startX: number; startY: number; active: boolean } | null>(null)
 
@@ -162,10 +165,11 @@ export const App = observer(function App() {
       onPointerMove={handleCanvasPointerMove}
       onPointerUp={handleCanvasPointerUp}
     >
-      <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} documentStore={documentStore} bridge={bridge} />
+      <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} documentStore={documentStore} bridge={bridge} />
       {!isDragging && selectedIds.map(id => (
         <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} />
       ))}
+      <SnapGuides lines={snapLines} />
       {marquee && (
         <div style={{
           position: "absolute",
