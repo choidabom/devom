@@ -12,6 +12,7 @@ export type ShellToCanvasMessage =
   | { type: "MOVE_ELEMENT"; payload: { id: string; parentId: string; index: number } }
   | { type: "SET_VIEWPORT"; payload: { width: number; height: number } }
   | { type: "TOGGLE_LOCK"; payload: { ids: string[] } }
+  | { type: "SET_MODE"; payload: { mode: "edit" | "interact" } }
 
 // Canvas -> Shell messages
 export type CanvasToShellMessage =
@@ -23,7 +24,6 @@ export type CanvasToShellMessage =
   | { type: "CANVAS_CLICKED" }
   | { type: "MARQUEE_SELECT"; payload: { ids: string[] } }
   | { type: "KEY_EVENT"; payload: { key: string; code: string; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean } }
-  | { type: "CONTEXT_MENU_ACTION"; payload: { action: "lock" | "unlock"; ids: string[] } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 
