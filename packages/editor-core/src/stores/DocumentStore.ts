@@ -1,13 +1,15 @@
 import { makeAutoObservable, observable } from "mobx"
 import { nanoid } from "nanoid"
 import type { CSSProperties } from "react"
-import { DEFAULT_ELEMENT_STYLE, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type EditorElement, type ElementType, type LayoutProps, type SizingProps } from "../types"
+import { DEFAULT_ELEMENT_STYLE, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type CanvasMode, type PageViewportWidth, type EditorElement, type ElementType, type LayoutProps, type SizingProps } from "../types"
 
 export class DocumentStore {
   elements = observable.map<string, EditorElement>()
   rootId = ""
   name = "Untitled"
   viewport = { width: 1280, height: 720 }
+  canvasMode: CanvasMode = 'canvas'
+  pageViewport: PageViewportWidth = 1280
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true })
@@ -37,6 +39,7 @@ export class DocumentStore {
       layoutMode: 'none' as const,
       layoutProps: { ...DEFAULT_LAYOUT_PROPS },
       sizing: { ...DEFAULT_SIZING },
+      canvasPosition: null,
     })
   }
 
@@ -65,6 +68,7 @@ export class DocumentStore {
         layoutMode: overrides.layoutMode ?? 'none',
         layoutProps: { ...DEFAULT_LAYOUT_PROPS, ...overrides.layoutProps },
         sizing: { ...DEFAULT_SIZING },
+        canvasPosition: null,
       })
       parent.children.push(id)
       return id
@@ -170,6 +174,14 @@ export class DocumentStore {
       layoutMode: 'none' as const,
       layoutProps: { ...DEFAULT_LAYOUT_PROPS },
       sizing: { ...DEFAULT_SIZING },
+      canvasPosition: null,
+    }
+
+    // Page Mode: root children default to flow layout
+    if (this.canvasMode === 'page' && targetParentId === this.rootId) {
+      const { position, left, top, ...rest } = element.style
+      element.style = { ...rest, position: 'relative' as const }
+      element.sizing = { w: 'fill', h: 'hug' }
     }
 
     this.elements.set(id, element)
@@ -183,6 +195,7 @@ export class DocumentStore {
       layoutMode: element.layoutMode ?? 'none',
       layoutProps: element.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
       sizing: element.sizing ?? { ...DEFAULT_SIZING },
+      canvasPosition: element.canvasPosition ?? null,
     })
     if (element.parentId) {
       const parent = this.elements.get(element.parentId)
@@ -239,6 +252,7 @@ export class DocumentStore {
         layoutMode: el.layoutMode ?? 'none',
         layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
         sizing: el.sizing ?? { ...DEFAULT_SIZING },
+        canvasPosition: null,
       }
 
       this.elements.set(newId, cloned)
@@ -270,6 +284,7 @@ export class DocumentStore {
         layoutMode: el.layoutMode ?? 'none',
         layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
         sizing: el.sizing ?? { ...DEFAULT_SIZING },
+        canvasPosition: null,
       }
 
       this.elements.set(newId, cloned)
@@ -341,6 +356,78 @@ export class DocumentStore {
     Object.assign(element.sizing, sizing)
   }
 
+  setCanvasMode(mode: CanvasMode) {
+    if (mode === this.canvasMode) return
+    const root = this.elements.get(this.rootId)
+    if (!root) return
+
+    if (mode === 'page') {
+      // Save absolute positions and switch to flow
+      for (const childId of root.children) {
+        const child = this.elements.get(childId)
+        if (!child) continue
+        child.canvasPosition = {
+          left: typeof child.style.left === 'number' ? child.style.left : 0,
+          top: typeof child.style.top === 'number' ? child.style.top : 0,
+        }
+        const { left, top, position, ...rest } = child.style
+        child.style = { ...rest, position: 'relative' as const }
+      }
+      root.layoutMode = 'flex'
+      root.layoutProps = {
+        ...DEFAULT_LAYOUT_PROPS,
+        direction: 'column',
+        gap: 0,
+        paddingTop: 0,
+        paddingRight: 0,
+        paddingBottom: 0,
+        paddingLeft: 0,
+        alignItems: 'stretch',
+      }
+      root.style = {
+        ...root.style,
+        width: this.pageViewport,
+        height: undefined,
+        minHeight: undefined,
+        overflow: 'visible',
+      }
+    } else {
+      // Restore absolute positions
+      for (const childId of root.children) {
+        const child = this.elements.get(childId)
+        if (!child) continue
+        const pos = child.canvasPosition ?? { left: 0, top: 0 }
+        child.style = {
+          ...child.style,
+          position: 'absolute' as const,
+          left: pos.left,
+          top: pos.top,
+        }
+      }
+      root.layoutMode = 'none'
+      root.layoutProps = { ...DEFAULT_LAYOUT_PROPS }
+      root.style = {
+        ...root.style,
+        width: this.viewport.width,
+        height: this.viewport.height,
+        minHeight: undefined,
+        overflow: 'hidden',
+      }
+    }
+
+    this.canvasMode = mode
+  }
+
+  setPageViewport(width: PageViewportWidth) {
+    this.pageViewport = width
+    if (this.canvasMode === 'page') {
+      const root = this.elements.get(this.rootId)
+      if (root) {
+        root.style = { ...root.style, width }
+      }
+    }
+  }
+
   reorderChild(parentId: string, childId: string, newIndex: number) {
     const parent = this.elements.get(parentId)
     if (!parent) return
@@ -394,6 +481,7 @@ export class DocumentStore {
         layoutMode: el.layoutMode ?? 'none',
         layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
         sizing: el.sizing ?? { ...DEFAULT_SIZING },
+        canvasPosition: el.canvasPosition ?? null,
       })
     }
     this.rootId = data.rootId
