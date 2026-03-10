@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite"
 import { Lock } from "lucide-react"
 import type { DocumentStore } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
+import { isAutoLayoutChild } from "@devom/editor-core"
 
 interface SelectionOverlayProps {
   elementId: string
@@ -12,6 +13,7 @@ interface SelectionOverlayProps {
 
 export const SelectionOverlay = observer(function SelectionOverlay({ elementId, documentStore, bridge }: SelectionOverlayProps) {
   const element = documentStore.getElement(elementId)
+  const inAutoLayout = element ? isAutoLayoutChild(element, (id) => documentStore.getElement(id)) : false
   const resizeCleanupRef = useRef<(() => void) | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const [bounds, setBounds] = useState<{ left: number; top: number; width: number; height: number } | null>(null)
@@ -80,6 +82,24 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
     { position: "sw", cursor: "sw-resize", x: -4, y: elHeight - 4 },
     { position: "w", cursor: "w-resize", x: -4, y: elHeight / 2 - 4 },
   ]
+
+  const filteredHandles = inAutoLayout && element
+    ? handles.filter(h => {
+        const parentEl = documentStore.getElement(element.parentId!)
+        if (!parentEl) return true
+        const dir = parentEl.layoutProps.direction
+        // Main axis: row → w controls width (e/w handles), column → h controls height (n/s handles)
+        const mainSizing = dir === 'row' ? element.sizing.w : element.sizing.h
+        const crossSizing = dir === 'row' ? element.sizing.h : element.sizing.w
+        const mainHandles = dir === 'row' ? ['e', 'w'] : ['n', 's']
+        const crossHandles = dir === 'row' ? ['n', 's'] : ['e', 'w']
+        // Hide main axis handles if fill (flex determines size)
+        if (mainSizing === 'fill' && mainHandles.some(a => h.position.includes(a))) return false
+        // Hide cross axis handles if fill (stretch determines size)
+        if (crossSizing === 'fill' && crossHandles.some(a => h.position.includes(a))) return false
+        return true
+      })
+    : handles
 
   const handlePointerDown = (e: React.PointerEvent, position: string) => {
     if (element.locked) return
@@ -182,7 +202,7 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
           <Lock size={12} />
         </div>
       ) : (
-        handles.map((handle) => (
+        filteredHandles.map((handle) => (
           <div
             key={handle.position}
             onPointerDown={(e) => handlePointerDown(e, handle.position)}
