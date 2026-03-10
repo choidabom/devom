@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react"
 import type { EditorElement } from "../types"
+import { getContainerStyles, getChildSizingStyles } from "../utils/layoutStyles"
 
 const SHADCN_IMPORTS: Record<string, { from: string; names: string[] }> = {
   "sc:button": { from: "@/components/ui/button", names: ["Button"] },
@@ -139,7 +140,27 @@ function renderShadcnElement(el: EditorElement, elements: Record<string, EditorE
 function renderHtmlElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number) {
   const pad = " ".repeat(indent)
   const tag = getHtmlTag(el)
-  const styleStr = styleToJsx(el.style)
+
+  // Compute effective style including auto-layout CSS
+  const effectiveStyle: CSSProperties = { ...el.style }
+
+  // Add container flex styles
+  if (el.layoutMode === 'flex') {
+    Object.assign(effectiveStyle, getContainerStyles(el))
+  }
+
+  // Adjust for auto-layout children
+  if (el.parentId) {
+    const parentEl = elements[el.parentId]
+    if (parentEl?.layoutMode === 'flex') {
+      delete (effectiveStyle as any).position
+      delete (effectiveStyle as any).left
+      delete (effectiveStyle as any).top
+      Object.assign(effectiveStyle, getChildSizingStyles(el, parentEl.layoutProps.direction))
+    }
+  }
+
+  const styleStr = styleToJsx(effectiveStyle)
   const propsStr = getHtmlPropsString(el)
   const hasChildren = el.children.length > 0
   const content = getHtmlContent(el)
