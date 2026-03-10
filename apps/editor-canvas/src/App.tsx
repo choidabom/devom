@@ -4,6 +4,7 @@ import { DocumentStore, MessageBridge, type EditorMessage } from "@devom/editor-
 import { ElementRenderer } from "./components/ElementRenderer"
 import { SelectionOverlay } from "./components/SelectionOverlay"
 import { SnapGuides } from "./components/SnapGuides"
+import { InsertionIndicator } from "./components/InsertionIndicator"
 
 import type { SnapLine } from "./utils/snap"
 
@@ -30,6 +31,8 @@ export const App = observer(function App() {
   const [marquee, setMarquee] = useState<{ startX: number; startY: number; endX: number; endY: number } | null>(null)
   const marqueeRef = useRef<{ startX: number; startY: number; active: boolean } | null>(null)
   const [editorMode, setEditorMode] = useState<"edit" | "interact">("edit")
+  const [insertionIndicator, setInsertionIndicator] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
+  const [dropHighlightId, setDropHighlightId] = useState<string | null>(null)
 
   const handleShellMessage = useCallback((msg: EditorMessage) => {
     switch (msg.type) {
@@ -180,11 +183,33 @@ export const App = observer(function App() {
       onPointerMove={editorMode === "edit" ? handleCanvasPointerMove : undefined}
       onPointerUp={editorMode === "edit" ? handleCanvasPointerUp : undefined}
     >
-      <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} documentStore={documentStore} bridge={bridge} editorMode={editorMode} />
+      <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} />
       {editorMode === "edit" && !isDragging && selectedIds.map(id => (
         <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} />
       ))}
       {editorMode === "edit" && <SnapGuides lines={snapLines} />}
+      {insertionIndicator && <InsertionIndicator {...insertionIndicator} />}
+      {dropHighlightId && (() => {
+        const dom = document.querySelector(`[data-element-id="${dropHighlightId}"]`) as HTMLElement | null
+        if (!dom) return null
+        const parentEl = dom.offsetParent as HTMLElement | null
+        if (!parentEl) return null
+        const parentRect = parentEl.getBoundingClientRect()
+        const domRect = dom.getBoundingClientRect()
+        return (
+          <div style={{
+            position: 'absolute',
+            left: domRect.left - parentRect.left,
+            top: domRect.top - parentRect.top,
+            width: domRect.width,
+            height: domRect.height,
+            border: '2px solid #3b82f6',
+            borderRadius: 4,
+            pointerEvents: 'none',
+            zIndex: 9998,
+          }} />
+        )
+      })()}
       {marquee && (
         <div style={{
           position: "absolute",
