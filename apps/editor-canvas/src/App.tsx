@@ -34,6 +34,8 @@ export const App = observer(function App() {
   const [marquee, setMarquee] = useState<{ startX: number; startY: number; endX: number; endY: number } | null>(null)
   const marqueeRef = useRef<{ startX: number; startY: number; active: boolean } | null>(null)
   const [editorMode, setEditorMode] = useState<"edit" | "interact">("edit")
+  const [canvasMode, setCanvasMode] = useState<"canvas" | "page">("canvas")
+  const [pageViewport, setPageViewport] = useState(1280)
   const [insertionIndicator, setInsertionIndicator] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
   const [dropHighlightId, setDropHighlightId] = useState<string | null>(null)
 
@@ -76,8 +78,39 @@ export const App = observer(function App() {
       case "UPDATE_SIZING":
         documentStore.updateSizing(msg.payload.id, msg.payload.sizing)
         break
+      case "SET_CANVAS_MODE":
+        documentStore.setCanvasMode(msg.payload.mode)
+        setCanvasMode(msg.payload.mode)
+        // Center page in viewport when switching to page mode
+        if (msg.payload.mode === 'page') {
+          const el = outerRef.current
+          if (el) {
+            const rect = el.getBoundingClientRect()
+            setViewport(prev => ({
+              ...prev,
+              panX: (rect.width - pageViewport * prev.zoom) / 2,
+              panY: 20,
+            }))
+          }
+        }
+        break
+      case "SET_PAGE_VIEWPORT":
+        documentStore.setPageViewport(msg.payload.width)
+        setPageViewport(msg.payload.width)
+        // Re-center with new width
+        {
+          const el = outerRef.current
+          if (el) {
+            const rect = el.getBoundingClientRect()
+            setViewport(prev => ({
+              ...prev,
+              panX: (rect.width - msg.payload.width * prev.zoom) / 2,
+            }))
+          }
+        }
+        break
     }
-  }, [])
+  }, [pageViewport])
 
   useEffect(() => {
     bridge.setTarget(window.parent)
@@ -327,6 +360,47 @@ export const App = observer(function App() {
           borderRadius: 2,
           pointerEvents: "none",
         }} />
+      )}
+
+      {/* Viewport preset bar (Page Mode only) */}
+      {canvasMode === 'page' && (
+        <div style={{
+          position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'center', gap: 4,
+          background: 'rgba(255,255,255,0.95)', borderRadius: 8,
+          padding: '4px 8px', fontSize: 11, color: '#64748b',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.1)', zIndex: 100,
+          userSelect: 'none', pointerEvents: 'auto',
+        }}>
+          {([
+            { label: 'Desktop', width: 1280 },
+            { label: 'Tablet', width: 768 },
+            { label: 'Mobile', width: 375 },
+          ] as const).map(p => (
+            <button
+              key={p.width}
+              onClick={() => {
+                setPageViewport(p.width)
+                documentStore.setPageViewport(p.width)
+                bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: p.width } })
+                const el = outerRef.current
+                if (el) {
+                  const rect = el.getBoundingClientRect()
+                  setViewport(prev => ({ ...prev, panX: (rect.width - p.width * prev.zoom) / 2 }))
+                }
+              }}
+              style={{
+                padding: '4px 10px', fontSize: 11, fontWeight: 500,
+                background: pageViewport === p.width ? '#6366f1' : 'transparent',
+                color: pageViewport === p.width ? '#fff' : '#64748b',
+                border: `1px solid ${pageViewport === p.width ? '#6366f1' : '#e2e8f0'}`,
+                borderRadius: 6, cursor: 'pointer',
+              }}
+            >
+              {p.label} ({p.width})
+            </button>
+          ))}
+        </div>
       )}
 
       {/* Zoom indicator */}
