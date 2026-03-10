@@ -22,11 +22,23 @@ export const App = observer(function App() {
           break
         }
         case "ELEMENT_CLICKED":
-          selectionStore.select(msg.payload.id, msg.payload.bounds)
+          if (msg.payload.shiftKey) {
+            selectionStore.toggle(msg.payload.id)
+          } else {
+            selectionStore.select(msg.payload.id, msg.payload.bounds)
+          }
+          bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [...selectionStore.selectedIds] } })
           break
         case "ELEMENT_MOVED":
           historyStore.pushSnapshot()
           documentStore.updateStyle(msg.payload.id, { left: msg.payload.x, top: msg.payload.y })
+          syncToCanvas()
+          break
+        case "ELEMENTS_MOVED":
+          historyStore.pushSnapshot()
+          for (const move of msg.payload.moves) {
+            documentStore.updateStyle(move.id, { left: move.x, top: move.y })
+          }
           syncToCanvas()
           break
         case "ELEMENT_RESIZED":
@@ -36,6 +48,9 @@ export const App = observer(function App() {
           break
         case "CANVAS_CLICKED":
           selectionStore.clear()
+          break
+        case "MARQUEE_SELECT":
+          selectionStore.setIds(msg.payload.ids)
           break
         case "KEY_EVENT": {
           const k = msg.payload
@@ -82,14 +97,21 @@ export const App = observer(function App() {
       if (element) {
         bridge.send({ type: "ADD_ELEMENT", payload: { ...element, style: { ...element.style }, props: { ...element.props }, children: [...element.children] } })
         selectionStore.select(id)
+        bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
       }
     }
   }, [])
 
   const handleDelete = useCallback(() => {
-    if (!selectionStore.selectedId) return
+    if (selectionStore.selectedIds.length === 0) return
     historyStore.pushSnapshot()
-    documentStore.removeElement(selectionStore.selectedId)
+    const toDelete = [...selectionStore.selectedIds].filter(id => {
+      const el = documentStore.getElement(id)
+      return el && !el.locked && el.id !== documentStore.rootId
+    })
+    for (const id of toDelete) {
+      documentStore.removeElement(id)
+    }
     selectionStore.clear()
     syncToCanvas()
   }, [syncToCanvas])
@@ -123,7 +145,8 @@ export const App = observer(function App() {
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [handleDelete, handleUndo, handleRedo])
 
-  const selected = selectionStore.selectedElement
+  const selectedElements = selectionStore.selectedElements
+  const hasSelection = selectedElements.length > 0 && selectedElements.some(el => !el.locked)
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: T.bg, color: T.text, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
@@ -136,7 +159,7 @@ export const App = observer(function App() {
           onDelete={handleDelete}
           canUndo={historyStore.canUndo}
           canRedo={historyStore.canRedo}
-          hasSelection={!!selected && !selected.locked}
+          hasSelection={hasSelection}
         />
       </div>
 
@@ -156,7 +179,7 @@ export const App = observer(function App() {
 
         <div data-guide="properties" style={{ width: 280, flexShrink: 0, padding: "0 8px 8px 8px" }}>
           <div style={{ background: T.panel, borderRadius: T.panelRadius, boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`, height: "100%", overflowY: "auto" }}>
-            {selected ? <PropertiesPanel /> : (
+            {selectedElements.length > 0 ? <PropertiesPanel /> : (
               <div style={{ padding: 20, color: T.textMuted, fontSize: 13, textAlign: "center" }}>
                 Select an element
               </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
@@ -9,17 +9,16 @@ import type { MessageBridge } from "@devom/editor-core"
 
 interface ElementRendererProps {
   elementId: string
-  selectedId: string | null
-  onSelect: (id: string | null) => void
+  selectedIds: string[]
+  onSelect: (id: string, shiftKey: boolean) => void
   onDragChange?: (dragging: boolean) => void
   documentStore: DocumentStore
   bridge: MessageBridge
 }
 
-export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedId, onSelect, onDragChange, documentStore, bridge }: ElementRendererProps) {
+export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, documentStore, bridge }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
-  const [dragDelta, setDragDelta] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     return () => { dragCleanupRef.current?.() }
@@ -27,19 +26,20 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
 
   if (!element || !element.visible) return null
 
-  const isSelected = selectedId === elementId
+  const isSelected = selectedIds.includes(elementId)
   const isRoot = element.parentId === null
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (element.locked) return
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    onSelect(element.id)
+    onSelect(element.id, e.shiftKey)
     bridge.send({
       type: "ELEMENT_CLICKED",
       payload: {
         id: element.id,
         bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        shiftKey: e.shiftKey,
       },
     })
   }
@@ -54,15 +54,37 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     target.setPointerCapture(e.pointerId)
     const startX = e.clientX
     const startY = e.clientY
-    const startLeft = typeof element.style.left === "number" ? element.style.left : 0
-    const startTop = typeof element.style.top === "number" ? element.style.top : 0
+
+    // Collect all dragged elements (selected group or just this one)
+    const dragIds = selectedIds.includes(elementId) ? selectedIds : [elementId]
+    const dragTargets = dragIds
+      .map(id => {
+        const el = documentStore.getElement(id)
+        if (!el || el.locked || el.parentId === null || el.style.position !== "absolute") return null
+        const dom = document.querySelector(`[data-element-id="${id}"]`) as HTMLElement | null
+        return {
+          id,
+          dom,
+          startLeft: typeof el.style.left === "number" ? el.style.left : 0,
+          startTop: typeof el.style.top === "number" ? el.style.top : 0,
+        }
+      })
+      .filter((t): t is NonNullable<typeof t> => t !== null && t.dom !== null)
 
     onDragChange?.(true)
+
+    const clearTransforms = () => {
+      for (const t of dragTargets) {
+        t.dom!.style.transform = ""
+        t.dom!.style.willChange = ""
+      }
+    }
 
     const cleanup = () => {
       target.releasePointerCapture(e.pointerId)
       target.removeEventListener("pointermove", onMove)
       target.removeEventListener("pointerup", onUp)
+      target.removeEventListener("pointercancel", onCancel)
       dragCleanupRef.current = null
       onDragChange?.(false)
     }
@@ -70,26 +92,42 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     const onMove = (me: PointerEvent) => {
       const dx = me.clientX - startX
       const dy = me.clientY - startY
-      setDragDelta({ x: dx, y: dy })
+      for (const t of dragTargets) {
+        t.dom!.style.transform = `translate(${dx}px, ${dy}px)`
+        t.dom!.style.willChange = "transform"
+      }
     }
 
     const onUp = (me: PointerEvent) => {
       cleanup()
+      clearTransforms()
       const dx = me.clientX - startX
       const dy = me.clientY - startY
-      const finalLeft = Math.round(startLeft + dx)
-      const finalTop = Math.round(startTop + dy)
-      setDragDelta(null)
-      documentStore.updateStyle(element.id, { left: finalLeft, top: finalTop })
-      bridge.send({
-        type: "ELEMENT_MOVED",
-        payload: { id: element.id, x: finalLeft, y: finalTop },
-      })
+      const moves: Array<{ id: string; x: number; y: number }> = []
+
+      for (const t of dragTargets) {
+        const finalLeft = Math.round(t.startLeft + dx)
+        const finalTop = Math.round(t.startTop + dy)
+        documentStore.updateStyle(t.id, { left: finalLeft, top: finalTop })
+        moves.push({ id: t.id, x: finalLeft, y: finalTop })
+      }
+
+      if (moves.length === 1) {
+        bridge.send({ type: "ELEMENT_MOVED", payload: moves[0] })
+      } else {
+        bridge.send({ type: "ELEMENTS_MOVED", payload: { moves } })
+      }
+    }
+
+    const onCancel = () => {
+      cleanup()
+      clearTransforms()
     }
 
     dragCleanupRef.current = cleanup
     target.addEventListener("pointermove", onMove)
     target.addEventListener("pointerup", onUp)
+    target.addEventListener("pointercancel", onCancel)
   }
 
   const content = getElementContent(element.type, element.props)
@@ -99,8 +137,6 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       data-element-id={element.id}
       style={{
         ...element.style,
-        transform: dragDelta ? `translate(${dragDelta.x}px, ${dragDelta.y}px)` : undefined,
-        willChange: dragDelta ? "transform" : undefined,
         outline: isSelected ? "1.5px dashed #6366f1" : undefined,
         outlineOffset: isSelected ? 2 : undefined,
         cursor: element.locked || isRoot ? "default" : "move",
@@ -111,7 +147,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     >
       {content}
       {element.children.map((childId) => (
-        <ElementRenderer key={childId} elementId={childId} selectedId={selectedId} onSelect={onSelect} onDragChange={onDragChange} documentStore={documentStore} bridge={bridge} />
+        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} documentStore={documentStore} bridge={bridge} />
       ))}
     </div>
   )

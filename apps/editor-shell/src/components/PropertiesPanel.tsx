@@ -3,36 +3,62 @@ import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
 export const PropertiesPanel = observer(function PropertiesPanel() {
-  const element = selectionStore.selectedElement
-  if (!element) return null
+  const elements = selectionStore.selectedElements
+  if (elements.length === 0) return null
+
+  const isMulti = elements.length > 1
+  const element = elements[0]
 
   const updateStyle = (key: string, value: string) => {
     historyStore.pushSnapshot()
     const parsed = /^\d+(\.\d+)?$/.test(value) ? Number(value) : value
-    documentStore.updateStyle(element.id, { [key]: parsed })
+    for (const el of elements) {
+      documentStore.updateStyle(el.id, { [key]: parsed })
+    }
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
   const updateProp = (key: string, value: string) => {
     historyStore.pushSnapshot()
-    documentStore.updateProps(element.id, { [key]: value })
+    for (const el of elements) {
+      documentStore.updateProps(el.id, { [key]: value })
+    }
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
   const isShadcn = element.type.startsWith("sc:")
+  const allSameType = elements.every(el => el.type === element.type)
+
+  const MIXED = "mixed"
+  const sharedStyle = (key: string, fallback: string | number = "") => {
+    const vals = elements.map(el => (el.style as Record<string, unknown>)[key] ?? fallback)
+    return vals.every(v => v === vals[0]) ? vals[0] : MIXED
+  }
+  const sharedProp = (key: string, fallback: string = "") => {
+    const vals = elements.map(el => (el.props as Record<string, unknown>)[key] ?? fallback)
+    return vals.every(v => v === vals[0]) ? String(vals[0]) : MIXED
+  }
 
   return (
     <div style={{ padding: "12px 0" }}>
-      {/* Position */}
-      <PropSection title="Position">
-        <PropGrid>
-          <PropCompact label="X" value={element.style.left ?? 0} onChange={(v) => updateStyle("left", v)} />
-          <PropCompact label="Y" value={element.style.top ?? 0} onChange={(v) => updateStyle("top", v)} />
-        </PropGrid>
-      </PropSection>
+      {isMulti && (
+        <div style={{ padding: "0 14px 10px", fontSize: 12, color: T.accent, fontWeight: 600, borderBottom: `1px solid ${T.border}`, marginBottom: 10 }}>
+          {elements.length} elements selected
+        </div>
+      )}
 
-      {/* Size */}
-      {(!isShadcn || element.type === "sc:card" || element.type === "sc:input") && (
+      {/* Position — single select only */}
+      {!isMulti && (
+        <PropSection title="Position">
+          <PropGrid>
+            <PropCompact label="X" value={element.style.left ?? 0} onChange={(v) => updateStyle("left", v)} />
+            <PropCompact label="Y" value={element.style.top ?? 0} onChange={(v) => updateStyle("top", v)} />
+          </PropGrid>
+        </PropSection>
+      )}
+
+      {/* Size — single select only */}
+      {!isMulti && (!isShadcn || element.type === "sc:card" || element.type === "sc:input") && (
         <PropSection title="Size">
           <PropGrid>
             <PropCompact label="W" value={element.style.width ?? "auto"} onChange={(v) => updateStyle("width", v)} />
@@ -41,18 +67,18 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {/* shadcn Component Props */}
-      {element.type === "sc:button" && (
+      {/* shadcn Component Props — only when all same type */}
+      {allSameType && element.type === "sc:button" && (
         <PropSection title="Component">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Label" value={element.props.label as string ?? "Button"} onChange={(v) => updateProp("label", v)} />
-            <PropSelect label="Variant" value={element.props.variant as string ?? "default"} options={["default", "destructive", "outline", "secondary", "ghost", "link"]} onChange={(v) => updateProp("variant", v)} />
-            <PropSelect label="Size" value={element.props.size as string ?? "default"} options={["default", "sm", "lg", "icon"]} onChange={(v) => updateProp("size", v)} />
+            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? "Button"} onChange={(v) => updateProp("label", v)} />}
+            <PropSelect label="Variant" value={sharedProp("variant", "default")} options={["default", "destructive", "outline", "secondary", "ghost", "link"]} onChange={(v) => updateProp("variant", v)} mixed={sharedProp("variant", "default") === MIXED} />
+            <PropSelect label="Size" value={sharedProp("size", "default")} options={["default", "sm", "lg", "icon"]} onChange={(v) => updateProp("size", v)} mixed={sharedProp("size", "default") === MIXED} />
           </div>
         </PropSection>
       )}
 
-      {element.type === "sc:card" && (
+      {allSameType && element.type === "sc:card" && !isMulti && (
         <PropSection title="Component">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
             <PropRow label="Title" value={element.props.title as string ?? ""} onChange={(v) => updateProp("title", v)} />
@@ -62,41 +88,38 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {element.type === "sc:input" && (
+      {allSameType && element.type === "sc:input" && (
         <PropSection title="Component">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Placeholder" value={element.props.placeholder as string ?? ""} onChange={(v) => updateProp("placeholder", v)} />
-            <PropSelect label="Type" value={element.props.type as string ?? "text"} options={["text", "password", "email", "number", "tel", "url", "search"]} onChange={(v) => updateProp("type", v)} />
+            {!isMulti && <PropRow label="Placeholder" value={element.props.placeholder as string ?? ""} onChange={(v) => updateProp("placeholder", v)} />}
+            <PropSelect label="Type" value={sharedProp("type", "text")} options={["text", "password", "email", "number", "tel", "url", "search"]} onChange={(v) => updateProp("type", v)} mixed={sharedProp("type", "text") === MIXED} />
           </div>
         </PropSection>
       )}
 
-      {element.type === "sc:badge" && (
+      {allSameType && element.type === "sc:badge" && (
         <PropSection title="Component">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Label" value={element.props.label as string ?? "Badge"} onChange={(v) => updateProp("label", v)} />
-            <PropSelect label="Variant" value={element.props.variant as string ?? "default"} options={["default", "secondary", "destructive", "outline"]} onChange={(v) => updateProp("variant", v)} />
+            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? "Badge"} onChange={(v) => updateProp("label", v)} />}
+            <PropSelect label="Variant" value={sharedProp("variant", "default")} options={["default", "secondary", "destructive", "outline"]} onChange={(v) => updateProp("variant", v)} mixed={sharedProp("variant", "default") === MIXED} />
           </div>
         </PropSection>
       )}
 
-      {/* Style — only for non-shadcn elements */}
-      {!isShadcn && (
-        <PropSection title="Style">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Visible" value="Yes" onChange={() => {}} />
-            <PropRow label="Opacity" value={element.style.opacity ?? 1} onChange={(v) => updateStyle("opacity", v)} />
-            <PropRow label="Radius" value={element.style.borderRadius ?? 0} onChange={(v) => updateStyle("borderRadius", v)} />
-            <PropRow label="Fill" value={element.style.backgroundColor ?? ""} onChange={(v) => updateStyle("backgroundColor", v)} color />
-            <PropRow label="Color" value={element.style.color ?? ""} onChange={(v) => updateStyle("color", v)} color />
-            <PropRow label="Padding" value={element.style.padding ?? 0} onChange={(v) => updateStyle("padding", v)} />
-            <PropRow label="Gap" value={element.style.gap ?? 0} onChange={(v) => updateStyle("gap", v)} />
-          </div>
-        </PropSection>
-      )}
+      {/* Style — shared properties (works for multi-select) */}
+      <PropSection title="Style">
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+          <PropRow label="Opacity" value={sharedStyle("opacity", 1)} onChange={(v) => updateStyle("opacity", v)} />
+          <PropRow label="Radius" value={sharedStyle("borderRadius", 0)} onChange={(v) => updateStyle("borderRadius", v)} />
+          <PropRow label="Fill" value={sharedStyle("backgroundColor", "")} onChange={(v) => updateStyle("backgroundColor", v)} color />
+          <PropRow label="Color" value={sharedStyle("color", "")} onChange={(v) => updateStyle("color", v)} color />
+          <PropRow label="Padding" value={sharedStyle("padding", 0)} onChange={(v) => updateStyle("padding", v)} />
+          <PropRow label="Gap" value={sharedStyle("gap", 0)} onChange={(v) => updateStyle("gap", v)} />
+        </div>
+      </PropSection>
 
-      {/* Container */}
-      {(element.type === "flex" || element.type === "grid") && (
+      {/* Container — single select only */}
+      {!isMulti && (element.type === "flex" || element.type === "grid") && (
         <PropSection title="Container">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
             {element.type === "flex" && (
@@ -147,20 +170,21 @@ function PropCompact({ label, value, onChange }: { label: string; value: string 
   )
 }
 
-function PropSelect({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
+function PropSelect({ label, value, options, onChange, mixed }: { label: string; value: string; options: string[]; onChange: (v: string) => void; mixed?: boolean }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>{label}</span>
       <select
-        value={value}
+        value={mixed ? "" : value}
         onChange={(e) => onChange(e.target.value)}
         style={{
           flex: 1, padding: "5px 8px",
           background: T.inputBg, border: `1px solid ${T.inputBorder}`,
-          borderRadius: 6, color: T.text, fontSize: 12, minWidth: 0,
+          borderRadius: 6, color: mixed ? T.textMuted : T.text, fontSize: 12, minWidth: 0,
           outline: "none", cursor: "pointer",
         }}
       >
+        {mixed && <option value="" disabled>mixed</option>}
         {options.map((opt) => (
           <option key={opt} value={opt}>{opt}</option>
         ))}
@@ -170,23 +194,25 @@ function PropSelect({ label, value, options, onChange }: { label: string; value:
 }
 
 function PropRow({ label, value, onChange, color }: { label: string; value: string | number; onChange: (v: string) => void; color?: boolean }) {
+  const isMixed = value === "mixed"
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>{label}</span>
       <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6 }}>
-        {color && (
+        {color && !isMixed && (
           <div style={{
             width: 20, height: 20, borderRadius: 4, flexShrink: 0,
             background: String(value) || "#fff", border: `1px solid ${T.inputBorder}`,
           }} />
         )}
         <input
-          value={String(value)}
+          value={isMixed ? "" : String(value)}
+          placeholder={isMixed ? "mixed" : undefined}
           onChange={(e) => onChange(e.target.value)}
           style={{
             flex: 1, padding: "5px 8px",
             background: T.inputBg, border: `1px solid ${T.inputBorder}`,
-            borderRadius: 6, color: T.text, fontSize: 12, minWidth: 0,
+            borderRadius: 6, color: isMixed ? T.textMuted : T.text, fontSize: 12, minWidth: 0,
             outline: "none",
           }}
         />

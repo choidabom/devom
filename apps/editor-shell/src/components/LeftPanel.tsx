@@ -20,7 +20,7 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
   const element = documentStore.getElement(elementId)
   const [hovered, setHovered] = useState(false)
   if (!element) return null
-  const isSelected = selectionStore.selectedId === elementId
+  const isSelected = selectionStore.selectedIds.includes(elementId)
   const isRoot = elementId === documentStore.rootId
 
   const iconMap: Record<string, string> = { flex: "◇", grid: "▦", text: "T", image: "▲", button: "/b", input: "◉", "sc:button": "Btn", "sc:card": "Card", "sc:input": "Inp", "sc:badge": "Bdg" }
@@ -29,10 +29,14 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
   return (
     <div>
       <div
-        onClick={() => {
+        onClick={(e) => {
           if (!isRoot) {
-            selectionStore.select(elementId)
-            bridge.send({ type: "SELECT_ELEMENT", payload: { id: elementId } })
+            if (e.shiftKey) {
+              selectionStore.toggle(elementId)
+            } else {
+              selectionStore.select(elementId)
+            }
+            bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [...selectionStore.selectedIds] } })
           }
         }}
         onMouseEnter={() => setHovered(true)}
