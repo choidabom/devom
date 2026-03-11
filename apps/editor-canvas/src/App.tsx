@@ -246,7 +246,7 @@ export const App = observer(function App() {
         return
       }
       // Prevent browser native undo/redo/copy/paste in iframe
-      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyX", "KeyV", "KeyD"].includes(e.code)) {
+      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyX", "KeyV", "KeyD", "Backslash"].includes(e.code)) {
         e.preventDefault()
       }
       bridge.send({

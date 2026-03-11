@@ -20,6 +20,9 @@ export const App = observer(function App() {
   const [showExport, setShowExport] = useState(false)
   const [editorMode, setEditorMode] = useState<"edit" | "interact">("edit")
   const [canvasMode, setCanvasMode] = useState<"canvas" | "page">("canvas")
+  const [showPanels, setShowPanels] = useState(true)
+  const [leftPanelWidth, setLeftPanelWidth] = useState(240)
+  const [isResizing, setIsResizing] = useState(false)
 
   useEffect(() => {
     const dispose = bridge.onMessage((msg: EditorMessage) => {
@@ -79,6 +82,7 @@ export const App = observer(function App() {
             if (k.shiftKey) handleRedo()
             else handleUndo()
           }
+          if ((k.metaKey || k.ctrlKey) && k.code === "Backslash") { setShowPanels(prev => !prev); return }
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyC") handleCopy()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyX") handleCut()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyV") handlePaste()
@@ -352,6 +356,11 @@ export const App = observer(function App() {
 
       // Modifier shortcuts take priority — use e.code for Korean IME compatibility
       if (e.metaKey || e.ctrlKey) {
+        if (e.code === "Backslash") {
+          e.preventDefault()
+          setShowPanels(prev => !prev)
+          return
+        }
         if (e.code === "KeyZ") {
           e.preventDefault()
           if (e.shiftKey) handleRedo()
@@ -426,21 +435,83 @@ export const App = observer(function App() {
         />
       </div>
 
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", gap: 0 }}>
-        <div data-guide="layers" style={{ width: 240, flexShrink: 0, padding: "0 8px 8px 8px", display: "flex", flexDirection: "column", gap: 8 }}>
-          <LeftPanel />
-        </div>
-
-        <div data-guide="canvas" style={{ flex: 1, position: "relative" }}>
+      <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
+        {/* Canvas — always full width */}
+        <div data-guide="canvas" style={{ position: "absolute", inset: 0 }}>
           <iframe
             ref={iframeRef}
             src={import.meta.env.VITE_CANVAS_ORIGIN || "http://localhost:4001"}
-            style={{ width: "100%", height: "100%", border: "none", borderRadius: T.panelRadius, background: T.panel }}
+            style={{ width: "100%", height: "100%", border: "none", background: T.panel, pointerEvents: isResizing ? "none" : "auto" }}
             title="Editor Canvas"
           />
         </div>
 
-        <div data-guide="properties" style={{ width: 280, flexShrink: 0, padding: "0 8px 8px 8px" }}>
+        {/* Panels — overlay on top of canvas */}
+        <div data-guide="layers" style={{
+          position: "absolute", left: 0, top: 0, bottom: 0, width: leftPanelWidth,
+          padding: "0 0 8px 8px", display: "flex", flexDirection: "column", gap: 8,
+          transform: showPanels ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.2s ease",
+          zIndex: 10,
+        }}>
+          <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <LeftPanel />
+          </div>
+          {/* Resize handle — wider hit area, thin visible line */}
+          <div
+            style={{
+              position: "absolute", right: -4, top: 0, bottom: 0, width: 8,
+              cursor: "col-resize", zIndex: 11, touchAction: "none",
+            }}
+            onPointerDown={(e) => {
+              e.preventDefault()
+              ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+              setIsResizing(true)
+              const startX = e.clientX
+              const startW = leftPanelWidth
+              const handle = e.currentTarget as HTMLElement
+              const line = handle.firstElementChild as HTMLElement
+              if (line) line.style.background = T.accent
+              const onMove = (ev: PointerEvent) => {
+                setLeftPanelWidth(Math.max(180, Math.min(480, startW + ev.clientX - startX)))
+              }
+              const onUp = () => {
+                if (line) line.style.background = ""
+                setIsResizing(false)
+                handle.removeEventListener("pointermove", onMove)
+                handle.removeEventListener("pointerup", onUp)
+              }
+              handle.addEventListener("pointermove", onMove)
+              handle.addEventListener("pointerup", onUp)
+            }}
+            onPointerEnter={(e) => {
+              if (!isResizing) {
+                const line = e.currentTarget.firstElementChild as HTMLElement
+                if (line) line.style.background = T.border
+              }
+            }}
+            onPointerLeave={(e) => {
+              if (!isResizing) {
+                const line = e.currentTarget.firstElementChild as HTMLElement
+                if (line) line.style.background = ""
+              }
+            }}
+          >
+            {/* Thin visible line in the center of the hit area */}
+            <div style={{
+              position: "absolute", left: 3, top: 0, bottom: 0, width: 1,
+              transition: "background 0.15s ease",
+            }} />
+          </div>
+        </div>
+
+        <div data-guide="properties" style={{
+          position: "absolute", right: 0, top: 0, bottom: 0, width: 280,
+          padding: "0 8px 8px 8px",
+          transform: showPanels ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.2s ease",
+          zIndex: 10,
+        }}>
           <div style={{ background: T.panel, borderRadius: T.panelRadius, boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`, height: "100%", overflowY: "auto", display: "flex", flexDirection: "column" }}>
             {editorMode === "interact" ? (
               <CodePreviewPanel />
