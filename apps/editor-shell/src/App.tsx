@@ -104,6 +104,31 @@ export const App = observer(function App() {
           documentStore.addSection(msg.payload.preset, msg.payload.index)
           syncToCanvas()
           break
+        case "GROUP_ELEMENTS_REQUEST": {
+          const groupId = documentStore.groupElements(msg.payload.ids, msg.payload.elementBounds)
+          if (groupId) {
+            historyStore.pushSnapshot()
+            selectionStore.select(groupId)
+            syncToCanvas()
+            bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [groupId] } })
+          }
+          break
+        }
+        case "UNGROUP_ELEMENTS_REQUEST": {
+          const ids = msg.payload.ids.filter(id => {
+            const el = documentStore.getElement(id)
+            return el && !el.locked && el.id !== documentStore.rootId
+          })
+          if (ids.length === 0) break
+          historyStore.pushSnapshot()
+          const newSelection = documentStore.ungroupElements(ids)
+          selectionStore.setIds(newSelection)
+          syncToCanvas()
+          if (newSelection.length > 0) {
+            bridge.send({ type: "SELECT_ELEMENT", payload: { ids: newSelection } })
+          }
+          break
+        }
       }
     })
 
@@ -198,6 +223,21 @@ export const App = observer(function App() {
     selectionStore.setIds(newIds)
     syncToCanvas()
     bridge.send({ type: "SELECT_ELEMENT", payload: { ids: newIds } })
+  }, [syncToCanvas])
+
+  const handleUngroup = useCallback(() => {
+    const ids = selectionStore.selectedIds.filter(id => {
+      const el = documentStore.getElement(id)
+      return el && !el.locked && el.id !== documentStore.rootId
+    })
+    if (ids.length === 0) return
+    historyStore.pushSnapshot()
+    const newSelection = documentStore.ungroupElements(ids)
+    selectionStore.setIds(newSelection)
+    syncToCanvas()
+    if (newSelection.length > 0) {
+      bridge.send({ type: "SELECT_ELEMENT", payload: { ids: newSelection } })
+    }
   }, [syncToCanvas])
 
   const handleAlign = useCallback((type: AlignType) => {
