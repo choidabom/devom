@@ -87,13 +87,26 @@ export class DocumentStore {
     const box = { backgroundColor: 'transparent' as const, borderRadius: 0, border: 'none' }
 
     // ════════════════════════════════════════════
+    // Page Wrapper — single flex column, natural flow
+    // ════════════════════════════════════════════
+    const W = 760
+    const page = add('div', this.rootId, {
+      name: 'Page',
+      style: { left: 0, top: 0, width: W, height: 'auto', backgroundColor: '#ffffff', borderRadius: 0, border: 'none' },
+      layoutMode: 'flex',
+      layoutProps: { direction: 'column', gap: 0, ...noPad, alignItems: 'stretch' },
+    })
+    if (!page) return
+
+    // ════════════════════════════════════════════
     // Header
     // ════════════════════════════════════════════
-    const header = add('div', this.rootId, {
+    const header = add('div', page, {
       name: 'Header',
-      style: { left: 40, top: 20, width: 720, height: 'auto', ...card, borderRadius: 0, borderLeft: 'none', borderRight: 'none', borderTop: 'none' },
+      style: { ...rel, width: 'auto', height: 'auto', ...box, borderBottom: `1px solid ${bd}` },
       layoutMode: 'flex',
-      layoutProps: { direction: 'row', gap: 0, ...noPad, paddingTop: 20, paddingRight: 24, paddingBottom: 20, paddingLeft: 24, alignItems: 'center', justifyContent: 'space-between' },
+      layoutProps: { direction: 'row', gap: 0, paddingTop: 20, paddingRight: 24, paddingBottom: 20, paddingLeft: 24, alignItems: 'center', justifyContent: 'space-between' },
+      sizing: { w: 'fill', h: 'hug' },
     })
     if (header) {
       const hl = add('div', header, {
@@ -104,7 +117,7 @@ export class DocumentStore {
       })
       if (hl) {
         add('text', hl, { name: 'Title', style: { ...rel, fontSize: 22, fontWeight: 700, color: t }, props: { content: 'Dashboard' } })
-        add('text', hl, { name: 'Subtitle', style: { ...rel, fontSize: 13, color: s }, props: { content: 'Your business at a glance.' } })
+        add('text', hl, { name: 'Subtitle', style: { ...rel, fontSize: 13, color: s }, props: { content: 'Welcome back, here\'s what\'s happening today.' } })
       }
       const hr = add('div', header, {
         name: 'Header Right',
@@ -113,125 +126,193 @@ export class DocumentStore {
         sizing: { w: 'hug', h: 'hug' },
       })
       if (hr) {
+        add('sc:input', hr, { name: 'Search', style: { ...rel, width: 180 }, props: { placeholder: 'Search...', type: 'text' } })
         add('sc:button', hr, { name: 'Download', style: { ...rel }, props: { label: 'Download', variant: 'outline', size: 'sm' } })
+        add('sc:button', hr, { name: 'New Report', style: { ...rel }, props: { label: '+ New Report', variant: 'default', size: 'sm' } })
         add('sc:avatar', hr, { name: 'Avatar', style: { ...rel }, props: { fallback: 'JD' } })
       }
     }
 
     // ════════════════════════════════════════════
-    // Stats Row — 4 metric cards
+    // Tabs Navigation
     // ════════════════════════════════════════════
-    const statsRow = add('div', this.rootId, {
+    add('sc:tabs', page, {
+      name: 'Navigation',
+      style: { ...rel, width: 'auto', paddingLeft: 24, paddingRight: 24 },
+      props: { tabs: ['Overview', 'Analytics', 'Reports', 'Notifications'], activeTab: 'Overview' },
+    })
+
+    // ════════════════════════════════════════════
+    // Content area (with padding)
+    // ════════════════════════════════════════════
+    const content = add('div', page, {
+      name: 'Content',
+      style: { ...rel, width: 'auto', height: 'auto', ...box },
+      layoutMode: 'flex',
+      layoutProps: { direction: 'column', gap: 16, paddingTop: 16, paddingRight: 24, paddingBottom: 16, paddingLeft: 24, alignItems: 'stretch' },
+      sizing: { w: 'fill', h: 'hug' },
+    })
+    if (!content) return
+
+    // ── Stats Row — 4 metric cards ──
+    const statsRow = add('div', content, {
       name: 'Stats Row',
-      style: { left: 40, top: 120, width: 720, height: 'auto', ...box },
+      style: { ...rel, width: 'auto', height: 'auto', ...box },
       layoutMode: 'flex',
       layoutProps: { direction: 'row', gap: 16, ...noPad, alignItems: 'stretch' },
+      sizing: { w: 'fill', h: 'hug' },
     })
     if (statsRow) {
       const stats = [
-        { name: 'Total Revenue', value: '$45,231', sub: '+20.1% from last month' },
-        { name: 'Subscriptions', value: '+2,350', sub: '+180.1% from last month' },
-        { name: 'Sales', value: '+12,234', sub: '+19% from last month' },
-        { name: 'Active Now', value: '+573', sub: '+201 since last hour' },
+        { name: 'Total Revenue', value: '$45,231.89', badge: '+20.1%', badgeVariant: 'default' },
+        { name: 'Subscriptions', value: '+2,350', badge: '+180.1%', badgeVariant: 'default' },
+        { name: 'Sales', value: '+12,234', badge: '+19%', badgeVariant: 'secondary' },
+        { name: 'Active Now', value: '573', badge: 'Live', badgeVariant: 'destructive' },
       ]
       for (const st of stats) {
         const sc = add('div', statsRow, {
           name: st.name,
-          style: { ...rel, width: 168, height: 'auto', ...card },
+          style: { ...rel, width: 'auto', height: 'auto', ...card },
           layoutMode: 'flex',
-          layoutProps: { direction: 'column', gap: 4, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'start' },
+          layoutProps: { direction: 'column', gap: 6, paddingTop: 16, paddingRight: 16, paddingBottom: 16, paddingLeft: 16, alignItems: 'start' },
+          sizing: { w: 'fill', h: 'hug' },
         })
         if (sc) {
-          add('text', sc, { name: `${st.name} Label`, style: { ...rel, fontSize: 13, fontWeight: 500, color: s }, props: { content: st.name } })
-          add('text', sc, { name: `${st.name} Value`, style: { ...rel, fontSize: 26, fontWeight: 700, color: t }, props: { content: st.value } })
-          add('text', sc, { name: `${st.name} Trend`, style: { ...rel, fontSize: 11, color: '#16a34a' }, props: { content: st.sub } })
+          const topRow = add('div', sc, {
+            name: `${st.name} Top`,
+            style: { ...rel, width: 'auto', height: 'auto', ...box },
+            layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'center', justifyContent: 'space-between' },
+            sizing: { w: 'fill', h: 'hug' },
+          })
+          if (topRow) {
+            add('text', topRow, { name: `${st.name} Label`, style: { ...rel, fontSize: 12, fontWeight: 500, color: s }, props: { content: st.name } })
+            add('sc:badge', topRow, { name: `${st.name} Badge`, style: { ...rel }, props: { label: st.badge, variant: st.badgeVariant } })
+          }
+          add('text', sc, { name: `${st.name} Value`, style: { ...rel, fontSize: 24, fontWeight: 700, color: t }, props: { content: st.value } })
+          add('sc:progress', sc, { name: `${st.name} Bar`, style: { ...rel, width: undefined }, props: { value: Math.floor(Math.random() * 40) + 60 } })
         }
       }
     }
 
-    // ════════════════════════════════════════════
-    // Content Row — Table + Settings
-    // ════════════════════════════════════════════
-    const contentRow = add('div', this.rootId, {
+    // ── Content Row — Table + Right Column ──
+    const contentRow = add('div', content, {
       name: 'Content Row',
-      style: { left: 40, top: 260, width: 720, height: 'auto', ...box },
+      style: { ...rel, width: 'auto', height: 'auto', ...box },
       layoutMode: 'flex',
       layoutProps: { direction: 'row', gap: 16, ...noPad, alignItems: 'start' },
+      sizing: { w: 'fill', h: 'hug' },
     })
     if (contentRow) {
       // Recent Sales table
       const tblCard = add('div', contentRow, {
         name: 'Recent Sales',
-        style: { ...rel, width: 430, height: 'auto', ...card },
+        style: { ...rel, width: 'auto', height: 'auto', ...card },
         layoutMode: 'flex',
         layoutProps: { direction: 'column', gap: 8, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch' },
+        sizing: { w: 'fill', h: 'hug' },
       })
       if (tblCard) {
-        add('text', tblCard, { name: 'Table Title', style: { ...rel, fontSize: 16, fontWeight: 600, color: t }, props: { content: 'Recent Sales' } })
-        add('text', tblCard, { name: 'Table Desc', style: { ...rel, fontSize: 12, color: s }, props: { content: 'You made 265 sales this month.' } })
+        const tblHeader = add('div', tblCard, {
+          name: 'Table Header',
+          style: { ...rel, width: 'auto', height: 'auto', ...box },
+          layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'center', justifyContent: 'space-between' },
+          sizing: { w: 'fill', h: 'hug' },
+        })
+        if (tblHeader) {
+          const thleft = add('div', tblHeader, {
+            name: 'Table Header Left',
+            style: { ...rel, width: 'auto', height: 'auto', ...box },
+            layoutMode: 'flex', layoutProps: { direction: 'column', gap: 2, ...noPad, alignItems: 'start' },
+            sizing: { w: 'hug', h: 'hug' },
+          })
+          if (thleft) {
+            add('text', thleft, { name: 'Table Title', style: { ...rel, fontSize: 16, fontWeight: 600, color: t }, props: { content: 'Recent Sales' } })
+            add('text', thleft, { name: 'Table Desc', style: { ...rel, fontSize: 12, color: s }, props: { content: 'You made 265 sales this month.' } })
+          }
+          add('sc:button', tblHeader, { name: 'View All', style: { ...rel }, props: { label: 'View All', variant: 'outline', size: 'sm' } })
+        }
         add('sc:table', tblCard, {
           name: 'Sales Table',
           style: { ...rel, width: undefined },
           props: {
-            headers: ['Customer', 'Email', 'Amount'],
+            headers: ['Customer', 'Email', 'Status', 'Amount'],
             rows: [
-              ['Olivia Martin', 'olivia@email.com', '+$1,999.00'],
-              ['Jackson Lee', 'jackson@email.com', '+$39.00'],
-              ['Isabella Nguyen', 'isabella@email.com', '+$299.00'],
-              ['William Kim', 'will@email.com', '+$99.00'],
+              ['Olivia Martin', 'olivia@email.com', 'Completed', '+$1,999.00'],
+              ['Jackson Lee', 'jackson@email.com', 'Completed', '+$39.00'],
+              ['Isabella Nguyen', 'isabella@email.com', 'Processing', '+$299.00'],
+              ['William Kim', 'will@email.com', 'Pending', '+$99.00'],
             ],
           },
         })
       }
 
-      // Settings panel
-      const setCard = add('div', contentRow, {
-        name: 'Settings',
-        style: { ...rel, width: 274, height: 'auto', ...card },
+      // Right column — Team + Settings
+      const rightCol = add('div', contentRow, {
+        name: 'Right Column',
+        style: { ...rel, width: 260, height: 'auto', ...box },
         layoutMode: 'flex',
-        layoutProps: { direction: 'column', gap: 14, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch' },
+        layoutProps: { direction: 'column', gap: 16, ...noPad, alignItems: 'stretch' },
       })
-      if (setCard) {
-        add('text', setCard, { name: 'Settings Title', style: { ...rel, fontSize: 16, fontWeight: 600, color: t }, props: { content: 'Settings' } })
-        add('sc:switch', setCard, { name: 'Notifications', style: { ...rel }, props: { label: 'Email notifications', checked: true } })
-        add('sc:switch', setCard, { name: 'Marketing', style: { ...rel }, props: { label: 'Marketing emails', checked: false } })
-        add('sc:separator', setCard, { name: 'Sep', style: { ...rel, width: undefined } })
-        add('sc:select', setCard, { name: 'Language', style: { ...rel, width: undefined }, props: { placeholder: 'Language', options: ['English', 'Korean', 'Japanese'] } })
-        add('sc:slider', setCard, { name: 'Volume', style: { ...rel, width: undefined }, props: { value: 70, min: 0, max: 100 } })
+      if (rightCol) {
+        // Team card
+        const teamCard = add('div', rightCol, {
+          name: 'Team',
+          style: { ...rel, width: 'auto', height: 'auto', ...card },
+          layoutMode: 'flex',
+          layoutProps: { direction: 'column', gap: 12, paddingTop: 16, paddingRight: 16, paddingBottom: 16, paddingLeft: 16, alignItems: 'stretch' },
+          sizing: { w: 'fill', h: 'hug' },
+        })
+        if (teamCard) {
+          add('text', teamCard, { name: 'Team Title', style: { ...rel, fontSize: 15, fontWeight: 600, color: t }, props: { content: 'Team Members' } })
+          const members = [
+            { name: 'Sofia Davis', initials: 'SD', role: 'Owner' },
+            { name: 'Jackson Lee', initials: 'JL', role: 'Developer' },
+            { name: 'Isabella Nguyen', initials: 'IN', role: 'Designer' },
+          ]
+          for (const member of members) {
+            const row = add('div', teamCard, {
+              name: `Member ${member.name}`,
+              style: { ...rel, width: 'auto', height: 'auto', ...box },
+              layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'center' },
+              sizing: { w: 'fill', h: 'hug' },
+            })
+            if (row) {
+              add('sc:avatar', row, { name: `${member.name} Avatar`, style: { ...rel }, props: { fallback: member.initials } })
+              const info = add('div', row, {
+                name: `${member.name} Info`,
+                style: { ...rel, width: 'auto', height: 'auto', ...box },
+                layoutMode: 'flex', layoutProps: { direction: 'column', gap: 0, ...noPad, alignItems: 'start' },
+                sizing: { w: 'fill', h: 'hug' },
+              })
+              if (info) {
+                add('text', info, { name: `${member.name} Name`, style: { ...rel, fontSize: 13, fontWeight: 500, color: t }, props: { content: member.name } })
+                add('text', info, { name: `${member.name} Role`, style: { ...rel, fontSize: 11, color: s }, props: { content: member.role } })
+              }
+            }
+          }
+          add('sc:button', teamCard, { name: 'Invite', style: { ...rel }, props: { label: '+ Invite Member', variant: 'outline', size: 'sm' } })
+        }
+
+        // Notification Settings
+        add('sc:switch', rightCol, { name: 'Notifications', style: { ...rel, ...card, paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12 }, props: { label: 'Email notifications', checked: true } })
       }
     }
 
-    // ════════════════════════════════════════════
-    // Alert Row
-    // ════════════════════════════════════════════
-    const alertRow = add('div', this.rootId, {
-      name: 'Alert Row',
-      style: { left: 40, top: 580, width: 720, height: 'auto', ...box },
-      layoutMode: 'flex',
-      layoutProps: { direction: 'row', gap: 16, ...noPad, alignItems: 'start' },
+    // ── Alert Banner ──
+    add('sc:alert', content, {
+      name: 'Notice',
+      style: { ...rel, width: 'auto' },
+      sizing: { w: 'fill', h: 'hug' },
+      props: { title: 'Scheduled Maintenance', description: 'System will be down on 3/15 02:00–04:00 UTC. Please save your work.', variant: 'default' },
     })
-    if (alertRow) {
-      add('sc:alert', alertRow, { name: 'Notice', style: { ...rel, width: 350 }, props: { title: 'Scheduled Maintenance', description: 'System will be down on 3/15 02:00–04:00 UTC.', variant: 'default' } })
-      const progressCard = add('div', alertRow, {
-        name: 'Storage',
-        style: { ...rel, width: 354, height: 'auto', ...card },
-        layoutMode: 'flex',
-        layoutProps: { direction: 'column', gap: 10, paddingTop: 16, paddingRight: 20, paddingBottom: 16, paddingLeft: 20, alignItems: 'stretch' },
-      })
-      if (progressCard) {
-        add('text', progressCard, { name: 'Storage Label', style: { ...rel, fontSize: 13, fontWeight: 600, color: t }, props: { content: 'Storage — 75 GB / 100 GB' } })
-        add('sc:progress', progressCard, { name: 'Progress', style: { ...rel, width: undefined }, props: { value: 75 } })
-      }
-    }
 
-    // ════════════════════════════════════════════
-    // Footer
-    // ════════════════════════════════════════════
-    const footer = add('div', this.rootId, {
+    // ── Footer ──
+    const footer = add('div', page, {
       name: 'Footer',
-      style: { left: 40, top: 680, width: 720, height: 'auto', ...box, borderTop: `1px solid ${bd}` },
+      style: { ...rel, width: 'auto', height: 'auto', ...box, borderTop: `1px solid ${bd}` },
       layoutMode: 'flex',
-      layoutProps: { direction: 'row', gap: 0, paddingTop: 16, ...noPad, paddingBottom: 16, alignItems: 'center', justifyContent: 'center' },
+      layoutProps: { direction: 'row', gap: 0, paddingTop: 16, paddingRight: 24, paddingBottom: 16, paddingLeft: 24, alignItems: 'center', justifyContent: 'center' },
+      sizing: { w: 'fill', h: 'hug' },
     })
     if (footer) {
       add('text', footer, { name: 'Copyright', style: { ...rel, fontSize: 12, color: m }, props: { content: '© 2026 Acme Inc. All rights reserved.' } })
