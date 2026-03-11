@@ -80,6 +80,7 @@ export const App = observer(function App() {
             else handleUndo()
           }
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyC") handleCopy()
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyX") handleCut()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyV") handlePaste()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyD") handleDuplicate()
           break
@@ -200,8 +201,24 @@ export const App = observer(function App() {
   const handleCopy = useCallback(() => {
     const elements = selectionStore.selectedElements.filter(el => !el.locked && el.id !== documentStore.rootId)
     if (elements.length === 0) return
-    clipboard = elements.map(el => JSON.parse(JSON.stringify(el)))
+    // Filter out elements whose ancestor is already in the selection
+    const selectedSet = new Set(elements.map(el => el.id))
+    const topLevel = elements.filter(el => {
+      let cur = el.parentId
+      while (cur) {
+        if (selectedSet.has(cur)) return false
+        const p = documentStore.getElement(cur)
+        cur = p?.parentId ?? null
+      }
+      return true
+    })
+    clipboard = topLevel.flatMap(el => documentStore.collectSubtree(el.id))
   }, [])
+
+  const handleCut = useCallback(() => {
+    handleCopy()
+    handleDelete()
+  }, [handleCopy, handleDelete])
 
   const handlePaste = useCallback(() => {
     if (clipboard.length === 0) return
@@ -344,6 +361,10 @@ export const App = observer(function App() {
           e.preventDefault()
           handleCopy()
         }
+        if (e.code === "KeyX") {
+          e.preventDefault()
+          handleCut()
+        }
         if (e.code === "KeyV") {
           e.preventDefault()
           handlePaste()
@@ -378,7 +399,7 @@ export const App = observer(function App() {
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [handleDelete, handleUndo, handleRedo, handleCopy, handlePaste, handleDuplicate, editorMode])
+  }, [handleDelete, handleUndo, handleRedo, handleCopy, handleCut, handlePaste, handleDuplicate, editorMode])
 
   const selectedElements = selectionStore.selectedElements
   const hasSelection = selectedElements.length > 0 && selectedElements.some(el => !el.locked)

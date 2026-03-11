@@ -358,66 +358,104 @@ export class DocumentStore {
     element.locked = !element.locked
   }
 
-  pasteElements(elements: EditorElement[], offset = 20): string[] {
-    const newIds: string[] = []
-    for (const el of elements) {
-      const parentId = el.parentId ?? this.rootId
-      const parent = this.elements.get(parentId) ?? this.elements.get(this.rootId)
-      if (!parent) continue
+  /** Collect element + all descendants as deep clones */
+  collectSubtree(id: string): EditorElement[] {
+    const el = this.elements.get(id)
+    if (!el) return []
+    const result: EditorElement[] = [JSON.parse(JSON.stringify(el))]
+    for (const childId of el.children) {
+      result.push(...this.collectSubtree(childId))
+    }
+    return result
+  }
 
-      const newId = nanoid()
+  /**
+   * Clone a flat list of elements (with parent-child relationships) into the store.
+   * Top-level elements (whose parentId is not in the set) go under targetParentId.
+   * Children are recursively cloned with new IDs, preserving the tree structure.
+   */
+  private _cloneTree(elements: EditorElement[], targetParentId: string, offset: number): string[] {
+    const target = this.elements.get(targetParentId)
+    if (!target || elements.length === 0) return []
+
+    // Build old→new ID map
+    const idMap = new Map<string, string>()
+    for (const el of elements) {
+      idMap.set(el.id, nanoid())
+    }
+
+    // Identify top-level elements (parent not in the copied set)
+    const copiedIds = new Set(elements.map(e => e.id))
+    const topLevelIds = new Set(
+      elements.filter(el => !el.parentId || !copiedIds.has(el.parentId)).map(e => e.id)
+    )
+
+    const newTopIds: string[] = []
+    for (const el of elements) {
+      const newId = idMap.get(el.id)!
+      const isTop = topLevelIds.has(el.id)
+      const newParentId = isTop ? targetParentId : idMap.get(el.parentId!)
+      if (!newParentId) continue
+
+      // When pasting to root in canvas mode, ensure absolute positioning
+      const needsAbsolute = isTop && targetParentId === this.rootId && this.canvasMode === 'canvas'
+      const style = {
+        ...JSON.parse(JSON.stringify(el.style)),
+        ...(isTop && typeof el.style.left === 'number' ? { left: el.style.left + offset } : {}),
+        ...(isTop && typeof el.style.top === 'number' ? { top: el.style.top + offset } : {}),
+      }
+      if (needsAbsolute) {
+        style.position = 'absolute'
+        if (typeof style.left !== 'number') style.left = 100
+        if (typeof style.top !== 'number') style.top = 100
+      }
+
       const cloned: EditorElement = {
         ...JSON.parse(JSON.stringify(el)),
         id: newId,
-        parentId: parent.id,
+        parentId: newParentId,
         name: `${el.type}-${newId.slice(0, 4)}`,
-        children: [],
-        style: {
-          ...JSON.parse(JSON.stringify(el.style)),
-          ...(typeof el.style.left === "number" ? { left: el.style.left + offset } : {}),
-          ...(typeof el.style.top === "number" ? { top: el.style.top + offset } : {}),
-        },
-        layoutMode: el.layoutMode ?? 'none',
-        layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
-        sizing: el.sizing ?? { ...DEFAULT_SIZING },
+        children: el.children.map(cid => idMap.get(cid)).filter(Boolean) as string[],
+        style,
         canvasPosition: null,
       }
 
       this.elements.set(newId, cloned)
-      parent.children.push(newId)
-      newIds.push(newId)
+      if (isTop) {
+        target.children.push(newId)
+        newTopIds.push(newId)
+      }
     }
-    return newIds
+
+    return newTopIds
+  }
+
+  pasteElements(elements: EditorElement[], offset = 20): string[] {
+    return this._cloneTree(elements, this.rootId, offset)
   }
 
   duplicateElements(ids: string[], offset = 20): string[] {
+    // Filter out elements whose ancestor is already in the set
+    const idSet = new Set(ids)
+    const topIds = ids.filter(id => {
+      const el = this.elements.get(id)
+      if (!el) return false
+      let cur = el.parentId
+      while (cur) {
+        if (idSet.has(cur)) return false
+        const p = this.elements.get(cur)
+        cur = p?.parentId ?? null
+      }
+      return true
+    })
+
     const newIds: string[] = []
-    for (const id of ids) {
+    for (const id of topIds) {
       const el = this.elements.get(id)
       if (!el || el.locked || id === this.rootId || !el.parentId) continue
-      const parent = this.elements.get(el.parentId)
-      if (!parent) continue
-
-      const newId = nanoid()
-      const cloned: EditorElement = {
-        ...JSON.parse(JSON.stringify(el)),
-        id: newId,
-        name: `${el.type}-${newId.slice(0, 4)}`,
-        children: [],
-        style: {
-          ...JSON.parse(JSON.stringify(el.style)),
-          ...(typeof el.style.left === "number" ? { left: el.style.left + offset } : {}),
-          ...(typeof el.style.top === "number" ? { top: el.style.top + offset } : {}),
-        },
-        layoutMode: el.layoutMode ?? 'none',
-        layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
-        sizing: el.sizing ?? { ...DEFAULT_SIZING },
-        canvasPosition: null,
-      }
-
-      this.elements.set(newId, cloned)
-      parent.children.push(newId)
-      newIds.push(newId)
+      const subtree = this.collectSubtree(id)
+      const cloned = this._cloneTree(subtree, el.parentId, offset)
+      newIds.push(...cloned)
     }
     return newIds
   }

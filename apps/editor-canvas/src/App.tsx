@@ -246,7 +246,7 @@ export const App = observer(function App() {
         return
       }
       // Prevent browser native undo/redo/copy/paste in iframe
-      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyV", "KeyD"].includes(e.code)) {
+      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyX", "KeyV", "KeyD"].includes(e.code)) {
         e.preventDefault()
       }
       bridge.send({
@@ -518,8 +518,10 @@ export const App = observer(function App() {
         if (items.length > 0) items.push("separator")
 
         if (hasSelection) {
+          items.push({ label: "Cut", shortcut: "⌘X", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "x", code: "KeyX", metaKey: true, ctrlKey: false, shiftKey: false, altKey: false } }) })
           items.push({ label: "Copy", shortcut: "⌘C", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "c", code: "KeyC", metaKey: true, ctrlKey: false, shiftKey: false, altKey: false } }) })
           items.push({ label: "Duplicate", shortcut: "⌘D", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "d", code: "KeyD", metaKey: true, ctrlKey: false, shiftKey: false, altKey: false } }) })
+          items.push("separator")
           items.push({ label: "Delete", shortcut: "⌫", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "Backspace", code: "Backspace", metaKey: false, ctrlKey: false, shiftKey: false, altKey: false } }) })
         }
         items.push({ label: "Paste", shortcut: "⌘V", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "v", code: "KeyV", metaKey: true, ctrlKey: false, shiftKey: false, altKey: false } }) })
