@@ -269,6 +269,22 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     bridge.send({ type: "INSERT_SECTION_REQUEST", payload: { preset: role, index } })
   }
 
+  // Find the root-level ancestor (direct child of root) for this element
+  const findRootAncestor = (): { id: string; el: typeof element; dom: HTMLElement } | null => {
+    let cur = element
+    while (cur) {
+      if (cur.parentId === documentStore.rootId) {
+        const dom = document.querySelector(`[data-element-id="${cur.id}"]`) as HTMLElement | null
+        return dom ? { id: cur.id, el: cur, dom } : null
+      }
+      if (!cur.parentId) return null
+      const p = documentStore.getElement(cur.parentId)
+      if (!p) return null
+      cur = p
+    }
+    return null
+  }
+
   const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
     if (editorMode === "interact") return
     if (element.locked || isRoot) return
@@ -276,6 +292,58 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     e.stopPropagation()
     e.preventDefault()
 
+    // If the root-level ancestor is absolute-positioned, move it instead of reordering
+    const rootAncestor = findRootAncestor()
+    const z = zoom
+    if (rootAncestor && rootAncestor.el.style.position === 'absolute') {
+      const target = e.currentTarget as HTMLElement
+      const containerDom = rootAncestor.dom
+      target.setPointerCapture(e.pointerId)
+      const startX = e.clientX
+      const startY = e.clientY
+      let hasMoved = false
+      onDragChange?.(true)
+
+      const cleanup = () => {
+        try { target.releasePointerCapture(e.pointerId) } catch { /* */ }
+        target.removeEventListener("pointermove", onMove)
+        target.removeEventListener("pointerup", onUp)
+        target.removeEventListener("pointercancel", onCancel)
+        dragCleanupRef.current = null
+        onDragChange?.(false)
+        containerDom.style.transform = ""
+      }
+      const onMove = (me: PointerEvent) => {
+        const dx = me.clientX - startX
+        const dy = me.clientY - startY
+        if (!hasMoved && Math.abs(dx) + Math.abs(dy) < 3) return
+        hasMoved = true
+        containerDom.style.transform = `translate(${dx / z}px, ${dy / z}px)`
+      }
+      const onUp = (me: PointerEvent) => {
+        if (!hasMoved) { cleanup(); return }
+        const dx = (me.clientX - startX) / z
+        const dy = (me.clientY - startY) / z
+        const curLeft = typeof rootAncestor.el.style.left === 'number' ? rootAncestor.el.style.left : 0
+        const curTop = typeof rootAncestor.el.style.top === 'number' ? rootAncestor.el.style.top : 0
+        const newX = Math.round(curLeft + dx)
+        const newY = Math.round(curTop + dy)
+        documentStore.updateStyle(rootAncestor.id, { left: newX, top: newY })
+        cleanup()
+        bridge.send({
+          type: "ELEMENT_MOVED",
+          payload: { id: rootAncestor.id, x: newX, y: newY },
+        })
+      }
+      const onCancel = () => { cleanup() }
+      dragCleanupRef.current = cleanup
+      target.addEventListener("pointermove", onMove)
+      target.addEventListener("pointerup", onUp)
+      target.addEventListener("pointercancel", onCancel)
+      return
+    }
+
+    // Normal auto-layout reorder drag (only within same container)
     const target = e.currentTarget as HTMLElement
     target.setPointerCapture(e.pointerId)
     const startX = e.clientX
@@ -311,7 +379,8 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
 
       const dropTarget = findDropTarget(me.clientX, me.clientY, [elementId], documentStore)
 
-      if (dropTarget) {
+      // Only show indicators for same-container reorder
+      if (dropTarget && dropTarget.containerId === element.parentId) {
         onDropHighlight?.(dropTarget.containerId)
         const container = documentStore.getElement(dropTarget.containerId)
         if (container) {
@@ -337,34 +406,11 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
 
       const dropTarget = findDropTarget(me.clientX, me.clientY, [elementId], documentStore)
 
+      // Only allow reorder within the same container — no reparenting
       if (dropTarget && dropTarget.containerId === element.parentId) {
         bridge.send({
           type: "REORDER_CHILD",
           payload: { parentId: dropTarget.containerId, childId: elementId, newIndex: dropTarget.insertIndex },
-        })
-      } else if (dropTarget) {
-        bridge.send({
-          type: "REPARENT_ELEMENT",
-          payload: {
-            id: elementId,
-            oldParentId: element.parentId!,
-            newParentId: dropTarget.containerId,
-            index: dropTarget.insertIndex,
-          },
-        })
-      } else {
-        const canvasRect = document.querySelector(`[data-element-id="${documentStore.rootId}"]`)?.getBoundingClientRect()
-        const dropX = canvasRect ? me.clientX - canvasRect.left : me.clientX
-        const dropY = canvasRect ? me.clientY - canvasRect.top : me.clientY
-        bridge.send({
-          type: "REPARENT_ELEMENT",
-          payload: {
-            id: elementId,
-            oldParentId: element.parentId!,
-            newParentId: documentStore.rootId,
-            index: 0,
-            dropPosition: { x: Math.round(dropX), y: Math.round(dropY) },
-          },
         })
       }
     }
@@ -391,7 +437,6 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         ...(isRoot && documentStore.canvasMode === 'page' ? {
           boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
           borderRadius: 2,
-          overflow: 'hidden',
         } : {}),
         outline: editorMode === "edit" && isSelected ? "1.5px dashed #6366f1" : undefined,
         outlineOffset: editorMode === "edit" && isSelected ? 2 : undefined,
