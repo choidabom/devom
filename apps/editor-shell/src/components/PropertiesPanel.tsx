@@ -3,7 +3,6 @@ import { Lock, Unlock } from "lucide-react"
 import { isAutoLayoutChild } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
-import { AutoLayoutSection } from "./AutoLayoutSection"
 import { SizingSection } from "./SizingSection"
 
 export const PropertiesPanel = observer(function PropertiesPanel() {
@@ -30,13 +29,6 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
-  const toggleAutoLayout = () => {
-    historyStore.pushSnapshot()
-    const newMode = element.layoutMode === 'flex' ? 'none' : 'flex'
-    documentStore.setLayoutMode(element.id, newMode as 'none' | 'flex')
-    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
-  }
-
   const updateLayoutProps = (props: Record<string, unknown>) => {
     historyStore.pushSnapshot()
     for (const el of elements) {
@@ -51,6 +43,17 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
       documentStore.updateSizing(el.id, sizing as any)
     }
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
+  const syncToCanvas = () => {
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
+  const inputStyle = {
+    width: "100%", padding: "5px 8px",
+    background: T.inputBg, border: `1px solid ${T.inputBorder}`,
+    borderRadius: 6, color: T.text, fontSize: 12, boxSizing: "border-box" as const,
+    outline: "none",
   }
 
   const isShadcn = element.type.startsWith("sc:")
@@ -104,13 +107,125 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </button>
       </div>
 
-      {/* Auto Layout — single select only */}
+      {/* Layout Mode — single select only */}
       {!isMulti && (
-        <AutoLayoutSection
-          element={element}
-          onToggle={toggleAutoLayout}
-          onUpdate={updateLayoutProps}
-        />
+        <PropSection title="Layout">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropSelect
+              label="Mode"
+              value={element.layoutMode ?? 'none'}
+              options={[
+                { value: 'none', label: 'None' },
+                { value: 'flex', label: 'Flex' },
+                { value: 'grid', label: 'Grid' },
+              ].map(opt => opt.value)}
+              onChange={v => {
+                historyStore.pushSnapshot()
+                documentStore.setLayoutMode(element.id, v as 'none' | 'flex' | 'grid')
+                syncToCanvas()
+              }}
+            />
+
+            {/* Flex controls */}
+            {element.layoutMode === 'flex' && element.layoutProps && (
+              <>
+                <PropSelect
+                  label="Direction"
+                  value={element.layoutProps.direction}
+                  options={['row', 'column']}
+                  onChange={v => updateLayoutProps({ direction: v as 'row' | 'column' })}
+                />
+                <PropRow
+                  label="Gap"
+                  value={element.layoutProps.gap}
+                  onChange={v => updateLayoutProps({ gap: Number(v) || 0 })}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Align</span>
+                  <div style={{ display: 'flex', gap: 2 }}>
+                    {(['start', 'center', 'end', 'stretch'] as const).map(val => (
+                      <button
+                        key={val}
+                        onClick={() => updateLayoutProps({ alignItems: val })}
+                        style={{
+                          padding: '4px 8px', fontSize: 10,
+                          background: element.layoutProps!.alignItems === val ? T.accent : T.inputBg,
+                          color: element.layoutProps!.alignItems === val ? '#fff' : T.text,
+                          border: `1px solid ${element.layoutProps!.alignItems === val ? T.accent : T.inputBorder}`,
+                          borderRadius: 4, cursor: 'pointer',
+                        }}
+                      >
+                        {val[0]!.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Justify</span>
+                  <div style={{ display: 'flex', gap: 2 }}>
+                    {(['start', 'center', 'end', 'space-between'] as const).map(val => (
+                      <button
+                        key={val}
+                        onClick={() => updateLayoutProps({ justifyContent: val })}
+                        style={{
+                          padding: '4px 8px', fontSize: 10,
+                          background: element.layoutProps!.justifyContent === val ? T.accent : T.inputBg,
+                          color: element.layoutProps!.justifyContent === val ? '#fff' : T.text,
+                          border: `1px solid ${element.layoutProps!.justifyContent === val ? T.accent : T.inputBorder}`,
+                          borderRadius: 4, cursor: 'pointer',
+                        }}
+                      >
+                        {val === 'space-between' ? 'SB' : val[0]!.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Padding</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 4, flex: 1 }}>
+                    {(['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'] as const).map(key => (
+                      <input
+                        key={key}
+                        value={element.layoutProps![key]}
+                        onChange={(e) => updateLayoutProps({ [key]: Number(e.target.value) || 0 })}
+                        title={key.replace('padding', '').toLowerCase()}
+                        style={{
+                          padding: '4px 6px', fontSize: 11, width: '100%', boxSizing: 'border-box',
+                          background: T.inputBg, border: `1px solid ${T.inputBorder}`,
+                          borderRadius: 4, color: T.text, outline: 'none', textAlign: 'center',
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Grid controls */}
+            {element.layoutMode === 'grid' && element.gridProps && (
+              <>
+                <PropRow
+                  label="Columns"
+                  value={element.gridProps.columns}
+                  onChange={e => {
+                    historyStore.pushSnapshot()
+                    documentStore.updateGridProps(element.id, { columns: Number(e) })
+                    syncToCanvas()
+                  }}
+                />
+                <PropRow
+                  label="Gap"
+                  value={element.gridProps.gap}
+                  onChange={e => {
+                    historyStore.pushSnapshot()
+                    documentStore.updateGridProps(element.id, { gap: Number(e) })
+                    syncToCanvas()
+                  }}
+                />
+              </>
+            )}
+          </div>
+        </PropSection>
       )}
 
       {/* Position — single select only, absolute positioning */}
@@ -192,6 +307,56 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
           <PropRow label="Gap" value={sharedStyle("gap", 0)} onChange={(v) => updateStyle("gap", v)} />
         </div>
       </PropSection>
+
+      {/* Section Props — single select with role */}
+      {!isMulti && element.role && (
+        <PropSection title="Section">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>Background</span>
+              <input
+                type="color"
+                value={element.sectionProps?.backgroundColor ?? '#ffffff'}
+                onChange={e => {
+                  historyStore.pushSnapshot()
+                  documentStore.updateSectionProps(element.id, { backgroundColor: e.target.value })
+                  syncToCanvas()
+                }}
+                style={{ width: 40, height: 28, border: `1px solid ${T.inputBorder}`, borderRadius: 6, cursor: 'pointer' }}
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>Max Width</span>
+              <input
+                type="number"
+                value={element.sectionProps?.maxWidth ?? ''}
+                placeholder="auto"
+                onChange={e => {
+                  historyStore.pushSnapshot()
+                  const val = e.target.value ? Number(e.target.value) : undefined
+                  documentStore.updateSectionProps(element.id, { maxWidth: val })
+                  syncToCanvas()
+                }}
+                style={inputStyle}
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>V. Padding</span>
+              <input
+                type="number"
+                value={element.sectionProps?.verticalPadding ?? 0}
+                min={0}
+                onChange={e => {
+                  historyStore.pushSnapshot()
+                  documentStore.updateSectionProps(element.id, { verticalPadding: Number(e.target.value) })
+                  syncToCanvas()
+                }}
+                style={inputStyle}
+              />
+            </div>
+          </div>
+        </PropSection>
+      )}
     </div>
   )
 })
