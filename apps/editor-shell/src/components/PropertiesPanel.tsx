@@ -1,5 +1,7 @@
+import { useState, useRef, useEffect, useCallback } from "react"
 import { observer } from "mobx-react-lite"
 import { Lock, Unlock } from "lucide-react"
+import { HexColorPicker } from "react-colorful"
 import { isAutoLayoutChild } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
@@ -14,6 +16,15 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
 
   const updateStyle = (key: string, value: string) => {
     historyStore.pushSnapshot()
+    const parsed = /^\d+(\.\d+)?$/.test(value) ? Number(value) : value
+    for (const el of elements) {
+      documentStore.updateStyle(el.id, { [key]: parsed })
+    }
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
+  // Live preview without history snapshot (for color picker drag)
+  const updateStyleLive = (key: string, value: string) => {
     const parsed = /^\d+(\.\d+)?$/.test(value) ? Number(value) : value
     for (const el of elements) {
       documentStore.updateStyle(el.id, { [key]: parsed })
@@ -383,8 +394,8 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
           <PropRow label="Opacity" value={sharedStyle("opacity", 1)} onChange={(v) => updateStyle("opacity", v)} />
           <PropRow label="Radius" value={sharedStyle("borderRadius", 0)} onChange={(v) => updateStyle("borderRadius", v)} />
-          <PropRow label="Fill" value={sharedStyle("backgroundColor", "")} onChange={(v) => updateStyle("backgroundColor", v)} color />
-          <PropRow label="Color" value={sharedStyle("color", "")} onChange={(v) => updateStyle("color", v)} color />
+          <PropRow label="Fill" value={sharedStyle("backgroundColor", "")} onChange={(v) => updateStyle("backgroundColor", v)} onLiveChange={(v) => updateStyleLive("backgroundColor", v)} color />
+          <PropRow label="Color" value={sharedStyle("color", "")} onChange={(v) => updateStyle("color", v)} onLiveChange={(v) => updateStyleLive("color", v)} color />
           <PropRow label="Padding" value={sharedStyle("padding", 0)} onChange={(v) => updateStyle("padding", v)} />
           <PropRow label="Gap" value={sharedStyle("gap", 0)} onChange={(v) => updateStyle("gap", v)} />
         </div>
@@ -396,16 +407,21 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>Background</span>
-              <input
-                type="color"
+              <ColorPickerPopover
                 value={element.sectionProps?.backgroundColor ?? '#ffffff'}
-                onChange={e => {
-                  historyStore.pushSnapshot()
-                  documentStore.updateSectionProps(element.id, { backgroundColor: e.target.value })
+                onLiveChange={v => {
+                  documentStore.updateSectionProps(element.id, { backgroundColor: v })
                   syncToCanvas()
                 }}
-                style={{ width: 40, height: 28, border: `1px solid ${T.inputBorder}`, borderRadius: 6, cursor: 'pointer' }}
+                onChange={v => {
+                  historyStore.pushSnapshot()
+                  documentStore.updateSectionProps(element.id, { backgroundColor: v })
+                  syncToCanvas()
+                }}
               />
+              <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "monospace" }}>
+                {element.sectionProps?.backgroundColor ?? '#ffffff'}
+              </span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>Max Width</span>
@@ -501,17 +517,83 @@ function PropSelect({ label, value, options, onChange, mixed }: { label: string;
   )
 }
 
-function PropRow({ label, value, onChange, color }: { label: string; value: string | number; onChange: (v: string) => void; color?: boolean }) {
+function ColorPickerPopover({ value, onChange, onLiveChange }: { value: string; onChange: (v: string) => void; onLiveChange?: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const [localHex, setLocalHex] = useState(value || "#ffffff")
+  const popRef = useRef<HTMLDivElement>(null)
+  const committedRef = useRef(value)
+
+  useEffect(() => { setLocalHex(value || "#ffffff") }, [value])
+
+  useEffect(() => {
+    if (!open) return
+    committedRef.current = value
+    const onClick = (e: MouseEvent) => {
+      if (popRef.current && !popRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [open, value])
+
+  // Commit on close: push snapshot once
+  useEffect(() => {
+    if (open) return
+    if (localHex !== committedRef.current && /^#[0-9a-fA-F]{6}$/i.test(localHex)) {
+      onChange(localHex)
+    }
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePickerChange = useCallback((hex: string) => {
+    setLocalHex(hex)
+    onLiveChange?.(hex)
+  }, [onLiveChange])
+
+  const handleHexInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value
+    setLocalHex(v)
+    if (/^#[0-9a-fA-F]{6}$/i.test(v)) onLiveChange?.(v)
+  }, [onLiveChange])
+
+  return (
+    <div ref={popRef} style={{ position: "relative" }}>
+      <div
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: 20, height: 20, borderRadius: 4, flexShrink: 0, cursor: "pointer",
+          background: value || "#fff", border: `1px solid ${T.inputBorder}`,
+        }}
+      />
+      {open && (
+        <div style={{
+          position: "absolute", top: "100%", left: 0, marginTop: 6, zIndex: 1000,
+          padding: 8, borderRadius: 10, background: T.panel,
+          border: `1px solid ${T.panelBorder}`, boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+        }}>
+          <HexColorPicker color={localHex} onChange={handlePickerChange} style={{ width: 180, height: 150 }} />
+          <input
+            value={localHex}
+            onChange={handleHexInput}
+            style={{
+              width: "100%", marginTop: 6, padding: "4px 6px", fontSize: 11,
+              background: T.inputBg, border: `1px solid ${T.inputBorder}`,
+              borderRadius: 4, color: T.text, boxSizing: "border-box", outline: "none",
+              fontFamily: "monospace",
+            }}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PropRow({ label, value, onChange, color, onLiveChange }: { label: string; value: string | number; onChange: (v: string) => void; color?: boolean; onLiveChange?: (v: string) => void }) {
   const isMixed = value === "mixed"
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>{label}</span>
       <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6 }}>
         {color && !isMixed && (
-          <div style={{
-            width: 20, height: 20, borderRadius: 4, flexShrink: 0,
-            background: String(value) || "#fff", border: `1px solid ${T.inputBorder}`,
-          }} />
+          <ColorPickerPopover value={String(value)} onChange={onChange} onLiveChange={onLiveChange} />
         )}
         <input
           value={isMixed ? "" : String(value)}
