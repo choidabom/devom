@@ -83,6 +83,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   }
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.button === 2) return  // Right-click: skip drag, let contextmenu handle
     if (editorMode === "interact") return
     if (element.locked || isRoot) return
     if (inAutoLayout) return  // Auto-layout drag handled separately
@@ -286,6 +287,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   }
 
   const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
+    if (e.button === 2) return  // Right-click: skip drag, let contextmenu handle
     if (editorMode === "interact") return
     if (element.locked || isRoot) return
     if (!inAutoLayout || !parent) return

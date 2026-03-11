@@ -40,12 +40,81 @@ export const App = observer(function App() {
   const [pageViewport, setPageViewport] = useState(1280)
   const [insertionIndicator, setInsertionIndicator] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
   const [dropHighlightId, setDropHighlightId] = useState<string | null>(null)
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
+  const contextMenuRef = useRef<HTMLDivElement>(null)
 
   // Viewport: zoom & pan
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
   const outerRef = useRef<HTMLDivElement>(null)
   const spaceHeldRef = useRef(false)
   const panDragRef = useRef<{ x: number; y: number } | null>(null)
+
+  // Close context menu on Escape
+  useEffect(() => {
+    if (!contextMenu) return
+    const onKey = (e: KeyboardEvent) => { if (e.code === "Escape") setContextMenu(null) }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [contextMenu])
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    if (editorMode !== "edit") return
+    e.preventDefault()
+
+    // Right-click on an element should select it if not already selected
+    // But if any ancestor is already selected, keep that selection
+    const target = e.target as HTMLElement
+    const elDom = target.closest("[data-element-id]") as HTMLElement | null
+    if (elDom) {
+      const id = elDom.getAttribute("data-element-id")!
+      const el = documentStore.getElement(id)
+      if (el && el.parentId !== null) {
+        // Check if this element or any ancestor is already in the selection
+        let ancestorSelected = false
+        let checkId: string | null = id
+        while (checkId) {
+          if (selectedIdsRef.current.includes(checkId)) { ancestorSelected = true; break }
+          const checkEl = documentStore.getElement(checkId)
+          checkId = checkEl?.parentId ?? null
+        }
+        if (!ancestorSelected) {
+          setSelectedIds([id])
+          bridge.send({
+            type: "ELEMENT_CLICKED",
+            payload: { id, bounds: { x: 0, y: 0, width: 0, height: 0 }, shiftKey: false },
+          })
+        }
+      }
+    }
+
+    setContextMenu({ x: e.clientX, y: e.clientY })
+  }, [editorMode])
+
+  const sendGroupRequest = useCallback(() => {
+    const ids = selectedIdsRef.current
+    if (ids.length < 2) return
+    const z = viewport.zoom
+    const rootDom = document.querySelector(`[data-element-id="${documentStore.rootId}"]`)
+    if (!rootDom) return
+    const rootRect = rootDom.getBoundingClientRect()
+    const elementBounds: Record<string, { left: number; top: number; width: number; height: number }> = {}
+    for (const id of ids) {
+      const dom = document.querySelector(`[data-element-id="${id}"]`)
+      if (!dom) continue
+      const rect = dom.getBoundingClientRect()
+      elementBounds[id] = {
+        left: (rect.left - rootRect.left) / z,
+        top: (rect.top - rootRect.top) / z,
+        width: rect.width / z,
+        height: rect.height / z,
+      }
+    }
+    bridge.send({ type: "GROUP_ELEMENTS_REQUEST", payload: { ids, elementBounds } })
+  }, [viewport.zoom])
+
+  const sendUngroupRequest = useCallback(() => {
+    bridge.send({ type: "UNGROUP_ELEMENTS_REQUEST", payload: { ids: selectedIdsRef.current } })
+  }, [])
 
   const handleShellMessage = useCallback((msg: EditorMessage) => {
     switch (msg.type) {
@@ -166,40 +235,14 @@ export const App = observer(function App() {
       // Group: Cmd+G (must come BEFORE generic KEY_EVENT forwarding)
       if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === "KeyG") {
         e.preventDefault()
-        const ids = selectedIdsRef.current
-        if (ids.length < 2) return
-
-        // Calculate element bounds via DOM measurement
-        const z = viewport.zoom
-        const rootDom = document.querySelector(`[data-element-id="${documentStore.rootId}"]`)
-        if (!rootDom) return
-        const rootRect = rootDom.getBoundingClientRect()
-        const elementBounds: Record<string, { left: number; top: number; width: number; height: number }> = {}
-        for (const id of ids) {
-          const dom = document.querySelector(`[data-element-id="${id}"]`)
-          if (!dom) continue
-          const rect = dom.getBoundingClientRect()
-          elementBounds[id] = {
-            left: (rect.left - rootRect.left) / z,
-            top: (rect.top - rootRect.top) / z,
-            width: rect.width / z,
-            height: rect.height / z,
-          }
-        }
-        bridge.send({
-          type: "GROUP_ELEMENTS_REQUEST",
-          payload: { ids, elementBounds },
-        })
+        sendGroupRequest()
         return
       }
 
       // Ungroup: Cmd+Shift+G
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === "KeyG") {
         e.preventDefault()
-        bridge.send({
-          type: "UNGROUP_ELEMENTS_REQUEST",
-          payload: { ids: selectedIdsRef.current },
-        })
+        sendUngroupRequest()
         return
       }
       // Prevent browser native undo/redo/copy/paste in iframe
@@ -258,6 +301,8 @@ export const App = observer(function App() {
 
   const handleCanvasPointerDown = (e: React.PointerEvent) => {
     const target = e.currentTarget as HTMLElement
+    // Right-click: skip marquee/capture — let contextmenu handle it
+    if (e.button === 2) return
     // Space+drag → pan (works in all modes)
     if (spaceHeldRef.current) {
       target.setPointerCapture(e.pointerId)
@@ -309,6 +354,9 @@ export const App = observer(function App() {
   const handleCanvasPointerUp = (e: React.PointerEvent) => {
     const target = e.currentTarget as HTMLElement
     try { target.releasePointerCapture(e.pointerId) } catch { /* not captured */ }
+
+    // Right-click: don't deselect or handle marquee
+    if (e.button === 2) return
 
     // End pan drag
     if (panDragRef.current) {
@@ -368,6 +416,7 @@ export const App = observer(function App() {
       onPointerDown={handleCanvasPointerDown}
       onPointerMove={handleCanvasPointerMove}
       onPointerUp={handleCanvasPointerUp}
+      onContextMenu={handleContextMenu}
     >
       {/* Viewport transform wrapper (canvas space) */}
       <div style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: '0 0', position: 'absolute' }}>
@@ -450,6 +499,79 @@ export const App = observer(function App() {
           ))}
         </div>
       )}
+
+      {/* Context menu */}
+      {contextMenu && (() => {
+        const ids = selectedIds
+        const hasSelection = ids.length > 0
+        const canGroup = ids.length >= 2
+        const canUngroup = ids.some(id => {
+          const el = documentStore.getElement(id)
+          return el && el.children.length > 0 && el.parentId !== null
+        })
+
+        type MenuItem = { label: string; shortcut?: string; onClick: () => void; disabled?: boolean } | "separator"
+        const items: MenuItem[] = []
+
+        if (canGroup) items.push({ label: "Group", shortcut: "⌘G", onClick: sendGroupRequest })
+        if (canUngroup) items.push({ label: "Ungroup", shortcut: "⇧⌘G", onClick: sendUngroupRequest })
+        if (items.length > 0) items.push("separator")
+
+        if (hasSelection) {
+          items.push({ label: "Copy", shortcut: "⌘C", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "c", code: "KeyC", metaKey: true, ctrlKey: false, shiftKey: false, altKey: false } }) })
+          items.push({ label: "Duplicate", shortcut: "⌘D", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "d", code: "KeyD", metaKey: true, ctrlKey: false, shiftKey: false, altKey: false } }) })
+          items.push({ label: "Delete", shortcut: "⌫", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "Backspace", code: "Backspace", metaKey: false, ctrlKey: false, shiftKey: false, altKey: false } }) })
+        }
+        items.push({ label: "Paste", shortcut: "⌘V", onClick: () => bridge.send({ type: "KEY_EVENT", payload: { key: "v", code: "KeyV", metaKey: true, ctrlKey: false, shiftKey: false, altKey: false } }) })
+
+        if (items.length === 0) return null
+
+        return (
+          <>
+          {/* Invisible backdrop to close menu on outside click */}
+          <div
+            style={{ position: "fixed", inset: 0, zIndex: 9999 }}
+            onPointerDown={(e) => { e.stopPropagation(); setContextMenu(null) }}
+            onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setContextMenu(null) }}
+          />
+          <div
+            ref={contextMenuRef}
+            onPointerDown={e => e.stopPropagation()}
+            onPointerUp={e => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: "fixed", left: contextMenu.x, top: contextMenu.y, zIndex: 10000,
+              background: "#fff", borderRadius: 8, padding: 4,
+              boxShadow: "0 4px 24px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06)",
+              minWidth: 180, fontSize: 12, userSelect: "none",
+            }}
+          >
+            {items.map((item, i) =>
+              item === "separator" ? (
+                <div key={`sep-${i}`} style={{ height: 1, background: "#e5e7eb", margin: "4px 0" }} />
+              ) : (
+                <button
+                  key={item.label}
+                  onClick={() => { item.onClick(); setContextMenu(null) }}
+                  disabled={item.disabled}
+                  style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    width: "100%", padding: "6px 10px", border: "none", background: "none",
+                    cursor: item.disabled ? "default" : "pointer", borderRadius: 4,
+                    color: item.disabled ? "#9ca3af" : "#1f2937", fontSize: 12,
+                  }}
+                  onMouseEnter={e => { if (!item.disabled) e.currentTarget.style.background = "#f3f4f6" }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "none" }}
+                >
+                  <span>{item.label}</span>
+                  {item.shortcut && <span style={{ color: "#9ca3af", fontSize: 11, marginLeft: 24 }}>{item.shortcut}</span>}
+                </button>
+              )
+            )}
+          </div>
+          </>
+        )
+      })()}
 
       {/* Zoom indicator */}
       <div
