@@ -39,10 +39,13 @@ export interface EditorElement {
   props: Record<string, unknown>
   locked: boolean
   visible: boolean
-  layoutMode: 'none' | 'flex'
+  layoutMode: 'none' | 'flex' | 'grid'
   layoutProps: LayoutProps
   sizing: SizingProps
   canvasPosition: { left: number; top: number } | null
+  role?: SectionRole
+  sectionProps?: SectionProps
+  gridProps?: GridProps
 }
 
 export interface EditorDocument {
@@ -77,6 +80,26 @@ export interface SizingProps {
   w: SizingMode
   h: SizingMode
 }
+
+export interface SectionProps {
+  backgroundColor?: string
+  backgroundImage?: string
+  maxWidth?: number
+  verticalPadding?: number
+}
+
+export interface GridProps {
+  columns: number
+  gap: number
+  minColumnWidth?: number
+}
+
+export const DEFAULT_GRID_PROPS: GridProps = {
+  columns: 3,
+  gap: 24,
+}
+
+export type SectionRole = 'section' | 'hero' | 'features' | 'cta' | 'footer' | 'header'
 
 export const DEFAULT_LAYOUT_PROPS: LayoutProps = {
   direction: 'column',
