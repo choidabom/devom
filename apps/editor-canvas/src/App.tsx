@@ -45,6 +45,7 @@ export const App = observer(function App() {
 
   // Viewport: zoom & pan
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
+  const savedViewportRef = useRef<{ zoom: number; panX: number; panY: number } | null>(null)
   const outerRef = useRef<HTMLDivElement>(null)
   const spaceHeldRef = useRef(false)
   const panDragRef = useRef<{ x: number; y: number } | null>(null)
@@ -138,7 +139,20 @@ export const App = observer(function App() {
         break
       case "SET_MODE":
         setEditorMode(msg.payload.mode)
-        if (msg.payload.mode === "interact") setSelectedIds([])
+        if (msg.payload.mode === "interact") {
+          setSelectedIds([])
+          // Save current viewport and reset for preview
+          setViewport(prev => {
+            savedViewportRef.current = prev
+            return { zoom: 1, panX: 0, panY: 0 }
+          })
+        } else {
+          // Restore previous viewport
+          if (savedViewportRef.current) {
+            setViewport(savedViewportRef.current)
+            savedViewportRef.current = null
+          }
+        }
         break
       case "SET_LAYOUT_MODE":
         documentStore.setLayoutMode(msg.payload.id, msg.payload.mode)
@@ -263,10 +277,59 @@ export const App = observer(function App() {
     return () => { dispose(); window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp) }
   }, [handleShellMessage])
 
-  // Wheel: Cmd+wheel = zoom, plain wheel = pan
+  // Interact mode: override root element styles for real-page preview
+  useEffect(() => {
+    if (editorMode !== "interact") return
+    const r = documentStore.root
+    if (!r) return
+    const rootEl = document.querySelector(`[data-element-id="${r.id}"]`) as HTMLElement | null
+    if (!rootEl) return
+    const rootWidth = typeof r.style.width === 'number' ? r.style.width : pageViewport
+    // Keep flex layout, just expand to full viewport and remove visual chrome
+    rootEl.style.setProperty('width', '100%', 'important')
+    rootEl.style.setProperty('min-height', '100vh', 'important')
+    rootEl.style.setProperty('overflow', 'visible', 'important')
+    rootEl.style.setProperty('padding', '0', 'important')
+    rootEl.style.setProperty('background', 'transparent', 'important')
+    rootEl.style.setProperty('gap', '0', 'important')
+    rootEl.style.setProperty('align-items', 'center', 'important')
+    // Center first child (Page) with max-width
+    const firstChild = rootEl.querySelector(':scope > [data-element-id]') as HTMLElement | null
+    if (firstChild) {
+      firstChild.style.setProperty('max-width', `${rootWidth}px`, 'important')
+      firstChild.style.setProperty('align-self', 'center', 'important')
+    }
+    // Override cursor/select on all editor elements
+    const allEls = rootEl.querySelectorAll('[data-element-id]') as NodeListOf<HTMLElement>
+    for (const el of allEls) {
+      el.style.setProperty('cursor', 'default', 'important')
+      el.style.setProperty('user-select', 'auto', 'important')
+    }
+    // Cleanup: remove overrides when leaving interact mode
+    return () => {
+      rootEl.style.removeProperty('width')
+      rootEl.style.removeProperty('min-height')
+      rootEl.style.removeProperty('overflow')
+      rootEl.style.removeProperty('padding')
+      rootEl.style.removeProperty('background')
+      rootEl.style.removeProperty('gap')
+      rootEl.style.removeProperty('align-items')
+      if (firstChild) {
+        firstChild.style.removeProperty('max-width')
+        firstChild.style.removeProperty('align-self')
+      }
+      for (const el of allEls) {
+        el.style.removeProperty('cursor')
+        el.style.removeProperty('user-select')
+      }
+    }
+  }, [editorMode, documentStore.root?.id, documentStore.root?.style?.width, pageViewport])
+
+  // Wheel: Cmd+wheel = zoom, plain wheel = pan (disabled in interact mode for natural scroll)
   useEffect(() => {
     const el = outerRef.current
     if (!el) return
+    if (editorMode === "interact") return // allow natural scroll
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
       if (e.metaKey || e.ctrlKey) {
@@ -285,7 +348,7 @@ export const App = observer(function App() {
     }
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
-  }, [])
+  }, [editorMode])
 
   const root = documentStore.root
   if (!root) return null
@@ -412,41 +475,54 @@ export const App = observer(function App() {
   return (
     <div
       ref={outerRef}
-      style={{ width: "100%", height: "100%", background: "#eeeef2", position: "relative", overflow: "hidden", cursor: spaceHeldRef.current ? "grab" : undefined }}
+      style={{
+        width: "100%", height: "100%",
+        background: editorMode === "interact" ? "#ffffff" : "#eeeef2",
+        position: "relative",
+        overflow: editorMode === "interact" ? "auto" : "hidden",
+        cursor: spaceHeldRef.current ? "grab" : undefined,
+      }}
       onPointerDown={handleCanvasPointerDown}
       onPointerMove={handleCanvasPointerMove}
       onPointerUp={handleCanvasPointerUp}
       onContextMenu={handleContextMenu}
     >
-      {/* Viewport transform wrapper (canvas space) */}
-      <div style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: '0 0', position: 'absolute' }}>
-        <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
-        {editorMode === "edit" && !isDragging && selectedIds.map(id => (
-          <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} zoom={zoom} />
-        ))}
-        {editorMode === "edit" && <SnapGuides lines={snapLines} />}
-        {dropHighlightId && (() => {
-          const dom = document.querySelector(`[data-element-id="${dropHighlightId}"]`) as HTMLElement | null
-          if (!dom) return null
-          const parentEl = dom.offsetParent as HTMLElement | null
-          if (!parentEl) return null
-          const parentRect = parentEl.getBoundingClientRect()
-          const domRect = dom.getBoundingClientRect()
-          return (
-            <div style={{
-              position: 'absolute',
-              left: (domRect.left - parentRect.left) / zoom,
-              top: (domRect.top - parentRect.top) / zoom,
-              width: domRect.width / zoom,
-              height: domRect.height / zoom,
-              border: '2px solid #3b82f6',
-              borderRadius: 4,
-              pointerEvents: 'none',
-              zIndex: 9998,
-            }} />
-          )
-        })()}
-      </div>
+      {editorMode === "interact" ? (
+        /* Interact mode: no transform, natural scroll — useEffect handles root style overrides */
+        <ElementRenderer elementId={root.id} selectedIds={[]} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={1} />
+      ) : (
+        <>
+        {/* Viewport transform wrapper (canvas space) */}
+        <div style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: '0 0', position: 'absolute' }}>
+          <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+          {!isDragging && selectedIds.map(id => (
+            <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} zoom={zoom} />
+          ))}
+          <SnapGuides lines={snapLines} />
+          {dropHighlightId && (() => {
+            const dom = document.querySelector(`[data-element-id="${dropHighlightId}"]`) as HTMLElement | null
+            if (!dom) return null
+            const parentEl = dom.offsetParent as HTMLElement | null
+            if (!parentEl) return null
+            const parentRect = parentEl.getBoundingClientRect()
+            const domRect = dom.getBoundingClientRect()
+            return (
+              <div style={{
+                position: 'absolute',
+                left: (domRect.left - parentRect.left) / zoom,
+                top: (domRect.top - parentRect.top) / zoom,
+                width: domRect.width / zoom,
+                height: domRect.height / zoom,
+                border: '2px solid #3b82f6',
+                borderRadius: 4,
+                pointerEvents: 'none',
+                zIndex: 9998,
+              }} />
+            )
+          })()}
+        </div>
+        </>
+      )}
 
       {/* Screen-space overlays */}
       {insertionIndicator && <InsertionIndicator {...insertionIndicator} />}
@@ -464,8 +540,8 @@ export const App = observer(function App() {
         }} />
       )}
 
-      {/* Viewport preset bar (Page Mode only) */}
-      {canvasMode === 'page' && (
+      {/* Viewport preset bar (Page Mode only, hidden in interact mode) */}
+      {canvasMode === 'page' && editorMode !== 'interact' && (
         <div
           onPointerDown={e => e.stopPropagation()}
           style={{
@@ -575,12 +651,12 @@ export const App = observer(function App() {
         )
       })()}
 
-      {/* Zoom indicator */}
+      {/* Zoom indicator — hidden in interact mode */}
       <div
         onPointerDown={e => e.stopPropagation()}
         style={{
         position: "absolute", bottom: 12, right: 12,
-        display: "flex", alignItems: "center", gap: 4,
+        display: editorMode === "interact" ? "none" : "flex", alignItems: "center", gap: 4,
         background: "rgba(255,255,255,0.9)", borderRadius: 6,
         padding: "4px 8px", fontSize: 11, color: "#64748b",
         boxShadow: "0 1px 4px rgba(0,0,0,0.1)", pointerEvents: "auto",

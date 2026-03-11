@@ -675,7 +675,7 @@ export class DocumentStore {
         height: undefined,
         minHeight: undefined,
         overflow: 'visible',
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#ffffff',
       }
     } else {
       // Restore absolute positions, sizing, and width (including grandchildren)

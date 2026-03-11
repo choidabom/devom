@@ -436,9 +436,16 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         ...containerStyles,
         ...sectionStyles,
         ...childSizingStyles,
-        ...(isRoot && documentStore.canvasMode === 'page' ? {
+        ...(isRoot && documentStore.canvasMode === 'page' && editorMode !== 'interact' ? {
           boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
           borderRadius: 2,
+        } : {}),
+        // Interact mode: convert fixed widths to max-width for responsiveness
+        ...(editorMode === "interact" && inAutoLayout && typeof element.style.width === 'number'
+          && childSizingStyles.flex === undefined ? {
+          maxWidth: element.style.width,
+          width: '100%',
+          overflowX: 'auto' as const,
         } : {}),
         outline: editorMode === "edit" && isSelected ? "1.5px dashed #6366f1" : undefined,
         outlineOffset: editorMode === "edit" && isSelected ? 2 : undefined,

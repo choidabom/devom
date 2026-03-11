@@ -73,6 +73,7 @@ export const App = observer(function App() {
           if (k.key === "Escape" && editorMode === "interact") {
             setEditorMode("edit")
             bridge.send({ type: "SET_MODE", payload: { mode: "edit" } })
+            setShowPanels(true)
             return
           }
           if (k.key === "Delete" || k.key === "Backspace") {
@@ -345,7 +346,12 @@ export const App = observer(function App() {
     setEditorMode(prev => {
       const next = prev === "edit" ? "interact" : "edit"
       bridge.send({ type: "SET_MODE", payload: { mode: next } })
-      if (next === "interact") selectionStore.clear()
+      if (next === "interact") {
+        selectionStore.clear()
+        setShowPanels(false)
+      } else {
+        setShowPanels(true)
+      }
       return next
     })
   }, [])
@@ -390,6 +396,7 @@ export const App = observer(function App() {
         if (editorMode !== "edit") {
           setEditorMode("edit")
           bridge.send({ type: "SET_MODE", payload: { mode: "edit" } })
+          setShowPanels(true)
         }
         return
       }
@@ -398,6 +405,7 @@ export const App = observer(function App() {
           setEditorMode("interact")
           selectionStore.clear()
           bridge.send({ type: "SET_MODE", payload: { mode: "interact" } })
+          setShowPanels(false)
         }
         return
       }
@@ -415,25 +423,47 @@ export const App = observer(function App() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: T.bg, color: T.text, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      <div data-guide="toolbar">
-        <Toolbar
-          onAdd={handleAddElement}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          onExport={() => setShowExport(true)}
-          onDelete={handleDelete}
-          onAlign={handleAlign}
-          canUndo={historyStore.canUndo}
-          canRedo={historyStore.canRedo}
-          hasSelection={hasSelection}
-          multiSelected={selectedElements.length >= 2}
-          editorMode={editorMode}
-          onToggleMode={handleToggleMode}
-          canvasMode={canvasMode}
-          onToggleCanvasMode={handleToggleCanvasMode}
-          onAddSection={handleAddSection}
-        />
-      </div>
+      {editorMode === "interact" && (
+        <div style={{
+          position: "fixed", top: 16, right: 16, zIndex: 100,
+          display: "flex", alignItems: "center", gap: 8,
+          background: "rgba(0,0,0,0.7)", borderRadius: 20, padding: "6px 16px",
+          backdropFilter: "blur(8px)",
+        }}>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Preview</span>
+          <button
+            onClick={handleToggleMode}
+            style={{
+              padding: "4px 12px", fontSize: 11, fontWeight: 500,
+              background: "#fff", color: "#000", border: "none",
+              borderRadius: 12, cursor: "pointer",
+            }}
+          >
+            Exit (V)
+          </button>
+        </div>
+      )}
+      {editorMode !== "interact" && (
+        <div data-guide="toolbar">
+          <Toolbar
+            onAdd={handleAddElement}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            onExport={() => setShowExport(true)}
+            onDelete={handleDelete}
+            onAlign={handleAlign}
+            canUndo={historyStore.canUndo}
+            canRedo={historyStore.canRedo}
+            hasSelection={hasSelection}
+            multiSelected={selectedElements.length >= 2}
+            editorMode={editorMode}
+            onToggleMode={handleToggleMode}
+            canvasMode={canvasMode}
+            onToggleCanvasMode={handleToggleCanvasMode}
+            onAddSection={handleAddSection}
+          />
+        </div>
+      )}
 
       <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
         {/* Canvas — always full width */}
@@ -525,7 +555,7 @@ export const App = observer(function App() {
       </div>
 
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
-      <LayoutGuide />
+      {editorMode !== "interact" && <LayoutGuide />}
     </div>
   )
 })
