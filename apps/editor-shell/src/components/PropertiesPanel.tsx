@@ -296,6 +296,87 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
+      {/* Image Properties */}
+      {!isMulti && element.type === "image" && (() => {
+        const src = String(element.props.src ?? '')
+        const alt = String(element.props.alt ?? '')
+        const objectFit = String(element.style.objectFit ?? 'cover')
+
+        return (
+          <div style={{ padding: "8px 12px", borderBottom: `1px solid ${T.border}`, marginBottom: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>Image</div>
+
+            {/* Thumbnail preview */}
+            {src && (
+              <div style={{ marginBottom: 8, borderRadius: 6, overflow: 'hidden', border: `1px solid ${T.inputBorder}` }}>
+                <img src={src} alt={alt} style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
+              </div>
+            )}
+
+            {/* Change image button */}
+            <button
+              onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = 'image/*'
+                input.onchange = () => {
+                  const file = input.files?.[0]
+                  if (!file) return
+                  if (file.size > 5 * 1024 * 1024) {
+                    alert('Image file size must be under 5MB')
+                    return
+                  }
+                  const reader = new FileReader()
+                  reader.onload = () => {
+                    updateProp('src', reader.result as string)
+                  }
+                  reader.readAsDataURL(file)
+                }
+                input.click()
+              }}
+              style={{
+                width: '100%', padding: '4px 8px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+                borderRadius: 4, background: T.inputBg, cursor: 'pointer', marginBottom: 8,
+              }}
+            >
+              Change Image
+            </button>
+
+            {/* Alt text */}
+            <div style={{ marginBottom: 6 }}>
+              <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>Alt Text</div>
+              <input
+                value={alt}
+                onChange={e => updateProp('alt', e.target.value)}
+                style={{
+                  width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+                  borderRadius: 4, background: T.inputBg, color: T.text, boxSizing: 'border-box',
+                }}
+                placeholder="Describe the image"
+              />
+            </div>
+
+            {/* Object Fit */}
+            <div>
+              <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>Object Fit</div>
+              <select
+                value={objectFit}
+                onChange={e => updateStyle('objectFit', e.target.value)}
+                style={{
+                  width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+                  borderRadius: 4, background: T.inputBg, color: T.text,
+                }}
+              >
+                <option value="cover">Cover</option>
+                <option value="contain">Contain</option>
+                <option value="fill">Fill</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Style — shared properties (works for multi-select) */}
       <PropSection title="Style">
         <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
