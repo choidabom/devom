@@ -5,9 +5,9 @@ import {
   AlignLeft, AlignCenterHorizontal, AlignRight,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowLeftRight, ArrowUpDown,
-  PanelTop, LayoutDashboard,
+  PanelTop, LayoutDashboard, LayoutTemplate,
 } from "lucide-react"
-import type { ElementType } from "@devom/editor-core"
+import type { ElementType, SectionRole } from "@devom/editor-core"
 import { T } from "../theme"
 
 export type AlignType = "left" | "center-h" | "right" | "top" | "center-v" | "bottom" | "distribute-h" | "distribute-v"
@@ -27,6 +27,7 @@ interface ToolbarProps {
   onToggleMode: () => void
   canvasMode: "canvas" | "page"
   onToggleCanvasMode: () => void
+  onAddSection?: (role: SectionRole) => void
 }
 
 const S = 15
@@ -54,9 +55,20 @@ const SHADCN_COMPONENTS: { type: ElementType; label: string; category: string }[
   { type: "sc:table", label: "Table", category: "Data" },
 ]
 
-export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode }: ToolbarProps) {
+const SECTION_PRESETS: { role: SectionRole; label: string }[] = [
+  { role: 'section', label: 'Empty Section' },
+  { role: 'header', label: 'Header' },
+  { role: 'hero', label: 'Hero' },
+  { role: 'features', label: 'Features' },
+  { role: 'cta', label: 'CTA' },
+  { role: 'footer', label: 'Footer' },
+]
+
+export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection }: ToolbarProps) {
   const [showShadcn, setShowShadcn] = useState(false)
+  const [showSections, setShowSections] = useState(false)
   const dropRef = useRef<HTMLDivElement>(null)
+  const sectionsDropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!showShadcn) return
@@ -66,6 +78,15 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
     document.addEventListener("mousedown", onClick)
     return () => document.removeEventListener("mousedown", onClick)
   }, [showShadcn])
+
+  useEffect(() => {
+    if (!showSections) return
+    const onClick = (e: MouseEvent) => {
+      if (sectionsDropRef.current && !sectionsDropRef.current.contains(e.target as Node)) setShowSections(false)
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [showSections])
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 16px", flexShrink: 0 }}>
@@ -122,6 +143,40 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
             </div>
           )}
         </div>
+
+        {/* Sections dropdown - only visible in page mode */}
+        {canvasMode === "page" && (
+          <div ref={sectionsDropRef} style={{ position: "relative" }}>
+            <ToolBtn
+              icon={<LayoutTemplate size={S} />}
+              title="Sections"
+              onClick={() => setShowSections(v => !v)}
+              active={showSections}
+            />
+            {showSections && (
+              <div style={{
+                position: "absolute", top: "100%", left: 0, marginTop: 4,
+                background: "#fff", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                border: "1px solid #e2e8f0", padding: 4, zIndex: 200, minWidth: 160,
+              }}>
+                {SECTION_PRESETS.map(p => (
+                  <button
+                    key={p.role}
+                    onClick={() => { onAddSection?.(p.role); setShowSections(false) }}
+                    style={{
+                      display: "block", width: "100%", textAlign: "left", padding: "6px 10px",
+                      fontSize: 12, border: "none", background: "none", cursor: "pointer", borderRadius: 4,
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#f1f5f9")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <ToolSep />
         <ToolBtn icon={<Settings size={S} />} title="Export" onClick={onExport} />
