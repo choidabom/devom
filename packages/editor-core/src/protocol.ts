@@ -36,6 +36,8 @@ export type CanvasToShellMessage =
   | { type: "REPARENT_ELEMENT"; payload: { id: string; oldParentId: string; newParentId: string; index: number; dropPosition?: { x: number; y: number } } }
   | { type: "SET_PAGE_VIEWPORT_REQUEST"; payload: { width: PageViewportWidth } }
   | { type: "INSERT_SECTION_REQUEST"; payload: { preset: SectionRole; index: number } }
+  | { type: "GROUP_ELEMENTS_REQUEST"; payload: { ids: string[]; elementBounds: Record<string, { left: number; top: number; width: number; height: number }> } }
+  | { type: "UNGROUP_ELEMENTS_REQUEST"; payload: { ids: string[] } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 
