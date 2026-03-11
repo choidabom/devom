@@ -38,9 +38,10 @@
 ## 메시지 프로토콜
 
 ```
-Canvas → Shell: GROUP_ELEMENTS_REQUEST { ids: string[] }
+Canvas → Shell: GROUP_ELEMENTS_REQUEST { ids: string[]; elementBounds: Record<string, { left, top, width, height }> }
+  Canvas에서 getBoundingClientRect() / zoom으로 문서 좌표 기준 bounds 계산하여 전송.
 Shell 처리:
-  1. documentStore.groupElements(ids) 실행
+  1. documentStore.groupElements(ids, elementBounds) 실행
   2. historyStore.pushSnapshot()
   3. SYNC_DOCUMENT → Canvas
   4. selectionStore.select(newGroupId)
