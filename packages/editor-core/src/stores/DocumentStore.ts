@@ -250,7 +250,7 @@ export class DocumentStore {
     return Array.from(this.elements.values())
   }
 
-  addElement(type: ElementType, parentId?: string): string {
+  addElement(type: ElementType, parentId?: string, initialProps?: Record<string, unknown>): string {
     const id = nanoid()
     const targetParentId = parentId ?? this.rootId
     const parent = this.elements.get(targetParentId)
@@ -263,7 +263,7 @@ export class DocumentStore {
       parentId: targetParentId,
       children: [],
       style: { ...DEFAULT_ELEMENT_STYLE[type] },
-      props: this.getDefaultProps(type),
+      props: { ...this.getDefaultProps(type), ...(initialProps ?? {}) },
       locked: false,
       visible: true,
       layoutMode: 'none' as const,

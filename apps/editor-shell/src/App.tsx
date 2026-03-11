@@ -155,9 +155,9 @@ export const App = observer(function App() {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }, [])
 
-  const handleAddElement = useCallback((type: ElementType) => {
+  const handleAddElement = useCallback((type: ElementType, props?: Record<string, unknown>) => {
     historyStore.pushSnapshot()
-    const id = documentStore.addElement(type)
+    const id = documentStore.addElement(type, undefined, props)
     if (id) {
       selectionStore.select(id)
       syncToCanvas()

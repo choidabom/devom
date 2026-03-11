@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useRef, useEffect } from "react"
+import { type ReactNode, useState, useRef, useEffect, useCallback } from "react"
 import {
   Plus, Type, ImageIcon,
   Undo2, Redo2, Trash2, Settings, ChevronDown,
@@ -13,7 +13,7 @@ import { T } from "../theme"
 export type AlignType = "left" | "center-h" | "right" | "top" | "center-v" | "bottom" | "distribute-h" | "distribute-v"
 
 interface ToolbarProps {
-  onAdd: (type: ElementType) => void
+  onAdd: (type: ElementType, props?: Record<string, unknown>) => void
   onUndo: () => void
   onRedo: () => void
   onExport: () => void
@@ -69,6 +69,28 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
   const [showSections, setShowSections] = useState(false)
   const dropRef = useRef<HTMLDivElement>(null)
   const sectionsDropRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image file size must be under 5MB')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      onAdd("image", { src: dataUrl, alt: file.name })
+    }
+    reader.readAsDataURL(file)
+
+    // Reset input so same file can be re-selected
+    e.target.value = ''
+  }, [onAdd])
 
   useEffect(() => {
     if (!showShadcn) return
@@ -96,7 +118,14 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
       }}>
         <ToolBtn icon={<Plus size={S} />} title="Frame" onClick={() => onAdd("div")} />
         <ToolBtn icon={<Type size={S} />} title="Text" onClick={() => onAdd("text")} />
-        <ToolBtn icon={<ImageIcon size={S} />} title="Image" onClick={() => onAdd("image")} />
+        <ToolBtn icon={<ImageIcon size={S} />} title="Image" onClick={() => fileInputRef.current?.click()} />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleImageUpload}
+        />
         <ToolSep />
 
         {/* shadcn/ui dropdown */}
