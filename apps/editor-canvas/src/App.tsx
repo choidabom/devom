@@ -29,6 +29,8 @@ const MAX_ZOOM = 5
 
 export const App = observer(function App() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const selectedIdsRef = useRef<string[]>([])
+  selectedIdsRef.current = selectedIds
   const [isDragging, setIsDragging] = useState(false)
   const [snapLines, setSnapLines] = useState<SnapLine[]>([])
   const [marquee, setMarquee] = useState<{ startX: number; startY: number; endX: number; endY: number } | null>(null)
@@ -164,7 +166,8 @@ export const App = observer(function App() {
       // Group: Cmd+G (must come BEFORE generic KEY_EVENT forwarding)
       if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === "KeyG") {
         e.preventDefault()
-        if (selectedIds.length < 2) return
+        const ids = selectedIdsRef.current
+        if (ids.length < 2) return
 
         // Calculate element bounds via DOM measurement
         const z = viewport.zoom
@@ -172,7 +175,7 @@ export const App = observer(function App() {
         if (!rootDom) return
         const rootRect = rootDom.getBoundingClientRect()
         const elementBounds: Record<string, { left: number; top: number; width: number; height: number }> = {}
-        for (const id of selectedIds) {
+        for (const id of ids) {
           const dom = document.querySelector(`[data-element-id="${id}"]`)
           if (!dom) continue
           const rect = dom.getBoundingClientRect()
@@ -185,7 +188,7 @@ export const App = observer(function App() {
         }
         bridge.send({
           type: "GROUP_ELEMENTS_REQUEST",
-          payload: { ids: selectedIds, elementBounds },
+          payload: { ids, elementBounds },
         })
         return
       }
@@ -195,7 +198,7 @@ export const App = observer(function App() {
         e.preventDefault()
         bridge.send({
           type: "UNGROUP_ELEMENTS_REQUEST",
-          payload: { ids: selectedIds },
+          payload: { ids: selectedIdsRef.current },
         })
         return
       }
