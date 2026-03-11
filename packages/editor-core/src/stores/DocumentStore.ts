@@ -1,7 +1,7 @@
 import { makeAutoObservable, observable } from "mobx"
 import { nanoid } from "nanoid"
 import type { CSSProperties } from "react"
-import { DEFAULT_ELEMENT_STYLE, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type CanvasMode, type PageViewportWidth, type EditorElement, type ElementType, type LayoutProps, type SizingProps } from "../types"
+import { DEFAULT_ELEMENT_STYLE, DEFAULT_GRID_PROPS, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type CanvasMode, type PageViewportWidth, type EditorElement, type ElementType, type GridProps, type LayoutProps, type SectionProps, type SizingProps } from "../types"
 
 export class DocumentStore {
   elements = observable.map<string, EditorElement>()
@@ -323,12 +323,22 @@ export class DocumentStore {
     newParent.children.splice(index, 0, id)
   }
 
-  setLayoutMode(id: string, mode: 'none' | 'flex') {
+  setLayoutMode(id: string, mode: 'none' | 'flex' | 'grid') {
     const element = this.elements.get(id)
     if (!element || element.locked || id === this.rootId) return
     element.layoutMode = mode
     if (mode === 'flex') {
       element.layoutProps = { ...DEFAULT_LAYOUT_PROPS }
+      for (const childId of element.children) {
+        const child = this.elements.get(childId)
+        if (!child) continue
+        const { position, left, top, ...rest } = child.style
+        child.style = { ...rest, position: 'relative' as const }
+      }
+    } else if (mode === 'grid') {
+      if (!element.gridProps) {
+        element.gridProps = { ...DEFAULT_GRID_PROPS }
+      }
       for (const childId of element.children) {
         const child = this.elements.get(childId)
         if (!child) continue
@@ -354,6 +364,18 @@ export class DocumentStore {
     const element = this.elements.get(id)
     if (!element) return
     Object.assign(element.sizing, sizing)
+  }
+
+  updateGridProps(id: string, props: Partial<GridProps>) {
+    const el = this.elements.get(id)
+    if (!el || !el.gridProps) return
+    el.gridProps = { ...el.gridProps, ...props }
+  }
+
+  updateSectionProps(id: string, props: Partial<SectionProps>) {
+    const el = this.elements.get(id)
+    if (!el) return
+    el.sectionProps = { ...el.sectionProps, ...props }
   }
 
   setCanvasMode(mode: CanvasMode) {
