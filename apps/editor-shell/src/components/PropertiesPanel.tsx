@@ -522,11 +522,13 @@ function ColorPickerPopover({ value, onChange, onLiveChange }: { value: string; 
   const [localHex, setLocalHex] = useState(value || "#ffffff")
   const popRef = useRef<HTMLDivElement>(null)
   const committedRef = useRef(value)
+  const wasOpenRef = useRef(false)
 
   useEffect(() => { setLocalHex(value || "#ffffff") }, [value])
 
   useEffect(() => {
     if (!open) return
+    wasOpenRef.current = true
     committedRef.current = value
     const onClick = (e: MouseEvent) => {
       if (popRef.current && !popRef.current.contains(e.target as Node)) setOpen(false)
@@ -535,12 +537,13 @@ function ColorPickerPopover({ value, onChange, onLiveChange }: { value: string; 
     return () => document.removeEventListener("mousedown", onClick)
   }, [open, value])
 
-  // Commit on close: push snapshot once
+  // Commit on close: push snapshot once (only after popover was actually opened)
   useEffect(() => {
-    if (open) return
+    if (open || !wasOpenRef.current) return
     if (localHex !== committedRef.current && /^#[0-9a-fA-F]{6}$/i.test(localHex)) {
       onChange(localHex)
     }
+    wasOpenRef.current = false
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePickerChange = useCallback((hex: string) => {
