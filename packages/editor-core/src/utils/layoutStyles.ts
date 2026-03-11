@@ -5,24 +5,38 @@ import type { EditorElement } from "../types"
  * Compute CSS properties for a flex container from its layoutProps.
  */
 export function getContainerStyles(element: EditorElement): CSSProperties {
-  if (element.layoutMode !== 'flex') return {}
-  const lp = element.layoutProps
-  return {
-    display: 'flex',
-    flexDirection: lp.direction,
-    gap: lp.gap,
-    paddingTop: lp.paddingTop,
-    paddingRight: lp.paddingRight,
-    paddingBottom: lp.paddingBottom,
-    paddingLeft: lp.paddingLeft,
-    alignItems: lp.alignItems === 'start' ? 'flex-start'
-      : lp.alignItems === 'end' ? 'flex-end'
-      : lp.alignItems,
-    justifyContent: lp.justifyContent === 'start' ? 'flex-start'
-      : lp.justifyContent === 'end' ? 'flex-end'
-      : lp.justifyContent === 'space-between' ? 'space-between'
-      : lp.justifyContent,
+  if (element.layoutMode === 'flex') {
+    const lp = element.layoutProps
+    return {
+      display: 'flex',
+      flexDirection: lp.direction,
+      gap: lp.gap,
+      paddingTop: lp.paddingTop,
+      paddingRight: lp.paddingRight,
+      paddingBottom: lp.paddingBottom,
+      paddingLeft: lp.paddingLeft,
+      alignItems: lp.alignItems === 'start' ? 'flex-start'
+        : lp.alignItems === 'end' ? 'flex-end'
+        : lp.alignItems,
+      justifyContent: lp.justifyContent === 'start' ? 'flex-start'
+        : lp.justifyContent === 'end' ? 'flex-end'
+        : lp.justifyContent === 'space-between' ? 'space-between'
+        : lp.justifyContent,
+    }
   }
+
+  if (element.layoutMode === 'grid' && element.gridProps) {
+    const g = element.gridProps
+    return {
+      display: 'grid' as const,
+      gridTemplateColumns: g.minColumnWidth
+        ? `repeat(auto-fit, minmax(${g.minColumnWidth}px, 1fr))`
+        : `repeat(${g.columns}, 1fr)`,
+      gap: g.gap,
+    }
+  }
+
+  return {}
 }
 
 /**
@@ -67,5 +81,28 @@ export function isAutoLayoutChild(
 ): boolean {
   if (!element.parentId) return false
   const parent = getElement(element.parentId)
-  return parent?.layoutMode === 'flex'
+  return parent?.layoutMode === 'flex' || parent?.layoutMode === 'grid'
+}
+
+export function getSectionStyles(element: EditorElement): CSSProperties {
+  if (!element.sectionProps) return {}
+  const s = element.sectionProps
+  const styles: CSSProperties = {}
+  if (s.backgroundColor) styles.backgroundColor = s.backgroundColor
+  if (s.backgroundImage) styles.backgroundImage = `url(${s.backgroundImage})`
+  if (s.verticalPadding != null) {
+    styles.paddingTop = s.verticalPadding
+    styles.paddingBottom = s.verticalPadding
+  }
+  return styles
+}
+
+export function getSectionContentStyles(element: EditorElement): CSSProperties {
+  if (!element.sectionProps?.maxWidth) return {}
+  return {
+    maxWidth: element.sectionProps.maxWidth,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '100%',
+  }
 }
