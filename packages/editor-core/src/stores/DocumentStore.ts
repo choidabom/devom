@@ -1,7 +1,8 @@
 import { makeAutoObservable, observable } from "mobx"
 import { nanoid } from "nanoid"
 import type { CSSProperties } from "react"
-import { DEFAULT_ELEMENT_STYLE, DEFAULT_GRID_PROPS, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type CanvasMode, type PageViewportWidth, type EditorElement, type ElementType, type GridProps, type LayoutProps, type SectionProps, type SizingProps } from "../types"
+import { DEFAULT_ELEMENT_STYLE, DEFAULT_GRID_PROPS, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type CanvasMode, type PageViewportWidth, type EditorElement, type ElementType, type GridProps, type LayoutProps, type SectionProps, type SectionRole, type SizingProps } from "../types"
+import { createSectionPreset } from "../presets/sectionPresets"
 
 export class DocumentStore {
   elements = observable.map<string, EditorElement>()
@@ -202,6 +203,39 @@ export class DocumentStore {
       if (parent && !parent.children.includes(element.id)) {
         parent.children.push(element.id)
       }
+    }
+  }
+
+  addSection(role: SectionRole, index?: number) {
+    const preset = createSectionPreset(role)
+    const sectionId = nanoid()
+    const root = this.elements.get(this.rootId)
+    if (!root) return
+
+    const section: EditorElement = {
+      ...preset.section,
+      id: sectionId,
+      parentId: this.rootId,
+    }
+    this.elements.set(sectionId, section)
+
+    for (const childTemplate of preset.children) {
+      const childId = nanoid()
+      const child: EditorElement = {
+        ...childTemplate,
+        id: childId,
+        parentId: sectionId,
+      }
+      this.elements.set(childId, child)
+      section.children = [...section.children, childId]
+    }
+
+    if (index != null && index < root.children.length) {
+      const newChildren = [...root.children]
+      newChildren.splice(index, 0, sectionId)
+      root.children = newChildren
+    } else {
+      root.children = [...root.children, sectionId]
     }
   }
 
