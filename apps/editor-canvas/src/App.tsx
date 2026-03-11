@@ -161,6 +161,45 @@ export const App = observer(function App() {
         }
         return
       }
+      // Group: Cmd+G (must come BEFORE generic KEY_EVENT forwarding)
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === "KeyG") {
+        e.preventDefault()
+        if (selectedIds.length < 2) return
+
+        // Calculate element bounds via DOM measurement
+        const z = viewport.zoom
+        const elementBounds: Record<string, { left: number; top: number; width: number; height: number }> = {}
+        for (const id of selectedIds) {
+          const dom = document.querySelector(`[data-element-id="${id}"]`)
+          if (!dom) continue
+          const rect = dom.getBoundingClientRect()
+          // Convert to document coordinates relative to root
+          const rootDom = document.querySelector(`[data-element-id="${documentStore.rootId}"]`)
+          if (!rootDom) continue
+          const rootRect = rootDom.getBoundingClientRect()
+          elementBounds[id] = {
+            left: (rect.left - rootRect.left) / z,
+            top: (rect.top - rootRect.top) / z,
+            width: rect.width / z,
+            height: rect.height / z,
+          }
+        }
+        bridge.send({
+          type: "GROUP_ELEMENTS_REQUEST",
+          payload: { ids: selectedIds, elementBounds },
+        })
+        return
+      }
+
+      // Ungroup: Cmd+Shift+G
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === "KeyG") {
+        e.preventDefault()
+        bridge.send({
+          type: "UNGROUP_ELEMENTS_REQUEST",
+          payload: { ids: selectedIds },
+        })
+        return
+      }
       // Prevent browser native undo/redo/copy/paste in iframe
       if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyV", "KeyD"].includes(e.code)) {
         e.preventDefault()
