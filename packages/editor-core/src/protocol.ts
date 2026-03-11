@@ -31,6 +31,7 @@ export type CanvasToShellMessage =
   | { type: "KEY_EVENT"; payload: { key: string; code: string; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean } }
   | { type: "REORDER_CHILD"; payload: { parentId: string; childId: string; newIndex: number } }
   | { type: "REPARENT_ELEMENT"; payload: { id: string; oldParentId: string; newParentId: string; index: number; dropPosition?: { x: number; y: number } } }
+  | { type: "SET_PAGE_VIEWPORT_REQUEST"; payload: { width: PageViewportWidth } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 

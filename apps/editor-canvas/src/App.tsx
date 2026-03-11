@@ -101,15 +101,17 @@ export const App = observer(function App() {
       case "SET_PAGE_VIEWPORT":
         // Don't call documentStore.setPageViewport() — SYNC_DOCUMENT already has the transformed data
         setPageViewport(msg.payload.width)
-        // Re-center with new width
+        // Zoom-to-fit and re-center with new width
         {
           const el = outerRef.current
           if (el) {
             const rect = el.getBoundingClientRect()
-            setViewport(prev => ({
-              ...prev,
-              panX: (rect.width - msg.payload.width * prev.zoom) / 2,
-            }))
+            const fitZoom = Math.min(1, (rect.width - 40) / msg.payload.width)
+            setViewport({
+              zoom: fitZoom,
+              panX: (rect.width - msg.payload.width * fitZoom) / 2,
+              panY: 20,
+            })
           }
         }
         break
@@ -215,12 +217,15 @@ export const App = observer(function App() {
 
   const handleCanvasPointerDown = (e: React.PointerEvent) => {
     const target = e.currentTarget as HTMLElement
-    target.setPointerCapture(e.pointerId)
-    // Space+drag → pan
+    // Space+drag → pan (works in all modes)
     if (spaceHeldRef.current) {
+      target.setPointerCapture(e.pointerId)
       panDragRef.current = { x: e.clientX, y: e.clientY }
       return
     }
+    // In interact mode, don't capture pointer or start marquee — let components handle events
+    if (editorMode === "interact") return
+    target.setPointerCapture(e.pointerId)
     const rect = target.getBoundingClientRect()
     marqueeRef.current = {
       startX: e.clientX - rect.left,
@@ -262,13 +267,16 @@ export const App = observer(function App() {
 
   const handleCanvasPointerUp = (e: React.PointerEvent) => {
     const target = e.currentTarget as HTMLElement
-    target.releasePointerCapture(e.pointerId)
+    try { target.releasePointerCapture(e.pointerId) } catch { /* not captured */ }
 
     // End pan drag
     if (panDragRef.current) {
       panDragRef.current = null
       return
     }
+
+    // In interact mode, don't handle marquee or canvas click
+    if (editorMode === "interact") return
 
     if (marqueeRef.current?.active && marquee) {
       const selRect = {
@@ -368,7 +376,9 @@ export const App = observer(function App() {
 
       {/* Viewport preset bar (Page Mode only) */}
       {canvasMode === 'page' && (
-        <div style={{
+        <div
+          onPointerDown={e => e.stopPropagation()}
+          style={{
           position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
           display: 'flex', alignItems: 'center', gap: 4,
           background: 'rgba(255,255,255,0.95)', borderRadius: 8,
@@ -384,19 +394,7 @@ export const App = observer(function App() {
             <button
               key={p.width}
               onClick={() => {
-                setPageViewport(p.width)
-                const root = documentStore.root
-                if (root) root.style = { ...root.style, width: p.width }
-                const el = outerRef.current
-                if (el) {
-                  const rect = el.getBoundingClientRect()
-                  const fitZoom = Math.min(1, (rect.width - 40) / p.width)
-                  setViewport({
-                    zoom: fitZoom,
-                    panX: (rect.width - p.width * fitZoom) / 2,
-                    panY: 20,
-                  })
-                }
+                bridge.send({ type: "SET_PAGE_VIEWPORT_REQUEST", payload: { width: p.width } })
               }}
               style={{
                 padding: '4px 10px', fontSize: 11, fontWeight: 500,
@@ -413,7 +411,9 @@ export const App = observer(function App() {
       )}
 
       {/* Zoom indicator */}
-      <div style={{
+      <div
+        onPointerDown={e => e.stopPropagation()}
+        style={{
         position: "absolute", bottom: 12, right: 12,
         display: "flex", alignItems: "center", gap: 4,
         background: "rgba(255,255,255,0.9)", borderRadius: 6,

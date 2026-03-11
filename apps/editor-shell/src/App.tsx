@@ -89,6 +89,11 @@ export const App = observer(function App() {
           documentStore.reparentElement(msg.payload.id, msg.payload.newParentId, msg.payload.index, msg.payload.dropPosition)
           syncToCanvas()
           break
+        case "SET_PAGE_VIEWPORT_REQUEST":
+          documentStore.setPageViewport(msg.payload.width)
+          syncToCanvas()
+          bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: msg.payload.width } })
+          break
       }
     })
 
