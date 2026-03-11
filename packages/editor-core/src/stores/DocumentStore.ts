@@ -680,18 +680,20 @@ export class DocumentStore {
     const lcaId = this.findLCA(validIds)
     if (!lcaId) return null
 
+    // Validate all elements have bounds data
+    for (const id of validIds) {
+      if (!elementBounds[id]) return null
+    }
+
     // Calculate bounding box from Canvas-measured element bounds
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     for (const id of validIds) {
-      const b = elementBounds[id]
-      if (!b) continue
+      const b = elementBounds[id]!
       minX = Math.min(minX, b.left)
       minY = Math.min(minY, b.top)
       maxX = Math.max(maxX, b.left + b.width)
       maxY = Math.max(maxY, b.top + b.height)
     }
-
-    if (!isFinite(minX)) return null
 
     // Create group container as child of LCA
     const groupId = nanoid()

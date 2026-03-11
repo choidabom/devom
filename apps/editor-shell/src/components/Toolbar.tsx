@@ -83,8 +83,8 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
 
     const reader = new FileReader()
     reader.onload = () => {
-      const dataUrl = reader.result as string
-      onAdd("image", { src: dataUrl, alt: file.name })
+      if (typeof reader.result !== 'string') return
+      onAdd("image", { src: reader.result, alt: file.name })
     }
     reader.readAsDataURL(file)
 

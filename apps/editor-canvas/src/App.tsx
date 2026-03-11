@@ -168,15 +168,14 @@ export const App = observer(function App() {
 
         // Calculate element bounds via DOM measurement
         const z = viewport.zoom
+        const rootDom = document.querySelector(`[data-element-id="${documentStore.rootId}"]`)
+        if (!rootDom) return
+        const rootRect = rootDom.getBoundingClientRect()
         const elementBounds: Record<string, { left: number; top: number; width: number; height: number }> = {}
         for (const id of selectedIds) {
           const dom = document.querySelector(`[data-element-id="${id}"]`)
           if (!dom) continue
           const rect = dom.getBoundingClientRect()
-          // Convert to document coordinates relative to root
-          const rootDom = document.querySelector(`[data-element-id="${documentStore.rootId}"]`)
-          if (!rootDom) continue
-          const rootRect = rootDom.getBoundingClientRect()
           elementBounds[id] = {
             left: (rect.left - rootRect.left) / z,
             top: (rect.top - rootRect.top) / z,

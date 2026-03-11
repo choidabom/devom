@@ -328,7 +328,8 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
                   }
                   const reader = new FileReader()
                   reader.onload = () => {
-                    updateProp('src', reader.result as string)
+                    if (typeof reader.result !== 'string') return
+                    updateProp('src', reader.result)
                   }
                   reader.readAsDataURL(file)
                 }
