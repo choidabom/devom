@@ -4,7 +4,7 @@
 
 에디터에 두 가지 기능을 추가한다:
 1. **Group/Ungroup** — 선택한 요소들을 컨테이너로 묶기/풀기
-2. **Image Upload** — 로컬 이미지 파일을 base64로 변환하여 Canvas에 추가
+2. **Image Upload** — 기존 `image` 타입에 파일 업로드 기능 추가
 
 ---
 
@@ -13,83 +13,106 @@
 ### 데이터 모델
 
 - 별도 타입 없이 기존 `div` 컨테이너를 그룹으로 사용
-- 생성된 그룹: `layoutMode: 'none'`, `name: 'Group'`
+- 생성된 그룹: `layoutMode: 'none'`, `name: 'Group-{id.slice(0,4)}'`
 
 ### Group 동작 (Cmd+G)
 
-1. 선택된 요소들의 bounding box 계산 (left, top, width, height)
-2. 새 `div` 요소 생성 — 위치/크기 = bounding box
-3. 선택된 요소들을 새 컨테이너의 children으로 이동
-4. 각 자식의 좌표를 컨테이너 기준 상대좌표로 변환 (`left -= container.left`, `top -= container.top`)
-5. 선택을 새 그룹 컨테이너로 변경
+1. 선택된 요소 2개 이상인지 확인, locked 요소 제외
+2. Bounding box 계산:
+   - Canvas iframe에서 각 요소의 `getBoundingClientRect()` 호출
+   - 현재 zoom 값으로 나누어 문서 좌표로 변환
+   - 모든 요소의 min(left, top), max(right, bottom) → bounding box
+3. LCA(Lowest Common Ancestor) 계산:
+   - 각 요소에서 root까지의 경로(parentId chain) 구축
+   - 모든 경로에서 공통으로 나타나는 가장 깊은 조상 선택
+   - LCA가 root인 경우 허용 (root 아래에 그룹 생성)
+   - 선택된 요소가 다른 요소의 조상인 경우 그룹핑 차단
+4. LCA의 자식으로 새 `div` 요소 생성 — 위치/크기 = bounding box
+5. 선택된 요소들을 원래 부모에서 분리, 새 컨테이너의 children으로 이동
+6. 각 자식의 좌표를 컨테이너 기준 상대좌표로 변환:
+   - 절대 좌표 요소: `left -= container.left`, `top -= container.top`
+   - flex/grid 자식: `getBoundingClientRect()` 기준 delta 계산 후 `position: absolute`로 전환
+7. 선택을 새 그룹 컨테이너로 변경
+8. `historyStore.pushSnapshot()` 호출
 
 ### Ungroup 동작 (Cmd+Shift+G)
 
 - 기존 `ungroupElements()` 활용
 - 자식들의 좌표를 부모 기준으로 재계산 (컨테이너 좌표 더하기)
-
-### 다른 부모에 속한 요소 그룹핑
-
-- 다른 부모에 속한 요소들도 그룹핑 허용
-- 공통 조상(Lowest Common Ancestor)을 찾아서 해당 레벨에 그룹 컨테이너 생성
-- 선택된 요소들을 원래 부모에서 분리 후 새 그룹의 children으로 이동
-- 각 요소의 절대 좌표를 계산한 뒤 그룹 컨테이너 기준 상대좌표로 변환
+- `historyStore.pushSnapshot()` 호출
 
 ### 메시지 프로토콜
 
-- Canvas → Shell: `GROUP_ELEMENTS_REQUEST { ids: string[] }`
-- Canvas → Shell: `UNGROUP_ELEMENTS_REQUEST { ids: string[] }`
-- Shell → Canvas: 기존 `SYNC_DOCUMENT`로 결과 반영
+```
+Canvas → Shell: GROUP_ELEMENTS_REQUEST { ids: string[] }
+Shell 처리:
+  1. documentStore.groupElements(ids) 실행
+  2. historyStore.pushSnapshot()
+  3. SYNC_DOCUMENT → Canvas
+  4. selectionStore.select(newGroupId)
+  5. SELECT_ELEMENT { ids: [newGroupId] } → Canvas
+
+Canvas → Shell: UNGROUP_ELEMENTS_REQUEST { ids: string[] }
+Shell 처리:
+  1. documentStore.ungroupElements(ids) 실행 → newSelection 반환
+  2. historyStore.pushSnapshot()
+  3. SYNC_DOCUMENT → Canvas
+  4. selectionStore.setIds(newSelection)
+  5. SELECT_ELEMENT { ids: newSelection } → Canvas
+```
 
 ### 키보드 단축키
 
-- `Cmd+G`: Group
-- `Cmd+Shift+G`: Ungroup
+- `Cmd+G`: Group (Canvas에서 감지 → Shell로 REQUEST)
+- `Cmd+Shift+G`: Ungroup (Canvas에서 감지 → Shell로 REQUEST)
+
+### Export
+
+- 그룹 컨테이너는 일반 `<div>`로 export (특별한 구분 없음)
 
 ### 제약 조건
 
 - root 요소는 그룹에 포함 불가
 - 선택 요소가 1개 이하면 Group 무시
 - locked 요소는 그룹/언그룹 대상에서 제외
+- 선택된 요소가 다른 선택 요소의 조상이면 그룹핑 차단
 
 ---
 
 ## 2. Image Upload
 
-### 데이터 모델
+### 현재 상태
 
-- `ElementType`에 `'img'` 추가
-- `props.src`: base64 data URL (string)
-- `props.alt`: 대체 텍스트 (string, 기본값 빈 문자열)
-- 기본 스타일: `width: 200`, `height: 'auto'`, `objectFit: 'cover'`
+`image` 타입이 이미 존재:
+- `types.ts`: `ElementType`에 `"image"` 포함
+- `DocumentStore.getDefaultProps()`: `{ src: "", alt: "Image" }` 반환
+- `ElementRenderer`: `<img>` 렌더링 (src 없으면 placeholder 표시)
+- `DEFAULT_ELEMENT_STYLE.image`: `{ height: 200, objectFit: "cover" }`
+- `jsxExport`: `"image"` → `"img"` 태그 매핑
 
-### 추가 UI
+### 추가할 기능: 파일 업로드
+
+#### Toolbar UI
 
 - Toolbar "UI" 드롭다운에 **Image** 항목 추가 (Media 카테고리)
-- 클릭 시 `<input type="file" accept="image/*">` 다이얼로그 실행
-- FileReader로 base64 변환 → `ADD_ELEMENT_REQUEST`에 `props.src` 포함
+- 클릭 시 숨겨진 `<input type="file" accept="image/*">` 트리거
+- 업로드 흐름:
+  1. 파일 선택 다이얼로그 열림
+  2. `file.size > 5MB` 체크 → 초과 시 alert 표시, 중단
+  3. `FileReader.readAsDataURL(file)` 실행
+  4. `ADD_ELEMENT_REQUEST { type: "image", props: { src: dataUrl, alt: file.name } }` → Shell 전송
 
-### ElementRenderer
-
-- `type === 'img'`일 때 `<img src={props.src} alt={props.alt} />` 렌더링
-- 리사이즈/드래그 가능 (기존 요소와 동일)
-- children 없음 (void element)
-
-### PropertiesPanel
+#### PropertiesPanel (image 선택 시)
 
 - src: 이미지 미리보기 썸네일 + "변경" 버튼 (파일 재선택)
 - alt: 텍스트 입력
 - objectFit: select (cover / contain / fill / none)
 
-### Export
-
-- JSX: `<img src="..." alt="..." style={{...}} />`
-- HTML: `<img src="..." alt="..." style="..." />`
-
 ### 제약 사항
 
 - base64이므로 최대 5MB 파일 크기 제한
 - 새로고침 시 소실 (현재 persistence 없으므로 동일)
+- children 없음 (void element)
 
 ---
 
@@ -99,13 +122,9 @@
 
 | 파일 | 변경 내용 |
 |------|----------|
-| `packages/editor-core/src/types.ts` | `ElementType`에 `'img'` 추가 |
-| `packages/editor-core/src/stores/DocumentStore.ts` | `groupElements()`, `addElement()` img 지원 |
+| `packages/editor-core/src/stores/DocumentStore.ts` | `groupElements()` 추가 |
 | `packages/editor-core/src/protocol.ts` | `GROUP_ELEMENTS_REQUEST`, `UNGROUP_ELEMENTS_REQUEST` 메시지 추가 |
-| `packages/editor-core/src/presets/defaultStyles.ts` | img 기본 스타일 추가 |
-| `apps/editor-shell/src/App.tsx` | 메시지 핸들러 추가, 키보드 단축키 |
-| `apps/editor-shell/src/components/Toolbar.tsx` | Image 항목 추가, Group/Ungroup 버튼 |
-| `apps/editor-canvas/src/App.tsx` | 메시지 핸들러, 키보드 단축키 |
-| `apps/editor-canvas/src/components/ElementRenderer.tsx` | img 렌더링 |
-| `apps/editor-shell/src/components/PropertiesPanel.tsx` | img 속성 UI |
-| `apps/editor-shell/src/utils/exportUtils.ts` | img export 지원 |
+| `apps/editor-shell/src/App.tsx` | Group/Ungroup 메시지 핸들러, Image 업로드 핸들러 |
+| `apps/editor-shell/src/components/Toolbar.tsx` | Image 항목 추가 |
+| `apps/editor-canvas/src/App.tsx` | Group/Ungroup 키보드 단축키 → REQUEST 전송 |
+| `apps/editor-shell/src/components/PropertiesPanel.tsx` | image 속성 UI (src 변경, alt, objectFit) |
