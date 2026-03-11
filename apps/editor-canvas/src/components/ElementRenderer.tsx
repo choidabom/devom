@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import React, { useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
@@ -20,11 +20,12 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import type { DocumentStore } from "@devom/editor-core"
+import type { DocumentStore, SectionRole } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
-import { getContainerStyles, getChildSizingStyles } from "@devom/editor-core"
+import { getContainerStyles, getChildSizingStyles, getSectionStyles, getSectionContentStyles } from "@devom/editor-core"
 import { calcSnap, type SnapLine, type Bounds } from "../utils/snap"
 import { findDropTarget, calcInsertionIndicator } from "../utils/autoLayoutDrag"
+import { SectionInsertButton } from "./SectionInsertButton"
 
 interface ElementRendererProps {
   elementId: string
@@ -60,6 +61,11 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   const childSizingStyles = inAutoLayout
     ? getChildSizingStyles(element, parent!.layoutProps.direction)
     : {}
+
+  // Section styles
+  const sectionStyles = getSectionStyles(element)
+  const contentStyles = getSectionContentStyles(element)
+  const hasContentWrapper = element.sectionProps?.maxWidth != null
 
   const handleClick = (e: React.MouseEvent) => {
     if (editorMode === "interact") return
@@ -259,6 +265,10 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     target.addEventListener("pointercancel", onCancel)
   }
 
+  const handleInsertSection = (role: SectionRole, index: number) => {
+    bridge.send({ type: "INSERT_SECTION_REQUEST", payload: { preset: role, index } })
+  }
+
   const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
     if (editorMode === "interact") return
     if (element.locked || isRoot) return
@@ -376,7 +386,13 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         ...element.style,
         ...(inAutoLayout ? { position: 'relative' as const, left: undefined, top: undefined } : {}),
         ...containerStyles,
+        ...sectionStyles,
         ...childSizingStyles,
+        ...(isRoot && documentStore.canvasMode === 'page' ? {
+          boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
+          borderRadius: 2,
+          overflow: 'hidden',
+        } : {}),
         outline: editorMode === "edit" && isSelected ? "1.5px dashed #6366f1" : undefined,
         outlineOffset: editorMode === "edit" && isSelected ? 2 : undefined,
         cursor: editorMode === "interact" ? undefined : (element.locked || isRoot ? "default" : (inAutoLayout ? "grab" : "move")),
@@ -386,9 +402,27 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       onPointerDown={inAutoLayout ? handleAutoLayoutPointerDown : handlePointerDown}
     >
       {content}
-      {element.children.map((childId) => (
-        <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
-      ))}
+      {hasContentWrapper ? (
+        <div style={contentStyles}>
+          {element.children.map((childId) => (
+            <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+          ))}
+        </div>
+      ) : isRoot && documentStore.canvasMode === 'page' && editorMode === 'edit' ? (
+        <>
+          <SectionInsertButton index={0} onInsert={handleInsertSection} />
+          {element.children.map((childId, i) => (
+            <React.Fragment key={childId}>
+              <ElementRenderer elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+              <SectionInsertButton index={i + 1} onInsert={handleInsertSection} />
+            </React.Fragment>
+          ))}
+        </>
+      ) : (
+        element.children.map((childId) => (
+          <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+        ))
+      )}
     </div>
   )
 })
