@@ -79,23 +79,27 @@ export const App = observer(function App() {
         documentStore.updateSizing(msg.payload.id, msg.payload.sizing)
         break
       case "SET_CANVAS_MODE":
-        documentStore.setCanvasMode(msg.payload.mode)
+        // Don't call documentStore.setCanvasMode() — SYNC_DOCUMENT already has the transformed data
         setCanvasMode(msg.payload.mode)
-        // Center page in viewport when switching to page mode
+        // Zoom-to-fit and center page when switching to page mode
         if (msg.payload.mode === 'page') {
           const el = outerRef.current
           if (el) {
             const rect = el.getBoundingClientRect()
-            setViewport(prev => ({
-              ...prev,
-              panX: (rect.width - pageViewport * prev.zoom) / 2,
+            const fitZoom = Math.min(1, (rect.width - 40) / pageViewport)
+            setViewport({
+              zoom: fitZoom,
+              panX: (rect.width - pageViewport * fitZoom) / 2,
               panY: 20,
-            }))
+            })
           }
+        } else {
+          // Reset to 100% when switching back to canvas mode
+          setViewport({ zoom: 1, panX: 0, panY: 0 })
         }
         break
       case "SET_PAGE_VIEWPORT":
-        documentStore.setPageViewport(msg.payload.width)
+        // Don't call documentStore.setPageViewport() — SYNC_DOCUMENT already has the transformed data
         setPageViewport(msg.payload.width)
         // Re-center with new width
         {
@@ -381,12 +385,17 @@ export const App = observer(function App() {
               key={p.width}
               onClick={() => {
                 setPageViewport(p.width)
-                documentStore.setPageViewport(p.width)
-                bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: p.width } })
+                const root = documentStore.root
+                if (root) root.style = { ...root.style, width: p.width }
                 const el = outerRef.current
                 if (el) {
                   const rect = el.getBoundingClientRect()
-                  setViewport(prev => ({ ...prev, panX: (rect.width - p.width * prev.zoom) / 2 }))
+                  const fitZoom = Math.min(1, (rect.width - 40) / p.width)
+                  setViewport({
+                    zoom: fitZoom,
+                    panX: (rect.width - p.width * fitZoom) / 2,
+                    panY: 20,
+                  })
                 }
               }}
               style={{
