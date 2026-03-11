@@ -617,6 +617,237 @@ export class DocumentStore {
     parent.children.splice(newIndex, 0, childId)
   }
 
+  private findLCA(ids: string[]): string | null {
+    if (ids.length === 0) return null
+
+    // Build path from each id to root
+    const paths: string[][] = []
+    for (const id of ids) {
+      const path: string[] = []
+      let current: string | null = id
+      while (current) {
+        path.unshift(current)
+        const el = this.elements.get(current)
+        if (!el) break
+        current = el.parentId
+      }
+      paths.push(path)
+    }
+
+    // Find deepest common ancestor
+    let lca = this.rootId
+    const minLen = Math.min(...paths.map(p => p.length))
+    for (let i = 0; i < minLen; i++) {
+      const val = paths[0]?.[i]
+      if (!val) break
+      if (paths.every(p => p[i] === val)) {
+        lca = val
+      } else {
+        break
+      }
+    }
+
+    return lca
+  }
+
+  private isAncestor(ancestorId: string, descendantId: string): boolean {
+    let current: string | null = descendantId
+    while (current) {
+      const el = this.elements.get(current)
+      if (!el || !el.parentId) return false
+      if (el.parentId === ancestorId) return true
+      current = el.parentId
+    }
+    return false
+  }
+
+  groupElements(ids: string[], elementBounds: Record<string, { left: number; top: number; width: number; height: number }>): string | null {
+    // Filter out root, locked elements
+    const validIds = ids.filter(id => {
+      const el = this.elements.get(id)
+      return el && !el.locked && id !== this.rootId
+    })
+    if (validIds.length < 2) return null
+
+    // Check: no element should be ancestor of another
+    for (const a of validIds) {
+      for (const b of validIds) {
+        if (a !== b && this.isAncestor(a, b)) return null
+      }
+    }
+
+    // Find LCA
+    const lcaId = this.findLCA(validIds)
+    if (!lcaId) return null
+
+    // Calculate bounding box from Canvas-measured element bounds
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const id of validIds) {
+      const b = elementBounds[id]
+      if (!b) continue
+      minX = Math.min(minX, b.left)
+      minY = Math.min(minY, b.top)
+      maxX = Math.max(maxX, b.left + b.width)
+      maxY = Math.max(maxY, b.top + b.height)
+    }
+
+    if (!isFinite(minX)) return null
+
+    // Create group container as child of LCA
+    const groupId = nanoid()
+    const lca = this.elements.get(lcaId)!
+
+    const group: EditorElement = {
+      id: groupId,
+      type: 'div',
+      name: `Group-${groupId.slice(0, 4)}`,
+      parentId: lcaId,
+      children: [],
+      style: {
+        position: 'absolute' as const,
+        left: minX,
+        top: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+      },
+      props: {},
+      locked: false,
+      visible: true,
+      layoutMode: 'none' as const,
+      layoutProps: { ...DEFAULT_LAYOUT_PROPS },
+      sizing: { ...DEFAULT_SIZING },
+      canvasPosition: null,
+    }
+    this.elements.set(groupId, group)
+
+    // Find the earliest index among selected elements in LCA's children
+    let insertIndex = lca.children.length
+    for (const id of validIds) {
+      const el = this.elements.get(id)
+      if (el && el.parentId === lcaId) {
+        const idx = lca.children.indexOf(id)
+        if (idx !== -1 && idx < insertIndex) insertIndex = idx
+      }
+    }
+
+    // Remove selected elements from their parents and add to group
+    for (const id of validIds) {
+      const el = this.elements.get(id)
+      if (!el) continue
+
+      // Remove from old parent
+      const oldParent = el.parentId ? this.elements.get(el.parentId) : undefined
+      if (oldParent) {
+        oldParent.children = oldParent.children.filter(c => c !== id)
+      }
+
+      // Convert coordinates: use Canvas-measured bounds relative to group
+      const b = elementBounds[id]
+      const left = b ? b.left - minX : 0
+      const top = b ? b.top - minY : 0
+      el.style = {
+        ...el.style,
+        position: 'absolute' as const,
+        left,
+        top,
+      }
+
+      el.parentId = groupId
+      group.children.push(id)
+    }
+
+    // Insert group into LCA's children at the computed position
+    lca.children = [
+      ...lca.children.slice(0, insertIndex),
+      groupId,
+      ...lca.children.slice(insertIndex),
+    ]
+
+    return groupId
+  }
+
+  /**
+   * Ungroup selected elements.
+   * - If a selected element is a child (has parent != root): detach from parent, move to grandparent
+   * - If a selected element is a container with children: move all children to parent, then delete container
+   * Returns the ids that should be selected after the operation.
+   */
+  ungroupElements(ids: string[]): string[] {
+    const newSelection: string[] = []
+
+    for (const id of ids) {
+      const element = this.elements.get(id)
+      if (!element || id === this.rootId) continue
+
+      const hasChildren = element.children.length > 0
+
+      if (hasChildren) {
+        // Container selected: move only direct children to parent, then delete container
+        const parent = element.parentId ? this.elements.get(element.parentId) : undefined
+        if (!parent) continue
+
+        const containerIndex = parent.children.indexOf(id)
+        if (containerIndex === -1) continue
+
+        const directChildIds = [...element.children]
+
+        // Update each direct child's parentId and style
+        for (const childId of directChildIds) {
+          const child = this.elements.get(childId)
+          if (!child) continue
+
+          child.parentId = parent.id
+
+          if (parent.layoutMode === 'flex' || parent.layoutMode === 'grid') {
+            const { position, left, top, ...rest } = child.style
+            child.style = { ...rest, position: 'relative' as const }
+          } else {
+            child.style = { ...child.style, position: 'absolute' as const }
+          }
+
+          newSelection.push(childId)
+        }
+
+        // Replace container with its direct children in parent (new array for MobX)
+        const before = parent.children.slice(0, containerIndex)
+        const after = parent.children.slice(containerIndex + 1)
+        parent.children = [...before, ...directChildIds, ...after]
+
+        // Delete the container only (children already reparented)
+        element.children = []
+        this.elements.delete(id)
+      } else {
+        // Child selected: detach from parent, move to grandparent
+        const parent = element.parentId ? this.elements.get(element.parentId) : undefined
+        if (!parent || parent.id === this.rootId) continue
+
+        const grandparent = parent.parentId ? this.elements.get(parent.parentId) : undefined
+        if (!grandparent) continue
+
+        // Remove from parent (new array for MobX)
+        parent.children = parent.children.filter(cid => cid !== id)
+
+        // Insert into grandparent right after the parent (new array for MobX)
+        const parentIndex = grandparent.children.indexOf(parent.id)
+        const gpBefore = grandparent.children.slice(0, parentIndex + 1)
+        const gpAfter = grandparent.children.slice(parentIndex + 1)
+        grandparent.children = [...gpBefore, id, ...gpAfter]
+        element.parentId = grandparent.id
+
+        if (grandparent.layoutMode === 'flex' || grandparent.layoutMode === 'grid') {
+          const { position, left, top, ...rest } = element.style
+          element.style = { ...rest, position: 'relative' as const }
+        } else {
+          element.style = { ...element.style, position: 'absolute' as const }
+        }
+
+        newSelection.push(id)
+      }
+    }
+
+    return newSelection
+  }
+
   reparentElement(id: string, newParentId: string, index: number, dropPosition?: { x: number; y: number }) {
     const element = this.elements.get(id)
     const newParent = this.elements.get(newParentId)
