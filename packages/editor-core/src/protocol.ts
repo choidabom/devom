@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react"
-import type { CanvasMode, EditorElement, ElementBounds, LayoutProps, PageViewportWidth, SizingProps } from "./types"
+import type { CanvasMode, EditorElement, ElementBounds, GridProps, LayoutProps, PageViewportWidth, SectionProps, SectionRole, SizingProps } from "./types"
 
 // Shell -> Canvas messages
 export type ShellToCanvasMessage =
@@ -18,6 +18,9 @@ export type ShellToCanvasMessage =
   | { type: "UPDATE_SIZING"; payload: { id: string; sizing: Partial<SizingProps> } }
   | { type: "SET_CANVAS_MODE"; payload: { mode: CanvasMode } }
   | { type: "SET_PAGE_VIEWPORT"; payload: { width: PageViewportWidth } }
+  | { type: "UPDATE_SECTION_PROPS"; payload: { id: string; sectionProps: Partial<SectionProps> } }
+  | { type: "UPDATE_GRID_PROPS"; payload: { id: string; gridProps: Partial<GridProps> } }
+  | { type: "ADD_SECTION"; payload: { preset: SectionRole; index?: number } }
 
 // Canvas -> Shell messages
 export type CanvasToShellMessage =
@@ -32,6 +35,7 @@ export type CanvasToShellMessage =
   | { type: "REORDER_CHILD"; payload: { parentId: string; childId: string; newIndex: number } }
   | { type: "REPARENT_ELEMENT"; payload: { id: string; oldParentId: string; newParentId: string; index: number; dropPosition?: { x: number; y: number } } }
   | { type: "SET_PAGE_VIEWPORT_REQUEST"; payload: { width: PageViewportWidth } }
+  | { type: "INSERT_SECTION_REQUEST"; payload: { preset: SectionRole; index: number } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 
