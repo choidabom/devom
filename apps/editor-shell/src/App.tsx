@@ -27,6 +27,11 @@ export const App = observer(function App() {
         case "CANVAS_READY": {
           const data = documentStore.toSerializable()
           bridge.send({ type: "SYNC_DOCUMENT", payload: data })
+          // Sync canvas mode if not default
+          if (documentStore.canvasMode !== 'canvas') {
+            bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: documentStore.canvasMode } })
+            setCanvasMode(documentStore.canvasMode)
+          }
           break
         }
         case "ELEMENT_CLICKED":

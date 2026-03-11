@@ -8,7 +8,7 @@ export class DocumentStore {
   elements = observable.map<string, EditorElement>()
   rootId = ""
   name = "Untitled"
-  viewport = { width: 1280, height: 720 }
+  viewport = { width: 1280, height: 800 }
   canvasMode: CanvasMode = 'canvas'
   pageViewport: PageViewportWidth = 1280
 
@@ -48,10 +48,12 @@ export class DocumentStore {
     const root = this.elements.get(this.rootId)
     if (!root) return
 
+    const rel = { position: 'relative' as const, left: undefined, top: undefined }
+    const noPad = { paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0 }
     const add = (
       type: ElementType,
       parentId: string,
-      overrides: { name?: string; style?: Partial<EditorElement['style']>; props?: Record<string, unknown>; layoutMode?: 'none' | 'flex'; layoutProps?: Partial<EditorElement['layoutProps']> } = {},
+      overrides: { name?: string; style?: Partial<EditorElement['style']>; props?: Record<string, unknown>; layoutMode?: 'none' | 'flex'; layoutProps?: Partial<EditorElement['layoutProps']>; sizing?: Partial<SizingProps> } = {},
     ): string => {
       const id = nanoid()
       const parent = this.elements.get(parentId)
@@ -68,80 +70,172 @@ export class DocumentStore {
         visible: true,
         layoutMode: overrides.layoutMode ?? 'none',
         layoutProps: { ...DEFAULT_LAYOUT_PROPS, ...overrides.layoutProps },
-        sizing: { ...DEFAULT_SIZING },
+        sizing: { ...DEFAULT_SIZING, ...overrides.sizing },
         canvasPosition: null,
       })
       parent.children.push(id)
       return id
     }
 
-    // Color palette
-    const c = { card: '#ffffff', text: '#0f172a', sub: '#64748b', border: '#e2e8f0' }
+    // Color palette — slate tones
+    const t = '#0f172a'   // text
+    const s = '#64748b'   // secondary
+    const m = '#94a3b8'   // muted
+    const bd = '#e2e8f0'  // border
+    const card = { backgroundColor: '#ffffff', borderRadius: 12, border: `1px solid ${bd}`, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
+    // Clear default div styling for layout containers
+    const box = { backgroundColor: 'transparent' as const, borderRadius: 0, border: 'none' }
 
-    // --- Header Section ---
-    add('text', this.rootId, { name: 'Title', style: { left: 20, top: 16, fontSize: 18, fontWeight: 700, color: c.text }, props: { content: 'Dashboard' } })
-    add('text', this.rootId, { name: 'Description', style: { left: 20, top: 42, fontSize: 12, color: c.sub }, props: { content: 'Welcome back! Here is your workspace overview.' } })
-
-    // --- Login Card (Auto Layout Column) ---
-    const loginCard = add('div', this.rootId, {
-      name: 'Login Card',
-      style: { left: 20, top: 70, width: 230, height: 'auto', backgroundColor: c.card, borderRadius: 16, border: `1px solid ${c.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+    // ════════════════════════════════════════════
+    // Header
+    // ════════════════════════════════════════════
+    const header = add('div', this.rootId, {
+      name: 'Header',
+      style: { left: 40, top: 20, width: 720, height: 'auto', ...card, borderRadius: 0, borderLeft: 'none', borderRight: 'none', borderTop: 'none' },
       layoutMode: 'flex',
-      layoutProps: { direction: 'column', gap: 10, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch', justifyContent: 'start' },
+      layoutProps: { direction: 'row', gap: 0, ...noPad, paddingTop: 20, paddingRight: 24, paddingBottom: 20, paddingLeft: 24, alignItems: 'center', justifyContent: 'space-between' },
     })
-    if (loginCard) {
-      add('sc:label', loginCard, { name: 'Email Label', style: { position: 'relative' }, props: { text: 'Email' } })
-      add('sc:input', loginCard, { name: 'Email Input', style: { position: 'relative', width: undefined }, props: { placeholder: 'you@example.com', type: 'email' } })
-      add('sc:label', loginCard, { name: 'PW Label', style: { position: 'relative' }, props: { text: 'Password' } })
-      add('sc:input', loginCard, { name: 'PW Input', style: { position: 'relative', width: undefined }, props: { placeholder: '••••••••', type: 'password' } })
-      add('sc:button', loginCard, { name: 'Login Btn', style: { position: 'relative' }, props: { label: 'Sign In', variant: 'default' } })
-      add('sc:separator', loginCard, { name: 'Divider', style: { position: 'relative', width: undefined } })
-      add('sc:checkbox', loginCard, { name: 'Remember', style: { position: 'relative' }, props: { label: 'Remember me', checked: false } })
+    if (header) {
+      const hl = add('div', header, {
+        name: 'Header Left',
+        style: { ...rel, width: 'auto', height: 'auto', ...box },
+        layoutMode: 'flex', layoutProps: { direction: 'column', gap: 2, ...noPad, alignItems: 'start' },
+        sizing: { w: 'hug', h: 'hug' },
+      })
+      if (hl) {
+        add('text', hl, { name: 'Title', style: { ...rel, fontSize: 22, fontWeight: 700, color: t }, props: { content: 'Dashboard' } })
+        add('text', hl, { name: 'Subtitle', style: { ...rel, fontSize: 13, color: s }, props: { content: 'Your business at a glance.' } })
+      }
+      const hr = add('div', header, {
+        name: 'Header Right',
+        style: { ...rel, width: 'auto', height: 'auto', ...box },
+        layoutMode: 'flex', layoutProps: { direction: 'row', gap: 10, ...noPad, alignItems: 'center' },
+        sizing: { w: 'hug', h: 'hug' },
+      })
+      if (hr) {
+        add('sc:button', hr, { name: 'Download', style: { ...rel }, props: { label: 'Download', variant: 'outline', size: 'sm' } })
+        add('sc:avatar', hr, { name: 'Avatar', style: { ...rel }, props: { fallback: 'JD' } })
+      }
     }
 
-    // --- Settings Card (Form Controls) ---
-    const settingsCard = add('div', this.rootId, {
-      name: 'Settings Card',
-      style: { left: 270, top: 70, width: 230, height: 'auto', backgroundColor: c.card, borderRadius: 16, border: `1px solid ${c.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+    // ════════════════════════════════════════════
+    // Stats Row — 4 metric cards
+    // ════════════════════════════════════════════
+    const statsRow = add('div', this.rootId, {
+      name: 'Stats Row',
+      style: { left: 40, top: 120, width: 720, height: 'auto', ...box },
       layoutMode: 'flex',
-      layoutProps: { direction: 'column', gap: 12, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch', justifyContent: 'start' },
+      layoutProps: { direction: 'row', gap: 16, ...noPad, alignItems: 'stretch' },
     })
-    if (settingsCard) {
-      add('text', settingsCard, { name: 'Settings Title', style: { position: 'relative', fontSize: 15, fontWeight: 700, color: c.text }, props: { content: 'Preferences' } })
-      add('sc:switch', settingsCard, { name: 'Push Toggle', style: { position: 'relative' }, props: { label: 'Push notifications', checked: true } })
-      add('sc:switch', settingsCard, { name: 'Email Toggle', style: { position: 'relative' }, props: { label: 'Email digest', checked: false } })
-      add('sc:separator', settingsCard, { name: 'Settings Sep', style: { position: 'relative', width: undefined } })
-      add('sc:select', settingsCard, { name: 'Language Select', style: { position: 'relative', width: undefined }, props: { placeholder: 'Language', options: ['English', 'Korean', 'Japanese'] } })
-      add('sc:slider', settingsCard, { name: 'Volume', style: { position: 'relative', width: undefined }, props: { value: 70, min: 0, max: 100 } })
-      add('sc:radio-group', settingsCard, { name: 'Theme Radio', style: { position: 'relative' }, props: { label: 'Theme', options: ['Light', 'Dark', 'System'], value: 'Light' } })
+    if (statsRow) {
+      const stats = [
+        { name: 'Total Revenue', value: '$45,231', sub: '+20.1% from last month' },
+        { name: 'Subscriptions', value: '+2,350', sub: '+180.1% from last month' },
+        { name: 'Sales', value: '+12,234', sub: '+19% from last month' },
+        { name: 'Active Now', value: '+573', sub: '+201 since last hour' },
+      ]
+      for (const st of stats) {
+        const sc = add('div', statsRow, {
+          name: st.name,
+          style: { ...rel, width: 168, height: 'auto', ...card },
+          layoutMode: 'flex',
+          layoutProps: { direction: 'column', gap: 4, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'start' },
+        })
+        if (sc) {
+          add('text', sc, { name: `${st.name} Label`, style: { ...rel, fontSize: 13, fontWeight: 500, color: s }, props: { content: st.name } })
+          add('text', sc, { name: `${st.name} Value`, style: { ...rel, fontSize: 26, fontWeight: 700, color: t }, props: { content: st.value } })
+          add('text', sc, { name: `${st.name} Trend`, style: { ...rel, fontSize: 11, color: '#16a34a' }, props: { content: st.sub } })
+        }
+      }
     }
 
-    // --- Status Badges ---
-    add('sc:badge', this.rootId, { name: 'Badge Active', style: { left: 20, top: 420 }, props: { label: 'Active', variant: 'default' } })
-    add('sc:badge', this.rootId, { name: 'Badge Pending', style: { left: 80, top: 420 }, props: { label: 'Pending', variant: 'secondary' } })
-    add('sc:badge', this.rootId, { name: 'Badge Error', style: { left: 150, top: 420 }, props: { label: 'Error', variant: 'destructive' } })
-    add('sc:badge', this.rootId, { name: 'Badge Info', style: { left: 210, top: 420 }, props: { label: 'Info', variant: 'outline' } })
-
-    // --- Alert ---
-    add('sc:alert', this.rootId, { name: 'Notice', style: { left: 20, top: 452, width: 230 }, props: { title: 'Scheduled Maintenance', description: 'System will be down on 3/15 02:00–04:00 UTC for upgrades.', variant: 'default' } })
-
-    // --- Progress ---
-    add('sc:progress', this.rootId, { name: 'Storage Progress', style: { left: 270, top: 452, width: 230 }, props: { value: 75 } })
-
-    // --- Table ---
-    add('sc:table', this.rootId, {
-      name: 'Members Table',
-      style: { left: 20, top: 540, width: 480 },
-      props: {
-        headers: ['Name', 'Role', 'Status'],
-        rows: [['Alice Kim', 'Admin', 'Active'], ['Bob Park', 'Editor', 'Pending'], ['Carol Lee', 'Viewer', 'Active']],
-      },
+    // ════════════════════════════════════════════
+    // Content Row — Table + Settings
+    // ════════════════════════════════════════════
+    const contentRow = add('div', this.rootId, {
+      name: 'Content Row',
+      style: { left: 40, top: 260, width: 720, height: 'auto', ...box },
+      layoutMode: 'flex',
+      layoutProps: { direction: 'row', gap: 16, ...noPad, alignItems: 'start' },
     })
+    if (contentRow) {
+      // Recent Sales table
+      const tblCard = add('div', contentRow, {
+        name: 'Recent Sales',
+        style: { ...rel, width: 430, height: 'auto', ...card },
+        layoutMode: 'flex',
+        layoutProps: { direction: 'column', gap: 8, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch' },
+      })
+      if (tblCard) {
+        add('text', tblCard, { name: 'Table Title', style: { ...rel, fontSize: 16, fontWeight: 600, color: t }, props: { content: 'Recent Sales' } })
+        add('text', tblCard, { name: 'Table Desc', style: { ...rel, fontSize: 12, color: s }, props: { content: 'You made 265 sales this month.' } })
+        add('sc:table', tblCard, {
+          name: 'Sales Table',
+          style: { ...rel, width: undefined },
+          props: {
+            headers: ['Customer', 'Email', 'Amount'],
+            rows: [
+              ['Olivia Martin', 'olivia@email.com', '+$1,999.00'],
+              ['Jackson Lee', 'jackson@email.com', '+$39.00'],
+              ['Isabella Nguyen', 'isabella@email.com', '+$299.00'],
+              ['William Kim', 'will@email.com', '+$99.00'],
+            ],
+          },
+        })
+      }
 
-    // --- Bottom Row (Misc) ---
-    add('sc:avatar', this.rootId, { name: 'User Avatar', style: { left: 270, top: 486 }, props: { fallback: 'AK' } })
-    add('sc:skeleton', this.rootId, { name: 'Loading', style: { left: 310, top: 486, width: 190, height: 20 } })
-    add('sc:toggle', this.rootId, { name: 'Bookmark', style: { left: 310, top: 512 }, props: { label: '★ Bookmark' } })
+      // Settings panel
+      const setCard = add('div', contentRow, {
+        name: 'Settings',
+        style: { ...rel, width: 274, height: 'auto', ...card },
+        layoutMode: 'flex',
+        layoutProps: { direction: 'column', gap: 14, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch' },
+      })
+      if (setCard) {
+        add('text', setCard, { name: 'Settings Title', style: { ...rel, fontSize: 16, fontWeight: 600, color: t }, props: { content: 'Settings' } })
+        add('sc:switch', setCard, { name: 'Notifications', style: { ...rel }, props: { label: 'Email notifications', checked: true } })
+        add('sc:switch', setCard, { name: 'Marketing', style: { ...rel }, props: { label: 'Marketing emails', checked: false } })
+        add('sc:separator', setCard, { name: 'Sep', style: { ...rel, width: undefined } })
+        add('sc:select', setCard, { name: 'Language', style: { ...rel, width: undefined }, props: { placeholder: 'Language', options: ['English', 'Korean', 'Japanese'] } })
+        add('sc:slider', setCard, { name: 'Volume', style: { ...rel, width: undefined }, props: { value: 70, min: 0, max: 100 } })
+      }
+    }
+
+    // ════════════════════════════════════════════
+    // Alert Row
+    // ════════════════════════════════════════════
+    const alertRow = add('div', this.rootId, {
+      name: 'Alert Row',
+      style: { left: 40, top: 580, width: 720, height: 'auto', ...box },
+      layoutMode: 'flex',
+      layoutProps: { direction: 'row', gap: 16, ...noPad, alignItems: 'start' },
+    })
+    if (alertRow) {
+      add('sc:alert', alertRow, { name: 'Notice', style: { ...rel, width: 350 }, props: { title: 'Scheduled Maintenance', description: 'System will be down on 3/15 02:00–04:00 UTC.', variant: 'default' } })
+      const progressCard = add('div', alertRow, {
+        name: 'Storage',
+        style: { ...rel, width: 354, height: 'auto', ...card },
+        layoutMode: 'flex',
+        layoutProps: { direction: 'column', gap: 10, paddingTop: 16, paddingRight: 20, paddingBottom: 16, paddingLeft: 20, alignItems: 'stretch' },
+      })
+      if (progressCard) {
+        add('text', progressCard, { name: 'Storage Label', style: { ...rel, fontSize: 13, fontWeight: 600, color: t }, props: { content: 'Storage — 75 GB / 100 GB' } })
+        add('sc:progress', progressCard, { name: 'Progress', style: { ...rel, width: undefined }, props: { value: 75 } })
+      }
+    }
+
+    // ════════════════════════════════════════════
+    // Footer
+    // ════════════════════════════════════════════
+    const footer = add('div', this.rootId, {
+      name: 'Footer',
+      style: { left: 40, top: 680, width: 720, height: 'auto', ...box, borderTop: `1px solid ${bd}` },
+      layoutMode: 'flex',
+      layoutProps: { direction: 'row', gap: 0, paddingTop: 16, ...noPad, paddingBottom: 16, alignItems: 'center', justifyContent: 'center' },
+    })
+    if (footer) {
+      add('text', footer, { name: 'Copyright', style: { ...rel, fontSize: 12, color: m }, props: { content: '© 2026 Acme Inc. All rights reserved.' } })
+    }
   }
 
   get root(): EditorElement | undefined {
@@ -418,26 +512,42 @@ export class DocumentStore {
     if (!root) return
 
     if (mode === 'page') {
-      // Save absolute positions and switch to flow
+      // Save absolute positions, sizing, width and switch to flow
+      // Also propagate fill sizing to children of flex-row containers
       for (const childId of root.children) {
         const child = this.elements.get(childId)
         if (!child) continue
         child.canvasPosition = {
           left: typeof child.style.left === 'number' ? child.style.left : 0,
           top: typeof child.style.top === 'number' ? child.style.top : 0,
+          width: child.style.width,
+          sizing: { ...child.sizing },
         }
         const { left, top, position, ...rest } = child.style
-        child.style = { ...rest, position: 'relative' as const }
+        child.style = { ...rest, position: 'relative' as const, width: '100%' }
+        child.sizing = { w: 'fill', h: 'hug' }
+
+        // For flex-row containers, make direct children fill equally
+        if (child.layoutMode === 'flex' && child.layoutProps.direction === 'row') {
+          for (const grandchildId of child.children) {
+            const gc = this.elements.get(grandchildId)
+            if (!gc) continue
+            if (!gc.canvasPosition) {
+              gc.canvasPosition = { left: 0, top: 0, width: gc.style.width, sizing: { ...gc.sizing } }
+            }
+            gc.sizing = { w: gc.sizing.w === 'hug' ? 'hug' : 'fill', h: gc.sizing.h === 'fixed' ? 'hug' : gc.sizing.h }
+          }
+        }
       }
       root.layoutMode = 'flex'
       root.layoutProps = {
         ...DEFAULT_LAYOUT_PROPS,
         direction: 'column',
-        gap: 0,
-        paddingTop: 0,
-        paddingRight: 0,
-        paddingBottom: 0,
-        paddingLeft: 0,
+        gap: 24,
+        paddingTop: 24,
+        paddingRight: 32,
+        paddingBottom: 32,
+        paddingLeft: 32,
         alignItems: 'stretch',
       }
       root.style = {
@@ -446,9 +556,10 @@ export class DocumentStore {
         height: undefined,
         minHeight: undefined,
         overflow: 'visible',
+        backgroundColor: '#f8fafc',
       }
     } else {
-      // Restore absolute positions
+      // Restore absolute positions, sizing, and width (including grandchildren)
       for (const childId of root.children) {
         const child = this.elements.get(childId)
         if (!child) continue
@@ -458,7 +569,19 @@ export class DocumentStore {
           position: 'absolute' as const,
           left: pos.left,
           top: pos.top,
+          width: pos.width ?? child.style.width,
         }
+        if (pos.sizing) {
+          child.sizing = { ...pos.sizing }
+        }
+        // Restore grandchildren sizing
+        for (const grandchildId of child.children) {
+          const gc = this.elements.get(grandchildId)
+          if (!gc || !gc.canvasPosition?.sizing) continue
+          gc.sizing = { ...gc.canvasPosition.sizing }
+          gc.canvasPosition = null
+        }
+        child.canvasPosition = null
       }
       root.layoutMode = 'none'
       root.layoutProps = { ...DEFAULT_LAYOUT_PROPS }
@@ -468,6 +591,7 @@ export class DocumentStore {
         height: this.viewport.height,
         minHeight: undefined,
         overflow: 'hidden',
+        backgroundColor: '#ffffff',
       }
     }
 

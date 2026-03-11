@@ -42,7 +42,7 @@ export interface EditorElement {
   layoutMode: 'none' | 'flex' | 'grid'
   layoutProps: LayoutProps
   sizing: SizingProps
-  canvasPosition: { left: number; top: number } | null
+  canvasPosition: { left: number; top: number; width?: CSSProperties['width']; sizing?: SizingProps } | null
   role?: SectionRole
   sectionProps?: SectionProps
   gridProps?: GridProps
