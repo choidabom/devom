@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
-import type { EditorMessage, ElementType } from "@devom/editor-core"
+import type { EditorMessage, ElementType, SectionRole } from "@devom/editor-core"
 import { exportToJSX, exportToHTML } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "./stores"
 import { T } from "./theme"
@@ -94,6 +94,11 @@ export const App = observer(function App() {
           syncToCanvas()
           bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: msg.payload.width } })
           break
+        case "INSERT_SECTION_REQUEST":
+          historyStore.pushSnapshot()
+          documentStore.addSection(msg.payload.preset, msg.payload.index)
+          syncToCanvas()
+          break
       }
     })
 
@@ -128,6 +133,12 @@ export const App = observer(function App() {
       syncToCanvas()
       bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
     }
+  }, [syncToCanvas])
+
+  const handleAddSection = useCallback((role: SectionRole) => {
+    historyStore.pushSnapshot()
+    documentStore.addSection(role)
+    syncToCanvas()
   }, [syncToCanvas])
 
   const handleDelete = useCallback(() => {
@@ -360,6 +371,7 @@ export const App = observer(function App() {
           onToggleMode={handleToggleMode}
           canvasMode={canvasMode}
           onToggleCanvasMode={handleToggleCanvasMode}
+          onAddSection={handleAddSection}
         />
       </div>
 
