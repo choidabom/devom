@@ -571,10 +571,6 @@ export const App = observer(function App() {
             onToggleCanvasMode={handleToggleCanvasMode}
             onAddSection={handleAddSection}
             onLoadTemplate={handleLoadTemplate}
-            zoom={canvasZoom}
-            onZoomIn={() => bridge.send({ type: "ZOOM_IN" })}
-            onZoomOut={() => bridge.send({ type: "ZOOM_OUT" })}
-            onZoomReset={() => bridge.send({ type: "ZOOM_RESET" })}
           />
         </div>
       )}
@@ -698,6 +694,23 @@ export const App = observer(function App() {
             )}
           </div>
         </div>
+
+        {/* Zoom controls — bottom-right, above panels */}
+        {(editorMode !== "interact" || canvasMode === 'canvas') && (
+          <div style={{
+            position: "absolute", bottom: 12, right: showPanels ? 296 : 12,
+            display: "flex", alignItems: "center", gap: 4,
+            background: T.panel, borderRadius: 8,
+            padding: "4px 8px", fontSize: 11,
+            boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`,
+            zIndex: 10, userSelect: "none",
+            transition: "right 0.2s ease",
+          }}>
+            <button onClick={() => bridge.send({ type: "ZOOM_OUT" })} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: T.textSub, padding: "0 2px", lineHeight: 1 }}>−</button>
+            <span onClick={() => bridge.send({ type: "ZOOM_RESET" })} style={{ cursor: "pointer", minWidth: 36, textAlign: "center", fontSize: 11, fontWeight: 500, color: T.textSub }}>{Math.round(canvasZoom * 100)}%</span>
+            <button onClick={() => bridge.send({ type: "ZOOM_IN" })} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: T.textSub, padding: "0 2px", lineHeight: 1 }}>+</button>
+          </div>
+        )}
       </div>
 
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}

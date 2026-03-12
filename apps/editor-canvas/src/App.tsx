@@ -725,21 +725,6 @@ export const App = observer(function App() {
         )
       })()}
 
-      {/* Zoom indicator — hidden in interact mode */}
-      <div
-        onPointerDown={e => e.stopPropagation()}
-        style={{
-        position: "absolute", bottom: 12, right: 12,
-        display: (editorMode === "interact" && canvasMode === 'page') ? "none" : "flex", alignItems: "center", gap: 4,
-        background: "rgba(255,255,255,0.9)", borderRadius: 6,
-        padding: "4px 8px", fontSize: 11, color: "#64748b",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.1)", pointerEvents: "auto",
-        userSelect: "none",
-      }}>
-        <button onClick={() => setViewport(prev => { const nz = Math.max(MIN_ZOOM, prev.zoom / 1.2); const el = outerRef.current; if (!el) return prev; const r = el.getBoundingClientRect(); const cx = r.width/2, cy = r.height/2; const s = nz/prev.zoom; return {zoom: nz, panX: cx-(cx-prev.panX)*s, panY: cy-(cy-prev.panY)*s} })} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#64748b", padding: "0 2px" }}>−</button>
-        <span onClick={() => setViewport({ zoom: 1, panX: 0, panY: 0 })} style={{ cursor: "pointer", minWidth: 36, textAlign: "center" }}>{Math.round(zoom * 100)}%</span>
-        <button onClick={() => setViewport(prev => { const nz = Math.min(MAX_ZOOM, prev.zoom * 1.2); const el = outerRef.current; if (!el) return prev; const r = el.getBoundingClientRect(); const cx = r.width/2, cy = r.height/2; const s = nz/prev.zoom; return {zoom: nz, panX: cx-(cx-prev.panX)*s, panY: cy-(cy-prev.panY)*s} })} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: "#64748b", padding: "0 2px" }}>+</button>
-      </div>
     </div>
   )
 })
