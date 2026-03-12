@@ -7,26 +7,39 @@ const SHADCN_IMPORTS: Record<string, { from: string; names: string[] }> = {
   "sc:card": { from: "@/components/ui/card", names: ["Card", "CardHeader", "CardTitle", "CardDescription", "CardContent"] },
   "sc:input": { from: "@/components/ui/input", names: ["Input"] },
   "sc:badge": { from: "@/components/ui/badge", names: ["Badge"] },
+  "sc:checkbox": { from: "@/components/ui/checkbox", names: ["Checkbox"] },
+  "sc:switch": { from: "@/components/ui/switch", names: ["Switch"] },
+  "sc:label": { from: "@/components/ui/label", names: ["Label"] },
+  "sc:textarea": { from: "@/components/ui/textarea", names: ["Textarea"] },
+  "sc:avatar": { from: "@/components/ui/avatar", names: ["Avatar", "AvatarFallback"] },
+  "sc:separator": { from: "@/components/ui/separator", names: ["Separator"] },
+  "sc:progress": { from: "@/components/ui/progress", names: ["Progress"] },
+  "sc:skeleton": { from: "@/components/ui/skeleton", names: ["Skeleton"] },
+  "sc:slider": { from: "@/components/ui/slider", names: ["Slider"] },
+  "sc:tabs": { from: "@/components/ui/tabs", names: ["Tabs", "TabsList", "TabsTrigger"] },
+  "sc:alert": { from: "@/components/ui/alert", names: ["Alert", "AlertTitle", "AlertDescription"] },
+  "sc:toggle": { from: "@/components/ui/toggle", names: ["Toggle"] },
+  "sc:select": { from: "@/components/ui/select", names: ["Select", "SelectTrigger", "SelectValue", "SelectContent", "SelectItem"] },
+  "sc:table": { from: "@/components/ui/table", names: ["Table", "TableHeader", "TableBody", "TableRow", "TableHead", "TableCell"] },
+  "sc:accordion": { from: "@/components/ui/accordion", names: ["Accordion", "AccordionItem", "AccordionTrigger", "AccordionContent"] },
+  "sc:radio-group": { from: "@/components/ui/radio-group", names: ["RadioGroup", "RadioGroupItem"] },
 }
 
 export function exportToJSX(elements: Record<string, EditorElement>, rootId: string): string {
   const root = elements[rootId]
   if (!root) return ""
 
-  // Collect used shadcn types
   const usedTypes = new Set<string>()
   collectTypes(root, elements, usedTypes)
 
   const lines: string[] = []
 
-  // Generate imports
   const imports = generateImports(usedTypes)
   if (imports.length > 0) {
     lines.push(...imports)
     lines.push("")
   }
 
-  // Generate component
   lines.push("export default function Component() {")
   lines.push("  return (")
   renderElement(root, elements, lines, 4)
@@ -72,40 +85,55 @@ function renderElement(el: EditorElement, elements: Record<string, EditorElement
   }
 }
 
+// --- Compute effective style (shared by both renderers) ---
+
+function computeEffectiveStyle(el: EditorElement, elements: Record<string, EditorElement>): CSSProperties {
+  const style: CSSProperties = { ...el.style }
+
+  if (el.layoutMode === 'flex') {
+    Object.assign(style, getContainerStyles(el))
+  }
+
+  if (el.parentId) {
+    const parentEl = elements[el.parentId]
+    if (parentEl?.layoutMode === 'flex') {
+      delete (style as any).position
+      delete (style as any).left
+      delete (style as any).top
+      Object.assign(style, getChildSizingStyles(el, parentEl.layoutProps.direction))
+    }
+  }
+
+  return style
+}
+
 // --- shadcn component rendering ---
 
 function renderShadcnElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number) {
   const pad = " ".repeat(indent)
+  const p = el.props
+  const styleStr = styleToJsx(computeEffectiveStyle(el, elements))
 
   switch (el.type) {
     case "sc:button": {
-      const variant = el.props.variant as string
-      const size = el.props.size as string
-      const label = String(el.props.label ?? "Button")
-      const styleStr = styleToJsx(el.style)
-      const variantProp = variant && variant !== "default" ? ` variant="${variant}"` : ""
-      const sizeProp = size && size !== "default" ? ` size="${size}"` : ""
+      const variantProp = p.variant && p.variant !== "default" ? ` variant="${p.variant}"` : ""
+      const sizeProp = p.size && p.size !== "default" ? ` size="${p.size}"` : ""
       lines.push(`${pad}<Button${variantProp}${sizeProp}${styleStr}>`)
-      lines.push(`${pad}  ${escapeJsx(label)}`)
+      lines.push(`${pad}  ${escJ(String(p.label ?? "Button"))}`)
       lines.push(`${pad}</Button>`)
       break
     }
     case "sc:card": {
-      const title = String(el.props.title ?? "")
-      const description = String(el.props.description ?? "")
-      const content = String(el.props.content ?? "")
-      const styleStr = styleToJsx(el.style)
       lines.push(`${pad}<Card${styleStr}>`)
       lines.push(`${pad}  <CardHeader>`)
-      if (title) lines.push(`${pad}    <CardTitle>${escapeJsx(title)}</CardTitle>`)
-      if (description) lines.push(`${pad}    <CardDescription>${escapeJsx(description)}</CardDescription>`)
+      if (p.title) lines.push(`${pad}    <CardTitle>${escJ(String(p.title))}</CardTitle>`)
+      if (p.description) lines.push(`${pad}    <CardDescription>${escJ(String(p.description))}</CardDescription>`)
       lines.push(`${pad}  </CardHeader>`)
-      if (content) {
+      if (p.content) {
         lines.push(`${pad}  <CardContent>`)
-        lines.push(`${pad}    <p>${escapeJsx(content)}</p>`)
+        lines.push(`${pad}    <p>${escJ(String(p.content))}</p>`)
         lines.push(`${pad}  </CardContent>`)
       }
-      // Render nested children
       for (const childId of el.children) {
         const child = elements[childId]
         if (child) renderElement(child, elements, lines, indent + 2)
@@ -114,23 +142,157 @@ function renderShadcnElement(el: EditorElement, elements: Record<string, EditorE
       break
     }
     case "sc:input": {
-      const placeholder = String(el.props.placeholder ?? "")
-      const type = el.props.type as string
-      const styleStr = styleToJsx(el.style)
-      const typeProp = type && type !== "text" ? ` type="${type}"` : ""
-      const placeholderProp = placeholder ? ` placeholder="${escapeAttr(placeholder)}"` : ""
-      lines.push(`${pad}<Input${typeProp}${placeholderProp}${styleStr} />`)
+      const typeProp = p.type && p.type !== "text" ? ` type="${p.type}"` : ""
+      const phProp = p.placeholder ? ` placeholder="${escA(String(p.placeholder))}"` : ""
+      lines.push(`${pad}<Input${typeProp}${phProp}${styleStr} />`)
       break
     }
     case "sc:badge": {
-      const variant = el.props.variant as string
-      const label = String(el.props.label ?? "Badge")
-      const styleStr = styleToJsx(el.style)
-      const variantProp = variant && variant !== "default" ? ` variant="${variant}"` : ""
-      lines.push(`${pad}<Badge${variantProp}${styleStr}>`)
-      lines.push(`${pad}  ${escapeJsx(label)}`)
-      lines.push(`${pad}</Badge>`)
+      const variantProp = p.variant && p.variant !== "default" ? ` variant="${p.variant}"` : ""
+      lines.push(`${pad}<Badge${variantProp}${styleStr}>${escJ(String(p.label ?? "Badge"))}</Badge>`)
       break
+    }
+    case "sc:checkbox": {
+      lines.push(`${pad}<div className="flex items-center gap-2"${styleStr}>`)
+      lines.push(`${pad}  <Checkbox id="${el.id}" ${p.checked ? "defaultChecked " : ""}/>`)
+      lines.push(`${pad}  <Label htmlFor="${el.id}">${escJ(String(p.label ?? ""))}</Label>`)
+      lines.push(`${pad}</div>`)
+      break
+    }
+    case "sc:switch": {
+      lines.push(`${pad}<div className="flex items-center justify-between"${styleStr}>`)
+      if (p.label) lines.push(`${pad}  <Label>${escJ(String(p.label))}</Label>`)
+      lines.push(`${pad}  <Switch ${p.checked ? "defaultChecked " : ""}/>`)
+      lines.push(`${pad}</div>`)
+      break
+    }
+    case "sc:label": {
+      lines.push(`${pad}<Label${styleStr}>${escJ(String(p.text ?? "Label"))}</Label>`)
+      break
+    }
+    case "sc:textarea": {
+      const phProp = p.placeholder ? ` placeholder="${escA(String(p.placeholder))}"` : ""
+      const rowsProp = p.rows ? ` rows={${p.rows}}` : ""
+      lines.push(`${pad}<Textarea${phProp}${rowsProp}${styleStr} />`)
+      break
+    }
+    case "sc:avatar": {
+      lines.push(`${pad}<Avatar${styleStr}>`)
+      lines.push(`${pad}  <AvatarFallback>${escJ(String(p.fallback ?? ""))}</AvatarFallback>`)
+      lines.push(`${pad}</Avatar>`)
+      break
+    }
+    case "sc:separator": {
+      const orientProp = p.orientation === "vertical" ? ` orientation="vertical"` : ""
+      lines.push(`${pad}<Separator${orientProp}${styleStr} />`)
+      break
+    }
+    case "sc:progress": {
+      lines.push(`${pad}<Progress value={${Number(p.value ?? 60)}}${styleStr} />`)
+      break
+    }
+    case "sc:skeleton": {
+      lines.push(`${pad}<Skeleton className="h-5 w-full"${styleStr} />`)
+      break
+    }
+    case "sc:slider": {
+      lines.push(`${pad}<Slider defaultValue={[${Number(p.value ?? 50)}]} min={${p.min ?? 0}} max={${p.max ?? 100}} step={${p.step ?? 1}}${styleStr} />`)
+      break
+    }
+    case "sc:tabs": {
+      const tabs = (p.tabs as string[]) ?? []
+      const active = String(p.activeTab ?? tabs[0] ?? "")
+      lines.push(`${pad}<Tabs defaultValue="${escA(active)}"${styleStr}>`)
+      lines.push(`${pad}  <TabsList>`)
+      for (const tab of tabs) {
+        lines.push(`${pad}    <TabsTrigger value="${escA(tab)}">${escJ(tab)}</TabsTrigger>`)
+      }
+      lines.push(`${pad}  </TabsList>`)
+      lines.push(`${pad}</Tabs>`)
+      break
+    }
+    case "sc:alert": {
+      const variantProp = p.variant && p.variant !== "default" ? ` variant="${p.variant}"` : ""
+      lines.push(`${pad}<Alert${variantProp}${styleStr}>`)
+      if (p.title) lines.push(`${pad}  <AlertTitle>${escJ(String(p.title))}</AlertTitle>`)
+      if (p.description) lines.push(`${pad}  <AlertDescription>${escJ(String(p.description))}</AlertDescription>`)
+      lines.push(`${pad}</Alert>`)
+      break
+    }
+    case "sc:toggle": {
+      const pressedProp = p.pressed ? " defaultPressed" : ""
+      lines.push(`${pad}<Toggle${pressedProp}${styleStr}>${escJ(String(p.label ?? ""))}</Toggle>`)
+      break
+    }
+    case "sc:select": {
+      const options = (p.options as string[]) ?? []
+      lines.push(`${pad}<Select${styleStr}>`)
+      lines.push(`${pad}  <SelectTrigger>`)
+      lines.push(`${pad}    <SelectValue placeholder="${escA(String(p.placeholder ?? "Select"))}" />`)
+      lines.push(`${pad}  </SelectTrigger>`)
+      lines.push(`${pad}  <SelectContent>`)
+      for (const opt of options) {
+        lines.push(`${pad}    <SelectItem value="${escA(opt)}">${escJ(opt)}</SelectItem>`)
+      }
+      lines.push(`${pad}  </SelectContent>`)
+      lines.push(`${pad}</Select>`)
+      break
+    }
+    case "sc:table": {
+      const headers = (p.headers as string[]) ?? []
+      const rows = (p.rows as string[][]) ?? []
+      lines.push(`${pad}<Table${styleStr}>`)
+      lines.push(`${pad}  <TableHeader>`)
+      lines.push(`${pad}    <TableRow>`)
+      for (const h of headers) lines.push(`${pad}      <TableHead>${escJ(h)}</TableHead>`)
+      lines.push(`${pad}    </TableRow>`)
+      lines.push(`${pad}  </TableHeader>`)
+      lines.push(`${pad}  <TableBody>`)
+      for (const row of rows) {
+        lines.push(`${pad}    <TableRow>`)
+        for (const cell of row) lines.push(`${pad}      <TableCell>${escJ(cell)}</TableCell>`)
+        lines.push(`${pad}    </TableRow>`)
+      }
+      lines.push(`${pad}  </TableBody>`)
+      lines.push(`${pad}</Table>`)
+      break
+    }
+    case "sc:accordion": {
+      const items = (p.items as Array<{ title: string; content: string }>) ?? []
+      lines.push(`${pad}<Accordion type="single" collapsible${styleStr}>`)
+      for (let i = 0; i < items.length; i++) {
+        lines.push(`${pad}  <AccordionItem value="item-${i}">`)
+        lines.push(`${pad}    <AccordionTrigger>${escJ(items[i].title)}</AccordionTrigger>`)
+        lines.push(`${pad}    <AccordionContent>${escJ(items[i].content)}</AccordionContent>`)
+        lines.push(`${pad}  </AccordionItem>`)
+      }
+      lines.push(`${pad}</Accordion>`)
+      break
+    }
+    case "sc:radio-group": {
+      const options = (p.options as string[]) ?? []
+      const value = String(p.value ?? "")
+      lines.push(`${pad}<div${styleStr}>`)
+      if (p.label) lines.push(`${pad}  <Label>${escJ(String(p.label))}</Label>`)
+      lines.push(`${pad}  <RadioGroup defaultValue="${escA(value)}">`)
+      for (const opt of options) {
+        const optId = opt.toLowerCase().replace(/\s+/g, "-")
+        lines.push(`${pad}    <div className="flex items-center gap-2">`)
+        lines.push(`${pad}      <RadioGroupItem value="${escA(opt)}" id="${optId}" />`)
+        lines.push(`${pad}      <Label htmlFor="${optId}">${escJ(opt)}</Label>`)
+        lines.push(`${pad}    </div>`)
+      }
+      lines.push(`${pad}  </RadioGroup>`)
+      lines.push(`${pad}</div>`)
+      break
+    }
+    default: {
+      lines.push(`${pad}<div${styleStr}>`)
+      for (const childId of el.children) {
+        const child = elements[childId]
+        if (child) renderElement(child, elements, lines, indent + 2)
+      }
+      lines.push(`${pad}</div>`)
     }
   }
 }
@@ -140,27 +302,7 @@ function renderShadcnElement(el: EditorElement, elements: Record<string, EditorE
 function renderHtmlElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number) {
   const pad = " ".repeat(indent)
   const tag = getHtmlTag(el)
-
-  // Compute effective style including auto-layout CSS
-  const effectiveStyle: CSSProperties = { ...el.style }
-
-  // Add container flex styles
-  if (el.layoutMode === 'flex') {
-    Object.assign(effectiveStyle, getContainerStyles(el))
-  }
-
-  // Adjust for auto-layout children
-  if (el.parentId) {
-    const parentEl = elements[el.parentId]
-    if (parentEl?.layoutMode === 'flex') {
-      delete (effectiveStyle as any).position
-      delete (effectiveStyle as any).left
-      delete (effectiveStyle as any).top
-      Object.assign(effectiveStyle, getChildSizingStyles(el, parentEl.layoutProps.direction))
-    }
-  }
-
-  const styleStr = styleToJsx(effectiveStyle)
+  const styleStr = styleToJsx(computeEffectiveStyle(el, elements))
   const propsStr = getHtmlPropsString(el)
   const hasChildren = el.children.length > 0
   const content = getHtmlContent(el)
@@ -188,27 +330,27 @@ function getHtmlTag(el: EditorElement): string {
 }
 
 function getHtmlContent(el: EditorElement): string {
-  if (el.type === "text") return escapeJsx(String(el.props.content ?? ""))
-  if (el.type === "button") return escapeJsx(String(el.props.label ?? ""))
+  if (el.type === "text") return escJ(String(el.props.content ?? ""))
+  if (el.type === "button") return escJ(String(el.props.label ?? ""))
   return ""
 }
 
 function getHtmlPropsString(el: EditorElement): string {
-  if (el.type === "image" && el.props.src) return ` src="${escapeAttr(String(el.props.src))}" alt="${escapeAttr(String(el.props.alt ?? ""))}"`
-  if (el.type === "input") return ` placeholder="${escapeAttr(String(el.props.placeholder ?? ""))}"`
+  if (el.type === "image" && el.props.src) return ` src="${escA(String(el.props.src))}" alt="${escA(String(el.props.alt ?? ""))}"`
+  if (el.type === "input") return ` placeholder="${escA(String(el.props.placeholder ?? ""))}"`
   return ""
 }
 
 // --- Utilities ---
 
-function escapeJsx(str: string): string {
-  return str.replace(/[<>&]/g, (c) => {
-    const map: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;" }
+function escJ(str: string): string {
+  return str.replace(/[<>&{}]/g, (c) => {
+    const map: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", "{": "&#123;", "}": "&#125;" }
     return map[c] ?? c
   })
 }
 
-function escapeAttr(str: string): string {
+function escA(str: string): string {
   return str.replace(/[<>&"']/g, (c) => {
     const map: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#x27;" }
     return map[c] ?? c
