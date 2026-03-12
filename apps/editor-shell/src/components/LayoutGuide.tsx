@@ -61,6 +61,7 @@ export function LayoutGuide() {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<"regions" | "arch">("regions")
   const [rects, setRects] = useState<Record<string, Rect>>({})
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -79,6 +80,10 @@ export function LayoutGuide() {
     window.addEventListener("resize", measure)
     return () => window.removeEventListener("resize", measure)
   }, [open])
+
+  useEffect(() => {
+    if (open && tab === "regions") setSelectedRegion("canvas")
+  }, [open, tab])
 
   return (
     <>
@@ -118,7 +123,11 @@ export function LayoutGuide() {
             <TBtn active={tab === "arch"} onClick={() => setTab("arch")}>Architecture</TBtn>
           </div>
 
-          {tab === "regions" ? <RegionsView rects={rects} /> : <ArchView />}
+          {tab === "regions" ? (
+            <RegionsView rects={rects} selectedRegion={selectedRegion} onSelectRegion={setSelectedRegion} />
+          ) : (
+            <ArchView />
+          )}
         </div>
       )}
 
@@ -141,98 +150,131 @@ function TBtn({ active, onClick, children }: { active: boolean; onClick: () => v
   )
 }
 
-// --- Regions: descriptions embedded inside each region ---
+// --- Regions: label badges on each region + detail panel at bottom ---
 
-function RegionsView({ rects }: { rects: Record<string, Rect> }) {
+function RegionsView({ rects, selectedRegion, onSelectRegion }: {
+  rects: Record<string, Rect>
+  selectedRegion: string | null
+  onSelectRegion: (id: string) => void
+}) {
+  const selected = REGIONS.find(r => r.id === selectedRegion)
+
   return (
     <>
+      {/* Region overlays — just colored borders + clickable label badges */}
       {REGIONS.map((r, i) => {
         const rect = rects[r.id]
         if (!rect) return null
-        const isToolbar = r.id === "toolbar"
+        const isActive = selectedRegion === r.id
 
         return (
           <div
             key={r.id}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onSelectRegion(r.id) }}
             style={{
               position: "absolute",
               left: rect.left, top: rect.top, width: rect.width, height: rect.height,
-              background: `rgba(${r.color}, 0.08)`,
-              border: `2px solid rgba(${r.color}, 0.5)`,
+              background: isActive ? `rgba(${r.color}, 0.12)` : `rgba(${r.color}, 0.04)`,
+              border: `2px solid rgba(${r.color}, ${isActive ? 0.8 : 0.3})`,
               borderRadius: 6,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: isToolbar ? "center" : "flex-start",
-              padding: isToolbar ? "0 20px" : "32px 16px 12px",
-              overflow: "hidden",
+              cursor: "pointer",
+              transition: "all 0.15s",
               animation: `ci 0.25s ease-out ${i * 0.05}s both`,
             }}
           >
             {/* Label badge */}
             <div style={{
-              position: "absolute", top: isToolbar ? "50%" : 8, left: isToolbar ? 12 : 8,
-              transform: isToolbar ? "translateY(-50%)" : undefined,
-              background: `rgba(${r.color}, 0.9)`, color: "#fff",
+              position: "absolute", top: 8, left: 8,
+              background: `rgba(${r.color}, ${isActive ? 1 : 0.7})`, color: "#fff",
               padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
               boxShadow: "0 2px 8px rgba(0,0,0,0.2)", whiteSpace: "nowrap",
+              transition: "all 0.15s",
             }}>
               {r.label}
             </div>
-
-            {isToolbar ? (
-              // Toolbar: single line, right-aligned
-              <div style={{
-                marginLeft: "auto", display: "flex", gap: 16, alignItems: "center",
-              }}>
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.75)" }}>{r.lines[0]}</span>
-                <span style={{
-                  fontSize: 10, color: "rgba(255,255,255,0.5)",
-                  fontFamily: "'SF Mono', Menlo, monospace",
-                  background: "rgba(0,0,0,0.3)", padding: "2px 8px", borderRadius: 4,
-                }}>{r.keys}</span>
-              </div>
-            ) : (
-              // Panels: vertical bullets
-              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                {r.lines.map((line, li) => (
-                  <div key={li} style={{
-                    fontSize: 11, color: "rgba(255,255,255,0.8)", lineHeight: 1.5,
-                    paddingLeft: 10, position: "relative",
-                  }}>
-                    <span style={{
-                      position: "absolute", left: 0, top: 6,
-                      width: 4, height: 4, borderRadius: "50%",
-                      background: `rgba(${r.color}, 0.6)`,
-                    }} />
-                    {line}
-                  </div>
-                ))}
-
-                {/* Tech line */}
-                <div style={{
-                  fontSize: 10, fontFamily: "'SF Mono', Menlo, monospace",
-                  color: "rgba(255,255,255,0.4)", marginTop: 6,
-                  borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 6,
-                }}>
-                  {r.tech}
-                </div>
-
-                {/* Data flow (canvas only) */}
-                {"flow" in r && r.flow && (
-                  <div style={{
-                    fontSize: 10, fontFamily: "'SF Mono', Menlo, monospace",
-                    color: "rgba(255,255,255,0.35)", marginTop: 4, lineHeight: 1.6,
-                    whiteSpace: "pre-line",
-                  }}>
-                    {r.flow}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )
       })}
+
+      {/* Detail panel — fixed at bottom center */}
+      {selected && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: "fixed",
+            bottom: 56, left: "50%", transform: "translateX(-50%)",
+            width: "min(680px, calc(100vw - 64px))",
+            background: "rgba(20,20,28,0.96)",
+            border: `1px solid rgba(${selected.color}, 0.3)`,
+            borderRadius: 14,
+            padding: "16px 20px",
+            backdropFilter: "blur(16px)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+            animation: "ci 0.2s ease-out",
+            zIndex: 5,
+            maxHeight: "40vh",
+            overflowY: "auto",
+          }}
+        >
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <div style={{
+              background: `rgba(${selected.color}, 0.9)`, color: "#fff",
+              padding: "3px 10px", borderRadius: 6, fontSize: 12, fontWeight: 700,
+            }}>
+              {selected.label}
+            </div>
+            <span style={{
+              fontSize: 11, fontFamily: "'SF Mono', Menlo, monospace",
+              color: "rgba(255,255,255,0.4)",
+            }}>
+              {selected.tech}
+            </span>
+          </div>
+
+          {/* Description bullets */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {selected.lines.map((line, li) => (
+              <div key={li} style={{
+                fontSize: 12, color: "rgba(255,255,255,0.8)", lineHeight: 1.6,
+                paddingLeft: 12, position: "relative",
+              }}>
+                <span style={{
+                  position: "absolute", left: 0, top: 7,
+                  width: 4, height: 4, borderRadius: "50%",
+                  background: `rgba(${selected.color}, 0.6)`,
+                }} />
+                {line}
+              </div>
+            ))}
+          </div>
+
+          {/* Keys (toolbar only) */}
+          {"keys" in selected && selected.keys && (
+            <div style={{
+              marginTop: 10, paddingTop: 8,
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+              fontSize: 11, fontFamily: "'SF Mono', Menlo, monospace",
+              color: "rgba(255,255,255,0.5)",
+            }}>
+              {selected.keys}
+            </div>
+          )}
+
+          {/* Data flow (canvas only) */}
+          {"flow" in selected && selected.flow && (
+            <div style={{
+              marginTop: 8, paddingTop: 8,
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+              fontSize: 11, fontFamily: "'SF Mono', Menlo, monospace",
+              color: "rgba(255,255,255,0.4)", lineHeight: 1.6,
+              whiteSpace: "pre-line",
+            }}>
+              {selected.flow}
+            </div>
+          )}
+        </div>
+      )}
     </>
   )
 }
@@ -336,7 +378,6 @@ function ArchView() {
           ))}
         </div>
       ))}
-
     </div>
   )
 }
