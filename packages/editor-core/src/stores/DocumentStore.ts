@@ -1,7 +1,7 @@
 import { makeAutoObservable, observable } from "mobx"
 import { nanoid } from "nanoid"
 import type { CSSProperties } from "react"
-import { DEFAULT_ELEMENT_STYLE, DEFAULT_GRID_PROPS, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type CanvasMode, type PageViewportWidth, type EditorElement, type ElementType, type GridProps, type LayoutProps, type SectionProps, type SectionRole, type SizingProps } from "../types"
+import { DEFAULT_ELEMENT_STYLE, DEFAULT_GRID_PROPS, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type CanvasMode, type PageViewportWidth, type EditorElement, type ElementTemplate, type ElementType, type GridProps, type LayoutProps, type SectionProps, type SectionRole, type SizingProps } from "../types"
 import { createSectionPreset } from "../presets/sectionPresets"
 import { TEMPLATE_BUILDERS } from "../presets/templates"
 
@@ -51,6 +51,36 @@ export class DocumentStore {
     this.elements.clear()
     this.initRoot()
     builder(this)
+  }
+
+  resetDocument() {
+    this.elements.clear()
+    this.initRoot()
+  }
+
+  importElements(templates: ElementTemplate[], targetParentId?: string): string[] {
+    const parentId = targetParentId ?? this.rootId
+    const parent = this.elements.get(parentId)
+    if (!parent) return []
+    const createdIds: string[] = []
+    for (const template of templates) {
+      const id = this.insertElementTree(template, parentId)
+      if (id) createdIds.push(id)
+    }
+    return createdIds
+  }
+
+  private insertElementTree(template: ElementTemplate, parentId: string): string {
+    const id = nanoid()
+    const { children: childTemplates, ...rest } = template
+    const element: EditorElement = { ...rest, id, parentId, children: [] }
+    this.elements.set(id, element)
+    const parent = this.elements.get(parentId)
+    if (parent) parent.children.push(id)
+    for (const childTemplate of childTemplates) {
+      this.insertElementTree(childTemplate, id)
+    }
+    return id
   }
 
   get root(): EditorElement | undefined {

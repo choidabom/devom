@@ -16,12 +16,13 @@ export class SelectionStore {
   }
 
   get selectedId(): string | null {
-    return this.selectedIds.length > 0 ? this.selectedIds[0] : null
+    return this.selectedIds.length > 0 ? (this.selectedIds[0] ?? null) : null
   }
 
   get selectedElement(): EditorElement | undefined {
     if (this.selectedIds.length === 0) return undefined
-    return this.documentStore.getElement(this.selectedIds[0])
+    const id = this.selectedIds[0]
+    return id ? this.documentStore.getElement(id) : undefined
   }
 
   get selectedElements(): EditorElement[] {
