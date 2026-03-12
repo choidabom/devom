@@ -17,7 +17,7 @@ export class DocumentStore {
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true })
     this.initRoot()
-    this.loadTemplate('dashboard')
+    this.loadTemplate('landing')
   }
 
   private initRoot() {

@@ -20,7 +20,7 @@ export const TEMPLATES: TemplateMetadata[] = [
   { id: 'login-form', name: 'Login Form', description: 'Authentication form with social login', category: 'form' },
   { id: 'pricing', name: 'Pricing Page', description: 'Three-tier pricing with feature comparison', category: 'marketing' },
   { id: 'settings', name: 'Settings Page', description: 'Account settings with tabs, forms and switches', category: 'form' },
-  { id: 'landing', name: 'Product Landing', description: 'Long-scroll product detail page with reviews and FAQ', category: 'marketing' },
+  { id: 'landing', name: 'Product Detail', description: 'Korean e-commerce style product detail page', category: 'marketing' },
 ]
 
 export const TEMPLATE_BUILDERS: Record<string, TemplateBuilder> = {

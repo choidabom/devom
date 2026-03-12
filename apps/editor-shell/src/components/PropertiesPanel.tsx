@@ -530,6 +530,36 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         )
       })()}
 
+      {/* Text Content — single text element */}
+      {!isMulti && element.type === "text" && (
+        <PropSection title="Text">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <textarea
+              value={String(element.props.content ?? "")}
+              onChange={(e) => updateProp("content", e.target.value)}
+              rows={3}
+              style={{
+                width: "100%", padding: "6px 8px", fontSize: 12, lineHeight: 1.5,
+                background: T.inputBg, border: `1px solid ${T.inputBorder}`,
+                borderRadius: 6, color: T.text, boxSizing: "border-box",
+                outline: "none", resize: "vertical", fontFamily: "inherit",
+              }}
+            />
+          </div>
+        </PropSection>
+      )}
+
+      {/* Typography */}
+      <PropSection title="Typography">
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+          <PropRow label="Size" value={sharedStyle("fontSize", "")} onChange={(v) => updateStyle("fontSize", v)} />
+          <PropSelect label="Weight" value={String(sharedStyle("fontWeight", ""))} options={["400", "500", "600", "700", "800"]} onChange={(v) => updateStyle("fontWeight", v)} mixed={sharedStyle("fontWeight", "") === MIXED} />
+          <PropSelect label="Align" value={String(sharedStyle("textAlign", ""))} options={["left", "center", "right"]} onChange={(v) => updateStyle("textAlign", v)} mixed={sharedStyle("textAlign", "") === MIXED} />
+          <PropRow label="Height" value={sharedStyle("lineHeight", "")} onChange={(v) => updateStyle("lineHeight", v)} />
+          <PropSelect label="Decor" value={String(sharedStyle("textDecoration", "none"))} options={["none", "underline", "line-through"]} onChange={(v) => updateStyle("textDecoration", v)} mixed={sharedStyle("textDecoration", "none") === MIXED} />
+        </div>
+      </PropSection>
+
       {/* Style — shared properties (works for multi-select) */}
       <PropSection title="Style">
         <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
@@ -537,6 +567,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
           <PropRow label="Radius" value={sharedStyle("borderRadius", 0)} onChange={(v) => updateStyle("borderRadius", v)} />
           <PropRow label="Fill" value={sharedStyle("backgroundColor", "")} onChange={(v) => updateStyle("backgroundColor", v)} onLiveChange={(v) => updateStyleLive("backgroundColor", v)} color />
           <PropRow label="Color" value={sharedStyle("color", "")} onChange={(v) => updateStyle("color", v)} onLiveChange={(v) => updateStyleLive("color", v)} color />
+          <PropRow label="Border" value={sharedStyle("border", "")} onChange={(v) => updateStyle("border", v)} />
           <PropRow label="Padding" value={sharedStyle("padding", 0)} onChange={(v) => updateStyle("padding", v)} />
           <PropRow label="Gap" value={sharedStyle("gap", 0)} onChange={(v) => updateStyle("gap", v)} />
         </div>
