@@ -496,7 +496,7 @@ export const App = observer(function App() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: T.bg, color: T.text, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      {editorMode === "interact" && (
+      {editorMode === "interact" && canvasMode === 'page' && (
         <div style={{
           position: "fixed", top: 16, right: 16, zIndex: 100,
           display: "flex", alignItems: "center", gap: 8,
@@ -516,7 +516,7 @@ export const App = observer(function App() {
           </button>
         </div>
       )}
-      {editorMode !== "interact" && (
+      {(editorMode !== "interact" || canvasMode === 'canvas') && (
         <div data-guide="toolbar">
           <Toolbar
             onAdd={handleAddElement}
@@ -637,7 +637,7 @@ export const App = observer(function App() {
           warnings={importWarnings}
         />
       )}
-      {editorMode !== "interact" && <LayoutGuide />}
+      {(editorMode !== "interact" || canvasMode === 'canvas') && <LayoutGuide />}
     </div>
   )
 })
