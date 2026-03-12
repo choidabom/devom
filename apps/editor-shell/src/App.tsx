@@ -27,6 +27,8 @@ export const App = observer(function App() {
   const [showPanels, setShowPanels] = useState(true)
   const [leftPanelWidth, setLeftPanelWidth] = useState(240)
   const [isResizing, setIsResizing] = useState(false)
+  const [isDndActive, setIsDndActive] = useState(false)
+  const [isDndOver, setIsDndOver] = useState(false)
 
   const showPanelsRef = useRef(showPanels)
   showPanelsRef.current = showPanels
@@ -139,6 +141,22 @@ export const App = observer(function App() {
             selectionStore.select(groupId)
             syncToCanvas()
             bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [groupId] } })
+          }
+          break
+        }
+        case "DND_CREATE_ELEMENT": {
+          const elType = msg.payload.elementType as ElementType
+          historyStore.pushSnapshot()
+          const id = documentStore.addElement(elType)
+          if (id) {
+            // Canvas mode: place at exact drop position
+            // Page mode: addElement already sets relative position, skip left/top
+            if (documentStore.canvasMode === 'canvas') {
+              documentStore.updateStyle(id, { left: msg.payload.x, top: msg.payload.y })
+            }
+            selectionStore.select(id)
+            syncToCanvas()
+            bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
           }
           break
         }
@@ -420,6 +438,17 @@ export const App = observer(function App() {
     })
   }, [canvasMode, getVisibleCanvasInfo])
 
+  // Track global drag state for DnD overlay
+  useEffect(() => {
+    const onDragStart = (e: DragEvent) => {
+      if (e.dataTransfer?.types.includes("application/devom-element")) setIsDndActive(true)
+    }
+    const onDragEnd = () => { setIsDndActive(false); setIsDndOver(false) }
+    document.addEventListener("dragstart", onDragStart)
+    document.addEventListener("dragend", onDragEnd)
+    return () => { document.removeEventListener("dragstart", onDragStart); document.removeEventListener("dragend", onDragEnd) }
+  }, [])
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const tag = document.activeElement?.tagName
@@ -550,6 +579,40 @@ export const App = observer(function App() {
             style={{ width: "100%", height: "100%", border: "none", background: T.panel, pointerEvents: isResizing ? "none" : "auto" }}
             title="Editor Canvas"
           />
+          {/* DnD overlay — visible during drag to intercept events over iframe */}
+          {isDndActive && (
+            <div
+              style={{
+                position: "absolute", inset: 0, zIndex: 5,
+                background: isDndOver ? "rgba(99, 102, 241, 0.06)" : "transparent",
+                border: isDndOver ? "2px dashed rgba(99, 102, 241, 0.4)" : "2px solid transparent",
+                borderRadius: isDndOver ? 8 : 0,
+                transition: "background 0.15s, border 0.15s",
+              }}
+              onDragEnter={(e) => {
+                e.preventDefault()
+                setIsDndOver(true)
+              }}
+              onDragOver={(e) => {
+                e.preventDefault()
+                e.dataTransfer.dropEffect = "copy"
+              }}
+              onDragLeave={(e) => {
+                if (e.currentTarget === e.target) setIsDndOver(false)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                setIsDndOver(false)
+                setIsDndActive(false)
+                const elementType = e.dataTransfer.getData("application/devom-element")
+                if (!elementType) return
+                const rect = e.currentTarget.getBoundingClientRect()
+                const clientX = e.clientX - rect.left
+                const clientY = e.clientY - rect.top
+                bridge.send({ type: "DND_DROP", payload: { elementType, clientX, clientY } })
+              }}
+            />
+          )}
         </div>
 
         {/* Panels — overlay on top of canvas */}

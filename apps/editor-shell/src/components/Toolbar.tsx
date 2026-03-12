@@ -130,8 +130,8 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
         display: "flex", alignItems: "center", gap: 2, padding: "4px 6px",
         background: T.panel, borderRadius: 10, boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`,
       }}>
-        <ToolBtn icon={<Plus size={S} />} title="Frame" onClick={() => onAdd("div")} />
-        <ToolBtn icon={<Type size={S} />} title="Text" onClick={() => onAdd("text")} />
+        <ToolBtn icon={<Plus size={S} />} title="Frame" onClick={() => onAdd("div")} draggableType="div" />
+        <ToolBtn icon={<Type size={S} />} title="Text" onClick={() => onAdd("text")} draggableType="text" />
         <ToolBtn icon={<ImageIcon size={S} />} title="Image" onClick={() => fileInputRef.current?.click()} />
         <input
           ref={fileInputRef}
@@ -168,11 +168,17 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
                       {items.map(c => (
                         <button
                           key={c.type}
+                          draggable
+                          onDragStart={e => {
+                            e.dataTransfer.setData("application/devom-element", c.type)
+                            e.dataTransfer.effectAllowed = "copy"
+                            setShowShadcn(false)
+                          }}
                           onClick={() => { onAdd(c.type); setShowShadcn(false) }}
                           style={{
                             padding: "4px 10px", fontSize: 12, borderRadius: 6,
                             border: `1px solid ${T.panelBorder}`, background: "transparent",
-                            color: T.text, cursor: "pointer", transition: "background 0.15s",
+                            color: T.text, cursor: "grab", transition: "background 0.15s",
                           }}
                           onMouseEnter={e => (e.currentTarget.style.background = T.hover)}
                           onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
@@ -308,13 +314,18 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
   )
 }
 
-function ToolBtn({ icon, title, onClick, disabled, active, wide }: { icon: ReactNode; title: string; onClick: () => void; disabled?: boolean; active?: boolean; wide?: boolean }) {
+function ToolBtn({ icon, title, onClick, disabled, active, wide, draggableType }: { icon: ReactNode; title: string; onClick: () => void; disabled?: boolean; active?: boolean; wide?: boolean; draggableType?: string }) {
   const [hovered, setHovered] = useState(false)
   return (
     <div
       style={{ position: "relative", display: "inline-flex" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      draggable={!!draggableType}
+      onDragStart={draggableType ? (e) => {
+        e.dataTransfer.setData("application/devom-element", draggableType)
+        e.dataTransfer.effectAllowed = "copy"
+      } : undefined}
     >
       <button
         onClick={onClick}
@@ -324,7 +335,7 @@ function ToolBtn({ icon, title, onClick, disabled, active, wide }: { icon: React
           display: "flex", alignItems: "center", justifyContent: "center",
           background: active ? T.accentLight : hovered && !disabled ? T.hover : "transparent",
           color: disabled ? T.textMuted : active ? T.accent : T.text,
-          border: "none", borderRadius: 8, cursor: disabled ? "default" : "pointer",
+          border: "none", borderRadius: 8, cursor: disabled ? "default" : draggableType ? "grab" : "pointer",
           fontSize: 14, lineHeight: 1, opacity: disabled ? 0.4 : 1,
           transition: "background 0.15s", whiteSpace: "nowrap",
         }}

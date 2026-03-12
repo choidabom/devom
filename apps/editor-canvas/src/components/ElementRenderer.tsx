@@ -294,8 +294,9 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     e.stopPropagation()
     e.preventDefault()
 
-    // If the root-level ancestor is absolute-positioned, move it instead of reordering
-    const rootAncestor = findRootAncestor()
+    // Page mode: if the root-level ancestor is absolute-positioned, move it instead of reordering
+    // Canvas mode: always allow individual element reorder within container
+    const rootAncestor = documentStore.canvasMode === 'page' ? findRootAncestor() : null
     const z = zoom
     if (rootAncestor && rootAncestor.el.style.position === 'absolute') {
       const target = e.currentTarget as HTMLElement

@@ -21,6 +21,7 @@ export type ShellToCanvasMessage =
   | { type: "UPDATE_SECTION_PROPS"; payload: { id: string; sectionProps: Partial<SectionProps> } }
   | { type: "UPDATE_GRID_PROPS"; payload: { id: string; gridProps: Partial<GridProps> } }
   | { type: "ADD_SECTION"; payload: { preset: SectionRole; index?: number } }
+  | { type: "DND_DROP"; payload: { elementType: string; clientX: number; clientY: number } }
 
 // Canvas -> Shell messages
 export type CanvasToShellMessage =
@@ -38,6 +39,7 @@ export type CanvasToShellMessage =
   | { type: "INSERT_SECTION_REQUEST"; payload: { preset: SectionRole; index: number } }
   | { type: "GROUP_ELEMENTS_REQUEST"; payload: { ids: string[]; elementBounds: Record<string, { left: number; top: number; width: number; height: number }> } }
   | { type: "UNGROUP_ELEMENTS_REQUEST"; payload: { ids: string[] } }
+  | { type: "DND_CREATE_ELEMENT"; payload: { elementType: string; x: number; y: number } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 

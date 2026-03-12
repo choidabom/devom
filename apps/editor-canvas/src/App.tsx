@@ -46,7 +46,8 @@ export const App = observer(function App() {
   // Viewport: zoom & pan
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 })
   const savedViewportRef = useRef<{ zoom: number; panX: number; panY: number } | null>(null)
-  const initialSyncDone = useRef(false)
+  const viewportRef = useRef(viewport)
+  viewportRef.current = viewport
   const outerRef = useRef<HTMLDivElement>(null)
   const spaceHeldRef = useRef(false)
   const panDragRef = useRef<{ x: number; y: number } | null>(null)
@@ -122,25 +123,15 @@ export const App = observer(function App() {
     switch (msg.type) {
       case "SYNC_DOCUMENT":
         documentStore.loadFromSerializable(msg.payload)
-        // Center content on first sync — use store data instead of DOM measurement
-        if (!initialSyncDone.current) {
-          initialSyncDone.current = true
-          const el = outerRef.current
-          const rootData = documentStore.getElement(documentStore.rootId)
-          if (el && rootData) {
-            const canvasRect = el.getBoundingClientRect()
-            const contentW = typeof rootData.style.width === 'number' ? rootData.style.width : 800
-            // Find first child to estimate content start position
-            const firstChild = rootData.children.length > 0 ? documentStore.getElement(rootData.children[0]!) : null
-            const contentX = typeof firstChild?.style.left === 'number' ? firstChild.style.left : 0
-            setViewport({
-              zoom: 1,
-              panX: Math.max(40, (canvasRect.width - contentW) / 2 - contentX),
-              panY: 40,
-            })
-          }
-        }
         break
+      case "DND_DROP": {
+        // Convert screen-relative coords to canvas coords accounting for viewport
+        const vp = viewportRef.current
+        const x = (msg.payload.clientX - vp.panX) / vp.zoom
+        const y = (msg.payload.clientY - vp.panY) / vp.zoom
+        bridge.send({ type: "DND_CREATE_ELEMENT", payload: { elementType: msg.payload.elementType, x: Math.round(x), y: Math.round(y) } })
+        break
+      }
       case "ADD_ELEMENT":
         documentStore.addElementFromRemote(msg.payload)
         break
