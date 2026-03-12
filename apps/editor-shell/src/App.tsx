@@ -422,7 +422,8 @@ export const App = observer(function App() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName === "INPUT") return
+      const tag = document.activeElement?.tagName
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return
 
       // Modifier shortcuts take priority — use e.code for Korean IME compatibility
       if (e.metaKey || e.ctrlKey) {
