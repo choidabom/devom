@@ -4,6 +4,7 @@ import { buildLoginForm } from "./loginForm"
 import { buildPricingPage } from "./pricingPage"
 import { buildSettingsPage } from "./settingsPage"
 import { buildLandingPage } from "./landingPage"
+import { buildFoodProduct } from "./foodProduct"
 
 export interface TemplateMetadata {
   id: string
@@ -21,6 +22,7 @@ export const TEMPLATES: TemplateMetadata[] = [
   { id: 'pricing', name: 'Pricing Page', description: 'Three-tier pricing with feature comparison', category: 'marketing' },
   { id: 'settings', name: 'Settings Page', description: 'Account settings with tabs, forms and switches', category: 'form' },
   { id: 'landing', name: 'Product Detail', description: 'Korean e-commerce style product detail page', category: 'marketing' },
+  { id: 'food-product', name: 'Food Product', description: 'Fresh food product page with reviews and delivery info', category: 'marketing' },
 ]
 
 export const TEMPLATE_BUILDERS: Record<string, TemplateBuilder> = {
@@ -30,4 +32,5 @@ export const TEMPLATE_BUILDERS: Record<string, TemplateBuilder> = {
   'pricing': buildPricingPage,
   'settings': buildSettingsPage,
   'landing': buildLandingPage,
+  'food-product': buildFoodProduct,
 }
