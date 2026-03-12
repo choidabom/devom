@@ -141,13 +141,16 @@ export const App = observer(function App() {
         setEditorMode(msg.payload.mode)
         if (msg.payload.mode === "interact") {
           setSelectedIds([])
-          // Save current viewport and reset for preview
-          setViewport(prev => {
-            savedViewportRef.current = prev
-            return { zoom: 1, panX: 0, panY: 0 }
-          })
+          // Page mode: reset viewport for fullscreen preview
+          // Canvas mode: keep current viewport (no expand)
+          if (msg.payload.canvasMode !== 'canvas') {
+            setViewport(prev => {
+              savedViewportRef.current = prev
+              return { zoom: 1, panX: 0, panY: 0 }
+            })
+          }
         } else {
-          // Restore previous viewport
+          // Restore previous viewport (only if we saved one)
           if (savedViewportRef.current) {
             setViewport(savedViewportRef.current)
             savedViewportRef.current = null
@@ -283,9 +286,11 @@ export const App = observer(function App() {
     return () => { dispose(); window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp) }
   }, [handleShellMessage])
 
-  // Interact mode: override root element styles for real-page preview
+  // Interact mode: override root element styles for real-page preview (page mode only)
   useEffect(() => {
     if (editorMode !== "interact") return
+    // Canvas mode: no root style overrides — keep layout as-is
+    if (canvasMode === 'canvas') return
     const r = documentStore.root
     if (!r) return
     const rootEl = document.querySelector(`[data-element-id="${r.id}"]`) as HTMLElement | null
@@ -483,9 +488,9 @@ export const App = observer(function App() {
       ref={outerRef}
       style={{
         width: "100%", height: "100%",
-        background: editorMode === "interact" ? "#ffffff" : "#eeeef2",
+        background: (editorMode === "interact" && canvasMode === 'page') ? "#ffffff" : "#eeeef2",
         position: "relative",
-        overflow: editorMode === "interact" ? "auto" : "hidden",
+        overflow: (editorMode === "interact" && canvasMode === 'page') ? "auto" : "hidden",
         cursor: spaceHeldRef.current ? "grab" : undefined,
       }}
       onPointerDown={handleCanvasPointerDown}
@@ -493,8 +498,8 @@ export const App = observer(function App() {
       onPointerUp={handleCanvasPointerUp}
       onContextMenu={handleContextMenu}
     >
-      {editorMode === "interact" ? (
-        /* Interact mode: no transform, natural scroll — useEffect handles root style overrides */
+      {(editorMode === "interact" && canvasMode === 'page') ? (
+        /* Page interact mode: no transform, natural scroll — useEffect handles root style overrides */
         <ElementRenderer elementId={root.id} selectedIds={[]} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={1} />
       ) : (
         <>
@@ -662,7 +667,7 @@ export const App = observer(function App() {
         onPointerDown={e => e.stopPropagation()}
         style={{
         position: "absolute", bottom: 12, right: 12,
-        display: editorMode === "interact" ? "none" : "flex", alignItems: "center", gap: 4,
+        display: (editorMode === "interact" && canvasMode === 'page') ? "none" : "flex", alignItems: "center", gap: 4,
         background: "rgba(255,255,255,0.9)", borderRadius: 6,
         padding: "4px 8px", fontSize: 11, color: "#64748b",
         boxShadow: "0 1px 4px rgba(0,0,0,0.1)", pointerEvents: "auto",

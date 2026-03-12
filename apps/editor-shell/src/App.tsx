@@ -401,10 +401,11 @@ export const App = observer(function App() {
   const handleToggleMode = useCallback(() => {
     setEditorMode(prev => {
       const next = prev === "edit" ? "interact" : "edit"
-      bridge.send({ type: "SET_MODE", payload: { mode: next } })
+      bridge.send({ type: "SET_MODE", payload: { mode: next, canvasMode } })
       if (next === "interact") {
         selectionStore.clear()
-        setShowPanels(false)
+        // Canvas mode: keep panels visible (no fullscreen expand)
+        if (canvasMode === 'page') setShowPanels(false)
       } else {
         setShowPanels(true)
         // Recalculate page mode zoom after panels reappear
@@ -454,6 +455,14 @@ export const App = observer(function App() {
         return
       }
 
+      // Escape exits interact mode
+      if (e.key === "Escape" && editorMode === "interact") {
+        setEditorMode("edit")
+        bridge.send({ type: "SET_MODE", payload: { mode: "edit" } })
+        setShowPanels(true)
+        return
+      }
+
       // Single-key mode switches (no modifier)
       if (e.key === "v" || e.key === "V") {
         if (editorMode !== "edit") {
@@ -467,8 +476,9 @@ export const App = observer(function App() {
         if (editorMode !== "interact") {
           setEditorMode("interact")
           selectionStore.clear()
-          bridge.send({ type: "SET_MODE", payload: { mode: "interact" } })
-          setShowPanels(false)
+          bridge.send({ type: "SET_MODE", payload: { mode: "interact", canvasMode } })
+          // Canvas mode: keep panels visible (no fullscreen expand)
+          if (canvasMode === 'page') setShowPanels(false)
         }
         return
       }

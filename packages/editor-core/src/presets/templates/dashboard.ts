@@ -1,6 +1,5 @@
-import { nanoid } from "nanoid"
 import type { DocumentStore } from "../../stores/DocumentStore"
-import { DEFAULT_ELEMENT_STYLE, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type EditorElement, type ElementType, type SizingProps } from "../../types"
+import { createTemplateHelper } from "./helpers"
 
 export function buildDashboard(store: DocumentStore): void {
   const root = store.elements.get(store.rootId)
@@ -8,32 +7,7 @@ export function buildDashboard(store: DocumentStore): void {
 
   const rel = { position: 'relative' as const, left: undefined, top: undefined }
   const noPad = { paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0 }
-  const add = (
-    type: ElementType,
-    parentId: string,
-    overrides: { name?: string; style?: Partial<EditorElement['style']>; props?: Record<string, unknown>; layoutMode?: 'none' | 'flex'; layoutProps?: Partial<EditorElement['layoutProps']>; sizing?: Partial<SizingProps> } = {},
-  ): string => {
-    const id = nanoid()
-    const parent = store.elements.get(parentId)
-    if (!parent) return ''
-    store.elements.set(id, {
-      id,
-      type,
-      name: overrides.name ?? `${type}-${id.slice(0, 4)}`,
-      parentId,
-      children: [],
-      style: { ...DEFAULT_ELEMENT_STYLE[type], ...overrides.style },
-      props: { ...getDefaultProps(type), ...overrides.props },
-      locked: false,
-      visible: true,
-      layoutMode: overrides.layoutMode ?? 'none',
-      layoutProps: { ...DEFAULT_LAYOUT_PROPS, ...overrides.layoutProps },
-      sizing: { ...DEFAULT_SIZING, ...overrides.sizing },
-      canvasPosition: null,
-    })
-    parent.children.push(id)
-    return id
-  }
+  const add = createTemplateHelper(store)
 
   // Color palette
   const t = '#0f172a'   // text
@@ -289,60 +263,5 @@ export function buildDashboard(store: DocumentStore): void {
   if (footer) {
     add('text', footer, { name: 'Copyright', style: { ...rel, fontSize: 12, color: m }, props: { content: '© 2026 Acme Inc. All rights reserved.' } })
     add('text', footer, { name: 'Version', style: { ...rel, fontSize: 12, color: m }, props: { content: 'v2.4.1' } })
-  }
-}
-
-function getDefaultProps(type: ElementType): Record<string, unknown> {
-  switch (type) {
-    case "text":
-      return { content: "Text" }
-    case "image":
-      return { src: "", alt: "Image" }
-    case "button":
-      return { label: "Button" }
-    case "input":
-      return { placeholder: "Enter text..." }
-    case "sc:button":
-      return { label: "Button", variant: "default", size: "default" }
-    case "sc:card":
-      return { title: "Card Title", description: "Card description", content: "Card content here." }
-    case "sc:input":
-      return { placeholder: "Type something...", type: "text" }
-    case "sc:badge":
-      return { label: "Badge", variant: "default" }
-    case "sc:checkbox":
-      return { label: "Agree to terms", checked: false }
-    case "sc:switch":
-      return { label: "Enable notifications", checked: false }
-    case "sc:label":
-      return { text: "Label" }
-    case "sc:textarea":
-      return { placeholder: "Enter text...", rows: 3 }
-    case "sc:avatar":
-      return { src: "", fallback: "AB" }
-    case "sc:separator":
-      return { orientation: "horizontal" }
-    case "sc:progress":
-      return { value: 60 }
-    case "sc:skeleton":
-      return { variant: "line" }
-    case "sc:slider":
-      return { value: 50, min: 0, max: 100, step: 1 }
-    case "sc:tabs":
-      return { tabs: ["Account", "Password", "Settings"], activeTab: "Account" }
-    case "sc:alert":
-      return { title: "Heads up!", description: "You can add components to your app.", variant: "default" }
-    case "sc:toggle":
-      return { label: "Bold", pressed: false }
-    case "sc:select":
-      return { placeholder: "Select option", options: ["Option 1", "Option 2", "Option 3"] }
-    case "sc:table":
-      return { headers: ["Name", "Status", "Amount"], rows: [["Alice", "Active", "₩250,000"], ["Bob", "Pending", "₩150,000"], ["Charlie", "Active", "₩350,000"]] }
-    case "sc:accordion":
-      return { items: [{ title: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." }, { title: "Is it styled?", content: "Yes. It comes with default styles." }] }
-    case "sc:radio-group":
-      return { label: "Plan", options: ["Free", "Pro", "Enterprise"], value: "Free" }
-    default:
-      return {}
   }
 }

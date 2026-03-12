@@ -12,7 +12,7 @@ export type ShellToCanvasMessage =
   | { type: "MOVE_ELEMENT"; payload: { id: string; parentId: string; index: number } }
   | { type: "SET_VIEWPORT"; payload: { width: number; height: number } }
   | { type: "TOGGLE_LOCK"; payload: { ids: string[] } }
-  | { type: "SET_MODE"; payload: { mode: "edit" | "interact" } }
+  | { type: "SET_MODE"; payload: { mode: "edit" | "interact"; canvasMode?: CanvasMode } }
   | { type: "SET_LAYOUT_MODE"; payload: { id: string; mode: "none" | "flex" } }
   | { type: "UPDATE_LAYOUT_PROPS"; payload: { id: string; layoutProps: Partial<LayoutProps> } }
   | { type: "UPDATE_SIZING"; payload: { id: string; sizing: Partial<SizingProps> } }

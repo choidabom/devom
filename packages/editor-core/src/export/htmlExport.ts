@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react"
 import type { EditorElement } from "../types"
-import { getContainerStyles, getChildSizingStyles } from "../utils/layoutStyles"
+import { escapeHtml, computeElementStyle } from "./utils"
 
 export function exportToHTML(elements: Record<string, EditorElement>, rootId: string): string {
   const root = elements[rootId]
@@ -28,12 +28,6 @@ export function exportToHTML(elements: Record<string, EditorElement>, rootId: st
   return lines.join("\n")
 }
 
-function esc(str: string): string {
-  return str.replace(/[<>&"']/g, (c) => {
-    const map: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#x27;" }
-    return map[c] ?? c
-  })
-}
 
 function renderHTML(
   el: EditorElement,
@@ -44,7 +38,7 @@ function renderHTML(
   parent: EditorElement | null,
 ) {
   const pad = " ".repeat(indent)
-  const style = computeFullStyle(el, parent)
+  const style = computeElementStyle(el, parent)
 
   // Handle shadcn/ui components
   if (el.type.startsWith("sc:")) {
@@ -56,27 +50,27 @@ function renderHTML(
     const content = String(el.props.content ?? "")
     const fontSize = el.style.fontSize as number | undefined
     const tag = fontSize && fontSize >= 20 ? "h2" : fontSize && fontSize >= 16 ? "h3" : "p"
-    lines.push(`${pad}<${tag} style="${esc(cssToInline(style))}">${esc(content)}</${tag}>`)
+    lines.push(`${pad}<${tag} style="${escapeHtml(cssToInline(style))}">${escapeHtml(content)}</${tag}>`)
     return
   }
 
   if (el.type === "image") {
-    lines.push(`${pad}<img style="${esc(cssToInline(style))}" src="${esc(String(el.props.src ?? ""))}" alt="${esc(String(el.props.alt ?? ""))}" />`)
+    lines.push(`${pad}<img style="${escapeHtml(cssToInline(style))}" src="${escapeHtml(String(el.props.src ?? ""))}" alt="${escapeHtml(String(el.props.alt ?? ""))}" />`)
     return
   }
 
   if (el.type === "button") {
-    lines.push(`${pad}<button style="${esc(cssToInline(style))}">${esc(String(el.props.label ?? "Button"))}</button>`)
+    lines.push(`${pad}<button style="${escapeHtml(cssToInline(style))}">${escapeHtml(String(el.props.label ?? "Button"))}</button>`)
     return
   }
 
   if (el.type === "input") {
-    lines.push(`${pad}<input style="${esc(cssToInline(style))}" placeholder="${esc(String(el.props.placeholder ?? ""))}" />`)
+    lines.push(`${pad}<input style="${escapeHtml(cssToInline(style))}" placeholder="${escapeHtml(String(el.props.placeholder ?? ""))}" />`)
     return
   }
 
   // div container
-  lines.push(`${pad}<div style="${esc(cssToInline(style))}">`)
+  lines.push(`${pad}<div style="${escapeHtml(cssToInline(style))}">`)
   for (const childId of el.children) {
     const child = elements[childId]
     if (child) renderHTML(child, elements, getEl, lines, indent + 2, el)
@@ -94,7 +88,7 @@ function renderShadcnHTML(
 ) {
   const pad = " ".repeat(indent)
   const p = el.props
-  const baseStyle = computeFullStyle(el, parent)
+  const baseStyle = computeElementStyle(el, parent)
 
   switch (el.type) {
     case "sc:button": {
@@ -111,12 +105,12 @@ function renderShadcnHTML(
           variant === 'ghost' ? { backgroundColor: 'transparent', color: '#0f172a' } :
           { backgroundColor: '#0f172a', color: '#ffffff' }),
       }
-      lines.push(`${pad}<button style="${esc(cssToInline(btnStyle))}">${esc(String(p.label ?? "Button"))}</button>`)
+      lines.push(`${pad}<button style="${escapeHtml(cssToInline(btnStyle))}">${escapeHtml(String(p.label ?? "Button"))}</button>`)
       break
     }
     case "sc:input": {
       const inputStyle: CSSProperties = { ...baseStyle }
-      lines.push(`${pad}<input style="${esc(cssToInline(inputStyle))}" placeholder="${esc(String(p.placeholder ?? ""))}" />`)
+      lines.push(`${pad}<input style="${escapeHtml(cssToInline(inputStyle))}" placeholder="${escapeHtml(String(p.placeholder ?? ""))}" />`)
       break
     }
     case "sc:badge": {
@@ -130,7 +124,7 @@ function renderShadcnHTML(
           variant === 'destructive' ? { backgroundColor: '#ef4444', color: '#ffffff' } :
           { backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #e2e8f0' }),
       }
-      lines.push(`${pad}<span style="${esc(cssToInline(badgeStyle))}">${esc(String(p.label ?? "Badge"))}</span>`)
+      lines.push(`${pad}<span style="${escapeHtml(cssToInline(badgeStyle))}">${escapeHtml(String(p.label ?? "Badge"))}</span>`)
       break
     }
     case "sc:avatar": {
@@ -141,15 +135,15 @@ function renderShadcnHTML(
         backgroundColor: '#f1f5f9', color: '#64748b', fontSize: 13, fontWeight: 600,
         flexShrink: 0,
       }
-      lines.push(`${pad}<div style="${esc(cssToInline(avatarStyle))}">${esc(String(p.fallback ?? ""))}</div>`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(avatarStyle))}">${escapeHtml(String(p.fallback ?? ""))}</div>`)
       break
     }
     case "sc:progress": {
       const value = Number(p.value ?? 60)
       const outerStyle: CSSProperties = { ...baseStyle, height: 6, backgroundColor: '#f1f5f9', borderRadius: 9999, overflow: 'hidden' }
       const innerStyle: CSSProperties = { width: `${value}%`, height: '100%', backgroundColor: '#3b82f6', borderRadius: 9999 }
-      lines.push(`${pad}<div style="${esc(cssToInline(outerStyle))}">`)
-      lines.push(`${pad}  <div style="${esc(cssToInline(innerStyle))}"></div>`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(outerStyle))}">`)
+      lines.push(`${pad}  <div style="${escapeHtml(cssToInline(innerStyle))}"></div>`)
       lines.push(`${pad}</div>`)
       break
     }
@@ -163,10 +157,10 @@ function renderShadcnHTML(
         display: 'flex', alignItems: checked ? 'center' : 'center', justifyContent: checked ? 'flex-end' : 'flex-start',
       }
       const thumbStyle: CSSProperties = { width: 18, height: 18, borderRadius: '50%', backgroundColor: '#ffffff' }
-      lines.push(`${pad}<div style="${esc(cssToInline(wrapStyle))}">`)
-      if (label) lines.push(`${pad}  <span style="font-size: 13px; color: #0f172a">${esc(label)}</span>`)
-      lines.push(`${pad}  <div style="${esc(cssToInline(trackStyle))}">`)
-      lines.push(`${pad}    <div style="${esc(cssToInline(thumbStyle))}"></div>`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(wrapStyle))}">`)
+      if (label) lines.push(`${pad}  <span style="font-size: 13px; color: #0f172a">${escapeHtml(label)}</span>`)
+      lines.push(`${pad}  <div style="${escapeHtml(cssToInline(trackStyle))}">`)
+      lines.push(`${pad}    <div style="${escapeHtml(cssToInline(thumbStyle))}"></div>`)
       lines.push(`${pad}  </div>`)
       lines.push(`${pad}</div>`)
       break
@@ -175,7 +169,7 @@ function renderShadcnHTML(
       const tabs = (p.tabs as string[]) ?? []
       const active = String(p.activeTab ?? tabs[0] ?? "")
       const wrapStyle: CSSProperties = { ...baseStyle, display: 'flex', gap: 0, borderBottom: '1px solid #e2e8f0' }
-      lines.push(`${pad}<div style="${esc(cssToInline(wrapStyle))}">`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(wrapStyle))}">`)
       for (const tab of tabs) {
         const isActive = tab === active
         const tabStyle: CSSProperties = {
@@ -183,7 +177,7 @@ function renderShadcnHTML(
           borderBottom: isActive ? '2px solid #0f172a' : '2px solid transparent', cursor: 'pointer',
           backgroundColor: 'transparent',
         }
-        lines.push(`${pad}  <button style="${esc(cssToInline(tabStyle))}">${esc(tab)}</button>`)
+        lines.push(`${pad}  <button style="${escapeHtml(cssToInline(tabStyle))}">${escapeHtml(tab)}</button>`)
       }
       lines.push(`${pad}</div>`)
       break
@@ -191,14 +185,14 @@ function renderShadcnHTML(
     case "sc:table": {
       const headers = (p.headers as string[]) ?? []
       const rows = (p.rows as string[][]) ?? []
-      lines.push(`${pad}<table style="${esc(cssToInline(baseStyle))}">`)
+      lines.push(`${pad}<table style="${escapeHtml(cssToInline(baseStyle))}">`)
       lines.push(`${pad}  <thead><tr>`)
-      for (const h of headers) lines.push(`${pad}    <th>${esc(h)}</th>`)
+      for (const h of headers) lines.push(`${pad}    <th>${escapeHtml(h)}</th>`)
       lines.push(`${pad}  </tr></thead>`)
       lines.push(`${pad}  <tbody>`)
       for (const row of rows) {
         lines.push(`${pad}    <tr>`)
-        for (const cell of row) lines.push(`${pad}      <td>${esc(cell)}</td>`)
+        for (const cell of row) lines.push(`${pad}      <td>${escapeHtml(cell)}</td>`)
         lines.push(`${pad}    </tr>`)
       }
       lines.push(`${pad}  </tbody>`)
@@ -210,17 +204,17 @@ function renderShadcnHTML(
         ...baseStyle, padding: '12px 16px', borderRadius: 8,
         border: '1px solid #e2e8f0', backgroundColor: '#ffffff',
       }
-      lines.push(`${pad}<div style="${esc(cssToInline(alertStyle))}">`)
-      if (p.title) lines.push(`${pad}  <div style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 4px">${esc(String(p.title))}</div>`)
-      if (p.description) lines.push(`${pad}  <div style="font-size: 13px; color: #64748b">${esc(String(p.description))}</div>`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(alertStyle))}">`)
+      if (p.title) lines.push(`${pad}  <div style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 4px">${escapeHtml(String(p.title))}</div>`)
+      if (p.description) lines.push(`${pad}  <div style="font-size: 13px; color: #64748b">${escapeHtml(String(p.description))}</div>`)
       lines.push(`${pad}</div>`)
       break
     }
     case "sc:checkbox": {
       const wrapStyle: CSSProperties = { ...baseStyle, display: 'flex', alignItems: 'center', gap: 8 }
-      lines.push(`${pad}<label style="${esc(cssToInline(wrapStyle))}">`)
+      lines.push(`${pad}<label style="${escapeHtml(cssToInline(wrapStyle))}">`)
       lines.push(`${pad}  <input type="checkbox" ${p.checked ? 'checked' : ''} style="width: 16px; height: 16px; accent-color: #0f172a" />`)
-      lines.push(`${pad}  <span style="font-size: 13px; color: #0f172a">${esc(String(p.label ?? ""))}</span>`)
+      lines.push(`${pad}  <span style="font-size: 13px; color: #0f172a">${escapeHtml(String(p.label ?? ""))}</span>`)
       lines.push(`${pad}</label>`)
       break
     }
@@ -230,19 +224,19 @@ function renderShadcnHTML(
         ...baseStyle, padding: '8px 12px', fontSize: 14, border: '1px solid #e2e8f0',
         borderRadius: 6, backgroundColor: '#ffffff', color: '#0f172a', width: '100%',
       }
-      lines.push(`${pad}<select style="${esc(cssToInline(selectStyle))}">`)
-      if (p.placeholder) lines.push(`${pad}  <option value="" disabled selected>${esc(String(p.placeholder))}</option>`)
-      for (const opt of options) lines.push(`${pad}  <option>${esc(opt)}</option>`)
+      lines.push(`${pad}<select style="${escapeHtml(cssToInline(selectStyle))}">`)
+      if (p.placeholder) lines.push(`${pad}  <option value="" disabled selected>${escapeHtml(String(p.placeholder))}</option>`)
+      for (const opt of options) lines.push(`${pad}  <option>${escapeHtml(opt)}</option>`)
       lines.push(`${pad}</select>`)
       break
     }
     case "sc:accordion": {
       const items = (p.items as Array<{ title: string; content: string }>) ?? []
-      lines.push(`${pad}<div style="${esc(cssToInline(baseStyle))}">`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(baseStyle))}">`)
       for (const item of items) {
         lines.push(`${pad}  <details style="border-bottom: 1px solid #e2e8f0; padding: 12px 0">`)
-        lines.push(`${pad}    <summary style="font-size: 14px; font-weight: 500; color: #0f172a; cursor: pointer">${esc(item.title)}</summary>`)
-        lines.push(`${pad}    <p style="font-size: 13px; color: #64748b; margin-top: 8px">${esc(item.content)}</p>`)
+        lines.push(`${pad}    <summary style="font-size: 14px; font-weight: 500; color: #0f172a; cursor: pointer">${escapeHtml(item.title)}</summary>`)
+        lines.push(`${pad}    <p style="font-size: 13px; color: #64748b; margin-top: 8px">${escapeHtml(item.content)}</p>`)
         lines.push(`${pad}  </details>`)
       }
       lines.push(`${pad}</div>`)
@@ -252,12 +246,12 @@ function renderShadcnHTML(
       const options = (p.options as string[]) ?? []
       const value = String(p.value ?? "")
       const groupName = `radio-${Math.random().toString(36).slice(2, 6)}`
-      lines.push(`${pad}<fieldset style="${esc(cssToInline({ ...baseStyle, border: 'none', display: 'flex', flexDirection: 'column', gap: 8 }))}">`)
-      if (p.label) lines.push(`${pad}  <legend style="font-size: 13px; font-weight: 500; color: #0f172a; margin-bottom: 4px">${esc(String(p.label))}</legend>`)
+      lines.push(`${pad}<fieldset style="${escapeHtml(cssToInline({ ...baseStyle, border: 'none', display: 'flex', flexDirection: 'column', gap: 8 }))}">`)
+      if (p.label) lines.push(`${pad}  <legend style="font-size: 13px; font-weight: 500; color: #0f172a; margin-bottom: 4px">${escapeHtml(String(p.label))}</legend>`)
       for (const opt of options) {
         lines.push(`${pad}  <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #0f172a">`)
-        lines.push(`${pad}    <input type="radio" name="${groupName}" value="${esc(opt)}" ${opt === value ? 'checked' : ''} style="accent-color: #0f172a" />`)
-        lines.push(`${pad}    ${esc(opt)}`)
+        lines.push(`${pad}    <input type="radio" name="${groupName}" value="${escapeHtml(opt)}" ${opt === value ? 'checked' : ''} style="accent-color: #0f172a" />`)
+        lines.push(`${pad}    ${escapeHtml(opt)}`)
         lines.push(`${pad}  </label>`)
       }
       lines.push(`${pad}</fieldset>`)
@@ -269,25 +263,25 @@ function renderShadcnHTML(
         ...baseStyle,
         ...(horizontal ? { height: 1, width: '100%', backgroundColor: '#e2e8f0' } : { width: 1, height: '100%', backgroundColor: '#e2e8f0' }),
       }
-      lines.push(`${pad}<div style="${esc(cssToInline(sepStyle))}"></div>`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(sepStyle))}"></div>`)
       break
     }
     case "sc:label": {
-      lines.push(`${pad}<label style="${esc(cssToInline({ ...baseStyle, fontSize: 13, fontWeight: 500, color: '#0f172a' }))}">${esc(String(p.text ?? "Label"))}</label>`)
+      lines.push(`${pad}<label style="${escapeHtml(cssToInline({ ...baseStyle, fontSize: 13, fontWeight: 500, color: '#0f172a' }))}">${escapeHtml(String(p.text ?? "Label"))}</label>`)
       break
     }
     case "sc:textarea": {
-      lines.push(`${pad}<textarea style="${esc(cssToInline(baseStyle))}" rows="${Number(p.rows ?? 3)}" placeholder="${esc(String(p.placeholder ?? ""))}">${esc(String(p.value ?? ""))}</textarea>`)
+      lines.push(`${pad}<textarea style="${escapeHtml(cssToInline(baseStyle))}" rows="${Number(p.rows ?? 3)}" placeholder="${escapeHtml(String(p.placeholder ?? ""))}">${escapeHtml(String(p.value ?? ""))}</textarea>`)
       break
     }
     case "sc:skeleton": {
       const skelStyle: CSSProperties = { ...baseStyle, backgroundColor: '#f1f5f9', borderRadius: 6, height: 20, animation: 'pulse 2s ease-in-out infinite' }
-      lines.push(`${pad}<div style="${esc(cssToInline(skelStyle))}"></div>`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(skelStyle))}"></div>`)
       break
     }
     case "sc:slider": {
       const sliderStyle: CSSProperties = { ...baseStyle, width: '100%' }
-      lines.push(`${pad}<input type="range" min="${p.min ?? 0}" max="${p.max ?? 100}" value="${p.value ?? 50}" step="${p.step ?? 1}" style="${esc(cssToInline(sliderStyle))}" />`)
+      lines.push(`${pad}<input type="range" min="${p.min ?? 0}" max="${p.max ?? 100}" value="${p.value ?? 50}" step="${p.step ?? 1}" style="${escapeHtml(cssToInline(sliderStyle))}" />`)
       break
     }
     case "sc:toggle": {
@@ -298,12 +292,12 @@ function renderShadcnHTML(
         backgroundColor: pressed ? '#f1f5f9' : 'transparent', color: '#0f172a',
         border: '1px solid #e2e8f0',
       }
-      lines.push(`${pad}<button style="${esc(cssToInline(toggleStyle))}">${esc(String(p.label ?? ""))}</button>`)
+      lines.push(`${pad}<button style="${escapeHtml(cssToInline(toggleStyle))}">${escapeHtml(String(p.label ?? ""))}</button>`)
       break
     }
     default: {
       // Fallback: render as div with children
-      lines.push(`${pad}<div style="${esc(cssToInline(baseStyle))}">`)
+      lines.push(`${pad}<div style="${escapeHtml(cssToInline(baseStyle))}">`)
       for (const childId of el.children) {
         const child = elements[childId]
         if (child) renderHTML(child, elements, getEl, lines, indent + 2, el)
@@ -313,29 +307,6 @@ function renderShadcnHTML(
   }
 }
 
-function computeFullStyle(el: EditorElement, parent: EditorElement | null): CSSProperties {
-  // Start with element's own style
-  const style: CSSProperties = { ...el.style }
-
-  // Remove absolute positioning for auto-layout children
-  if (parent && (parent.layoutMode === 'flex' || parent.layoutMode === 'grid')) {
-    delete style.position
-    delete (style as Record<string, unknown>).left
-    delete (style as Record<string, unknown>).top
-  }
-
-  // Add container layout styles
-  const containerStyles = getContainerStyles(el)
-  Object.assign(style, containerStyles)
-
-  // Add child sizing styles
-  if (parent && parent.layoutMode === 'flex') {
-    const sizingStyles = getChildSizingStyles(el, parent.layoutProps.direction)
-    Object.assign(style, sizingStyles)
-  }
-
-  return style
-}
 
 function cssToInline(style: CSSProperties): string {
   return Object.entries(style)
