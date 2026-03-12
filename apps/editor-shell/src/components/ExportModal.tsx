@@ -25,6 +25,18 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleDownload = () => {
+    const ext = format === "html" ? "html" : format === "jsx" ? "jsx" : "json"
+    const mime = format === "json" ? "application/json" : "text/plain"
+    const blob = new Blob([output], { type: `${mime};charset=utf-8` })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `export.${ext}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div style={{
       position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)",
@@ -46,6 +58,10 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
             ))}
           </div>
           <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={handleDownload} style={{
+              padding: "6px 16px", background: T.hover, color: T.text,
+              border: `1px solid ${T.inputBorder}`, borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 500,
+            }}>Download</button>
             <button onClick={handleCopy} style={{
               padding: "6px 16px", background: T.accent, color: "#fff",
               border: "none", borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 500,
