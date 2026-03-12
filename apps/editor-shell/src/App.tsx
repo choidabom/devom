@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
 import type { EditorMessage, ElementType, SectionRole } from "@devom/editor-core"
-import { exportToJSX, exportToHTML } from "@devom/editor-core"
+import { exportToJSX, exportToHTML, importJSX } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "./stores"
 import { T } from "./theme"
 import { Toolbar, type AlignType } from "./components/Toolbar"
 import { LeftPanel } from "./components/LeftPanel"
 import { PropertiesPanel } from "./components/PropertiesPanel"
 import { ExportModal } from "./components/ExportModal"
+import { ImportJSXModal } from "./components/ImportJSXModal"
 import { LayoutGuide } from "./components/LayoutGuide"
 
 import type { EditorElement } from "@devom/editor-core"
@@ -18,6 +19,8 @@ let clipboard: EditorElement[] = []
 export const App = observer(function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [showExport, setShowExport] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importWarnings, setImportWarnings] = useState<string[]>([])
   const [editorMode, setEditorMode] = useState<"edit" | "interact">("edit")
   const [canvasMode, setCanvasMode] = useState<"canvas" | "page">("canvas")
   const [showPanels, setShowPanels] = useState(true)
@@ -182,6 +185,30 @@ export const App = observer(function App() {
     documentStore.loadTemplate(templateId)
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }, [syncToCanvas])
+
+  const handleImportJSX = useCallback((code: string, mode: 'replace' | 'add') => {
+    const result = importJSX(code)
+
+    if (result.warnings.length > 0 && result.elements.length === 0) {
+      setImportWarnings(result.warnings)
+      return // parse failed — keep modal, show warnings
+    }
+
+    historyStore.pushSnapshot()
+
+    if (mode === 'replace') {
+      documentStore.resetDocument()
+    }
+
+    documentStore.importElements(result.elements)
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+
+    setImportWarnings(result.warnings) // show warnings for partial success
+    if (result.elements.length > 0) {
+      setShowImportModal(false)
+      setImportWarnings([])
+    }
+  }, [])
 
   const handleDelete = useCallback(() => {
     if (selectionStore.selectedIds.length === 0) return
@@ -456,6 +483,7 @@ export const App = observer(function App() {
             onUndo={handleUndo}
             onRedo={handleRedo}
             onExport={() => setShowExport(true)}
+            onImportJSX={() => setShowImportModal(true)}
             onDelete={handleDelete}
             onAlign={handleAlign}
             canUndo={historyStore.canUndo}
@@ -562,6 +590,13 @@ export const App = observer(function App() {
       </div>
 
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
+      {showImportModal && (
+        <ImportJSXModal
+          onImport={handleImportJSX}
+          onClose={() => { setShowImportModal(false); setImportWarnings([]) }}
+          warnings={importWarnings}
+        />
+      )}
       {editorMode !== "interact" && <LayoutGuide />}
     </div>
   )

@@ -5,7 +5,7 @@ import {
   AlignLeft, AlignCenterHorizontal, AlignRight,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowLeftRight, ArrowUpDown,
-  PanelTop, LayoutDashboard, LayoutTemplate,
+  PanelTop, LayoutDashboard, LayoutTemplate, FileDown,
 } from "lucide-react"
 import type { ElementType, SectionRole } from "@devom/editor-core"
 import { TEMPLATES } from "@devom/editor-core"
@@ -18,6 +18,7 @@ interface ToolbarProps {
   onUndo: () => void
   onRedo: () => void
   onExport: () => void
+  onImportJSX?: () => void
   onDelete: () => void
   onAlign: (type: AlignType) => void
   canUndo: boolean
@@ -66,7 +67,7 @@ const SECTION_PRESETS: { role: SectionRole; label: string }[] = [
   { role: 'footer', label: 'Footer' },
 ]
 
-export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection, onLoadTemplate }: ToolbarProps) {
+export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection, onLoadTemplate }: ToolbarProps) {
   const [showShadcn, setShowShadcn] = useState(false)
   const [showSections, setShowSections] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
@@ -260,6 +261,7 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
 
         <ToolSep />
         <ToolBtn icon={<Settings size={S} />} title="Export" onClick={onExport} />
+        <ToolBtn icon={<FileDown size={S} />} title="Import JSX" onClick={() => onImportJSX?.()} />
         <ToolSep />
         <ToolBtn icon={<Undo2 size={S} />} title="Undo" onClick={onUndo} disabled={!canUndo} />
         <ToolBtn icon={<Redo2 size={S} />} title="Redo" onClick={onRedo} disabled={!canRedo} />
