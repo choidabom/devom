@@ -49,6 +49,8 @@ export const App = observer(function App() {
   const viewportRef = useRef(viewport)
   viewportRef.current = viewport
   const outerRef = useRef<HTMLDivElement>(null)
+  const initialCenterDoneRef = useRef(false)
+  const [canvasReady, setCanvasReady] = useState(false)
   const spaceHeldRef = useRef(false)
   const panDragRef = useRef<{ x: number; y: number } | null>(null)
 
@@ -123,6 +125,37 @@ export const App = observer(function App() {
     switch (msg.type) {
       case "SYNC_DOCUMENT":
         documentStore.loadFromSerializable(msg.payload)
+        // Center elements in viewport on first canvas load (canvas mode only)
+        if (!initialCenterDoneRef.current) {
+          initialCenterDoneRef.current = true
+          if (canvasMode !== 'canvas') { setCanvasReady(true); break }
+          requestAnimationFrame(() => {
+            const outer = outerRef.current
+            if (!outer) { setCanvasReady(true); return }
+            const root = documentStore.root
+            if (!root || root.children.length === 0) { setCanvasReady(true); return }
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+            for (const childId of root.children) {
+              const child = documentStore.getElement(childId)
+              if (!child) continue
+              const x = typeof child.style.left === 'number' ? child.style.left : 0
+              const y = typeof child.style.top === 'number' ? child.style.top : 0
+              const w = typeof child.style.width === 'number' ? child.style.width : 200
+              const h = typeof child.style.height === 'number' ? child.style.height : 100
+              if (w <= 0 || h <= 0) continue
+              minX = Math.min(minX, x)
+              minY = Math.min(minY, y)
+              maxX = Math.max(maxX, x + w)
+              maxY = Math.max(maxY, y + h)
+            }
+            if (isFinite(minX)) {
+              const contentCx = minX + (maxX - minX) / 2
+              const rect = outer.getBoundingClientRect()
+              setViewport({ zoom: 1, panX: rect.width / 2 - contentCx, panY: 60 - minY })
+            }
+            setCanvasReady(true)
+          })
+        }
         break
       case "DND_DROP": {
         // Convert screen-relative coords to canvas coords accounting for viewport
@@ -512,7 +545,7 @@ export const App = observer(function App() {
       ) : (
         <>
         {/* Viewport transform wrapper (canvas space) */}
-        <div style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: '0 0', position: 'absolute' }}>
+        <div style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: '0 0', position: 'absolute', opacity: canvasReady ? 1 : 0 }}>
           <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
           {!isDragging && selectedIds.map(id => (
             <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} zoom={zoom} />
@@ -572,12 +605,13 @@ export const App = observer(function App() {
           userSelect: 'none', pointerEvents: 'auto',
         }}>
           {([
-            { label: 'Desktop', width: 1280 },
-            { label: 'Tablet', width: 768 },
-            { label: 'Mobile', width: 375 },
+            { label: 'Desktop', width: 1280, tooltip: '' },
+            { label: 'Tablet', width: 768, tooltip: '반응형 미리보기 — 준비 중' },
+            { label: 'Mobile', width: 375, tooltip: '반응형 미리보기 — 준비 중' },
           ] as const).map(p => (
             <button
               key={p.width}
+              title={p.tooltip}
               onClick={() => {
                 bridge.send({ type: "SET_PAGE_VIEWPORT_REQUEST", payload: { width: p.width } })
               }}

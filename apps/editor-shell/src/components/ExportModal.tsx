@@ -42,10 +42,10 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
 
   const handlePdfDownload = useCallback(async () => {
     setPdfLoading(true)
+    let iframe: HTMLIFrameElement | null = null
     try {
       const htmlContent = exportToHTML(exportElements, data.rootId)
-      // Render HTML in a hidden iframe to capture
-      const iframe = document.createElement("iframe")
+      iframe = document.createElement("iframe")
       iframe.style.cssText = "position:fixed;left:-9999px;top:0;width:1280px;height:900px;border:none;"
       document.body.appendChild(iframe)
       const iframeDoc = iframe.contentDocument!
@@ -53,10 +53,10 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
       iframeDoc.write(htmlContent)
       iframeDoc.close()
 
-      // Wait for fonts/images to load
-      await new Promise(r => setTimeout(r, 500))
+      // Wait for fonts to load
+      if (iframeDoc.fonts) await iframeDoc.fonts.ready
+      else await new Promise(r => setTimeout(r, 500))
 
-      // Capture root container only (skip body background/padding)
       const root = iframeDoc.body.firstElementChild as HTMLElement ?? iframeDoc.body
       const canvas = await html2canvas(root, {
         scale: 2,
@@ -64,22 +64,20 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
         width: root.scrollWidth,
         height: root.scrollHeight,
       })
-      document.body.removeChild(iframe)
 
       const imgWidth = canvas.width
       const imgHeight = canvas.height
-      // A4 dimensions in pt: 595.28 x 841.89
-      const pdfWidth = 595.28
-      const pdfHeight = (imgHeight * pdfWidth) / imgWidth
-      const orientation = pdfHeight > 841.89 ? "p" as const : "p" as const
-      const pdf = new jsPDF({ orientation, unit: "pt", format: [pdfWidth, pdfHeight] })
-      const imgData = canvas.toDataURL("image/png")
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
+      const isLandscape = imgWidth > imgHeight
+      const pdfW = isLandscape ? 841.89 : 595.28
+      const pdfH = (imgHeight * pdfW) / imgWidth
+      const pdf = new jsPDF({ orientation: isLandscape ? "l" : "p", unit: "pt", format: [pdfW, pdfH] })
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pdfW, pdfH)
       pdf.save("export.pdf")
     } catch (err) {
       console.error("PDF export failed:", err)
       alert("PDF export failed. Check console for details.")
     } finally {
+      if (iframe?.parentNode) document.body.removeChild(iframe)
       setPdfLoading(false)
     }
   }, [exportElements, data.rootId])

@@ -17,7 +17,7 @@ export class DocumentStore {
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true })
     this.initRoot()
-    this.loadTemplate('landing')
+    this.loadTemplate('food-product')
   }
 
   private initRoot() {
