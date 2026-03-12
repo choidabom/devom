@@ -247,13 +247,57 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {/* Position — single select only, absolute positioning */}
-      {!isMulti && !inAutoLayout && (
+      {/* Position — single select, non-root elements */}
+      {!isMulti && element.parentId !== null && (
         <PropSection title="Position">
-          <PropGrid>
-            <PropCompact label="X" value={element.style.left ?? 0} onChange={(v) => updateStyle("left", v)} />
-            <PropCompact label="Y" value={element.style.top ?? 0} onChange={(v) => updateStyle("top", v)} />
-          </PropGrid>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            {/* Absolute / Relative toggle */}
+            <div style={{ display: "flex", gap: 2 }}>
+              {(["absolute", "relative"] as const).map(pos => (
+                <button
+                  key={pos}
+                  onClick={() => {
+                    if (element.style.position === pos) return
+                    historyStore.pushSnapshot()
+                    if (pos === "relative") {
+                      // Switch to relative: remove absolute coords, set auto-layout sizing
+                      documentStore.updateStyle(element.id, {
+                        position: "relative",
+                        left: undefined,
+                        top: undefined,
+                      })
+                      documentStore.updateSizing(element.id, { w: "fill", h: "hug" })
+                    } else {
+                      // Switch to absolute: set position and default coords
+                      documentStore.updateStyle(element.id, {
+                        position: "absolute",
+                        left: 100,
+                        top: 100,
+                      })
+                      documentStore.updateSizing(element.id, { w: "fixed", h: "fixed" })
+                    }
+                    syncToCanvas()
+                  }}
+                  style={{
+                    flex: 1, padding: "5px 0", fontSize: 11, fontWeight: 500,
+                    background: element.style.position === pos ? T.accent : T.inputBg,
+                    color: element.style.position === pos ? "#fff" : T.text,
+                    border: `1px solid ${element.style.position === pos ? T.accent : T.inputBorder}`,
+                    borderRadius: 4, cursor: "pointer",
+                  }}
+                >
+                  {pos === "absolute" ? "Absolute" : "Relative"}
+                </button>
+              ))}
+            </div>
+            {/* X/Y inputs for absolute positioning */}
+            {!inAutoLayout && (
+              <PropGrid>
+                <PropCompact label="X" value={element.style.left ?? 0} onChange={(v) => updateStyle("left", v)} />
+                <PropCompact label="Y" value={element.style.top ?? 0} onChange={(v) => updateStyle("top", v)} />
+              </PropGrid>
+            )}
+          </div>
         </PropSection>
       )}
 
