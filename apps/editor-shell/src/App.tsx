@@ -10,6 +10,7 @@ import { PropertiesPanel } from "./components/PropertiesPanel"
 import { ExportModal } from "./components/ExportModal"
 import { ImportJSXModal } from "./components/ImportJSXModal"
 import { LayoutGuide } from "./components/LayoutGuide"
+import { GuidePanel } from "./components/GuidePanel"
 
 import type { EditorElement } from "@devom/editor-core"
 
@@ -29,6 +30,7 @@ export const App = observer(function App() {
   const [isResizing, setIsResizing] = useState(false)
   const [isDndActive, setIsDndActive] = useState(false)
   const [isDndOver, setIsDndOver] = useState(false)
+  const [canvasZoom, setCanvasZoom] = useState(1)
 
   const showPanelsRef = useRef(showPanels)
   showPanelsRef.current = showPanels
@@ -160,6 +162,9 @@ export const App = observer(function App() {
           }
           break
         }
+        case "ZOOM_CHANGED":
+          setCanvasZoom(msg.payload.zoom)
+          break
         case "UNGROUP_ELEMENTS_REQUEST": {
           const ids = msg.payload.ids.filter(id => {
             const el = documentStore.getElement(id)
@@ -566,6 +571,10 @@ export const App = observer(function App() {
             onToggleCanvasMode={handleToggleCanvasMode}
             onAddSection={handleAddSection}
             onLoadTemplate={handleLoadTemplate}
+            zoom={canvasZoom}
+            onZoomIn={() => bridge.send({ type: "ZOOM_IN" })}
+            onZoomOut={() => bridge.send({ type: "ZOOM_OUT" })}
+            onZoomReset={() => bridge.send({ type: "ZOOM_RESET" })}
           />
         </div>
       )}
@@ -685,9 +694,7 @@ export const App = observer(function App() {
             {editorMode === "interact" ? (
               <CodePreviewPanel />
             ) : selectedElements.length > 0 ? <PropertiesPanel /> : (
-              <div style={{ padding: 20, color: T.textMuted, fontSize: 13, textAlign: "center" }}>
-                Select an element
-              </div>
+              <GuidePanel />
             )}
           </div>
         </div>
