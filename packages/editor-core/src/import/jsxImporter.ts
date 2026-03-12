@@ -17,7 +17,6 @@ interface JSXExpressionContainer { type: 'JSXExpressionContainer'; expression: E
 interface JSXEmptyExpression { type: 'JSXEmptyExpression' }
 interface StringLiteral { type: 'StringLiteral'; value: string }
 interface NumericLiteral { type: 'NumericLiteral'; value: number }
-interface BooleanLiteral { type: 'BooleanLiteral'; value: boolean }
 interface ObjectExpression { type: 'ObjectExpression'; properties: ObjectProperty[] }
 interface ObjectProperty { type: 'ObjectProperty'; key: Identifier; value: StringLiteral | NumericLiteral }
 interface Identifier { type: 'Identifier'; name: string }
@@ -36,8 +35,6 @@ interface MemberExpression { type: 'MemberExpression'; property: Identifier }
 interface FunctionExpressionNode { type: 'FunctionExpression'; body: BlockStatement }
 type Expression = JSXElement | JSXFragment | StringLiteral | NumericLiteral | ConditionalExpression | LogicalExpression | CallExpression | ObjectExpression
 type Statement = ReturnStatement | ExpressionStatement | ExportDefaultDeclaration | FunctionDeclaration | VariableDeclaration
-interface File { type: 'File'; program: { body: Statement[] } }
-type Node = File | JSXElement | JSXFragment | JSXText | JSXExpressionContainer | Expression | Statement
 
 const MAX_INPUT_SIZE = 50 * 1024
 
