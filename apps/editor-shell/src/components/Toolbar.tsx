@@ -8,6 +8,7 @@ import {
   PanelTop, LayoutDashboard, LayoutTemplate,
 } from "lucide-react"
 import type { ElementType, SectionRole } from "@devom/editor-core"
+import { TEMPLATES } from "@devom/editor-core"
 import { T } from "../theme"
 
 export type AlignType = "left" | "center-h" | "right" | "top" | "center-v" | "bottom" | "distribute-h" | "distribute-v"
@@ -28,6 +29,7 @@ interface ToolbarProps {
   canvasMode: "canvas" | "page"
   onToggleCanvasMode: () => void
   onAddSection?: (role: SectionRole) => void
+  onLoadTemplate?: (templateId: string) => void
 }
 
 const S = 15
@@ -64,11 +66,13 @@ const SECTION_PRESETS: { role: SectionRole; label: string }[] = [
   { role: 'footer', label: 'Footer' },
 ]
 
-export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection }: ToolbarProps) {
+export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection, onLoadTemplate }: ToolbarProps) {
   const [showShadcn, setShowShadcn] = useState(false)
   const [showSections, setShowSections] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
   const dropRef = useRef<HTMLDivElement>(null)
   const sectionsDropRef = useRef<HTMLDivElement>(null)
+  const templatesDropRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,6 +113,15 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
     document.addEventListener("mousedown", onClick)
     return () => document.removeEventListener("mousedown", onClick)
   }, [showSections])
+
+  useEffect(() => {
+    if (!showTemplates) return
+    const onClick = (e: MouseEvent) => {
+      if (templatesDropRef.current && !templatesDropRef.current.contains(e.target as Node)) setShowTemplates(false)
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [showTemplates])
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 16px", flexShrink: 0 }}>
@@ -206,6 +219,44 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onDelete, onAlign, ca
             )}
           </div>
         )}
+
+        {/* Templates dropdown */}
+        <div ref={templatesDropRef} style={{ position: "relative" }}>
+          <ToolBtn
+            icon={<span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 12, fontWeight: 600 }}>Templates <ChevronDown size={10} /></span>}
+            title="Load Template"
+            onClick={() => setShowTemplates(v => !v)}
+            active={showTemplates}
+          />
+          {showTemplates && (
+            <div style={{
+              position: "absolute", top: "100%", left: 0, marginTop: 4,
+              background: "#fff", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+              border: "1px solid #e2e8f0", padding: 4, zIndex: 200, minWidth: 220,
+            }}>
+              {TEMPLATES.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => {
+                    if (confirm('Replace current document with template?')) {
+                      onLoadTemplate?.(t.id)
+                    }
+                    setShowTemplates(false)
+                  }}
+                  style={{
+                    display: "block", width: "100%", textAlign: "left", padding: "8px 10px",
+                    fontSize: 12, border: "none", background: "none", cursor: "pointer", borderRadius: 4,
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#f1f5f9")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                >
+                  <div style={{ fontWeight: 500 }}>{t.name}</div>
+                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{t.description}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <ToolSep />
         <ToolBtn icon={<Settings size={S} />} title="Export" onClick={onExport} />

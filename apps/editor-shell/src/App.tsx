@@ -177,6 +177,12 @@ export const App = observer(function App() {
     syncToCanvas()
   }, [syncToCanvas])
 
+  const handleLoadTemplate = useCallback((templateId: string) => {
+    historyStore.pushSnapshot()
+    documentStore.loadTemplate(templateId)
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }, [syncToCanvas])
+
   const handleDelete = useCallback(() => {
     if (selectionStore.selectedIds.length === 0) return
     historyStore.pushSnapshot()
@@ -461,6 +467,7 @@ export const App = observer(function App() {
             canvasMode={canvasMode}
             onToggleCanvasMode={handleToggleCanvasMode}
             onAddSection={handleAddSection}
+            onLoadTemplate={handleLoadTemplate}
           />
         </div>
       )}
