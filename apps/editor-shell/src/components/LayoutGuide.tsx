@@ -10,6 +10,7 @@ const REGIONS = [
     lines: [
       "버튼 클릭 → DocumentStore.addElement() → Canvas에 ADD_ELEMENT 전송 → 즉시 렌더링",
       "Export 시 toSerializable()로 트리 직렬화 → JSON/JSX/HTML 코드 생성",
+      "DnD: 컴포넌트를 Canvas로 드래그앤드롭 추가",
     ],
     tech: "Toolbar.tsx | HistoryStore",
     keys: "Del 삭제 · Cmd+Z Undo · Cmd+Shift+Z Redo",
@@ -22,7 +23,6 @@ const REGIONS = [
       "DocumentStore.rootId부터 children[]을 재귀 순회하며 트리 UI 구성",
       "요소 클릭 → selectionStore.select() + Canvas에 SELECT_ELEMENT 전송 → 양쪽 동기화",
       "MobX observer: 요소 추가/삭제 시 트리가 자동으로 리렌더링",
-      "depth 값으로 paddingLeft 계산 → 시각적 들여쓰기 표현",
     ],
     tech: "LeftPanel.tsx | LayerTree 재귀 컴포넌트 | MobX observer",
   },
@@ -33,14 +33,11 @@ const REGIONS = [
     lines: [
       "별도 Vite 앱 — Shell과 격리된 환경에서 실제 React 컴포넌트 렌더링",
       "iframe 로드 → CANVAS_READY → Shell이 SYNC_DOCUMENT로 전체 상태 전송",
-      "요소 클릭 → getBoundingClientRect로 bounds 계산 → Shell에 ELEMENT_CLICKED 전송",
-      "드래그: pointerdown → setPointerCapture → transform 실시간 이동 → pointerup 시 최종 좌표 전송",
-      "다중 드래그: 선택 그룹 전체 DOM transform 동시 이동 → ELEMENTS_MOVED 배치 전송",
-      "Marquee: 배경 드래그 시 영역 내 요소 자동 다중 선택",
-      "리사이즈: SelectionOverlay가 DOM 측정으로 8방향 핸들 배치 → 드래그로 크기 변경",
+      "드래그: pointerdown → setPointerCapture → transform → pointerup 시 좌표 전송",
+      "다중 드래그, Marquee 선택, 8방향 리사이즈",
     ],
-    tech: "editor-canvas Vite app | ElementRenderer 재귀 | SelectionOverlay DOM 측정",
-    flow: "Shell→Canvas: SYNC_DOCUMENT, ADD_ELEMENT, SELECT_ELEMENT(ids[])\nCanvas→Shell: ELEMENT_CLICKED(shiftKey), ELEMENTS_MOVED, MARQUEE_SELECT",
+    tech: "editor-canvas Vite app | ElementRenderer 재귀 | SelectionOverlay",
+    flow: "Shell→Canvas: SYNC_DOCUMENT, ADD_ELEMENT, SELECT_ELEMENT\nCanvas→Shell: ELEMENT_CLICKED, ELEMENTS_MOVED, MARQUEE_SELECT",
   },
   {
     id: "properties",
@@ -51,7 +48,6 @@ const REGIONS = [
       "다중 선택 시 공통값 표시, 값이 다르면 'mixed' placeholder로 표시",
       "스타일 변경 시 선택된 모든 요소에 일괄 적용 (historyStore 스냅샷 1회)",
       "sc: 접두사 요소는 variant/size를 select 드롭다운으로 편집",
-      "모든 변경 → toSerializable() → SYNC_DOCUMENT로 Canvas 전체 동기화",
     ],
     tech: "PropertiesPanel.tsx | MobX observer | SYNC_DOCUMENT 전체 동기화",
   },
@@ -90,7 +86,7 @@ export function LayoutGuide() {
       <button
         onClick={() => setOpen(!open)}
         style={{
-          position: "fixed", bottom: 16, right: 296, zIndex: 9999,
+          position: "fixed", bottom: 16, right: 16, zIndex: 9999,
           width: 32, height: 32, borderRadius: 8, border: "none",
           background: open ? "#6366f1" : "rgba(0,0,0,0.5)",
           color: "#fff", fontSize: 14, cursor: "pointer",
@@ -99,7 +95,7 @@ export function LayoutGuide() {
         }}
         title="Layout Guide"
       >
-        {open ? "✕" : "?"}
+        {open ? "\u2715" : "?"}
       </button>
 
       {open && (
@@ -150,7 +146,7 @@ function TBtn({ active, onClick, children }: { active: boolean; onClick: () => v
   )
 }
 
-// --- Regions: label badges on each region + detail panel at bottom ---
+// --- Regions: non-overlapping overlays + detail tooltip near selected ---
 
 function RegionsView({ rects, selectedRegion, onSelectRegion }: {
   rects: Record<string, Rect>
@@ -158,12 +154,49 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
   onSelectRegion: (id: string) => void
 }) {
   const selected = REGIONS.find(r => r.id === selectedRegion)
+  const selectedRect = selectedRegion ? rects[selectedRegion] : null
+
+  // Adjust Canvas rect to exclude Layers area (they overlap)
+  const layersRect = rects["layers"]
+  const adjustedRects: Record<string, Rect> = { ...rects }
+  if (rects["canvas"] && layersRect) {
+    const cr = rects["canvas"]!
+    const layersRight = layersRect.left + layersRect.width
+    adjustedRects["canvas"] = {
+      left: layersRight,
+      top: cr.top,
+      width: cr.width - (layersRight - cr.left),
+      height: cr.height,
+    }
+  }
+  // Adjust Canvas rect to exclude Properties area too
+  const propsRect = rects["properties"]
+  if (adjustedRects["canvas"] && propsRect) {
+    const cr = adjustedRects["canvas"]!
+    adjustedRects["canvas"] = {
+      ...cr,
+      width: propsRect.left - cr.left,
+    }
+  }
+
+  // Calculate detail panel position: below the selected region's label badge
+  const getDetailPos = () => {
+    if (!selectedRect || !selected) return { left: 0, top: 0 }
+    const rect = selected.id === "canvas" ? (adjustedRects["canvas"] ?? selectedRect) : selectedRect
+    // Place below the label badge (top-left of region + badge offset)
+    return {
+      left: Math.min(rect.left + 8, window.innerWidth - 380),
+      top: rect.top + 36,
+    }
+  }
+
+  const detailPos = getDetailPos()
 
   return (
     <>
-      {/* Region overlays — just colored borders + clickable label badges */}
+      {/* Region overlays */}
       {REGIONS.map((r, i) => {
-        const rect = rects[r.id]
+        const rect = adjustedRects[r.id]
         if (!rect) return null
         const isActive = selectedRegion === r.id
 
@@ -196,52 +229,45 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
         )
       })}
 
-      {/* Detail panel — fixed at bottom center */}
-      {selected && (
+      {/* Detail panel — positioned near the selected region */}
+      {selected && selectedRect && (
         <div
           onClick={(e) => e.stopPropagation()}
           style={{
             position: "fixed",
-            bottom: 56, left: "50%", transform: "translateX(-50%)",
-            width: "min(680px, calc(100vw - 64px))",
+            left: detailPos.left,
+            top: detailPos.top,
+            width: 360,
+            maxHeight: "min(320px, calc(100vh - " + (detailPos.top + 60) + "px))",
+            overflowY: "auto",
             background: "rgba(20,20,28,0.96)",
             border: `1px solid rgba(${selected.color}, 0.3)`,
-            borderRadius: 14,
-            padding: "16px 20px",
+            borderRadius: 12,
+            padding: "14px 16px",
             backdropFilter: "blur(16px)",
             boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-            animation: "ci 0.2s ease-out",
+            animation: "ci 0.15s ease-out",
             zIndex: 5,
-            maxHeight: "40vh",
-            overflowY: "auto",
           }}
         >
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <div style={{
-              background: `rgba(${selected.color}, 0.9)`, color: "#fff",
-              padding: "3px 10px", borderRadius: 6, fontSize: 12, fontWeight: 700,
-            }}>
-              {selected.label}
-            </div>
-            <span style={{
-              fontSize: 11, fontFamily: "'SF Mono', Menlo, monospace",
-              color: "rgba(255,255,255,0.4)",
-            }}>
-              {selected.tech}
-            </span>
+          {/* Tech badge */}
+          <div style={{
+            fontSize: 11, fontFamily: "'SF Mono', Menlo, monospace",
+            color: "rgba(255,255,255,0.35)", marginBottom: 10,
+          }}>
+            {selected.tech}
           </div>
 
           {/* Description bullets */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
             {selected.lines.map((line, li) => (
               <div key={li} style={{
-                fontSize: 12, color: "rgba(255,255,255,0.8)", lineHeight: 1.6,
-                paddingLeft: 12, position: "relative",
+                fontSize: 12.5, color: "rgba(255,255,255,0.8)", lineHeight: 1.6,
+                paddingLeft: 14, position: "relative",
               }}>
                 <span style={{
                   position: "absolute", left: 0, top: 7,
-                  width: 4, height: 4, borderRadius: "50%",
+                  width: 5, height: 5, borderRadius: "50%",
                   background: `rgba(${selected.color}, 0.6)`,
                 }} />
                 {line}
@@ -249,7 +275,7 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
             ))}
           </div>
 
-          {/* Keys (toolbar only) */}
+          {/* Keys */}
           {"keys" in selected && selected.keys && (
             <div style={{
               marginTop: 10, paddingTop: 8,
@@ -261,7 +287,7 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
             </div>
           )}
 
-          {/* Data flow (canvas only) */}
+          {/* Data flow */}
           {"flow" in selected && selected.flow && (
             <div style={{
               marginTop: 8, paddingTop: 8,
