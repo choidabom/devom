@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from "react"
 import { observer } from "mobx-react-lite"
 import { Lock, Unlock } from "lucide-react"
-import { HexColorPicker } from "react-colorful"
 import { isAutoLayoutChild } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 import { SizingSection } from "./SizingSection"
+import { PropSection, PropGrid, PropCompact, PropSelect, PropRow, PropToggleRow, ColorPickerPopover } from "./properties/PropWidgets"
+import { COMPONENT_PROPS } from "./properties/componentPropsRegistry"
 
 export const PropertiesPanel = observer(function PropertiesPanel() {
   const elements = selectionStore.selectedElements
@@ -23,7 +23,6 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
-  // Live preview without history snapshot (for color picker drag)
   const updateStyleLive = (key: string, value: string) => {
     const parsed = /^\d+(\.\d+)?$/.test(value) ? Number(value) : value
     for (const el of elements) {
@@ -92,6 +91,10 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
     return vals.every(v => v === vals[0]) ? String(vals[0]) : MIXED
   }
 
+  // Render shadcn component props from registry
+  const componentFields = allSameType ? COMPONENT_PROPS[element.type] : undefined
+  const hasComponentProps = componentFields && componentFields.length > 0
+
   return (
     <div style={{ padding: "12px 0" }}>
       {isMulti && (
@@ -128,203 +131,17 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </button>
       </div>
 
-      {/* Layout Mode — single select only */}
+      {/* Layout Mode */}
       {!isMulti && (
-        <PropSection title="Layout">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropSelect
-              label="Mode"
-              value={element.layoutMode ?? 'none'}
-              options={[
-                { value: 'none', label: 'None' },
-                { value: 'flex', label: 'Flex' },
-                { value: 'grid', label: 'Grid' },
-              ].map(opt => opt.value)}
-              onChange={v => {
-                historyStore.pushSnapshot()
-                documentStore.setLayoutMode(element.id, v as 'none' | 'flex' | 'grid')
-                syncToCanvas()
-              }}
-            />
-
-            {/* Flex controls */}
-            {element.layoutMode === 'flex' && element.layoutProps && (
-              <>
-                <PropSelect
-                  label="Direction"
-                  value={element.layoutProps.direction}
-                  options={['row', 'column']}
-                  onChange={v => updateLayoutProps({ direction: v as 'row' | 'column' })}
-                />
-                <PropRow
-                  label="Gap"
-                  value={element.layoutProps.gap}
-                  onChange={v => updateLayoutProps({ gap: Number(v) || 0 })}
-                />
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Align</span>
-                  <div style={{ display: 'flex', gap: 2 }}>
-                    {(['start', 'center', 'end', 'stretch'] as const).map(val => (
-                      <button
-                        key={val}
-                        onClick={() => updateLayoutProps({ alignItems: val })}
-                        style={{
-                          padding: '4px 8px', fontSize: 10,
-                          background: element.layoutProps!.alignItems === val ? T.accent : T.inputBg,
-                          color: element.layoutProps!.alignItems === val ? '#fff' : T.text,
-                          border: `1px solid ${element.layoutProps!.alignItems === val ? T.accent : T.inputBorder}`,
-                          borderRadius: 4, cursor: 'pointer',
-                        }}
-                      >
-                        {val[0]!.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Justify</span>
-                  <div style={{ display: 'flex', gap: 2 }}>
-                    {(['start', 'center', 'end', 'space-between'] as const).map(val => (
-                      <button
-                        key={val}
-                        onClick={() => updateLayoutProps({ justifyContent: val })}
-                        style={{
-                          padding: '4px 8px', fontSize: 10,
-                          background: element.layoutProps!.justifyContent === val ? T.accent : T.inputBg,
-                          color: element.layoutProps!.justifyContent === val ? '#fff' : T.text,
-                          border: `1px solid ${element.layoutProps!.justifyContent === val ? T.accent : T.inputBorder}`,
-                          borderRadius: 4, cursor: 'pointer',
-                        }}
-                      >
-                        {val === 'space-between' ? 'SB' : val[0]!.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Padding</span>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 4, flex: 1 }}>
-                    {(['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'] as const).map(key => (
-                      <input
-                        key={key}
-                        value={element.layoutProps![key]}
-                        onChange={(e) => updateLayoutProps({ [key]: Number(e.target.value) || 0 })}
-                        title={key.replace('padding', '').toLowerCase()}
-                        style={{
-                          padding: '4px 6px', fontSize: 11, width: '100%', boxSizing: 'border-box',
-                          background: T.inputBg, border: `1px solid ${T.inputBorder}`,
-                          borderRadius: 4, color: T.text, outline: 'none', textAlign: 'center',
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} title="Flex wrap — 모바일 반응형 대응은 추가 구현 예정">
-                  <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Wrap</span>
-                  <div style={{ display: 'flex', gap: 2 }}>
-                    {(['nowrap', 'wrap'] as const).map(val => (
-                      <button
-                        key={val}
-                        onClick={() => updateLayoutProps({ flexWrap: val })}
-                        title={val === 'wrap' ? '자식 요소가 넘칠 때 줄바꿈 (반응형 WIP)' : '줄바꿈 없음'}
-                        style={{
-                          padding: '4px 10px', fontSize: 10,
-                          background: (element.layoutProps!.flexWrap ?? 'nowrap') === val ? T.accent : T.inputBg,
-                          color: (element.layoutProps!.flexWrap ?? 'nowrap') === val ? '#fff' : T.text,
-                          border: `1px solid ${(element.layoutProps!.flexWrap ?? 'nowrap') === val ? T.accent : T.inputBorder}`,
-                          borderRadius: 4, cursor: 'pointer',
-                        }}
-                      >
-                        {val === 'nowrap' ? 'No' : 'Wrap'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Grid controls */}
-            {element.layoutMode === 'grid' && element.gridProps && (
-              <>
-                <PropRow
-                  label="Columns"
-                  value={element.gridProps.columns}
-                  onChange={e => {
-                    historyStore.pushSnapshot()
-                    documentStore.updateGridProps(element.id, { columns: Number(e) })
-                    syncToCanvas()
-                  }}
-                />
-                <PropRow
-                  label="Gap"
-                  value={element.gridProps.gap}
-                  onChange={e => {
-                    historyStore.pushSnapshot()
-                    documentStore.updateGridProps(element.id, { gap: Number(e) })
-                    syncToCanvas()
-                  }}
-                />
-              </>
-            )}
-          </div>
-        </PropSection>
+        <LayoutSection element={element} updateLayoutProps={updateLayoutProps} syncToCanvas={syncToCanvas} />
       )}
 
-      {/* Position — single select, non-root elements */}
+      {/* Position */}
       {!isMulti && element.parentId !== null && (
-        <PropSection title="Position">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {/* Absolute / Relative toggle */}
-            <div style={{ display: "flex", gap: 2 }}>
-              {(["absolute", "relative"] as const).map(pos => (
-                <button
-                  key={pos}
-                  onClick={() => {
-                    if (element.style.position === pos) return
-                    historyStore.pushSnapshot()
-                    if (pos === "relative") {
-                      // Switch to relative: remove absolute coords, set auto-layout sizing
-                      documentStore.updateStyle(element.id, {
-                        position: "relative",
-                        left: undefined,
-                        top: undefined,
-                      })
-                      documentStore.updateSizing(element.id, { w: "fill", h: "hug" })
-                    } else {
-                      // Switch to absolute: set position and default coords
-                      documentStore.updateStyle(element.id, {
-                        position: "absolute",
-                        left: 100,
-                        top: 100,
-                      })
-                      documentStore.updateSizing(element.id, { w: "fixed", h: "fixed" })
-                    }
-                    syncToCanvas()
-                  }}
-                  style={{
-                    flex: 1, padding: "5px 0", fontSize: 11, fontWeight: 500,
-                    background: element.style.position === pos ? T.accent : T.inputBg,
-                    color: element.style.position === pos ? "#fff" : T.text,
-                    border: `1px solid ${element.style.position === pos ? T.accent : T.inputBorder}`,
-                    borderRadius: 4, cursor: "pointer",
-                  }}
-                >
-                  {pos === "absolute" ? "Absolute" : "Relative"}
-                </button>
-              ))}
-            </div>
-            {/* X/Y inputs for absolute positioning */}
-            {!inAutoLayout && (
-              <PropGrid>
-                <PropCompact label="X" value={element.style.left ?? 0} onChange={(v) => updateStyle("left", v)} />
-                <PropCompact label="Y" value={element.style.top ?? 0} onChange={(v) => updateStyle("top", v)} />
-              </PropGrid>
-            )}
-          </div>
-        </PropSection>
+        <PositionSection element={element} inAutoLayout={inAutoLayout} updateStyle={updateStyle} syncToCanvas={syncToCanvas} />
       )}
 
-      {/* Sizing — single select, only for auto-layout children */}
+      {/* Sizing — auto-layout children */}
       {!isMulti && inAutoLayout && (
         <SizingSection
           element={element}
@@ -334,7 +151,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         />
       )}
 
-      {/* Size — single select only, not in auto-layout */}
+      {/* Size — non auto-layout */}
       {!isMulti && !inAutoLayout && (!isShadcn || element.type === "sc:card" || element.type === "sc:input") && (
         <PropSection title="Size">
           <PropGrid>
@@ -344,160 +161,39 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {/* shadcn Component Props — only when all same type */}
-      {allSameType && element.type === "sc:button" && (
+      {/* Component Props (from registry) */}
+      {hasComponentProps && (
         <PropSection title="Component">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? "Button"} onChange={(v) => updateProp("label", v)} />}
-            <PropSelect label="Variant" value={sharedProp("variant", "default")} options={["default", "destructive", "outline", "secondary", "ghost", "link"]} onChange={(v) => updateProp("variant", v)} mixed={sharedProp("variant", "default") === MIXED} />
-            <PropSelect label="Size" value={sharedProp("size", "default")} options={["default", "sm", "lg", "icon"]} onChange={(v) => updateProp("size", v)} mixed={sharedProp("size", "default") === MIXED} />
+            {componentFields.map(field => {
+              if (field.singleOnly && isMulti) return null
+              switch (field.type) {
+                case "text":
+                  return <PropRow key={field.key} label={field.label} value={isMulti ? sharedProp(field.key, String(field.default ?? "")) : (element.props[field.key] as string ?? String(field.default ?? ""))} onChange={(v) => updateProp(field.key, v)} />
+                case "select":
+                  return <PropSelect key={field.key} label={field.label} value={sharedProp(field.key, String(field.default ?? ""))} options={field.options!} onChange={(v) => updateProp(field.key, v)} mixed={sharedProp(field.key, String(field.default ?? "")) === MIXED} />
+                case "toggle":
+                  return <PropToggleRow key={field.key} label={field.label} value={Boolean(element.props[field.key])} onChange={(v) => updatePropTyped(field.key, v)} />
+                case "number": {
+                  const val = Number(element.props[field.key] ?? field.default ?? 0)
+                  return <PropRow key={field.key} label={field.label} value={val} onChange={(v) => {
+                    let num = Number(v) || 0
+                    if (field.min != null) num = Math.max(field.min, num)
+                    if (field.max != null) num = Math.min(field.max, num)
+                    updatePropTyped(field.key, num)
+                  }} />
+                }
+                case "csv":
+                  return <PropRow key={field.key} label={field.label} value={(element.props[field.key] as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped(field.key, v.split(",").map(s => s.trim()).filter(Boolean))} />
+                default:
+                  return null
+              }
+            })}
           </div>
         </PropSection>
       )}
 
-      {allSameType && element.type === "sc:card" && !isMulti && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Title" value={element.props.title as string ?? ""} onChange={(v) => updateProp("title", v)} />
-            <PropRow label="Desc" value={element.props.description as string ?? ""} onChange={(v) => updateProp("description", v)} />
-            <PropRow label="Content" value={element.props.content as string ?? ""} onChange={(v) => updateProp("content", v)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:input" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {!isMulti && <PropRow label="Placeholder" value={element.props.placeholder as string ?? ""} onChange={(v) => updateProp("placeholder", v)} />}
-            <PropSelect label="Type" value={sharedProp("type", "text")} options={["text", "password", "email", "number", "tel", "url", "search"]} onChange={(v) => updateProp("type", v)} mixed={sharedProp("type", "text") === MIXED} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:badge" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? "Badge"} onChange={(v) => updateProp("label", v)} />}
-            <PropSelect label="Variant" value={sharedProp("variant", "default")} options={["default", "secondary", "destructive", "outline"]} onChange={(v) => updateProp("variant", v)} mixed={sharedProp("variant", "default") === MIXED} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:checkbox" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? ""} onChange={(v) => updateProp("label", v)} />}
-            <PropToggleRow label="Checked" value={Boolean(element.props.checked)} onChange={(v) => updatePropTyped("checked", v)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:switch" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? ""} onChange={(v) => updateProp("label", v)} />}
-            <PropToggleRow label="Checked" value={Boolean(element.props.checked)} onChange={(v) => updatePropTyped("checked", v)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:label" && !isMulti && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Text" value={element.props.text as string ?? "Label"} onChange={(v) => updateProp("text", v)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:textarea" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {!isMulti && <PropRow label="Placeholder" value={element.props.placeholder as string ?? ""} onChange={(v) => updateProp("placeholder", v)} />}
-            <PropRow label="Rows" value={Number(element.props.rows ?? 3)} onChange={(v) => updatePropTyped("rows", Number(v) || 3)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:avatar" && !isMulti && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Fallback" value={element.props.fallback as string ?? ""} onChange={(v) => updateProp("fallback", v)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:separator" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropSelect label="Orient" value={sharedProp("orientation", "horizontal")} options={["horizontal", "vertical"]} onChange={(v) => updateProp("orientation", v)} mixed={sharedProp("orientation", "horizontal") === MIXED} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:progress" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Value" value={Number(element.props.value ?? 60)} onChange={(v) => updatePropTyped("value", Math.min(100, Math.max(0, Number(v) || 0)))} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:slider" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Value" value={Number(element.props.value ?? 50)} onChange={(v) => updatePropTyped("value", Number(v) || 0)} />
-            <PropRow label="Min" value={Number(element.props.min ?? 0)} onChange={(v) => updatePropTyped("min", Number(v) || 0)} />
-            <PropRow label="Max" value={Number(element.props.max ?? 100)} onChange={(v) => updatePropTyped("max", Number(v) || 100)} />
-            <PropRow label="Step" value={Number(element.props.step ?? 1)} onChange={(v) => updatePropTyped("step", Number(v) || 1)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:tabs" && !isMulti && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Tabs" value={(element.props.tabs as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped("tabs", v.split(",").map(s => s.trim()).filter(Boolean))} />
-            <PropRow label="Active" value={element.props.activeTab as string ?? ""} onChange={(v) => updateProp("activeTab", v)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:alert" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {!isMulti && <PropRow label="Title" value={element.props.title as string ?? ""} onChange={(v) => updateProp("title", v)} />}
-            {!isMulti && <PropRow label="Desc" value={element.props.description as string ?? ""} onChange={(v) => updateProp("description", v)} />}
-            <PropSelect label="Variant" value={sharedProp("variant", "default")} options={["default", "destructive"]} onChange={(v) => updateProp("variant", v)} mixed={sharedProp("variant", "default") === MIXED} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:toggle" && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? ""} onChange={(v) => updateProp("label", v)} />}
-            <PropToggleRow label="Pressed" value={Boolean(element.props.pressed)} onChange={(v) => updatePropTyped("pressed", v)} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:select" && !isMulti && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Placeholder" value={element.props.placeholder as string ?? ""} onChange={(v) => updateProp("placeholder", v)} />
-            <PropRow label="Options" value={(element.props.options as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped("options", v.split(",").map(s => s.trim()).filter(Boolean))} />
-          </div>
-        </PropSection>
-      )}
-
-      {allSameType && element.type === "sc:table" && !isMulti && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Headers" value={(element.props.headers as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped("headers", v.split(",").map(s => s.trim()).filter(Boolean))} />
-          </div>
-        </PropSection>
-      )}
-
+      {/* Accordion special case (info only) */}
       {allSameType && element.type === "sc:accordion" && !isMulti && (
         <PropSection title="Component">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
@@ -506,99 +202,12 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {allSameType && element.type === "sc:radio-group" && !isMulti && (
-        <PropSection title="Component">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <PropRow label="Label" value={element.props.label as string ?? ""} onChange={(v) => updateProp("label", v)} />
-            <PropRow label="Options" value={(element.props.options as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped("options", v.split(",").map(s => s.trim()).filter(Boolean))} />
-            <PropRow label="Value" value={element.props.value as string ?? ""} onChange={(v) => updateProp("value", v)} />
-          </div>
-        </PropSection>
+      {/* Image Properties */}
+      {!isMulti && element.type === "image" && (
+        <ImageSection element={element} updateProp={updateProp} updateStyle={updateStyle} />
       )}
 
-      {/* Image Properties */}
-      {!isMulti && element.type === "image" && (() => {
-        const src = String(element.props.src ?? '')
-        const alt = String(element.props.alt ?? '')
-        const objectFit = String(element.style.objectFit ?? 'cover')
-
-        return (
-          <div style={{ padding: "8px 12px", borderBottom: `1px solid ${T.border}`, marginBottom: 10 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>Image</div>
-
-            {/* Thumbnail preview */}
-            {src && (
-              <div style={{ marginBottom: 8, borderRadius: 6, overflow: 'hidden', border: `1px solid ${T.inputBorder}` }}>
-                <img src={src} alt={alt} style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
-              </div>
-            )}
-
-            {/* Change image button */}
-            <button
-              onClick={() => {
-                const input = document.createElement('input')
-                input.type = 'file'
-                input.accept = 'image/*'
-                input.onchange = () => {
-                  const file = input.files?.[0]
-                  if (!file) return
-                  if (file.size > 5 * 1024 * 1024) {
-                    alert('Image file size must be under 5MB')
-                    return
-                  }
-                  const reader = new FileReader()
-                  reader.onload = () => {
-                    if (typeof reader.result !== 'string') return
-                    updateProp('src', reader.result)
-                  }
-                  reader.readAsDataURL(file)
-                }
-                input.click()
-              }}
-              style={{
-                width: '100%', padding: '4px 8px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
-                borderRadius: 4, background: T.inputBg, cursor: 'pointer', marginBottom: 8,
-              }}
-            >
-              Change Image
-            </button>
-
-            {/* Alt text */}
-            <div style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>Alt Text</div>
-              <input
-                value={alt}
-                onChange={e => updateProp('alt', e.target.value)}
-                style={{
-                  width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
-                  borderRadius: 4, background: T.inputBg, color: T.text, boxSizing: 'border-box',
-                }}
-                placeholder="Describe the image"
-              />
-            </div>
-
-            {/* Object Fit */}
-            <div>
-              <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>Object Fit</div>
-              <select
-                value={objectFit}
-                onChange={e => updateStyle('objectFit', e.target.value)}
-                style={{
-                  width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
-                  borderRadius: 4, background: T.inputBg, color: T.text,
-                }}
-              >
-                <option value="cover">Cover</option>
-                <option value="contain">Contain</option>
-                <option value="fill">Fill</option>
-                <option value="none">None</option>
-              </select>
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* Text Content — single text element */}
+      {/* Text Content */}
       {!isMulti && element.type === "text" && (
         <PropSection title="Text">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
@@ -617,7 +226,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {/* Typography — hidden for shadcn components */}
+      {/* Typography */}
       {!allShadcn && (
         <PropSection title="Typography">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
@@ -630,7 +239,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {/* Style — hidden for shadcn components */}
+      {/* Style */}
       {!allShadcn && (
         <PropSection title="Style">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
@@ -645,229 +254,259 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         </PropSection>
       )}
 
-      {/* Section Props — single select with role */}
+      {/* Section Props */}
       {!isMulti && element.role && (
-        <PropSection title="Section">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>Background</span>
-              <ColorPickerPopover
-                value={element.sectionProps?.backgroundColor ?? '#ffffff'}
-                onLiveChange={v => {
-                  documentStore.updateSectionProps(element.id, { backgroundColor: v })
-                  syncToCanvas()
-                }}
-                onChange={v => {
-                  historyStore.pushSnapshot()
-                  documentStore.updateSectionProps(element.id, { backgroundColor: v })
-                  syncToCanvas()
-                }}
-              />
-              <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "monospace" }}>
-                {element.sectionProps?.backgroundColor ?? '#ffffff'}
-              </span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>Max Width</span>
-              <input
-                type="number"
-                value={element.sectionProps?.maxWidth ?? ''}
-                placeholder="auto"
-                onChange={e => {
-                  historyStore.pushSnapshot()
-                  const val = e.target.value ? Number(e.target.value) : undefined
-                  documentStore.updateSectionProps(element.id, { maxWidth: val })
-                  syncToCanvas()
-                }}
-                style={inputStyle}
-              />
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>V. Padding</span>
-              <input
-                type="number"
-                value={element.sectionProps?.verticalPadding ?? 0}
-                min={0}
-                onChange={e => {
-                  historyStore.pushSnapshot()
-                  documentStore.updateSectionProps(element.id, { verticalPadding: Number(e.target.value) })
-                  syncToCanvas()
-                }}
-                style={inputStyle}
-              />
-            </div>
-          </div>
-        </PropSection>
+        <SectionPropsSection element={element} inputStyle={inputStyle} syncToCanvas={syncToCanvas} />
       )}
     </div>
   )
 })
 
-function PropSection({ title, children }: { title: string; children: React.ReactNode }) {
+// --- Sub-sections extracted from the main panel ---
+
+import type { EditorElement } from "@devom/editor-core"
+
+function LayoutSection({ element, updateLayoutProps, syncToCanvas }: { element: EditorElement; updateLayoutProps: (p: Record<string, unknown>) => void; syncToCanvas: () => void }) {
   return (
-    <div style={{ borderBottom: `1px solid ${T.border}`, paddingBottom: 10, marginBottom: 10 }}>
-      <div style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8, padding: "0 14px" }}>{title}</div>
-      {children}
-    </div>
-  )
-}
-
-function PropGrid({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, padding: "0 14px" }}>
-      {children}
-    </div>
-  )
-}
-
-function PropCompact({ label, value, onChange }: { label: string; value: string | number; onChange: (v: string) => void }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <span style={{ fontSize: 11, color: T.textMuted }}>{label}</span>
-      <input
-        value={String(value)}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          width: "100%", padding: "5px 8px",
-          background: T.inputBg, border: `1px solid ${T.inputBorder}`,
-          borderRadius: 6, color: T.text, fontSize: 12, boxSizing: "border-box",
-          outline: "none",
-        }}
-      />
-    </div>
-  )
-}
-
-function PropSelect({ label, value, options, onChange, mixed }: { label: string; value: string; options: string[]; onChange: (v: string) => void; mixed?: boolean }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>{label}</span>
-      <select
-        value={mixed ? "" : value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          flex: 1, padding: "5px 8px",
-          background: T.inputBg, border: `1px solid ${T.inputBorder}`,
-          borderRadius: 6, color: mixed ? T.textMuted : T.text, fontSize: 12, minWidth: 0,
-          outline: "none", cursor: "pointer",
-        }}
-      >
-        {mixed && <option value="" disabled>mixed</option>}
-        {options.map((opt) => (
-          <option key={opt} value={opt}>{opt}</option>
-        ))}
-      </select>
-    </div>
-  )
-}
-
-function ColorPickerPopover({ value, onChange, onLiveChange }: { value: string; onChange: (v: string) => void; onLiveChange?: (v: string) => void }) {
-  const [open, setOpen] = useState(false)
-  const [localHex, setLocalHex] = useState(value || "#ffffff")
-  const popRef = useRef<HTMLDivElement>(null)
-  const committedRef = useRef(value)
-  const wasOpenRef = useRef(false)
-
-  useEffect(() => { setLocalHex(value || "#ffffff") }, [value])
-
-  useEffect(() => {
-    if (!open) return
-    wasOpenRef.current = true
-    committedRef.current = value
-    const onClick = (e: MouseEvent) => {
-      if (popRef.current && !popRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener("mousedown", onClick)
-    return () => document.removeEventListener("mousedown", onClick)
-  }, [open, value])
-
-  // Commit on close: push snapshot once (only after popover was actually opened)
-  useEffect(() => {
-    if (open || !wasOpenRef.current) return
-    if (localHex !== committedRef.current && /^#[0-9a-fA-F]{6}$/i.test(localHex)) {
-      onChange(localHex)
-    }
-    wasOpenRef.current = false
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handlePickerChange = useCallback((hex: string) => {
-    setLocalHex(hex)
-    onLiveChange?.(hex)
-  }, [onLiveChange])
-
-  const handleHexInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value
-    setLocalHex(v)
-    if (/^#[0-9a-fA-F]{6}$/i.test(v)) onLiveChange?.(v)
-  }, [onLiveChange])
-
-  return (
-    <div ref={popRef} style={{ position: "relative" }}>
-      <div
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: 20, height: 20, borderRadius: 4, flexShrink: 0, cursor: "pointer",
-          background: value || "#fff", border: `1px solid ${T.inputBorder}`,
-        }}
-      />
-      {open && (
-        <div style={{
-          position: "absolute", top: "100%", left: 0, marginTop: 6, zIndex: 1000,
-          padding: 8, borderRadius: 10, background: T.panel,
-          border: `1px solid ${T.panelBorder}`, boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-        }}>
-          <HexColorPicker color={localHex} onChange={handlePickerChange} style={{ width: 180, height: 150 }} />
-          <input
-            value={localHex}
-            onChange={handleHexInput}
-            style={{
-              width: "100%", marginTop: 6, padding: "4px 6px", fontSize: 11,
-              background: T.inputBg, border: `1px solid ${T.inputBorder}`,
-              borderRadius: 4, color: T.text, boxSizing: "border-box", outline: "none",
-              fontFamily: "monospace",
-            }}
-          />
-        </div>
-      )}
-    </div>
-  )
-}
-
-function PropToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>{label}</span>
-      <input
-        type="checkbox"
-        checked={value}
-        onChange={(e) => onChange(e.target.checked)}
-        style={{ accentColor: T.accent, cursor: "pointer" }}
-      />
-    </div>
-  )
-}
-
-function PropRow({ label, value, onChange, color, onLiveChange }: { label: string; value: string | number; onChange: (v: string) => void; color?: boolean; onLiveChange?: (v: string) => void }) {
-  const isMixed = value === "mixed"
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>{label}</span>
-      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6 }}>
-        {color && !isMixed && (
-          <ColorPickerPopover value={String(value)} onChange={onChange} onLiveChange={onLiveChange} />
-        )}
-        <input
-          value={isMixed ? "" : String(value)}
-          placeholder={isMixed ? "mixed" : undefined}
-          onChange={(e) => onChange(e.target.value)}
-          style={{
-            flex: 1, padding: "5px 8px",
-            background: T.inputBg, border: `1px solid ${T.inputBorder}`,
-            borderRadius: 6, color: isMixed ? T.textMuted : T.text, fontSize: 12, minWidth: 0,
-            outline: "none",
+    <PropSection title="Layout">
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+        <PropSelect
+          label="Mode"
+          value={element.layoutMode ?? 'none'}
+          options={['none', 'flex', 'grid']}
+          onChange={v => {
+            historyStore.pushSnapshot()
+            documentStore.setLayoutMode(element.id, v as 'none' | 'flex' | 'grid')
+            syncToCanvas()
           }}
         />
+
+        {element.layoutMode === 'flex' && element.layoutProps && (
+          <>
+            <PropSelect label="Direction" value={element.layoutProps.direction} options={['row', 'column']} onChange={v => updateLayoutProps({ direction: v as 'row' | 'column' })} />
+            <PropRow label="Gap" value={element.layoutProps.gap} onChange={v => updateLayoutProps({ gap: Number(v) || 0 })} />
+            <SegmentedControl label="Align" options={['start', 'center', 'end', 'stretch'] as const} value={element.layoutProps.alignItems} onSelect={val => updateLayoutProps({ alignItems: val })} format={v => v[0]!.toUpperCase()} />
+            <SegmentedControl label="Justify" options={['start', 'center', 'end', 'space-between'] as const} value={element.layoutProps.justifyContent} onSelect={val => updateLayoutProps({ justifyContent: val })} format={v => v === 'space-between' ? 'SB' : v[0]!.toUpperCase()} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Padding</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 4, flex: 1 }}>
+                {(['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'] as const).map(key => (
+                  <input
+                    key={key}
+                    value={element.layoutProps![key]}
+                    onChange={(e) => updateLayoutProps({ [key]: Number(e.target.value) || 0 })}
+                    title={key.replace('padding', '').toLowerCase()}
+                    style={{
+                      padding: '4px 6px', fontSize: 11, width: '100%', boxSizing: 'border-box',
+                      background: T.inputBg, border: `1px solid ${T.inputBorder}`,
+                      borderRadius: 4, color: T.text, outline: 'none', textAlign: 'center',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <SegmentedControl label="Wrap" options={['nowrap', 'wrap'] as const} value={element.layoutProps.flexWrap ?? 'nowrap'} onSelect={val => updateLayoutProps({ flexWrap: val })} format={v => v === 'nowrap' ? 'No' : 'Wrap'} />
+          </>
+        )}
+
+        {element.layoutMode === 'grid' && element.gridProps && (
+          <>
+            <PropRow label="Columns" value={element.gridProps.columns} onChange={e => { historyStore.pushSnapshot(); documentStore.updateGridProps(element.id, { columns: Number(e) }); syncToCanvas() }} />
+            <PropRow label="Gap" value={element.gridProps.gap} onChange={e => { historyStore.pushSnapshot(); documentStore.updateGridProps(element.id, { gap: Number(e) }); syncToCanvas() }} />
+          </>
+        )}
+      </div>
+    </PropSection>
+  )
+}
+
+function SegmentedControl<T extends string>({ label, options, value, onSelect, format }: { label: string; options: readonly T[]; value: T; onSelect: (v: T) => void; format: (v: T) => string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>{label}</span>
+      <div style={{ display: 'flex', gap: 2 }}>
+        {options.map(val => (
+          <button
+            key={val}
+            onClick={() => onSelect(val)}
+            style={{
+              padding: '4px 8px', fontSize: 10,
+              background: value === val ? T.accent : T.inputBg,
+              color: value === val ? '#fff' : T.text,
+              border: `1px solid ${value === val ? T.accent : T.inputBorder}`,
+              borderRadius: 4, cursor: 'pointer',
+            }}
+          >
+            {format(val)}
+          </button>
+        ))}
       </div>
     </div>
+  )
+}
+
+function PositionSection({ element, inAutoLayout, updateStyle, syncToCanvas }: { element: EditorElement; inAutoLayout: boolean; updateStyle: (k: string, v: string) => void; syncToCanvas: () => void }) {
+  return (
+    <PropSection title="Position">
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+        <div style={{ display: "flex", gap: 2 }}>
+          {(["absolute", "relative"] as const).map(pos => (
+            <button
+              key={pos}
+              onClick={() => {
+                if (element.style.position === pos) return
+                historyStore.pushSnapshot()
+                if (pos === "relative") {
+                  documentStore.updateStyle(element.id, { position: "relative", left: undefined, top: undefined })
+                  documentStore.updateSizing(element.id, { w: "fill", h: "hug" })
+                } else {
+                  documentStore.updateStyle(element.id, { position: "absolute", left: 100, top: 100 })
+                  documentStore.updateSizing(element.id, { w: "fixed", h: "fixed" })
+                }
+                syncToCanvas()
+              }}
+              style={{
+                flex: 1, padding: "5px 0", fontSize: 11, fontWeight: 500,
+                background: element.style.position === pos ? T.accent : T.inputBg,
+                color: element.style.position === pos ? "#fff" : T.text,
+                border: `1px solid ${element.style.position === pos ? T.accent : T.inputBorder}`,
+                borderRadius: 4, cursor: "pointer",
+              }}
+            >
+              {pos === "absolute" ? "Absolute" : "Relative"}
+            </button>
+          ))}
+        </div>
+        {!inAutoLayout && (
+          <PropGrid>
+            <PropCompact label="X" value={element.style.left ?? 0} onChange={(v) => updateStyle("left", v)} />
+            <PropCompact label="Y" value={element.style.top ?? 0} onChange={(v) => updateStyle("top", v)} />
+          </PropGrid>
+        )}
+      </div>
+    </PropSection>
+  )
+}
+
+function ImageSection({ element, updateProp, updateStyle }: { element: EditorElement; updateProp: (k: string, v: string) => void; updateStyle: (k: string, v: string) => void }) {
+  const src = String(element.props.src ?? '')
+  const alt = String(element.props.alt ?? '')
+  const objectFit = String(element.style.objectFit ?? 'cover')
+
+  return (
+    <div style={{ padding: "8px 12px", borderBottom: `1px solid ${T.border}`, marginBottom: 10 }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>Image</div>
+      {src && (
+        <div style={{ marginBottom: 8, borderRadius: 6, overflow: 'hidden', border: `1px solid ${T.inputBorder}` }}>
+          <img src={src} alt={alt} style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
+        </div>
+      )}
+      <button
+        onClick={() => {
+          const input = document.createElement('input')
+          input.type = 'file'
+          input.accept = 'image/*'
+          input.onchange = () => {
+            const file = input.files?.[0]
+            if (!file) return
+            if (file.size > 5 * 1024 * 1024) { alert('Image file size must be under 5MB'); return }
+            const reader = new FileReader()
+            reader.onload = () => { if (typeof reader.result === 'string') updateProp('src', reader.result) }
+            reader.readAsDataURL(file)
+          }
+          input.click()
+        }}
+        style={{
+          width: '100%', padding: '4px 8px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+          borderRadius: 4, background: T.inputBg, cursor: 'pointer', marginBottom: 8,
+        }}
+      >
+        Change Image
+      </button>
+      <div style={{ marginBottom: 6 }}>
+        <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>Alt Text</div>
+        <input
+          value={alt}
+          onChange={e => updateProp('alt', e.target.value)}
+          style={{
+            width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+            borderRadius: 4, background: T.inputBg, color: T.text, boxSizing: 'border-box',
+          }}
+          placeholder="Describe the image"
+        />
+      </div>
+      <div>
+        <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>Object Fit</div>
+        <select
+          value={objectFit}
+          onChange={e => updateStyle('objectFit', e.target.value)}
+          style={{
+            width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+            borderRadius: 4, background: T.inputBg, color: T.text,
+          }}
+        >
+          <option value="cover">Cover</option>
+          <option value="contain">Contain</option>
+          <option value="fill">Fill</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+    </div>
+  )
+}
+
+function SectionPropsSection({ element, inputStyle, syncToCanvas }: { element: EditorElement; inputStyle: React.CSSProperties; syncToCanvas: () => void }) {
+  return (
+    <PropSection title="Section">
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>Background</span>
+          <ColorPickerPopover
+            value={element.sectionProps?.backgroundColor ?? '#ffffff'}
+            onLiveChange={v => {
+              documentStore.updateSectionProps(element.id, { backgroundColor: v })
+              syncToCanvas()
+            }}
+            onChange={v => {
+              historyStore.pushSnapshot()
+              documentStore.updateSectionProps(element.id, { backgroundColor: v })
+              syncToCanvas()
+            }}
+          />
+          <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "monospace" }}>
+            {element.sectionProps?.backgroundColor ?? '#ffffff'}
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>Max Width</span>
+          <input
+            type="number"
+            value={element.sectionProps?.maxWidth ?? ''}
+            placeholder="auto"
+            onChange={e => {
+              historyStore.pushSnapshot()
+              const val = e.target.value ? Number(e.target.value) : undefined
+              documentStore.updateSectionProps(element.id, { maxWidth: val })
+              syncToCanvas()
+            }}
+            style={inputStyle}
+          />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 12, color: T.textSub, width: 80, flexShrink: 0 }}>V. Padding</span>
+          <input
+            type="number"
+            value={element.sectionProps?.verticalPadding ?? 0}
+            min={0}
+            onChange={e => {
+              historyStore.pushSnapshot()
+              documentStore.updateSectionProps(element.id, { verticalPadding: Number(e.target.value) })
+              syncToCanvas()
+            }}
+            style={inputStyle}
+          />
+        </div>
+      </div>
+    </PropSection>
   )
 }
