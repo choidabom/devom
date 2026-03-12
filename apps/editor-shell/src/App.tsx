@@ -535,7 +535,7 @@ export const App = observer(function App() {
         <div data-guide="canvas" style={{ position: "absolute", inset: 0 }}>
           <iframe
             ref={iframeRef}
-            src={import.meta.env.VITE_CANVAS_ORIGIN || "http://localhost:4001"}
+            src={(import.meta.env.VITE_CANVAS_ORIGIN || (import.meta.env.DEV ? "http://localhost:4001" : window.location.origin)) + (import.meta.env.DEV ? "" : "/canvas/")}
             style={{ width: "100%", height: "100%", border: "none", background: T.panel, pointerEvents: isResizing ? "none" : "auto" }}
             title="Editor Canvas"
           />

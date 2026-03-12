@@ -16,6 +16,7 @@
     "dev": "vite build --watch"
   },
   "dependencies": {
+    "@babel/parser": "^7.29.0",
     "@devom/ts-config": "workspace:*",
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",
@@ -23,12 +24,12 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "typescript": "catalog:",
-    "vite": "catalog:",
-    "vite-plugin-dts": "catalog:",
+    "@types/react": "catalog:react",
     "react": "catalog:react",
     "react-dom": "catalog:react",
-    "@types/react": "catalog:react"
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:"
   },
   "peerDependencies": {
     "react": "^19.0.0"

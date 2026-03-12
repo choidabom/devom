@@ -26,6 +26,12 @@ dist-ssr
 *.tsbuildinfo
 .vercel
 
+# Debug screenshots
+/*.png
+
+# Editor deploy output
+dist-editor/
+
 # Proxy
 proxy/ssl/*.pem
 proxy/logs/

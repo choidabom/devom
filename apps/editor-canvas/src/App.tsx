@@ -8,7 +8,7 @@ import { InsertionIndicator } from "./components/InsertionIndicator"
 
 import type { SnapLine } from "./utils/snap"
 
-const SHELL_ORIGIN = import.meta.env.VITE_SHELL_ORIGIN || "http://localhost:4000"
+const SHELL_ORIGIN = import.meta.env.VITE_SHELL_ORIGIN || (import.meta.env.DEV ? "http://localhost:4000" : window.location.origin)
 
 const documentStore = new DocumentStore()
 const bridge = new MessageBridge(SHELL_ORIGIN)

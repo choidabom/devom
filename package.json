@@ -15,7 +15,9 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "archive": "pnpm --filter=@devom/archive",
     "editor": "turbo run dev --filter=@devom/editor-shell --filter=@devom/editor-canvas",
-    "editor:build": "pnpm --filter @devom/editor-core build && turbo run build --filter=@devom/editor-shell --filter=@devom/editor-canvas"
+    "editor:build": "pnpm --filter @devom/editor-core build && turbo run build --filter=@devom/editor-shell --filter=@devom/editor-canvas",
+    "editor:deploy": "pnpm editor:build && node scripts/editor-combine.mjs",
+    "editor:publish": "pnpm editor:deploy && cd dist-editor && npx vercel deploy --prod --yes"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
