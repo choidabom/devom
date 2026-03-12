@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { observer } from "mobx-react-lite"
-import { exportToJSON, exportToJSX, exportToHTML } from "@devom/editor-core"
+import { exportToJSON, exportToJSX, exportToHTML, convertToPageLayout } from "@devom/editor-core"
 import { documentStore } from "../stores"
 import { T } from "../theme"
 
@@ -8,12 +8,16 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
   const [format, setFormat] = useState<"json" | "jsx" | "html">("json")
   const [copied, setCopied] = useState(false)
   const data = documentStore.toSerializable()
+  // Always export as page layout (flex column) regardless of canvas/page mode
+  const exportElements = documentStore.canvasMode === 'canvas'
+    ? convertToPageLayout(data.elements, data.rootId)
+    : data.elements
 
   const output = format === "json"
-    ? exportToJSON(data.elements, data.rootId)
+    ? exportToJSON(exportElements, data.rootId)
     : format === "jsx"
-    ? exportToJSX(data.elements, data.rootId)
-    : exportToHTML(data.elements, data.rootId)
+    ? exportToJSX(exportElements, data.rootId)
+    : exportToHTML(exportElements, data.rootId)
 
   const handleCopy = () => {
     navigator.clipboard.writeText(output)
