@@ -5,6 +5,9 @@ import { DEFAULT_ELEMENT_STYLE, DEFAULT_GRID_PROPS, DEFAULT_LAYOUT_PROPS, DEFAUL
 import { createSectionPreset } from "../presets/sectionPresets"
 import { TEMPLATE_BUILDERS } from "../presets/templates"
 import { getDefaultProps } from "../utils/getDefaultProps"
+import { collectSubtree, pasteElements as pasteHelper, duplicateElements as duplicateHelper, importElements as importHelper } from "./helpers/cloneHelpers"
+import { groupElements as groupHelper, ungroupElements as ungroupHelper } from "./helpers/groupHelpers"
+import { switchCanvasMode } from "./helpers/canvasModeHelpers"
 
 export class DocumentStore {
   elements = observable.map<string, EditorElement>()
@@ -59,32 +62,7 @@ export class DocumentStore {
     this.initRoot()
   }
 
-  importElements(templates: ElementTemplate[], targetParentId?: string): string[] {
-    const parentId = targetParentId ?? this.rootId
-    const parent = this.elements.get(parentId)
-    if (!parent) return []
-    const createdIds: string[] = []
-    for (const template of templates) {
-      const id = this.insertElementTree(template, parentId)
-      if (id) createdIds.push(id)
-    }
-    return createdIds
-  }
-
-  private insertElementTree(template: ElementTemplate, parentId: string, depth = 0): string {
-    const id = nanoid()
-    const { children: childTemplates, ...rest } = template
-    const element: EditorElement = { ...rest, id, parentId, children: [] }
-    this.elements.set(id, element)
-    const parent = this.elements.get(parentId)
-    if (parent) parent.children = [...parent.children, id]
-    if (depth < 50) {
-      for (const childTemplate of childTemplates) {
-        this.insertElementTree(childTemplate, id, depth + 1)
-      }
-    }
-    return id
-  }
+  // --- Core CRUD ---
 
   get root(): EditorElement | undefined {
     return this.elements.get(this.rootId)
@@ -185,12 +163,10 @@ export class DocumentStore {
     const element = this.elements.get(id)
     if (!element || id === this.rootId) return
 
-    // Remove children recursively
     for (const childId of [...element.children]) {
       this.removeElement(childId)
     }
 
-    // Remove from parent's children
     const parent = element.parentId ? this.elements.get(element.parentId) : undefined
     if (parent) {
       const idx = parent.children.indexOf(id)
@@ -206,107 +182,7 @@ export class DocumentStore {
     element.locked = !element.locked
   }
 
-  /** Collect element + all descendants as deep clones */
-  collectSubtree(id: string): EditorElement[] {
-    const el = this.elements.get(id)
-    if (!el) return []
-    const result: EditorElement[] = [JSON.parse(JSON.stringify(el))]
-    for (const childId of el.children) {
-      result.push(...this.collectSubtree(childId))
-    }
-    return result
-  }
-
-  /**
-   * Clone a flat list of elements (with parent-child relationships) into the store.
-   * Top-level elements (whose parentId is not in the set) go under targetParentId.
-   * Children are recursively cloned with new IDs, preserving the tree structure.
-   */
-  private _cloneTree(elements: EditorElement[], targetParentId: string, offset: number): string[] {
-    const target = this.elements.get(targetParentId)
-    if (!target || elements.length === 0) return []
-
-    // Build old→new ID map
-    const idMap = new Map<string, string>()
-    for (const el of elements) {
-      idMap.set(el.id, nanoid())
-    }
-
-    // Identify top-level elements (parent not in the copied set)
-    const copiedIds = new Set(elements.map(e => e.id))
-    const topLevelIds = new Set(
-      elements.filter(el => !el.parentId || !copiedIds.has(el.parentId)).map(e => e.id)
-    )
-
-    const newTopIds: string[] = []
-    for (const el of elements) {
-      const newId = idMap.get(el.id)!
-      const isTop = topLevelIds.has(el.id)
-      const newParentId = isTop ? targetParentId : idMap.get(el.parentId!)
-      if (!newParentId) continue
-
-      // When pasting to root in canvas mode, ensure absolute positioning
-      const needsAbsolute = isTop && targetParentId === this.rootId && this.canvasMode === 'canvas'
-      const style = {
-        ...JSON.parse(JSON.stringify(el.style)),
-        ...(isTop && typeof el.style.left === 'number' ? { left: el.style.left + offset } : {}),
-        ...(isTop && typeof el.style.top === 'number' ? { top: el.style.top + offset } : {}),
-      }
-      if (needsAbsolute) {
-        style.position = 'absolute'
-        if (typeof style.left !== 'number') style.left = 100
-        if (typeof style.top !== 'number') style.top = 100
-      }
-
-      const cloned: EditorElement = {
-        ...JSON.parse(JSON.stringify(el)),
-        id: newId,
-        parentId: newParentId,
-        name: `${el.type}-${newId.slice(0, 4)}`,
-        children: el.children.map(cid => idMap.get(cid)).filter(Boolean) as string[],
-        style,
-        canvasPosition: null,
-      }
-
-      this.elements.set(newId, cloned)
-      if (isTop) {
-        target.children.push(newId)
-        newTopIds.push(newId)
-      }
-    }
-
-    return newTopIds
-  }
-
-  pasteElements(elements: EditorElement[], offset = 20): string[] {
-    return this._cloneTree(elements, this.rootId, offset)
-  }
-
-  duplicateElements(ids: string[], offset = 20): string[] {
-    // Filter out elements whose ancestor is already in the set
-    const idSet = new Set(ids)
-    const topIds = ids.filter(id => {
-      const el = this.elements.get(id)
-      if (!el) return false
-      let cur = el.parentId
-      while (cur) {
-        if (idSet.has(cur)) return false
-        const p = this.elements.get(cur)
-        cur = p?.parentId ?? null
-      }
-      return true
-    })
-
-    const newIds: string[] = []
-    for (const id of topIds) {
-      const el = this.elements.get(id)
-      if (!el || el.locked || id === this.rootId || !el.parentId) continue
-      const subtree = this.collectSubtree(id)
-      const cloned = this._cloneTree(subtree, el.parentId, offset)
-      newIds.push(...cloned)
-    }
-    return newIds
-  }
+  // --- Style / Props ---
 
   updateStyle(id: string, style: Partial<CSSProperties>) {
     const element = this.elements.get(id)
@@ -320,22 +196,7 @@ export class DocumentStore {
     Object.assign(element.props, props)
   }
 
-  moveElement(id: string, newParentId: string, index: number) {
-    const element = this.elements.get(id)
-    const newParent = this.elements.get(newParentId)
-    if (!element || !newParent || id === this.rootId) return
-
-    // Remove from old parent
-    const oldParent = element.parentId ? this.elements.get(element.parentId) : undefined
-    if (oldParent) {
-      const idx = oldParent.children.indexOf(id)
-      if (idx !== -1) oldParent.children.splice(idx, 1)
-    }
-
-    // Add to new parent
-    element.parentId = newParentId
-    newParent.children.splice(index, 0, id)
-  }
+  // --- Layout ---
 
   setLayoutMode(id: string, mode: 'none' | 'flex' | 'grid') {
     const element = this.elements.get(id)
@@ -392,106 +253,19 @@ export class DocumentStore {
     el.sectionProps = { ...el.sectionProps, ...props }
   }
 
-  setCanvasMode(mode: CanvasMode) {
-    if (mode === this.canvasMode) return
-    const root = this.elements.get(this.rootId)
-    if (!root) return
+  moveElement(id: string, newParentId: string, index: number) {
+    const element = this.elements.get(id)
+    const newParent = this.elements.get(newParentId)
+    if (!element || !newParent || id === this.rootId) return
 
-    if (mode === 'page') {
-      // Save absolute positions, sizing, width and switch to flow
-      // Also propagate fill sizing to children of flex-row containers
-      for (const childId of root.children) {
-        const child = this.elements.get(childId)
-        if (!child) continue
-        child.canvasPosition = {
-          left: typeof child.style.left === 'number' ? child.style.left : 0,
-          top: typeof child.style.top === 'number' ? child.style.top : 0,
-          width: child.style.width,
-          sizing: { ...child.sizing },
-        }
-        const { left, top, position, ...rest } = child.style
-        child.style = { ...rest, position: 'relative' as const, width: '100%' }
-        child.sizing = { w: 'fill', h: 'hug' }
-
-        // For flex-row containers, make direct children fill equally
-        if (child.layoutMode === 'flex' && child.layoutProps.direction === 'row') {
-          for (const grandchildId of child.children) {
-            const gc = this.elements.get(grandchildId)
-            if (!gc) continue
-            if (!gc.canvasPosition) {
-              gc.canvasPosition = { left: 0, top: 0, width: gc.style.width, sizing: { ...gc.sizing } }
-            }
-            gc.sizing = { w: gc.sizing.w === 'hug' ? 'hug' : 'fill', h: gc.sizing.h === 'fixed' ? 'hug' : gc.sizing.h }
-          }
-        }
-      }
-      root.layoutMode = 'flex'
-      root.layoutProps = {
-        ...DEFAULT_LAYOUT_PROPS,
-        direction: 'column',
-        gap: 24,
-        paddingTop: 24,
-        paddingRight: 32,
-        paddingBottom: 32,
-        paddingLeft: 32,
-        alignItems: 'stretch',
-      }
-      root.style = {
-        ...root.style,
-        width: this.pageViewport,
-        height: undefined,
-        minHeight: undefined,
-        overflow: 'visible',
-        backgroundColor: '#ffffff',
-      }
-    } else {
-      // Restore absolute positions, sizing, and width (including grandchildren)
-      for (const childId of root.children) {
-        const child = this.elements.get(childId)
-        if (!child) continue
-        const pos = child.canvasPosition ?? { left: 0, top: 0 }
-        child.style = {
-          ...child.style,
-          position: 'absolute' as const,
-          left: pos.left,
-          top: pos.top,
-          width: pos.width ?? child.style.width,
-        }
-        if (pos.sizing) {
-          child.sizing = { ...pos.sizing }
-        }
-        // Restore grandchildren sizing
-        for (const grandchildId of child.children) {
-          const gc = this.elements.get(grandchildId)
-          if (!gc || !gc.canvasPosition?.sizing) continue
-          gc.sizing = { ...gc.canvasPosition.sizing }
-          gc.canvasPosition = null
-        }
-        child.canvasPosition = null
-      }
-      root.layoutMode = 'none'
-      root.layoutProps = { ...DEFAULT_LAYOUT_PROPS }
-      root.style = {
-        ...root.style,
-        width: undefined,
-        height: undefined,
-        minHeight: undefined,
-        overflow: 'visible',
-        backgroundColor: 'transparent',
-      }
+    const oldParent = element.parentId ? this.elements.get(element.parentId) : undefined
+    if (oldParent) {
+      const idx = oldParent.children.indexOf(id)
+      if (idx !== -1) oldParent.children.splice(idx, 1)
     }
 
-    this.canvasMode = mode
-  }
-
-  setPageViewport(width: PageViewportWidth) {
-    this.pageViewport = width
-    if (this.canvasMode === 'page') {
-      const root = this.elements.get(this.rootId)
-      if (root) {
-        root.style = { ...root.style, width }
-      }
-    }
+    element.parentId = newParentId
+    newParent.children.splice(index, 0, id)
   }
 
   reorderChild(parentId: string, childId: string, newIndex: number) {
@@ -501,239 +275,6 @@ export class DocumentStore {
     if (oldIndex === -1) return
     parent.children.splice(oldIndex, 1)
     parent.children.splice(newIndex, 0, childId)
-  }
-
-  private findLCA(ids: string[]): string | null {
-    if (ids.length === 0) return null
-
-    // Build path from each id to root
-    const paths: string[][] = []
-    for (const id of ids) {
-      const path: string[] = []
-      let current: string | null = id
-      while (current) {
-        path.unshift(current)
-        const el = this.elements.get(current)
-        if (!el) break
-        current = el.parentId
-      }
-      paths.push(path)
-    }
-
-    // Find deepest common ancestor
-    let lca = this.rootId
-    const minLen = Math.min(...paths.map(p => p.length))
-    for (let i = 0; i < minLen; i++) {
-      const val = paths[0]?.[i]
-      if (!val) break
-      if (paths.every(p => p[i] === val)) {
-        lca = val
-      } else {
-        break
-      }
-    }
-
-    return lca
-  }
-
-  private isAncestor(ancestorId: string, descendantId: string): boolean {
-    let current: string | null = descendantId
-    while (current) {
-      const el = this.elements.get(current)
-      if (!el || !el.parentId) return false
-      if (el.parentId === ancestorId) return true
-      current = el.parentId
-    }
-    return false
-  }
-
-  groupElements(ids: string[], elementBounds: Record<string, { left: number; top: number; width: number; height: number }>): string | null {
-    // Filter out root, locked elements
-    const validIds = ids.filter(id => {
-      const el = this.elements.get(id)
-      return el && !el.locked && id !== this.rootId
-    })
-    if (validIds.length < 2) return null
-
-    // Check: no element should be ancestor of another
-    for (const a of validIds) {
-      for (const b of validIds) {
-        if (a !== b && this.isAncestor(a, b)) return null
-      }
-    }
-
-    // Find LCA
-    const lcaId = this.findLCA(validIds)
-    if (!lcaId) return null
-
-    // Validate all elements have bounds data
-    for (const id of validIds) {
-      if (!elementBounds[id]) return null
-    }
-
-    // Calculate bounding box from Canvas-measured element bounds
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
-    for (const id of validIds) {
-      const b = elementBounds[id]!
-      minX = Math.min(minX, b.left)
-      minY = Math.min(minY, b.top)
-      maxX = Math.max(maxX, b.left + b.width)
-      maxY = Math.max(maxY, b.top + b.height)
-    }
-
-    // Create group container as child of LCA
-    const groupId = nanoid()
-    const lca = this.elements.get(lcaId)!
-
-    const group: EditorElement = {
-      id: groupId,
-      type: 'div',
-      name: `Group-${groupId.slice(0, 4)}`,
-      parentId: lcaId,
-      children: [],
-      style: {
-        position: 'absolute' as const,
-        left: minX,
-        top: minY,
-        width: maxX - minX,
-        height: maxY - minY,
-      },
-      props: {},
-      locked: false,
-      visible: true,
-      layoutMode: 'none' as const,
-      layoutProps: { ...DEFAULT_LAYOUT_PROPS },
-      sizing: { ...DEFAULT_SIZING },
-      canvasPosition: null,
-    }
-    this.elements.set(groupId, group)
-
-    // Find the earliest index among selected elements in LCA's children
-    let insertIndex = lca.children.length
-    for (const id of validIds) {
-      const el = this.elements.get(id)
-      if (el && el.parentId === lcaId) {
-        const idx = lca.children.indexOf(id)
-        if (idx !== -1 && idx < insertIndex) insertIndex = idx
-      }
-    }
-
-    // Remove selected elements from their parents and add to group
-    for (const id of validIds) {
-      const el = this.elements.get(id)
-      if (!el) continue
-
-      // Remove from old parent
-      const oldParent = el.parentId ? this.elements.get(el.parentId) : undefined
-      if (oldParent) {
-        oldParent.children = oldParent.children.filter(c => c !== id)
-      }
-
-      // Convert coordinates: use Canvas-measured bounds relative to group
-      const b = elementBounds[id]
-      const left = b ? b.left - minX : 0
-      const top = b ? b.top - minY : 0
-      el.style = {
-        ...el.style,
-        position: 'absolute' as const,
-        left,
-        top,
-      }
-
-      el.parentId = groupId
-      group.children.push(id)
-    }
-
-    // Insert group into LCA's children at the computed position
-    lca.children = [
-      ...lca.children.slice(0, insertIndex),
-      groupId,
-      ...lca.children.slice(insertIndex),
-    ]
-
-    return groupId
-  }
-
-  /**
-   * Ungroup selected elements.
-   * - If a selected element is a child (has parent != root): detach from parent, move to grandparent
-   * - If a selected element is a container with children: move all children to parent, then delete container
-   * Returns the ids that should be selected after the operation.
-   */
-  ungroupElements(ids: string[]): string[] {
-    const newSelection: string[] = []
-
-    for (const id of ids) {
-      const element = this.elements.get(id)
-      if (!element || id === this.rootId) continue
-
-      const hasChildren = element.children.length > 0
-
-      if (hasChildren) {
-        // Container selected: move only direct children to parent, then delete container
-        const parent = element.parentId ? this.elements.get(element.parentId) : undefined
-        if (!parent) continue
-
-        const containerIndex = parent.children.indexOf(id)
-        if (containerIndex === -1) continue
-
-        const directChildIds = [...element.children]
-
-        // Update each direct child's parentId and style
-        for (const childId of directChildIds) {
-          const child = this.elements.get(childId)
-          if (!child) continue
-
-          child.parentId = parent.id
-
-          if (parent.layoutMode === 'flex' || parent.layoutMode === 'grid') {
-            const { position, left, top, ...rest } = child.style
-            child.style = { ...rest, position: 'relative' as const }
-          } else {
-            child.style = { ...child.style, position: 'absolute' as const }
-          }
-
-          newSelection.push(childId)
-        }
-
-        // Replace container with its direct children in parent (new array for MobX)
-        const before = parent.children.slice(0, containerIndex)
-        const after = parent.children.slice(containerIndex + 1)
-        parent.children = [...before, ...directChildIds, ...after]
-
-        // Delete the container only (children already reparented)
-        element.children = []
-        this.elements.delete(id)
-      } else {
-        // Child selected: detach from parent, move to grandparent
-        const parent = element.parentId ? this.elements.get(element.parentId) : undefined
-        if (!parent || parent.id === this.rootId) continue
-
-        const grandparent = parent.parentId ? this.elements.get(parent.parentId) : undefined
-        if (!grandparent) continue
-
-        // Remove from parent (new array for MobX)
-        parent.children = parent.children.filter(cid => cid !== id)
-
-        // Insert into grandparent right after the parent (new array for MobX)
-        const parentIndex = grandparent.children.indexOf(parent.id)
-        const gpBefore = grandparent.children.slice(0, parentIndex + 1)
-        const gpAfter = grandparent.children.slice(parentIndex + 1)
-        grandparent.children = [...gpBefore, id, ...gpAfter]
-        element.parentId = grandparent.id
-
-        if (grandparent.layoutMode === 'flex' || grandparent.layoutMode === 'grid') {
-          const { position, left, top, ...rest } = element.style
-          element.style = { ...rest, position: 'relative' as const }
-        } else {
-          element.style = { ...element.style, position: 'absolute' as const }
-        }
-
-        newSelection.push(id)
-      }
-    }
-
-    return newSelection
   }
 
   reparentElement(id: string, newParentId: string, index: number, dropPosition?: { x: number; y: number }) {
@@ -763,6 +304,54 @@ export class DocumentStore {
       }
     }
   }
+
+  // --- Clone / Clipboard (delegated) ---
+
+  collectSubtree(id: string): EditorElement[] {
+    return collectSubtree(this.elements, id)
+  }
+
+  pasteElements(elements: EditorElement[], offset = 20): string[] {
+    return pasteHelper(this.elements, this.rootId, this.canvasMode, elements, offset)
+  }
+
+  duplicateElements(ids: string[], offset = 20): string[] {
+    return duplicateHelper(this.elements, this.rootId, this.canvasMode, ids, offset)
+  }
+
+  importElements(templates: ElementTemplate[], targetParentId?: string): string[] {
+    return importHelper(this.elements, this.rootId, templates, targetParentId)
+  }
+
+  // --- Group / Ungroup (delegated) ---
+
+  groupElements(ids: string[], elementBounds: Record<string, { left: number; top: number; width: number; height: number }>): string | null {
+    return groupHelper(this.elements, this.rootId, ids, elementBounds)
+  }
+
+  ungroupElements(ids: string[]): string[] {
+    return ungroupHelper(this.elements, this.rootId, ids)
+  }
+
+  // --- Canvas Mode (delegated) ---
+
+  setCanvasMode(mode: CanvasMode) {
+    if (mode === this.canvasMode) return
+    switchCanvasMode(this.elements, this.rootId, mode, this.pageViewport)
+    this.canvasMode = mode
+  }
+
+  setPageViewport(width: PageViewportWidth) {
+    this.pageViewport = width
+    if (this.canvasMode === 'page') {
+      const root = this.elements.get(this.rootId)
+      if (root) {
+        root.style = { ...root.style, width }
+      }
+    }
+  }
+
+  // --- Serialization ---
 
   toSerializable(): { elements: Record<string, EditorElement>; rootId: string } {
     const elements: Record<string, EditorElement> = {}
