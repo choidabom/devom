@@ -288,9 +288,7 @@ export const App = observer(function App() {
 
   // Interact mode: override root element styles for real-page preview (page mode only)
   useEffect(() => {
-    if (editorMode !== "interact") return
-    // Canvas mode: no root style overrides — keep layout as-is
-    if (canvasMode === 'canvas') return
+    if (!(editorMode === "interact" && canvasMode === 'page')) return
     const r = documentStore.root
     if (!r) return
     const rootEl = document.querySelector(`[data-element-id="${r.id}"]`) as HTMLElement | null

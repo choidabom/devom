@@ -245,7 +245,7 @@ function renderShadcnHTML(
     case "sc:radio-group": {
       const options = (p.options as string[]) ?? []
       const value = String(p.value ?? "")
-      const groupName = `radio-${Math.random().toString(36).slice(2, 6)}`
+      const groupName = `radio-${el.id.slice(0, 6)}`
       lines.push(`${pad}<fieldset style="${escapeHtml(cssToInline({ ...baseStyle, border: 'none', display: 'flex', flexDirection: 'column', gap: 8 }))}">`)
       if (p.label) lines.push(`${pad}  <legend style="font-size: 13px; font-weight: 500; color: #0f172a; margin-bottom: 4px">${escapeHtml(String(p.label))}</legend>`)
       for (const opt of options) {
@@ -281,7 +281,7 @@ function renderShadcnHTML(
     }
     case "sc:slider": {
       const sliderStyle: CSSProperties = { ...baseStyle, width: '100%' }
-      lines.push(`${pad}<input type="range" min="${p.min ?? 0}" max="${p.max ?? 100}" value="${p.value ?? 50}" step="${p.step ?? 1}" style="${escapeHtml(cssToInline(sliderStyle))}" />`)
+      lines.push(`${pad}<input type="range" min="${Number(p.min ?? 0)}" max="${Number(p.max ?? 100)}" value="${Number(p.value ?? 50)}" step="${Number(p.step ?? 1)}" style="${escapeHtml(cssToInline(sliderStyle))}" />`)
       break
     }
     case "sc:toggle": {
@@ -314,7 +314,7 @@ function cssToInline(style: CSSProperties): string {
     .map(([k, v]) => {
       const prop = k.replace(/([A-Z])/g, "-$1").toLowerCase()
       const val = typeof v === "number" && !["opacity", "zIndex", "flex", "order", "flexGrow", "flexShrink"].includes(k) ? `${v}px` : v
-      return `${prop}: ${val}`
+      return `${prop}: ${String(val).replace(/[;"\\]/g, '')}`
     })
     .join("; ")
 }

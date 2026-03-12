@@ -16,7 +16,10 @@ export function createTemplateHelper(store: DocumentStore) {
   return (type: ElementType, parentId: string, overrides: AddElementOverrides = {}): string => {
     const id = nanoid()
     const parent = store.elements.get(parentId)
-    if (!parent) return ''
+    if (!parent) {
+      console.error(`[createTemplateHelper] Parent element not found: ${parentId}`)
+      return ''
+    }
     store.elements.set(id, {
       id,
       type,
