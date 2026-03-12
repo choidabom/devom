@@ -310,3 +310,7 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
     top: 100,
   },
 }
+
+export type ElementTemplate = Omit<EditorElement, 'id' | 'parentId' | 'children'> & {
+  children: ElementTemplate[]
+}
