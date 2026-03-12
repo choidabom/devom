@@ -40,6 +40,14 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
+  const updatePropTyped = (key: string, value: unknown) => {
+    historyStore.pushSnapshot()
+    for (const el of elements) {
+      documentStore.updateProps(el.id, { [key]: value })
+    }
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
   const updateLayoutProps = (props: Record<string, unknown>) => {
     historyStore.pushSnapshot()
     for (const el of elements) {
@@ -303,6 +311,139 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
             {!isMulti && <PropRow label="Label" value={element.props.label as string ?? "Badge"} onChange={(v) => updateProp("label", v)} />}
             <PropSelect label="Variant" value={sharedProp("variant", "default")} options={["default", "secondary", "destructive", "outline"]} onChange={(v) => updateProp("variant", v)} mixed={sharedProp("variant", "default") === MIXED} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:checkbox" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? ""} onChange={(v) => updateProp("label", v)} />}
+            <PropToggleRow label="Checked" value={Boolean(element.props.checked)} onChange={(v) => updatePropTyped("checked", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:switch" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? ""} onChange={(v) => updateProp("label", v)} />}
+            <PropToggleRow label="Checked" value={Boolean(element.props.checked)} onChange={(v) => updatePropTyped("checked", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:label" && !isMulti && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Text" value={element.props.text as string ?? "Label"} onChange={(v) => updateProp("text", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:textarea" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            {!isMulti && <PropRow label="Placeholder" value={element.props.placeholder as string ?? ""} onChange={(v) => updateProp("placeholder", v)} />}
+            <PropRow label="Rows" value={Number(element.props.rows ?? 3)} onChange={(v) => updatePropTyped("rows", Number(v) || 3)} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:avatar" && !isMulti && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Fallback" value={element.props.fallback as string ?? ""} onChange={(v) => updateProp("fallback", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:separator" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropSelect label="Orient" value={sharedProp("orientation", "horizontal")} options={["horizontal", "vertical"]} onChange={(v) => updateProp("orientation", v)} mixed={sharedProp("orientation", "horizontal") === MIXED} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:progress" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Value" value={Number(element.props.value ?? 60)} onChange={(v) => updatePropTyped("value", Math.min(100, Math.max(0, Number(v) || 0)))} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:slider" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Value" value={Number(element.props.value ?? 50)} onChange={(v) => updatePropTyped("value", Number(v) || 0)} />
+            <PropRow label="Min" value={Number(element.props.min ?? 0)} onChange={(v) => updatePropTyped("min", Number(v) || 0)} />
+            <PropRow label="Max" value={Number(element.props.max ?? 100)} onChange={(v) => updatePropTyped("max", Number(v) || 100)} />
+            <PropRow label="Step" value={Number(element.props.step ?? 1)} onChange={(v) => updatePropTyped("step", Number(v) || 1)} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:tabs" && !isMulti && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Tabs" value={(element.props.tabs as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped("tabs", v.split(",").map(s => s.trim()).filter(Boolean))} />
+            <PropRow label="Active" value={element.props.activeTab as string ?? ""} onChange={(v) => updateProp("activeTab", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:alert" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            {!isMulti && <PropRow label="Title" value={element.props.title as string ?? ""} onChange={(v) => updateProp("title", v)} />}
+            {!isMulti && <PropRow label="Desc" value={element.props.description as string ?? ""} onChange={(v) => updateProp("description", v)} />}
+            <PropSelect label="Variant" value={sharedProp("variant", "default")} options={["default", "destructive"]} onChange={(v) => updateProp("variant", v)} mixed={sharedProp("variant", "default") === MIXED} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:toggle" && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            {!isMulti && <PropRow label="Label" value={element.props.label as string ?? ""} onChange={(v) => updateProp("label", v)} />}
+            <PropToggleRow label="Pressed" value={Boolean(element.props.pressed)} onChange={(v) => updatePropTyped("pressed", v)} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:select" && !isMulti && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Placeholder" value={element.props.placeholder as string ?? ""} onChange={(v) => updateProp("placeholder", v)} />
+            <PropRow label="Options" value={(element.props.options as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped("options", v.split(",").map(s => s.trim()).filter(Boolean))} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:table" && !isMulti && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Headers" value={(element.props.headers as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped("headers", v.split(",").map(s => s.trim()).filter(Boolean))} />
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:accordion" && !isMulti && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <span style={{ fontSize: 11, color: T.textSub }}>{(element.props.items as unknown[])?.length ?? 0} items</span>
+          </div>
+        </PropSection>
+      )}
+
+      {allSameType && element.type === "sc:radio-group" && !isMulti && (
+        <PropSection title="Component">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+            <PropRow label="Label" value={element.props.label as string ?? ""} onChange={(v) => updateProp("label", v)} />
+            <PropRow label="Options" value={(element.props.options as string[] ?? []).join(", ")} onChange={(v) => updatePropTyped("options", v.split(",").map(s => s.trim()).filter(Boolean))} />
+            <PropRow label="Value" value={element.props.value as string ?? ""} onChange={(v) => updateProp("value", v)} />
           </div>
         </PropSection>
       )}
@@ -585,6 +726,20 @@ function ColorPickerPopover({ value, onChange, onLiveChange }: { value: string; 
           />
         </div>
       )}
+    </div>
+  )
+}
+
+function PropToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>{label}</span>
+      <input
+        type="checkbox"
+        checked={value}
+        onChange={(e) => onChange(e.target.checked)}
+        style={{ accentColor: T.accent, cursor: "pointer" }}
+      />
     </div>
   )
 }
