@@ -778,7 +778,7 @@ export class DocumentStore {
       this.elements.set(key, {
         ...el,
         layoutMode: el.layoutMode ?? 'none',
-        layoutProps: el.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
+        layoutProps: { ...DEFAULT_LAYOUT_PROPS, ...el.layoutProps },
         sizing: el.sizing ?? { ...DEFAULT_SIZING },
         canvasPosition: el.canvasPosition ?? null,
       })

@@ -78,6 +78,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
   const isShadcn = element.type.startsWith("sc:")
   const allSameType = elements.every(el => el.type === element.type)
   const inAutoLayout = !isMulti && isAutoLayoutChild(element, (id) => documentStore.getElement(id))
+  const parentEl = element.parentId ? documentStore.getElement(element.parentId) : undefined
 
   const MIXED = "mixed"
   const sharedStyle = (key: string, fallback: string | number = ""): string | number => {
@@ -217,6 +218,27 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
                     ))}
                   </div>
                 </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} title="Flex wrap — 모바일 반응형 대응은 추가 구현 예정">
+                  <span style={{ fontSize: 12, color: T.textSub, width: 56, flexShrink: 0 }}>Wrap</span>
+                  <div style={{ display: 'flex', gap: 2 }}>
+                    {(['nowrap', 'wrap'] as const).map(val => (
+                      <button
+                        key={val}
+                        onClick={() => updateLayoutProps({ flexWrap: val })}
+                        title={val === 'wrap' ? '자식 요소가 넘칠 때 줄바꿈 (반응형 WIP)' : '줄바꿈 없음'}
+                        style={{
+                          padding: '4px 10px', fontSize: 10,
+                          background: (element.layoutProps!.flexWrap ?? 'nowrap') === val ? T.accent : T.inputBg,
+                          color: (element.layoutProps!.flexWrap ?? 'nowrap') === val ? '#fff' : T.text,
+                          border: `1px solid ${(element.layoutProps!.flexWrap ?? 'nowrap') === val ? T.accent : T.inputBorder}`,
+                          borderRadius: 4, cursor: 'pointer',
+                        }}
+                      >
+                        {val === 'nowrap' ? 'No' : 'Wrap'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </>
             )}
 
@@ -307,6 +329,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
           element={element}
           onUpdateSizing={updateSizing}
           onUpdateStyle={updateStyle}
+          parentFlexWrap={parentEl?.layoutProps?.flexWrap}
         />
       )}
 

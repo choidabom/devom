@@ -74,6 +74,7 @@ export interface LayoutProps {
   paddingLeft: number
   alignItems: 'start' | 'center' | 'end' | 'stretch'
   justifyContent: 'start' | 'center' | 'end' | 'space-between'
+  flexWrap: 'nowrap' | 'wrap'
 }
 
 export interface SizingProps {
@@ -110,6 +111,7 @@ export const DEFAULT_LAYOUT_PROPS: LayoutProps = {
   paddingLeft: 8,
   alignItems: 'start',
   justifyContent: 'start',
+  flexWrap: 'nowrap',
 }
 
 export const DEFAULT_SIZING: SizingProps = {

@@ -31,7 +31,7 @@ export function computeElementStyle(el: EditorElement, parent: EditorElement | n
 
   // Add child sizing styles
   if (parent?.layoutMode === 'flex' && parent.layoutProps) {
-    Object.assign(style, getChildSizingStyles(el, parent.layoutProps.direction))
+    Object.assign(style, getChildSizingStyles(el, parent.layoutProps.direction, parent.layoutProps.flexWrap))
   }
 
   return style

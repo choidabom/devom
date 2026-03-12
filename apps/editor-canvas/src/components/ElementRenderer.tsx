@@ -59,7 +59,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   const parent = element.parentId ? documentStore.getElement(element.parentId) : undefined
   const inAutoLayout = (parent?.layoutMode === 'flex' || parent?.layoutMode === 'grid') && !!parent?.layoutProps
   const childSizingStyles = inAutoLayout
-    ? getChildSizingStyles(element, parent!.layoutProps.direction)
+    ? getChildSizingStyles(element, parent!.layoutProps.direction, parent!.layoutProps.flexWrap)
     : {}
 
   // Section styles

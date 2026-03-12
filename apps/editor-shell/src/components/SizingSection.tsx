@@ -6,9 +6,10 @@ interface SizingSectionProps {
   element: EditorElement
   onUpdateSizing: (sizing: { w?: SizingMode; h?: SizingMode }) => void
   onUpdateStyle: (key: string, value: string) => void
+  parentFlexWrap?: 'nowrap' | 'wrap'
 }
 
-export const SizingSection = observer(function SizingSection({ element, onUpdateSizing, onUpdateStyle }: SizingSectionProps) {
+export const SizingSection = observer(function SizingSection({ element, onUpdateSizing, onUpdateStyle, parentFlexWrap }: SizingSectionProps) {
   const { w, h } = element.sizing
 
   return (
@@ -43,6 +44,24 @@ export const SizingSection = observer(function SizingSection({ element, onUpdate
             />
           )}
         </div>
+
+        {/* Min width — only for wrap containers with fill children */}
+        {parentFlexWrap === 'wrap' && w === 'fill' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 12, color: T.textSub, width: 20, flexShrink: 0 }}>↳</span>
+            <span style={{ fontSize: 11, color: T.textMuted, width: 50, flexShrink: 0 }}>Min W</span>
+            <input
+              value={element.style.minWidth ?? ''}
+              placeholder="200"
+              onChange={(e) => onUpdateStyle('minWidth', e.target.value)}
+              style={{
+                flex: 1, padding: '5px 8px',
+                background: T.inputBg, border: `1px solid ${T.inputBorder}`,
+                borderRadius: 6, color: T.text, fontSize: 12, outline: 'none',
+              }}
+            />
+          </div>
+        )}
 
         {/* Height sizing */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

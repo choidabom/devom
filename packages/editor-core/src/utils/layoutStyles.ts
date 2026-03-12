@@ -22,6 +22,7 @@ export function getContainerStyles(element: EditorElement): CSSProperties {
         : lp.justifyContent === 'end' ? 'flex-end'
         : lp.justifyContent === 'space-between' ? 'space-between'
         : lp.justifyContent,
+      ...(lp.flexWrap === 'wrap' ? { flexWrap: 'wrap' as const } : {}),
     }
   }
 
@@ -46,6 +47,7 @@ export function getContainerStyles(element: EditorElement): CSSProperties {
 export function getChildSizingStyles(
   child: EditorElement,
   parentDirection: 'row' | 'column',
+  parentFlexWrap?: 'nowrap' | 'wrap',
 ): CSSProperties {
   const styles: CSSProperties = {}
   const { w, h } = child.sizing
@@ -56,7 +58,8 @@ export function getChildSizingStyles(
   const crossDim = parentDirection === 'row' ? 'height' : 'width'
 
   if (mainSizing === 'fill') {
-    styles.flex = '1 0 0'
+    const minW = parentFlexWrap === 'wrap' && typeof child.style.minWidth === 'number' ? child.style.minWidth : 0
+    styles.flex = `1 0 ${minW}px`
     styles[mainDim] = undefined
   } else if (mainSizing === 'hug') {
     styles[mainDim] = 'fit-content'
