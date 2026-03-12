@@ -171,10 +171,14 @@ export const App = observer(function App() {
           const el = outerRef.current
           if (el) {
             const rect = el.getBoundingClientRect()
-            const fitZoom = Math.min(1, (rect.width - 40) / pageViewport)
+            // Use visibleWidth from Shell (accounts for overlaid panels) or fall back to full width
+            const availableWidth = msg.payload.visibleWidth ?? rect.width
+            const fitZoom = Math.min(1, (availableWidth - 40) / pageViewport)
+            // Center within the visible area using Shell's leftOffset
+            const panelLeftOffset = msg.payload.leftOffset ?? 0
             setViewport({
               zoom: fitZoom,
-              panX: (rect.width - pageViewport * fitZoom) / 2,
+              panX: panelLeftOffset + (availableWidth - pageViewport * fitZoom) / 2,
               panY: 20,
             })
           }
@@ -191,10 +195,12 @@ export const App = observer(function App() {
           const el = outerRef.current
           if (el) {
             const rect = el.getBoundingClientRect()
-            const fitZoom = Math.min(1, (rect.width - 40) / msg.payload.width)
+            const availableWidth = msg.payload.visibleWidth ?? rect.width
+            const fitZoom = Math.min(1, (availableWidth - 40) / msg.payload.width)
+            const panelLeftOffset = msg.payload.leftOffset ?? 0
             setViewport({
               zoom: fitZoom,
-              panX: (rect.width - msg.payload.width * fitZoom) / 2,
+              panX: panelLeftOffset + (availableWidth - msg.payload.width * fitZoom) / 2,
               panY: 20,
             })
           }

@@ -16,8 +16,8 @@ export type ShellToCanvasMessage =
   | { type: "SET_LAYOUT_MODE"; payload: { id: string; mode: "none" | "flex" } }
   | { type: "UPDATE_LAYOUT_PROPS"; payload: { id: string; layoutProps: Partial<LayoutProps> } }
   | { type: "UPDATE_SIZING"; payload: { id: string; sizing: Partial<SizingProps> } }
-  | { type: "SET_CANVAS_MODE"; payload: { mode: CanvasMode } }
-  | { type: "SET_PAGE_VIEWPORT"; payload: { width: PageViewportWidth } }
+  | { type: "SET_CANVAS_MODE"; payload: { mode: CanvasMode; visibleWidth?: number; leftOffset?: number } }
+  | { type: "SET_PAGE_VIEWPORT"; payload: { width: PageViewportWidth; visibleWidth?: number; leftOffset?: number } }
   | { type: "UPDATE_SECTION_PROPS"; payload: { id: string; sectionProps: Partial<SectionProps> } }
   | { type: "UPDATE_GRID_PROPS"; payload: { id: string; gridProps: Partial<GridProps> } }
   | { type: "ADD_SECTION"; payload: { preset: SectionRole; index?: number } }

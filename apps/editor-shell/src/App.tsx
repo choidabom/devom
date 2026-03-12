@@ -18,6 +18,7 @@ let clipboard: EditorElement[] = []
 
 export const App = observer(function App() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
   const [showExport, setShowExport] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [importWarnings, setImportWarnings] = useState<string[]>([])
@@ -27,6 +28,24 @@ export const App = observer(function App() {
   const [leftPanelWidth, setLeftPanelWidth] = useState(240)
   const [isResizing, setIsResizing] = useState(false)
 
+  const showPanelsRef = useRef(showPanels)
+  showPanelsRef.current = showPanels
+  const leftPanelWidthRef = useRef(leftPanelWidth)
+  leftPanelWidthRef.current = leftPanelWidth
+
+  const RIGHT_PANEL_WIDTH = 280
+
+  const getVisibleCanvasInfo = useCallback(() => {
+    const container = canvasContainerRef.current
+    if (!container) return { visibleWidth: undefined, leftOffset: undefined }
+    const totalWidth = container.getBoundingClientRect().width
+    if (!showPanelsRef.current) return { visibleWidth: totalWidth, leftOffset: 0 }
+    const leftPanelTotal = leftPanelWidthRef.current + 12 // panel width + left padding
+    const rightPanelTotal = RIGHT_PANEL_WIDTH + 16 // panel width + padding
+    const visibleWidth = totalWidth - leftPanelTotal - rightPanelTotal
+    return { visibleWidth, leftOffset: leftPanelTotal }
+  }, [])
+
   useEffect(() => {
     const dispose = bridge.onMessage((msg: EditorMessage) => {
       switch (msg.type) {
@@ -35,7 +54,7 @@ export const App = observer(function App() {
           bridge.send({ type: "SYNC_DOCUMENT", payload: data })
           // Sync canvas mode if not default
           if (documentStore.canvasMode !== 'canvas') {
-            bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: documentStore.canvasMode } })
+            { const info = getVisibleCanvasInfo(); bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: documentStore.canvasMode, ...info } }) }
             setCanvasMode(documentStore.canvasMode)
           }
           break
@@ -106,7 +125,7 @@ export const App = observer(function App() {
         case "SET_PAGE_VIEWPORT_REQUEST":
           documentStore.setPageViewport(msg.payload.width)
           syncToCanvas()
-          bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: msg.payload.width } })
+          { const info = getVisibleCanvasInfo(); bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: msg.payload.width, ...info } }) }
           break
         case "INSERT_SECTION_REQUEST":
           historyStore.pushSnapshot()
@@ -374,10 +393,10 @@ export const App = observer(function App() {
       historyStore.pushSnapshot()
       documentStore.setCanvasMode(next)
       syncToCanvas()
-      bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: next } })
+      { const info = getVisibleCanvasInfo(); bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: next, ...info } }) }
       return next
     })
-  }, [syncToCanvas])
+  }, [syncToCanvas, getVisibleCanvasInfo])
 
   const handleToggleMode = useCallback(() => {
     setEditorMode(prev => {
@@ -388,10 +407,17 @@ export const App = observer(function App() {
         setShowPanels(false)
       } else {
         setShowPanels(true)
+        // Recalculate page mode zoom after panels reappear
+        if (canvasMode === 'page') {
+          requestAnimationFrame(() => {
+            const info = getVisibleCanvasInfo()
+            bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: 'page', ...info } })
+          })
+        }
       }
       return next
     })
-  }, [])
+  }, [canvasMode, getVisibleCanvasInfo])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -504,7 +530,7 @@ export const App = observer(function App() {
         </div>
       )}
 
-      <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
+      <div ref={canvasContainerRef} style={{ position: "relative", flex: 1, overflow: "hidden" }}>
         {/* Canvas — always full width */}
         <div data-guide="canvas" style={{ position: "absolute", inset: 0 }}>
           <iframe
