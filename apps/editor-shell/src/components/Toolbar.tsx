@@ -6,6 +6,7 @@ import {
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowLeftRight, ArrowUpDown,
   PanelTop, LayoutDashboard, LayoutTemplate, FileDown,
+  ZoomIn, ZoomOut,
 } from "lucide-react"
 import type { ElementType, SectionRole } from "@devom/editor-core"
 import { TEMPLATES } from "@devom/editor-core"
@@ -31,6 +32,10 @@ interface ToolbarProps {
   onToggleCanvasMode: () => void
   onAddSection?: (role: SectionRole) => void
   onLoadTemplate?: (templateId: string) => void
+  zoom: number
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onZoomReset: () => void
 }
 
 const S = 15
@@ -67,7 +72,7 @@ const SECTION_PRESETS: { role: SectionRole; label: string }[] = [
   { role: 'footer', label: 'Footer' },
 ]
 
-export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection, onLoadTemplate }: ToolbarProps) {
+export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection, onLoadTemplate, zoom, onZoomIn, onZoomOut, onZoomReset }: ToolbarProps) {
   const [showShadcn, setShowShadcn] = useState(false)
   const [showSections, setShowSections] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
@@ -309,6 +314,16 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
           onClick={onToggleMode}
           active={editorMode === "interact"}
         />
+        <ToolSep />
+        <ToolBtn icon={<ZoomOut size={S} />} title="Zoom Out (⌘−)" onClick={onZoomOut} />
+        <span
+          onClick={onZoomReset}
+          style={{ fontSize: 11, fontWeight: 500, color: T.textSub, cursor: "pointer", minWidth: 36, textAlign: "center", userSelect: "none" }}
+          title="Reset Zoom (⌘0)"
+        >
+          {Math.round(zoom * 100)}%
+        </span>
+        <ToolBtn icon={<ZoomIn size={S} />} title="Zoom In (⌘+)" onClick={onZoomIn} />
       </div>
     </div>
   )

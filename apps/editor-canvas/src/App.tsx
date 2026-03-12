@@ -121,6 +121,11 @@ export const App = observer(function App() {
     bridge.send({ type: "UNGROUP_ELEMENTS_REQUEST", payload: { ids: selectedIdsRef.current } })
   }, [])
 
+  // Notify Shell whenever zoom changes
+  useEffect(() => {
+    bridge.send({ type: "ZOOM_CHANGED", payload: { zoom: viewport.zoom } })
+  }, [viewport.zoom])
+
   const handleShellMessage = useCallback((msg: EditorMessage) => {
     switch (msg.type) {
       case "SYNC_DOCUMENT":
@@ -232,6 +237,31 @@ export const App = observer(function App() {
           // Reset to 100% when switching back to canvas mode
           setViewport({ zoom: 1, panX: 0, panY: 0 })
         }
+        break
+      case "ZOOM_IN":
+        setViewport(prev => {
+          const el = outerRef.current
+          if (!el) return prev
+          const r = el.getBoundingClientRect()
+          const cx = r.width / 2, cy = r.height / 2
+          const nz = Math.min(MAX_ZOOM, prev.zoom * 1.2)
+          const s = nz / prev.zoom
+          return { zoom: nz, panX: cx - (cx - prev.panX) * s, panY: cy - (cy - prev.panY) * s }
+        })
+        break
+      case "ZOOM_OUT":
+        setViewport(prev => {
+          const el = outerRef.current
+          if (!el) return prev
+          const r = el.getBoundingClientRect()
+          const cx = r.width / 2, cy = r.height / 2
+          const nz = Math.max(MIN_ZOOM, prev.zoom / 1.2)
+          const s = nz / prev.zoom
+          return { zoom: nz, panX: cx - (cx - prev.panX) * s, panY: cy - (cy - prev.panY) * s }
+        })
+        break
+      case "ZOOM_RESET":
+        setViewport({ zoom: 1, panX: 0, panY: 0 })
         break
       case "SET_PAGE_VIEWPORT":
         // Don't call documentStore.setPageViewport() — SYNC_DOCUMENT already has the transformed data
@@ -605,26 +635,17 @@ export const App = observer(function App() {
           userSelect: 'none', pointerEvents: 'auto',
         }}>
           {([
-            { label: 'Desktop', width: 1280, tooltip: '' },
-            { label: 'Tablet', width: 768, tooltip: '반응형 미리보기 — 준비 중' },
-            { label: 'Mobile', width: 375, tooltip: '반응형 미리보기 — 준비 중' },
-          ] as const).map(p => (
-            <button
+            { label: 'Desktop', width: 1280 as const, wip: false },
+            { label: 'Tablet', width: 768 as const, wip: true },
+            { label: 'Mobile', width: 375 as const, wip: true },
+          ]).map(p => (
+            <ViewportButton
               key={p.width}
-              title={p.tooltip}
-              onClick={() => {
-                bridge.send({ type: "SET_PAGE_VIEWPORT_REQUEST", payload: { width: p.width } })
-              }}
-              style={{
-                padding: '4px 10px', fontSize: 11, fontWeight: 500,
-                background: pageViewport === p.width ? '#6366f1' : 'transparent',
-                color: pageViewport === p.width ? '#fff' : '#64748b',
-                border: `1px solid ${pageViewport === p.width ? '#6366f1' : '#e2e8f0'}`,
-                borderRadius: 6, cursor: 'pointer',
-              }}
-            >
-              {p.label} ({p.width})
-            </button>
+              label={`${p.label} (${p.width})`}
+              active={pageViewport === p.width}
+              wip={p.wip}
+              onClick={() => bridge.send({ type: "SET_PAGE_VIEWPORT_REQUEST", payload: { width: p.width } })}
+            />
           ))}
         </div>
       )}
@@ -722,3 +743,34 @@ export const App = observer(function App() {
     </div>
   )
 })
+
+function ViewportButton({ label, active, wip, onClick }: { label: string; active: boolean; wip: boolean; onClick: () => void }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div style={{ position: 'relative', display: 'inline-flex' }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      <button
+        onClick={onClick}
+        style={{
+          padding: '4px 10px', fontSize: 11, fontWeight: 500,
+          background: active ? '#6366f1' : 'transparent',
+          color: active ? '#fff' : '#64748b',
+          border: `1px solid ${active ? '#6366f1' : '#e2e8f0'}`,
+          borderRadius: 6, cursor: 'pointer',
+        }}
+      >
+        {label}
+      </button>
+      {wip && hovered && (
+        <div style={{
+          position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
+          marginTop: 6, padding: '4px 10px', borderRadius: 6,
+          background: '#1e1e2e', color: '#fff', fontSize: 11, whiteSpace: 'nowrap',
+          pointerEvents: 'none', zIndex: 1000,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        }}>
+          준비 중
+        </div>
+      )}
+    </div>
+  )
+}

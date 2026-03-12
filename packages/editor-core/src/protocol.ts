@@ -22,6 +22,9 @@ export type ShellToCanvasMessage =
   | { type: "UPDATE_GRID_PROPS"; payload: { id: string; gridProps: Partial<GridProps> } }
   | { type: "ADD_SECTION"; payload: { preset: SectionRole; index?: number } }
   | { type: "DND_DROP"; payload: { elementType: string; clientX: number; clientY: number } }
+  | { type: "ZOOM_IN" }
+  | { type: "ZOOM_OUT" }
+  | { type: "ZOOM_RESET" }
 
 // Canvas -> Shell messages
 export type CanvasToShellMessage =
@@ -40,6 +43,7 @@ export type CanvasToShellMessage =
   | { type: "GROUP_ELEMENTS_REQUEST"; payload: { ids: string[]; elementBounds: Record<string, { left: number; top: number; width: number; height: number }> } }
   | { type: "UNGROUP_ELEMENTS_REQUEST"; payload: { ids: string[] } }
   | { type: "DND_CREATE_ELEMENT"; payload: { elementType: string; x: number; y: number } }
+  | { type: "ZOOM_CHANGED"; payload: { zoom: number } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 
