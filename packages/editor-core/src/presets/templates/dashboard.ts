@@ -139,7 +139,7 @@ export function buildDashboard(store: DocumentStore): void {
         const valRow = add('div', sc, {
           name: `${st.name} Value Row`,
           style: { ...rel, width: 'auto', height: 'auto', ...box },
-          layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'baseline' },
+          layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'end' as const },
           sizing: { w: 'fill', h: 'hug' },
         })
         if (valRow) {

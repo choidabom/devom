@@ -262,8 +262,8 @@ function renderShadcnElement(el: EditorElement, elements: Record<string, EditorE
       lines.push(`${pad}<Accordion type="single" collapsible${styleStr}>`)
       for (let i = 0; i < items.length; i++) {
         lines.push(`${pad}  <AccordionItem value="item-${i}">`)
-        lines.push(`${pad}    <AccordionTrigger>${escJ(items[i].title)}</AccordionTrigger>`)
-        lines.push(`${pad}    <AccordionContent>${escJ(items[i].content)}</AccordionContent>`)
+        lines.push(`${pad}    <AccordionTrigger>${escJ(items[i]!.title)}</AccordionTrigger>`)
+        lines.push(`${pad}    <AccordionContent>${escJ(items[i]!.content)}</AccordionContent>`)
         lines.push(`${pad}  </AccordionItem>`)
       }
       lines.push(`${pad}</Accordion>`)

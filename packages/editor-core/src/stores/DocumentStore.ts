@@ -30,10 +30,10 @@ export class DocumentStore {
       children: [],
       style: {
         position: "relative",
-        width: this.viewport.width,
-        height: this.viewport.height,
-        backgroundColor: "#ffffff",
-        overflow: "hidden",
+        width: undefined,
+        height: undefined,
+        backgroundColor: "transparent",
+        overflow: "visible",
       },
       props: {},
       locked: true,
@@ -472,11 +472,11 @@ export class DocumentStore {
       root.layoutProps = { ...DEFAULT_LAYOUT_PROPS }
       root.style = {
         ...root.style,
-        width: this.viewport.width,
-        height: this.viewport.height,
+        width: undefined,
+        height: undefined,
         minHeight: undefined,
-        overflow: 'hidden',
-        backgroundColor: '#ffffff',
+        overflow: 'visible',
+        backgroundColor: 'transparent',
       }
     }
 
