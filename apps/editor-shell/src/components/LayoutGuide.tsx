@@ -85,12 +85,12 @@ export function LayoutGuide() {
       <button
         onClick={() => setOpen(!open)}
         style={{
-          position: "fixed", bottom: 16, right: 16, zIndex: 9999,
-          width: 40, height: 40, borderRadius: 12, border: "none",
-          background: open ? "#6366f1" : "rgba(0,0,0,0.7)",
-          color: "#fff", fontSize: 18, cursor: "pointer",
+          position: "fixed", bottom: 16, right: 296, zIndex: 9999,
+          width: 32, height: 32, borderRadius: 8, border: "none",
+          background: open ? "#6366f1" : "rgba(0,0,0,0.5)",
+          color: "#fff", fontSize: 14, cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.2)", transition: "all 0.2s",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)", transition: "all 0.2s",
         }}
         title="Layout Guide"
       >
