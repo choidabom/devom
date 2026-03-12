@@ -14,6 +14,7 @@ export interface TemplateMetadata {
 export type TemplateBuilder = (store: DocumentStore) => void
 
 export const TEMPLATES: TemplateMetadata[] = [
+  { id: 'blank', name: 'Blank Canvas', description: 'Empty canvas to start from scratch', category: 'content' },
   { id: 'dashboard', name: 'SaaS Dashboard', description: 'Analytics dashboard with stats, table, and team', category: 'dashboard' },
   { id: 'login-form', name: 'Login Form', description: 'Authentication form with social login', category: 'form' },
   { id: 'pricing', name: 'Pricing Page', description: 'Three-tier pricing with feature comparison', category: 'marketing' },
@@ -21,6 +22,7 @@ export const TEMPLATES: TemplateMetadata[] = [
 ]
 
 export const TEMPLATE_BUILDERS: Record<string, TemplateBuilder> = {
+  blank: (store) => store.resetDocument(),
   dashboard: buildDashboard,
   'login-form': buildLoginForm,
   'pricing': buildPricingPage,

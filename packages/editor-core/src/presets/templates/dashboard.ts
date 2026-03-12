@@ -35,22 +35,21 @@ export function buildDashboard(store: DocumentStore): void {
     return id
   }
 
-  // Color palette — slate tones
+  // Color palette
   const t = '#0f172a'   // text
   const s = '#64748b'   // secondary
   const m = '#94a3b8'   // muted
   const bd = '#e2e8f0'  // border
-  const card = { backgroundColor: '#ffffff', borderRadius: 12, border: `1px solid ${bd}`, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
-  // Clear default div styling for layout containers
+  const card = { backgroundColor: '#ffffff', borderRadius: 12, border: `1px solid ${bd}`, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
   const box = { backgroundColor: 'transparent' as const, borderRadius: 0, border: 'none' }
 
   // ════════════════════════════════════════════
-  // Page Wrapper — single flex column, natural flow
+  // Page Wrapper — wider for better proportion
   // ════════════════════════════════════════════
-  const W = 760
+  const W = 1080
   const page = add('div', store.rootId, {
     name: 'Page',
-    style: { left: 0, top: 0, width: W, height: 'auto', backgroundColor: '#ffffff', borderRadius: 0, border: 'none' },
+    style: { left: 0, top: 0, width: W, height: 'auto', backgroundColor: '#f8fafc', borderRadius: 0, border: 'none' },
     layoutMode: 'flex',
     layoutProps: { direction: 'column', gap: 0, ...noPad, alignItems: 'stretch' },
   })
@@ -61,9 +60,9 @@ export function buildDashboard(store: DocumentStore): void {
   // ════════════════════════════════════════════
   const header = add('div', page, {
     name: 'Header',
-    style: { ...rel, width: 'auto', height: 'auto', ...box, borderBottom: `1px solid ${bd}` },
+    style: { ...rel, width: 'auto', height: 'auto', ...box, backgroundColor: '#ffffff', borderBottom: `1px solid ${bd}` },
     layoutMode: 'flex',
-    layoutProps: { direction: 'row', gap: 0, paddingTop: 20, paddingRight: 24, paddingBottom: 20, paddingLeft: 24, alignItems: 'center', justifyContent: 'space-between' },
+    layoutProps: { direction: 'row', gap: 0, paddingTop: 16, paddingRight: 32, paddingBottom: 16, paddingLeft: 32, alignItems: 'center', justifyContent: 'space-between' },
     sizing: { w: 'fill', h: 'hug' },
   })
   if (header) {
@@ -74,17 +73,17 @@ export function buildDashboard(store: DocumentStore): void {
       sizing: { w: 'hug', h: 'hug' },
     })
     if (hl) {
-      add('text', hl, { name: 'Title', style: { ...rel, fontSize: 22, fontWeight: 700, color: t }, props: { content: 'Dashboard' } })
-      add('text', hl, { name: 'Subtitle', style: { ...rel, fontSize: 13, color: s }, props: { content: 'Welcome back, here\'s what\'s happening today.' } })
+      add('text', hl, { name: 'Title', style: { ...rel, fontSize: 20, fontWeight: 700, color: t }, props: { content: 'Dashboard' } })
+      add('text', hl, { name: 'Subtitle', style: { ...rel, fontSize: 13, color: s }, props: { content: 'Track your metrics, manage your team.' } })
     }
     const hr = add('div', header, {
       name: 'Header Right',
       style: { ...rel, width: 'auto', height: 'auto', ...box },
-      layoutMode: 'flex', layoutProps: { direction: 'row', gap: 10, ...noPad, alignItems: 'center' },
+      layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'center' },
       sizing: { w: 'hug', h: 'hug' },
     })
     if (hr) {
-      add('sc:input', hr, { name: 'Search', style: { ...rel, width: 180 }, props: { placeholder: 'Search...', type: 'text' } })
+      add('sc:input', hr, { name: 'Search', style: { ...rel, width: 200 }, props: { placeholder: 'Search...', type: 'text' } })
       add('sc:button', hr, { name: 'Download', style: { ...rel }, props: { label: 'Download', variant: 'outline', size: 'sm' } })
       add('sc:button', hr, { name: 'New Report', style: { ...rel }, props: { label: '+ New Report', variant: 'default', size: 'sm' } })
       add('sc:avatar', hr, { name: 'Avatar', style: { ...rel }, props: { fallback: 'JD' } })
@@ -96,18 +95,18 @@ export function buildDashboard(store: DocumentStore): void {
   // ════════════════════════════════════════════
   add('sc:tabs', page, {
     name: 'Navigation',
-    style: { ...rel, width: 'auto', paddingLeft: 24, paddingRight: 24 },
+    style: { ...rel, width: 'auto', paddingLeft: 32, paddingRight: 32, backgroundColor: '#ffffff' },
     props: { tabs: ['Overview', 'Analytics', 'Reports', 'Notifications'], activeTab: 'Overview' },
   })
 
   // ════════════════════════════════════════════
-  // Content area (with padding)
+  // Content area
   // ════════════════════════════════════════════
   const content = add('div', page, {
     name: 'Content',
     style: { ...rel, width: 'auto', height: 'auto', ...box },
     layoutMode: 'flex',
-    layoutProps: { direction: 'column', gap: 16, paddingTop: 16, paddingRight: 24, paddingBottom: 16, paddingLeft: 24, alignItems: 'stretch' },
+    layoutProps: { direction: 'column', gap: 20, paddingTop: 24, paddingRight: 32, paddingBottom: 24, paddingLeft: 32, alignItems: 'stretch' },
     sizing: { w: 'fill', h: 'hug' },
   })
   if (!content) return
@@ -122,32 +121,35 @@ export function buildDashboard(store: DocumentStore): void {
   })
   if (statsRow) {
     const stats = [
-      { name: 'Total Revenue', value: '$45,231.89', badge: '+20.1%', badgeVariant: 'default' },
-      { name: 'Subscriptions', value: '+2,350', badge: '+180.1%', badgeVariant: 'default' },
-      { name: 'Sales', value: '+12,234', badge: '+19%', badgeVariant: 'secondary' },
-      { name: 'Active Now', value: '573', badge: 'Live', badgeVariant: 'destructive' },
+      { name: 'Total Revenue', value: '$45,231.89', change: '+20.1%', sub: 'from last month', progress: 78 },
+      { name: 'Subscriptions', value: '+2,350', change: '+180.1%', sub: 'from last month', progress: 92 },
+      { name: 'Sales', value: '+12,234', change: '+19%', sub: 'from last month', progress: 65 },
+      { name: 'Active Now', value: '573', change: '', sub: 'online right now', progress: 45 },
     ]
     for (const st of stats) {
       const sc = add('div', statsRow, {
         name: st.name,
         style: { ...rel, width: 'auto', height: 'auto', ...card },
         layoutMode: 'flex',
-        layoutProps: { direction: 'column', gap: 6, paddingTop: 16, paddingRight: 16, paddingBottom: 16, paddingLeft: 16, alignItems: 'start' },
+        layoutProps: { direction: 'column', gap: 8, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'start' },
         sizing: { w: 'fill', h: 'hug' },
       })
       if (sc) {
-        const topRow = add('div', sc, {
-          name: `${st.name} Top`,
+        add('text', sc, { name: `${st.name} Label`, style: { ...rel, fontSize: 13, fontWeight: 500, color: s }, props: { content: st.name } })
+        const valRow = add('div', sc, {
+          name: `${st.name} Value Row`,
           style: { ...rel, width: 'auto', height: 'auto', ...box },
-          layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'center', justifyContent: 'space-between' },
+          layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'baseline' },
           sizing: { w: 'fill', h: 'hug' },
         })
-        if (topRow) {
-          add('text', topRow, { name: `${st.name} Label`, style: { ...rel, fontSize: 12, fontWeight: 500, color: s }, props: { content: st.name } })
-          add('sc:badge', topRow, { name: `${st.name} Badge`, style: { ...rel }, props: { label: st.badge, variant: st.badgeVariant } })
+        if (valRow) {
+          add('text', valRow, { name: `${st.name} Value`, style: { ...rel, fontSize: 28, fontWeight: 700, color: t }, props: { content: st.value } })
+          if (st.change) {
+            add('text', valRow, { name: `${st.name} Change`, style: { ...rel, fontSize: 12, fontWeight: 500, color: '#16a34a' }, props: { content: st.change } })
+          }
         }
-        add('text', sc, { name: `${st.name} Value`, style: { ...rel, fontSize: 24, fontWeight: 700, color: t }, props: { content: st.value } })
-        add('sc:progress', sc, { name: `${st.name} Bar`, style: { ...rel, width: undefined }, props: { value: Math.floor(Math.random() * 40) + 60 } })
+        add('text', sc, { name: `${st.name} Sub`, style: { ...rel, fontSize: 11, color: m }, props: { content: st.sub } })
+        add('sc:progress', sc, { name: `${st.name} Bar`, style: { ...rel, width: undefined }, props: { value: st.progress }, sizing: { w: 'fill', h: 'fixed' } })
       }
     }
   }
@@ -157,7 +159,7 @@ export function buildDashboard(store: DocumentStore): void {
     name: 'Content Row',
     style: { ...rel, width: 'auto', height: 'auto', ...box },
     layoutMode: 'flex',
-    layoutProps: { direction: 'row', gap: 16, ...noPad, alignItems: 'start' },
+    layoutProps: { direction: 'row', gap: 20, ...noPad, alignItems: 'start' },
     sizing: { w: 'fill', h: 'hug' },
   })
   if (contentRow) {
@@ -166,7 +168,7 @@ export function buildDashboard(store: DocumentStore): void {
       name: 'Recent Sales',
       style: { ...rel, width: 'auto', height: 'auto', ...card },
       layoutMode: 'flex',
-      layoutProps: { direction: 'column', gap: 8, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch' },
+      layoutProps: { direction: 'column', gap: 12, paddingTop: 24, paddingRight: 24, paddingBottom: 24, paddingLeft: 24, alignItems: 'stretch' },
       sizing: { w: 'fill', h: 'hug' },
     })
     if (tblCard) {
@@ -199,17 +201,18 @@ export function buildDashboard(store: DocumentStore): void {
             ['Jackson Lee', 'jackson@email.com', 'Completed', '+$39.00'],
             ['Isabella Nguyen', 'isabella@email.com', 'Processing', '+$299.00'],
             ['William Kim', 'will@email.com', 'Pending', '+$99.00'],
+            ['Sofia Davis', 'sofia@email.com', 'Completed', '+$450.00'],
           ],
         },
       })
     }
 
-    // Right column — Team + Settings
+    // Right column — Team + Quick Actions
     const rightCol = add('div', contentRow, {
       name: 'Right Column',
-      style: { ...rel, width: 260, height: 'auto', ...box },
+      style: { ...rel, width: 300, height: 'auto', ...box },
       layoutMode: 'flex',
-      layoutProps: { direction: 'column', gap: 16, ...noPad, alignItems: 'stretch' },
+      layoutProps: { direction: 'column', gap: 20, ...noPad, alignItems: 'stretch' },
     })
     if (rightCol) {
       // Team card
@@ -217,11 +220,11 @@ export function buildDashboard(store: DocumentStore): void {
         name: 'Team',
         style: { ...rel, width: 'auto', height: 'auto', ...card },
         layoutMode: 'flex',
-        layoutProps: { direction: 'column', gap: 12, paddingTop: 16, paddingRight: 16, paddingBottom: 16, paddingLeft: 16, alignItems: 'stretch' },
+        layoutProps: { direction: 'column', gap: 14, paddingTop: 20, paddingRight: 20, paddingBottom: 20, paddingLeft: 20, alignItems: 'stretch' },
         sizing: { w: 'fill', h: 'hug' },
       })
       if (teamCard) {
-        add('text', teamCard, { name: 'Team Title', style: { ...rel, fontSize: 15, fontWeight: 600, color: t }, props: { content: 'Team Members' } })
+        add('text', teamCard, { name: 'Team Title', style: { ...rel, fontSize: 16, fontWeight: 600, color: t }, props: { content: 'Team Members' } })
         const members = [
           { name: 'Sofia Davis', initials: 'SD', role: 'Owner' },
           { name: 'Jackson Lee', initials: 'JL', role: 'Developer' },
@@ -231,7 +234,7 @@ export function buildDashboard(store: DocumentStore): void {
           const row = add('div', teamCard, {
             name: `Member ${member.name}`,
             style: { ...rel, width: 'auto', height: 'auto', ...box },
-            layoutMode: 'flex', layoutProps: { direction: 'row', gap: 8, ...noPad, alignItems: 'center' },
+            layoutMode: 'flex', layoutProps: { direction: 'row', gap: 10, ...noPad, alignItems: 'center' },
             sizing: { w: 'fill', h: 'hug' },
           })
           if (row) {
@@ -251,8 +254,19 @@ export function buildDashboard(store: DocumentStore): void {
         add('sc:button', teamCard, { name: 'Invite', style: { ...rel }, props: { label: '+ Invite Member', variant: 'outline', size: 'sm' } })
       }
 
-      // Notification Settings
-      add('sc:switch', rightCol, { name: 'Notifications', style: { ...rel, ...card, paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12 }, props: { label: 'Email notifications', checked: true } })
+      // Quick settings
+      const settingsCard = add('div', rightCol, {
+        name: 'Quick Settings',
+        style: { ...rel, width: 'auto', height: 'auto', ...card },
+        layoutMode: 'flex',
+        layoutProps: { direction: 'column', gap: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0, alignItems: 'stretch' },
+        sizing: { w: 'fill', h: 'hug' },
+      })
+      if (settingsCard) {
+        add('sc:switch', settingsCard, { name: 'Email Notifications', style: { ...rel, paddingLeft: 20, paddingRight: 20, paddingTop: 14, paddingBottom: 14, borderBottom: `1px solid ${bd}` }, props: { label: 'Email notifications', checked: true } })
+        add('sc:switch', settingsCard, { name: 'Push Notifications', style: { ...rel, paddingLeft: 20, paddingRight: 20, paddingTop: 14, paddingBottom: 14, borderBottom: `1px solid ${bd}` }, props: { label: 'Push notifications', checked: false } })
+        add('sc:switch', settingsCard, { name: 'Marketing Emails', style: { ...rel, paddingLeft: 20, paddingRight: 20, paddingTop: 14, paddingBottom: 14 }, props: { label: 'Marketing emails', checked: false } })
+      }
     }
   }
 
@@ -261,19 +275,20 @@ export function buildDashboard(store: DocumentStore): void {
     name: 'Notice',
     style: { ...rel, width: 'auto' },
     sizing: { w: 'fill', h: 'hug' },
-    props: { title: 'Scheduled Maintenance', description: 'System will be down on 3/15 02:00–04:00 UTC. Please save your work.', variant: 'default' },
+    props: { title: 'Heads up!', description: 'Your trial ends in 7 days. Upgrade to Pro for unlimited access.', variant: 'default' },
   })
 
   // ── Footer ──
   const footer = add('div', page, {
     name: 'Footer',
-    style: { ...rel, width: 'auto', height: 'auto', ...box, borderTop: `1px solid ${bd}` },
+    style: { ...rel, width: 'auto', height: 'auto', ...box, backgroundColor: '#ffffff', borderTop: `1px solid ${bd}` },
     layoutMode: 'flex',
-    layoutProps: { direction: 'row', gap: 0, paddingTop: 16, paddingRight: 24, paddingBottom: 16, paddingLeft: 24, alignItems: 'center', justifyContent: 'center' },
+    layoutProps: { direction: 'row', gap: 0, paddingTop: 16, paddingRight: 32, paddingBottom: 16, paddingLeft: 32, alignItems: 'center', justifyContent: 'space-between' },
     sizing: { w: 'fill', h: 'hug' },
   })
   if (footer) {
     add('text', footer, { name: 'Copyright', style: { ...rel, fontSize: 12, color: m }, props: { content: '© 2026 Acme Inc. All rights reserved.' } })
+    add('text', footer, { name: 'Version', style: { ...rel, fontSize: 12, color: m }, props: { content: 'v2.4.1' } })
   }
 }
 
