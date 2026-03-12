@@ -1,5 +1,7 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { observer } from "mobx-react-lite"
+import html2canvas from "html2canvas"
+import { jsPDF } from "jspdf"
 import { exportToJSON, exportToJSX, exportToHTML, convertToPageLayout } from "@devom/editor-core"
 import { documentStore } from "../stores"
 import { T } from "../theme"
@@ -7,6 +9,7 @@ import { T } from "../theme"
 export const ExportModal = observer(function ExportModal({ onClose }: { onClose: () => void }) {
   const [format, setFormat] = useState<"html" | "jsx" | "json">("html")
   const [copied, setCopied] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const data = documentStore.toSerializable()
   // Always export as page layout (flex column) regardless of canvas/page mode
   const exportElements = documentStore.canvasMode === 'canvas'
@@ -37,6 +40,50 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
     URL.revokeObjectURL(url)
   }
 
+  const handlePdfDownload = useCallback(async () => {
+    setPdfLoading(true)
+    try {
+      const htmlContent = exportToHTML(exportElements, data.rootId)
+      // Render HTML in a hidden iframe to capture
+      const iframe = document.createElement("iframe")
+      iframe.style.cssText = "position:fixed;left:-9999px;top:0;width:1280px;height:900px;border:none;"
+      document.body.appendChild(iframe)
+      const iframeDoc = iframe.contentDocument!
+      iframeDoc.open()
+      iframeDoc.write(htmlContent)
+      iframeDoc.close()
+
+      // Wait for fonts/images to load
+      await new Promise(r => setTimeout(r, 500))
+
+      // Capture root container only (skip body background/padding)
+      const root = iframeDoc.body.firstElementChild as HTMLElement ?? iframeDoc.body
+      const canvas = await html2canvas(root, {
+        scale: 2,
+        useCORS: true,
+        width: root.scrollWidth,
+        height: root.scrollHeight,
+      })
+      document.body.removeChild(iframe)
+
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      // A4 dimensions in pt: 595.28 x 841.89
+      const pdfWidth = 595.28
+      const pdfHeight = (imgHeight * pdfWidth) / imgWidth
+      const orientation = pdfHeight > 841.89 ? "p" as const : "p" as const
+      const pdf = new jsPDF({ orientation, unit: "pt", format: [pdfWidth, pdfHeight] })
+      const imgData = canvas.toDataURL("image/png")
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
+      pdf.save("export.pdf")
+    } catch (err) {
+      console.error("PDF export failed:", err)
+      alert("PDF export failed. Check console for details.")
+    } finally {
+      setPdfLoading(false)
+    }
+  }, [exportElements, data.rootId])
+
   return (
     <div style={{
       position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)",
@@ -58,6 +105,11 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
             ))}
           </div>
           <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={handlePdfDownload} disabled={pdfLoading} style={{
+              padding: "6px 16px", background: T.hover, color: T.text,
+              border: `1px solid ${T.inputBorder}`, borderRadius: 6, cursor: pdfLoading ? "wait" : "pointer", fontSize: 12, fontWeight: 500,
+              opacity: pdfLoading ? 0.6 : 1,
+            }}>{pdfLoading ? "Generating..." : "PDF"}</button>
             <button onClick={handleDownload} style={{
               padding: "6px 16px", background: T.hover, color: T.text,
               border: `1px solid ${T.inputBorder}`, borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 500,

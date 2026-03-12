@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@devom/editor-core": "workspace:*",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.0",
     "lucide-react": "^0.344.0",
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",
