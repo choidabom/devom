@@ -20,26 +20,6 @@ export function convertToPageLayout(
   // Already page-like (flex column root)
   if (root.layoutMode === 'flex') return out
 
-  // Convert root to flex column
-  root.layoutMode = 'flex'
-  root.layoutProps = {
-    ...root.layoutProps,
-    direction: 'column',
-    gap: 0,
-    paddingTop: 0,
-    paddingRight: 0,
-    paddingBottom: 0,
-    paddingLeft: 0,
-    alignItems: 'stretch',
-  }
-  root.style = {
-    ...root.style,
-    width: root.style.width ?? 1280,
-    height: undefined,
-    overflow: 'visible',
-    backgroundColor: root.style.backgroundColor === 'transparent' ? '#ffffff' : root.style.backgroundColor,
-  }
-
   // Sort children by vertical then horizontal position (top-to-bottom, left-to-right)
   const sortedChildren = [...root.children].sort((a, b) => {
     const elA = out[a]
@@ -54,11 +34,41 @@ export function convertToPageLayout(
   })
   root.children = sortedChildren
 
+  // Find max width among children to determine page width
+  let maxChildWidth = 0
+  for (const childId of root.children) {
+    const child = out[childId]
+    if (!child) continue
+    const w = typeof child.style.width === 'number' ? child.style.width : 0
+    if (w > maxChildWidth) maxChildWidth = w
+  }
+  const pageWidth = maxChildWidth > 0 ? maxChildWidth : 800
+
+  // Convert root to flex column with the computed page width
+  root.layoutMode = 'flex'
+  root.layoutProps = {
+    ...root.layoutProps,
+    direction: 'column',
+    gap: 0,
+    paddingTop: 0,
+    paddingRight: 0,
+    paddingBottom: 0,
+    paddingLeft: 0,
+    alignItems: 'stretch',
+  }
+  root.style = {
+    ...root.style,
+    width: pageWidth,
+    maxWidth: '100%',
+    height: undefined,
+    overflow: 'visible',
+    backgroundColor: '#ffffff',
+  }
+
   // Convert each top-level child from absolute to flow
   for (const childId of root.children) {
     const child = out[childId]
     if (!child) continue
-    // Remove absolute positioning
     const { left, top, position, ...rest } = child.style
     child.style = { ...rest, position: 'relative' as const, width: '100%' }
     child.sizing = { w: 'fill', h: 'hug' }

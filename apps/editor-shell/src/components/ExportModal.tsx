@@ -5,7 +5,7 @@ import { documentStore } from "../stores"
 import { T } from "../theme"
 
 export const ExportModal = observer(function ExportModal({ onClose }: { onClose: () => void }) {
-  const [format, setFormat] = useState<"json" | "jsx" | "html">("json")
+  const [format, setFormat] = useState<"html" | "jsx" | "json">("html")
   const [copied, setCopied] = useState(false)
   const data = documentStore.toSerializable()
   // Always export as page layout (flex column) regardless of canvas/page mode
@@ -13,11 +13,11 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
     ? convertToPageLayout(data.elements, data.rootId)
     : data.elements
 
-  const output = format === "json"
-    ? exportToJSON(exportElements, data.rootId)
+  const output = format === "html"
+    ? exportToHTML(exportElements, data.rootId)
     : format === "jsx"
     ? exportToJSX(exportElements, data.rootId)
-    : exportToHTML(exportElements, data.rootId)
+    : exportToJSON(exportElements, data.rootId)
 
   const handleCopy = () => {
     navigator.clipboard.writeText(output)
@@ -37,7 +37,7 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", gap: 4 }}>
-            {(["json", "jsx", "html"] as const).map(f => (
+            {(["html", "jsx", "json"] as const).map(f => (
               <button key={f} onClick={() => setFormat(f)} style={{
                 padding: "6px 14px", background: format === f ? T.accent : "transparent",
                 color: format === f ? "#fff" : T.text, border: `1px solid ${format === f ? T.accent : T.inputBorder}`,

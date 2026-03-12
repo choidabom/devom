@@ -11,7 +11,8 @@ export function exportToHTML(elements: Record<string, EditorElement>, rootId: st
     '<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">',
     "<style>",
     "  * { margin: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }",
-    "  body { background: #f1f5f9; min-height: 100vh; display: flex; justify-content: center; padding: 0; }",
+    "  body { background: #f1f5f9; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 0; overflow-x: hidden; }",
+    "  img { max-width: 100%; height: auto; }",
     "  table { width: 100%; border-collapse: collapse; }",
     "  th { text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 500; color: #64748b; border-bottom: 1px solid #e2e8f0; }",
     "  td { padding: 8px 12px; font-size: 13px; color: #0f172a; border-bottom: 1px solid #f1f5f9; }",
@@ -313,7 +314,7 @@ function cssToInline(style: CSSProperties): string {
     .filter(([, v]) => v !== undefined && v !== "")
     .map(([k, v]) => {
       const prop = k.replace(/([A-Z])/g, "-$1").toLowerCase()
-      const val = typeof v === "number" && !["opacity", "zIndex", "flex", "order", "flexGrow", "flexShrink"].includes(k) ? `${v}px` : v
+      const val = typeof v === "number" && !["opacity", "zIndex", "flex", "order", "flexGrow", "flexShrink", "fontWeight", "lineHeight"].includes(k) ? `${v}px` : v
       return `${prop}: ${String(val).replace(/[;"\\]/g, '')}`
     })
     .join("; ")
