@@ -37,16 +37,16 @@ type Expression = JSXElement | JSXFragment | StringLiteral | NumericLiteral | Co
 type Statement = ReturnStatement | ExpressionStatement | ExportDefaultDeclaration | FunctionDeclaration | VariableDeclaration
 
 const MAX_INPUT_SIZE = 50 * 1024
+const MAX_NESTING_DEPTH = 50
+const SAFE_URL_PATTERN = /^(https?:\/\/|data:image\/|\/)/
 
 export interface ImportResult {
   elements: ElementTemplate[]
   warnings: string[]
 }
 
-let elementCounter = 0
-
 export function importJSX(code: string): ImportResult {
-  elementCounter = 0
+  let elementCounter = 0
   const warnings: string[] = []
 
   if (code.length > MAX_INPUT_SIZE) {
@@ -69,7 +69,8 @@ export function importJSX(code: string): ImportResult {
     return { elements: [], warnings: ['No JSX found in the provided code'] }
   }
 
-  const elements = walkNode(jsxRoot, warnings)
+  const nextId = () => elementCounter++
+  const elements = walkNode(jsxRoot, warnings, nextId)
   return { elements, warnings }
 }
 
@@ -135,14 +136,18 @@ function isJSXNode(node: any): boolean {
   return node.type === 'JSXElement' || node.type === 'JSXFragment'
 }
 
-function walkNode(node: any, warnings: string[]): ElementTemplate[] {
+function walkNode(node: any, warnings: string[], nextId: () => number, depth = 0): ElementTemplate[] {
+  if (depth > MAX_NESTING_DEPTH) {
+    warnings.push(`Max nesting depth (${MAX_NESTING_DEPTH}) exceeded, skipping deeper elements`)
+    return []
+  }
   if (node.type === 'JSXElement') {
-    const elem = walkJSXElement(node, warnings)
+    const elem = walkJSXElement(node, warnings, nextId, depth)
     return elem ? [elem] : []
   } else if (node.type === 'JSXFragment') {
     const children: ElementTemplate[] = []
     for (const child of node.children) {
-      children.push(...walkNode(child, warnings))
+      children.push(...walkNode(child, warnings, nextId, depth))
     }
     return children
   } else if (node.type === 'JSXText') {
@@ -154,11 +159,11 @@ function walkNode(node: any, warnings: string[]): ElementTemplate[] {
     } else if (expr.type === 'StringLiteral') {
       return []
     } else if (isJSXNode(expr)) {
-      return walkNode(expr, warnings)
+      return walkNode(expr, warnings, nextId, depth)
     } else if (expr.type === 'ConditionalExpression') {
-      return walkNode(expr.consequent, warnings)
+      return walkNode(expr.consequent, warnings, nextId, depth)
     } else if (expr.type === 'LogicalExpression' && expr.operator === '&&') {
-      return walkNode(expr.right, warnings)
+      return walkNode(expr.right, warnings, nextId, depth)
     } else if (expr.type === 'CallExpression') {
       // Handle .map() pattern
       const callee = expr.callee
@@ -168,9 +173,9 @@ function walkNode(node: any, warnings: string[]): ElementTemplate[] {
           const arrow = arg
           if (arrow.body.type === 'BlockStatement') {
             const jsx = findJSXInBlock(arrow.body)
-            if (jsx) return walkNode(jsx, warnings)
+            if (jsx) return walkNode(jsx, warnings, nextId, depth)
           } else if (isJSXNode(arrow.body)) {
-            return walkNode(arrow.body, warnings)
+            return walkNode(arrow.body, warnings, nextId, depth)
           }
         }
       }
@@ -180,7 +185,7 @@ function walkNode(node: any, warnings: string[]): ElementTemplate[] {
   return []
 }
 
-function walkJSXElement(node: any, warnings: string[]): ElementTemplate | null {
+function walkJSXElement(node: any, warnings: string[], nextId: () => number, depth: number): ElementTemplate | null {
   const tagName = getTagName(node.openingElement.name)
   if (!tagName) return null
 
@@ -212,7 +217,13 @@ function walkJSXElement(node: any, warnings: string[]): ElementTemplate | null {
   if (disabled !== null) props.disabled = disabled
   if (checked !== null) props.checked = checked
   if (value) props.value = value
-  if (src) props.src = src
+  if (src) {
+    if (SAFE_URL_PATTERN.test(src)) {
+      props.src = src
+    } else {
+      warnings.push(`Blocked unsafe URL in src attribute: ${src.slice(0, 50)}`)
+    }
+  }
   if (alt) props.alt = alt
 
   // Parse Tailwind classes
@@ -228,7 +239,7 @@ function walkJSXElement(node: any, warnings: string[]): ElementTemplate | null {
   const childElements: ElementTemplate[] = []
   if (mapping.type !== 'text' && mapping.type !== 'sc:button' && !mapping.type.startsWith('sc:')) {
     for (const child of node.children) {
-      childElements.push(...walkNode(child, warnings))
+      childElements.push(...walkNode(child, warnings, nextId, depth + 1))
     }
   } else if (mapping.type.startsWith('sc:') && mapping.type !== 'sc:button') {
     // Some sc: components might have children (e.g., sc:card, sc:tabs)
@@ -244,7 +255,7 @@ function walkJSXElement(node: any, warnings: string[]): ElementTemplate | null {
 
   const template: ElementTemplate = {
     type: mapping.type,
-    name: generateName(tagName, elementCounter++),
+    name: generateName(tagName, nextId()),
     style: {
       position: 'relative' as const,
       left: undefined,
@@ -319,17 +330,23 @@ function getBooleanAttribute(attributes: any[], name: string): boolean | null {
   for (const attr of attributes) {
     if (attr.type === 'JSXAttribute' && attr.name.type === 'JSXIdentifier' && attr.name.name === name) {
       if (attr.value === null) {
-        return true
+        return true // <Switch checked /> — no value means true
       } else if (attr.value?.type === 'JSXExpressionContainer') {
         const expr = attr.value.expression
         if (expr.type === 'BooleanLiteral') {
-          return expr.value
+          return expr.value // <Switch checked={true} />
+        }
+        if (expr.type === 'Identifier') {
+          if (expr.name === 'true') return true
+          if (expr.name === 'false') return false
         }
       }
     }
   }
   return null
 }
+
+const DANGEROUS_STYLE_PATTERN = /javascript:|expression\s*\(|-moz-binding/i
 
 function extractInlineStyle(attributes: any[]): Partial<CSSProperties> {
   const style: Partial<CSSProperties> = {}
@@ -342,7 +359,9 @@ function extractInlineStyle(attributes: any[]): Partial<CSSProperties> {
             if (prop.type === 'ObjectProperty' && prop.key.type === 'Identifier') {
               const key = prop.key.name
               if (prop.value.type === 'StringLiteral') {
-                ;(style as any)[key] = prop.value.value
+                const val = prop.value.value
+                if (DANGEROUS_STYLE_PATTERN.test(val)) continue
+                ;(style as any)[key] = val
               } else if (prop.value.type === 'NumericLiteral') {
                 ;(style as any)[key] = prop.value.value
               }
@@ -359,7 +378,8 @@ function extractTextContent(children: any[]): string {
   let text = ''
   for (const child of children) {
     if (child.type === 'JSXText') {
-      text += child.value.trim()
+      const trimmed = child.value.trim()
+      if (trimmed) text += (text ? ' ' : '') + trimmed
     } else if (child.type === 'JSXExpressionContainer') {
       const expr = child.expression
       if (expr.type === 'StringLiteral') {
@@ -367,6 +387,9 @@ function extractTextContent(children: any[]): string {
       } else if (expr.type === 'NumericLiteral') {
         text += String(expr.value)
       }
+    } else if (child.type === 'JSXElement' || child.type === 'JSXFragment') {
+      const nested = extractTextContent(child.children)
+      if (nested) text += (text ? ' ' : '') + nested
     }
   }
   return text.trim()

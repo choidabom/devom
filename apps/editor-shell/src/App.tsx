@@ -187,6 +187,9 @@ export const App = observer(function App() {
   }, [syncToCanvas])
 
   const handleImportJSX = useCallback((code: string, mode: 'replace' | 'add') => {
+    if (mode === 'replace' && !confirm('Replace current document with imported JSX?')) return
+
+    setImportWarnings([])
     const result = importJSX(code)
 
     if (result.warnings.length > 0 && result.elements.length === 0) {
@@ -203,10 +206,11 @@ export const App = observer(function App() {
     documentStore.importElements(result.elements)
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
 
-    setImportWarnings(result.warnings) // show warnings for partial success
     if (result.elements.length > 0) {
       setShowImportModal(false)
       setImportWarnings([])
+    } else {
+      setImportWarnings([...result.warnings, 'No importable elements found in the provided code.'])
     }
   }, [])
 

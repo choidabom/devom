@@ -70,15 +70,17 @@ export class DocumentStore {
     return createdIds
   }
 
-  private insertElementTree(template: ElementTemplate, parentId: string): string {
+  private insertElementTree(template: ElementTemplate, parentId: string, depth = 0): string {
     const id = nanoid()
     const { children: childTemplates, ...rest } = template
     const element: EditorElement = { ...rest, id, parentId, children: [] }
     this.elements.set(id, element)
     const parent = this.elements.get(parentId)
-    if (parent) parent.children.push(id)
-    for (const childTemplate of childTemplates) {
-      this.insertElementTree(childTemplate, id)
+    if (parent) parent.children = [...parent.children, id]
+    if (depth < 50) {
+      for (const childTemplate of childTemplates) {
+        this.insertElementTree(childTemplate, id, depth + 1)
+      }
     }
     return id
   }

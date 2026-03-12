@@ -145,6 +145,7 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
         {/* shadcn/ui dropdown */}
         <div ref={dropRef} style={{ position: "relative" }}>
           <ToolBtn
+            wide
             icon={<span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 12, fontWeight: 600 }}>UI <ChevronDown size={10} /></span>}
             title="shadcn/ui Components"
             onClick={() => setShowShadcn(v => !v)}
@@ -221,9 +222,12 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
           </div>
         )}
 
+        <ToolSep />
+
         {/* Templates dropdown */}
         <div ref={templatesDropRef} style={{ position: "relative" }}>
           <ToolBtn
+            wide
             icon={<span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 12, fontWeight: 600 }}>Templates <ChevronDown size={10} /></span>}
             title="Load Template"
             onClick={() => setShowTemplates(v => !v)}
@@ -263,6 +267,7 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
         <ToolBtn icon={<Settings size={S} />} title="Export" onClick={onExport} />
         <ToolBtn icon={<FileDown size={S} />} title="Import JSX" onClick={() => onImportJSX?.()} />
         <ToolSep />
+
         <ToolBtn icon={<Undo2 size={S} />} title="Undo" onClick={onUndo} disabled={!canUndo} />
         <ToolBtn icon={<Redo2 size={S} />} title="Redo" onClick={onRedo} disabled={!canRedo} />
         {hasSelection && (
@@ -303,7 +308,7 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
   )
 }
 
-function ToolBtn({ icon, title, onClick, disabled, active }: { icon: ReactNode; title: string; onClick: () => void; disabled?: boolean; active?: boolean }) {
+function ToolBtn({ icon, title, onClick, disabled, active, wide }: { icon: ReactNode; title: string; onClick: () => void; disabled?: boolean; active?: boolean; wide?: boolean }) {
   const [hovered, setHovered] = useState(false)
   return (
     <div
@@ -315,12 +320,13 @@ function ToolBtn({ icon, title, onClick, disabled, active }: { icon: ReactNode; 
         onClick={onClick}
         disabled={disabled}
         style={{
-          width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+          ...(wide ? { height: 32, padding: "0 10px" } : { width: 32, height: 32, padding: 0 }),
+          display: "flex", alignItems: "center", justifyContent: "center",
           background: active ? T.accentLight : hovered && !disabled ? T.hover : "transparent",
           color: disabled ? T.textMuted : active ? T.accent : T.text,
           border: "none", borderRadius: 8, cursor: disabled ? "default" : "pointer",
-          fontSize: 14, lineHeight: 1, padding: 0, opacity: disabled ? 0.4 : 1,
-          transition: "background 0.15s",
+          fontSize: 14, lineHeight: 1, opacity: disabled ? 0.4 : 1,
+          transition: "background 0.15s", whiteSpace: "nowrap",
         }}
       >
         {icon}
