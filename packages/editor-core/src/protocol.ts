@@ -1,5 +1,12 @@
 import type { CSSProperties } from "react"
-import type { CanvasMode, EditorElement, ElementBounds, GridProps, LayoutProps, PageViewportWidth, SectionProps, SectionRole, SizingProps } from "./types"
+import type { CanvasMode, EditorElement, ElementBounds, GridProps, LayoutProps, PageViewportWidth, SectionProps, SectionRole, SizingProps, ValidationRule } from "./types"
+
+export interface FormFieldRuntime {
+  elementId: string
+  name: string
+  defaultValue: string | number | boolean | undefined
+  validation?: ValidationRule
+}
 
 // Shell -> Canvas messages
 export type ShellToCanvasMessage =
@@ -25,6 +32,7 @@ export type ShellToCanvasMessage =
   | { type: "ZOOM_IN" }
   | { type: "ZOOM_OUT" }
   | { type: "ZOOM_RESET" }
+  | { type: "SET_INTERACTION_FORM_STATE"; formId: string; fields: FormFieldRuntime[] }
 
 // Canvas -> Shell messages
 export type CanvasToShellMessage =
@@ -44,6 +52,7 @@ export type CanvasToShellMessage =
   | { type: "UNGROUP_ELEMENTS_REQUEST"; payload: { ids: string[] } }
   | { type: "DND_CREATE_ELEMENT"; payload: { elementType: string; x: number; y: number } }
   | { type: "ZOOM_CHANGED"; payload: { zoom: number } }
+  | { type: "FORM_SUBMIT_RESULT"; formId: string; values: Record<string, unknown> }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 
