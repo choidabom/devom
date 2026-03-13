@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useState, useCallback, useEffect } from "react"
 import { observer } from "mobx-react-lite"
 import {
   Lock, Unlock, Square, Columns3, Type, LayoutGrid,
@@ -9,22 +9,71 @@ import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
 export const LeftPanel = observer(function LeftPanel() {
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
+
+  const selectedKey = selectionStore.selectedIds.join(",")
+
+  useEffect(() => {
+    const ids = selectionStore.selectedIds
+    if (ids.length === 0) return
+
+    const ancestorIds = new Set<string>()
+    for (const id of ids) {
+      let el = documentStore.getElement(id)
+      while (el?.parentId) {
+        ancestorIds.add(el.parentId)
+        el = documentStore.getElement(el.parentId)
+      }
+    }
+
+    setCollapsedIds((prev) => {
+      let changed = false
+      const next = new Set(prev)
+      for (const aId of ancestorIds) {
+        if (next.has(aId)) {
+          next.delete(aId)
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+
+    const firstId = ids[0]
+    if (firstId) {
+      setTimeout(() => {
+        const el = document.querySelector(`[data-layer-id="${firstId}"]`)
+        el?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+      }, 50)
+    }
+  }, [selectedKey])
+
+  const toggleCollapse = useCallback((id: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
   return (
     <div style={{ background: T.panel, borderRadius: T.panelRadius, boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`, height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "14px 16px 10px", fontSize: 13, fontWeight: 600, color: T.text }}>
         Layers
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: "0 6px 8px" }}>
-        <LayerTree elementId={documentStore.rootId} depth={0} />
+        <LayerTree elementId={documentStore.rootId} depth={0} collapsedIds={collapsedIds} onToggleCollapse={toggleCollapse} />
       </div>
     </div>
   )
 })
 
-const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId: string; depth: number }) {
+const LayerTree = observer(function LayerTree({ elementId, depth, collapsedIds, onToggleCollapse }: {
+  elementId: string; depth: number; collapsedIds: Set<string>; onToggleCollapse: (id: string) => void
+}) {
   const element = documentStore.getElement(elementId)
   const [hovered, setHovered] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
+  const collapsed = collapsedIds.has(elementId)
   if (!element) return null
   const isSelected = selectionStore.selectedIds.includes(elementId)
   const isRoot = elementId === documentStore.rootId
@@ -46,6 +95,7 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
   return (
     <div>
       <div
+        data-layer-id={elementId}
         onClick={(e) => {
           if (!isRoot) {
             if (e.shiftKey) {
@@ -78,7 +128,7 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
       >
         {hasChildren && !isRoot ? (
           <span
-            onClick={(e) => { e.stopPropagation(); setCollapsed(!collapsed) }}
+            onClick={(e) => { e.stopPropagation(); onToggleCollapse(elementId) }}
             style={{ display: "flex", flexShrink: 0, cursor: "pointer", opacity: 0.5, transition: "transform 0.15s", transform: collapsed ? "rotate(0deg)" : "rotate(90deg)" }}
           >
             <ChevronRight size={10} />
@@ -115,7 +165,7 @@ const LayerTree = observer(function LayerTree({ elementId, depth }: { elementId:
         )}
       </div>
       {!collapsed && element.children.map((childId) => (
-        <LayerTree key={childId} elementId={childId} depth={depth + 1} />
+        <LayerTree key={childId} elementId={childId} depth={depth + 1} collapsedIds={collapsedIds} onToggleCollapse={onToggleCollapse} />
       ))}
     </div>
   )
