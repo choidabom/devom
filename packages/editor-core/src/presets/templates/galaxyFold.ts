@@ -78,7 +78,7 @@ export function buildGalaxyFold(store: DocumentStore): void {
   }
 
   /** feature-benefit img-bottom: 타이틀 위 + 이미지/비디오 아래 */
-  function imgBottom(title: string, disc: string, bg: string, tc: string, imgUrl: string, videoUrl: string) {
+  function imgBottom(title: string, disc: string, bg: string, tc: string, imgUrl: string, videoUrl: string, imgHeight = 600) {
     const sec = add('div', page, {
       name: (title || 'Feature').slice(0, 20),
       style: { ...rel, width: 'auto', height: 'auto', backgroundColor: bg, borderRadius: 0, border: 'none' },
@@ -116,7 +116,7 @@ export function buildGalaxyFold(store: DocumentStore): void {
       const src = imgUrl.startsWith('//') ? 'https:' + imgUrl : imgUrl
       add('image', sec, {
         name: 'Visual',
-        style: { ...rel, width: W, height: 600, objectFit: 'cover' },
+        style: { ...rel, width: W, height: imgHeight, objectFit: 'cover' },
         props: { src, alt: title || 'Feature image' },
         sizing: { w: 'fill', h: 'fill' },
       })
@@ -124,7 +124,7 @@ export function buildGalaxyFold(store: DocumentStore): void {
       const vSrc = videoUrl.startsWith('//') ? 'https:' + videoUrl : videoUrl
       add('video', sec, {
         name: 'Video',
-        style: { ...rel, width: W, height: 600, objectFit: 'cover' },
+        style: { ...rel, width: W, height: imgHeight, objectFit: 'cover' },
         props: { src: vSrc, autoplay: true, muted: true, loop: true, controls: false },
         sizing: { w: 'fill', h: 'fill' },
       })
@@ -300,10 +300,10 @@ export function buildGalaxyFold(store: DocumentStore): void {
     '//images.samsung.com/kdp/cms_task/C20250715000220/35139/f3773507-f687-4c02-be1d-1c84fa7416c5.jpg?$FB_TYPE_A_JPG$', '')
 
   // ════════════════════════════════════════════
-  // Component 10: Ultra Camera hero (dark)
+  // Component 10: Ultra Camera hero (dark) — 1440x846 원본 비율
   // ════════════════════════════════════════════
   imgBottom('', '', '#000000', '',
-    '//images.samsung.com/kdp/cms_task/C20250625010040/34186/a381670c-7776-43d6-9043-608bda89450f.jpg?$FB_TYPE_A_JPG$', '')
+    '//images.samsung.com/kdp/cms_task/C20250625010040/34186/a381670c-7776-43d6-9043-608bda89450f.jpg?$FB_TYPE_A_JPG$', '', 846)
 
   // ════════════════════════════════════════════
   // Component 11: 압도적인 2억 화소 카메라 (title + desc)
