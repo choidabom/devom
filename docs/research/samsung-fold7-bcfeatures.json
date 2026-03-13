@@ -1,0 +1,1083 @@
+[
+  {
+    "index": 0,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_kv(text)",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 특정 AI 기능 사용을 위해서는 삼성 계정 로그인이 필요합니다.\n* 삼성은 AI 기능 결과의 정확성, 완성도, 신뢰성에 대해 보장하지 않습니다.\n* Galaxy AI 기능의 사용 가능 여부는 지역/국가, OS/One UI 버전, 기기 모델, 이동통신사에 따라 다를 수 있습니다.\n* 삼성 갤럭시 기기의 Galaxy AI 기본 기능들은 무료로 제공되나, 향후 출시되는 향상된 기능이나 새로운 서비스는 유료로 제공될 수 있습니다. 제3자가 제공하는 AI 기능에는 다른 조건이 적용될 수 있습니다. \nGalaxy AI 기본 기능은 현재 삼성 서비스 이용 약관 내 'Advanced Intelligence' 항목에 나열된 서비스입니다. \n자세한 내용은 (https://account.samsung.com/links?key=consent.terms-and-conditions&locale=ko-KO)를 참조하세요.\n* 일부 지역에서는 AI 이용 연령 제한이 있어 미성년자에게 Galaxy AI 서비스가 제한될 수 있습니다.\n* 이해를 돕기 위해 연출된 이미지 입니다. 실제 UX/UI는 다를 수 있습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 1,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Ultra Unfolds",
+    "title": "갤럭시 Z 폴드7, \n울트라를 펼치다",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "video",
+        "src": "//images.samsung.com/kdp/cms_task/C20250716000009/35173/3e35d3a2-8b51-46ea-b2da-9aba8c76836e.mp4",
+        "poster": ""
+      }
+    ]
+  },
+  {
+    "index": 2,
+    "type": "stcText",
+    "cptnm": "",
+    "title": "",
+    "description": "역대 갤럭시 Z 폴드 중에서 \n\n가장 슬림하고 가볍게 설계된 혁신적인 디자인의 갤럭시 Z 폴드7을 만나보세요.\n\n더 넓어진 디스플레이들을 통해 놀라운 몰입감을 경험해보세요.\n\n이제 울트라급 경험을 폴드에서 더 크게 펼쳐보세요.\n&nbsp;",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": []
+  },
+  {
+    "index": 3,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Ultra Unfolds(text)",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 4,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Thinnest",
+    "title": "놀랍도록 얇고 가벼운 디자인",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010033/34179/def1e6e4-1091-479d-a360-01456fc2f566.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시 Z 폴드7을 들고 있는 모습입니다. "
+      }
+    ]
+  },
+  {
+    "index": 5,
+    "type": "stcText",
+    "cptnm": "",
+    "title": "",
+    "description": "스마트폰에 대한 기대를 뛰어넘는 놀라운 갤럭시 Z 폴드7을 만나보세요.\n\n접은 상태로 사용할 때에는 21:9 비율로 재탄생한 커버 디스플레이와\n\n더욱 더 얇아진 디자인의 조합으로 한 손으로 더 쉽고 편안하게 사용할 수 있죠.\n\n더 넓은 화면에서의 몰입이 필요할 땐 역대 가장 큰 203.1mm의 메인 디스플레이를 펼쳐보세요.\n&nbsp;",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": []
+  },
+  {
+    "index": 6,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Thinnest",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 이해를 돕기 위해 연출된 이미지 입니다. \n* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.\n* 갤럭시 Z 폴드7의 커버 디스플레이 크기는 코너 곡선을 제외하고 직각화하여 대각선으로 측정 시 164.8mm, \n직각화하지 않고 측정 시 164.2mm입니다. 둥근 모서리와 카메라 홀로 인해 실제 보이는 영역은 디스플레이 크기보다 작습니다.\n* 갤럭시 Z 폴드7의 메인 디스플레이 크기는 코너 곡선을 제외하고 직각화하여 대각선으로 측정 시 203.1mm, \n직각화하지 않고 측정 시 202.4mm입니다. 둥근 모서리와 카메라 홀로 인해 실제 보이는 영역은 디스플레이 크기보다 작습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 7,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Sleek tech in sleek colors(General)",
+    "title": "매력적인 컬러로 완성된 놀라운 디자인",
+    "description": "",
+    "disclaimer": "* 이해를 돕기 위해 연출된 이미지 입니다. \n* 색상은 국가, 이동통신사에 따라 다를 수 있습니다.\n* 삼성닷컴/삼성 강남 전용컬러 제품은 오직 삼성닷컴과 삼성 강남에서만 구매할 수 있습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010036/34182/f422b0b2-3eff-4f09-bc30-a3612bd6ea22.jpg?$FB_TYPE_A_JPG$",
+        "alt": "블루쉐도우 색상의 갤럭시Z 폴드7 1대는 측면으로 열려 있습니다. 블루쉐도우 색상의 갤럭시Z 폴드7, 제트블랙 색상의 갤럭시Z 폴드7, 코랄레드 색상의 갤럭시Z 폴드7 이 전면 디스플레이가 보이는 상태로 나란히 놓여 있습니다."
+      }
+    ]
+  },
+  {
+    "index": 8,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Looks sleek. Built tough",
+    "title": "얇지만 더욱 강력해진 내구성",
+    "description": "",
+    "disclaimer": "* 이해를 돕기 위해 연출된 이미지 입니다.\n* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.\n* 어드밴스드 아머 알루미늄 프레임은 볼륨 버튼, 사이드 키, SIM 트레이를 포함하지 않습니다.\n* 기기 전면에는 코닝® 고릴라® 글래스 세라믹 2가 후면에는 코닝® 고릴라® 글래스 빅터스® 2가 적용되었습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250829000273/36317/59418458-bd93-48eb-bcb9-a1e2474d3e85.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시 Z 폴드7의 견고한 알루미늄 프레임을 클로즈업한 모습입니다.아머 알루미늄으로 견고하게 감싼 프레임 슬림하지만 더 강력해진 갤럭시 Z 폴드7은 한층 더 강력해진 아머 알루미늄 프레임으로 둘러싸여 안심하고 사용할 수 있습니다. 갤럭시 Z 폴드7을 X레이 스타일로 촬영해 클로즈업한 모습입니다. 살짝 접은 측면을 비추어 아머 플렉스힌지의 내부 설계를 알려줍니다. 얇아져도 튼튼한 플렉스힌지 갤럭시 Z 폴드7을 보호하는 이전보다 더 얇게 접히는 혁신적인 아머 플렉스힌지를 만나보세요. 갤럭시 Z 폴드7가 거의 펼쳐져 후면 방향으로 놓여 있습니다. 커버 디스플레이 위에는 화면을 보호하는 유리층이 덮여 있습니다.놀랍도록 강력한 전후면 고릴라 글래스 갤럭시 폴더블 제품 중 최초로 고릴라® 글래스 빅터스 2와 함께 더 강한 내구성을 위해 코닝® 고릴라® 글래스 세라믹 2가 적용되었습니다."
+      }
+    ]
+  },
+  {
+    "index": 9,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_See how thin and light Galaxy Z Fold7 is",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 갤럭시 Z 폴드4와 비교한 결과입니다.\n* 무게는 국가, 이동통신사에 따라 다를 수 있습니다.\n* 접힌 상태 두께는 커버 디스플레이부터 후면 글래스까지 측정한 값입니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250715000220/35139/f3773507-f687-4c02-be1d-1c84fa7416c5.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시 Z 폴드7,  얼마나 더 얇고 가벼워졌을까요? 왼쪽에는 갤럭시 Z 폴드7  측면 반쪽이 보이고 오른쪽에는 갤럭시 Z 폴드4 측면 하단 반쪽이 보입니다. 갤럭시 Z 폴드7 두께 8.9mm 갤럭시 Z 폴드4 두께 14.2mm 두께(접힌 상태) -5.3mm 무게 -48g"
+      }
+    ]
+  },
+  {
+    "index": 10,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Ultra Camera",
+    "title": "",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010040/34186/a381670c-7776-43d6-9043-608bda89450f.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시 Z 폴드7의 2억 화소 후면 카메라로 촬영한 인물과 풍경 사진입니다. 디테일이 선명하고 생생하게 살아있습니다."
+      }
+    ]
+  },
+  {
+    "index": 11,
+    "type": "textSimple",
+    "cptnm": "",
+    "title": "갤럭시 Z 폴드7에서 만나는 \n\n압도적인 2억 화소 카메라",
+    "description": "강력한 2억 화소 카메라와 ProVisual Engine의 완벽한 조합으로\n\n놀랍도록 아름다운 초고해상도 사진을 촬영해 보세요.\n\n갤럭시 Z 폴드 시리즈 최초로 갤럭시 Z 폴드7에 탑재된 2억 화소 카메라는\n\n모든 순간을 디테일하게 포착하고, 차세대 ProVisual Engine이\n\n색상과 디테일을 개선하여 선명도를 높이고 피부톤과 질감까지 더욱 선명하게 표현해주죠.\n\n촬영 결과물을 대화면으로 감상하며 생생한 몰입감을 경험해 보세요.\n&nbsp;",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "rgb(255, 255, 255)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(255, 255, 255)"
+    },
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(212, 212, 212)"
+    },
+    "media": []
+  },
+  {
+    "index": 12,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Camera",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.\n* 조명 조건, 피사체의 수, 초점이 맞지 않거나 움직이는 등 촬영 조건에 따라 결과는 달라질 수 있습니다.\n* ‘광학 줌 수준’은 적응형 픽셀 센서를 기반으로 한 스페이스 줌입니다.\n* ‘광학 줌 수준’의 배율은 광학 줌 배율을 의미하는 것이 아닙니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010042/34188/9ce80f57-3c44-4760-8407-570996be7850.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시Z 폴드7의 뒷면과 메인 디스플레이의 카메라 렌즈가 클로즈업 된 채로 나타납니다. 위에서부터 10MP 망원 카메라 광학 줌 3배 200MP 광각 카메라 광학 줌 수준의 2배 줌 12MP 초광각 카메라 10MP 내부 전면 카메라10MP커버 카메라 순서로 표시되어 있습니다."
+      }
+    ]
+  },
+  {
+    "index": 13,
+    "type": "carousel",
+    "cptnm": "Galaxy Z Fold7_Ultra 200 MP camera is here(carousel)",
+    "title": "",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000003/36762/e77c54ec-3332-4439-bb6e-5f092333201e.jpg?$ORIGIN_JPG$",
+        "alt": "갤럭시 Z 폴드7의 2억 화소 후면 카메라로 질감이 풍부한 건축물을 배경으로 두 사람의 사진을 촬영했습니다. 생생한 디테일과 질감이 정확하게 표현되었습니다."
+      },
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000003/36762/63907afc-3e90-418b-90e3-d90d194f3346.jpg?$ORIGIN_JPG$",
+        "alt": "갤럭시 Z 폴드7의 2억 화소 후면 카메라로 숲 속 사람들의 고해상도 사진을 촬영했습니다. 더욱 섬세한 디테일과 질감이 포착되었습니다."
+      },
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000003/36762/da75e5f7-2a47-411c-854d-3d6c3c4f37a5.jpg?$ORIGIN_JPG$",
+        "alt": "갤럭시 Z 폴드7의 2억 화소 후면 카메라로 들판의 말들을 촬영했습니다. 생생한 색상과 디테일이 살아있습니다."
+      },
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000003/36762/ff269b3f-1ca9-4763-a980-bddd480b86e0.jpg?$ORIGIN_JPG$",
+        "alt": "갤럭시 Z 폴드7의 2억 화소 후면 카메라로 바닷가에 있는 사람의 고해상도 사진을 촬영했습니다. 생생한 색상과 디테일이 살아있습니다."
+      },
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000003/36762/618970d8-4121-400b-9265-a63e6a10f6d5.jpg?$ORIGIN_JPG$",
+        "alt": "낮 동안의 도시 풍경 사진을 갤럭시 Z 폴드7의 2억 화소 후면 카메라로 촬영했습니다. 디테일이 선명하고 사실적입니다."
+      },
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000003/36762/8193070c-2c73-45f9-a71f-a262ea8cfe2b.jpg?$ORIGIN_JPG$",
+        "alt": "\t실내 테이블에 놓인 음식 사진을 갤럭시 Z 폴드7의 2억 화소 후면 카메라로 촬영했습니다. 색상과 디테일이 잘 표현되었습니다."
+      },
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000003/36762/db460500-9e13-4e6d-af6a-4cc3220b7a1c.jpg?$ORIGIN_JPG$",
+        "alt": "인물과 풍경 사진을 갤럭시 Z 폴드7의 2억 화소 후면 카메라로 촬영했습니다. 디테일이 선명하고 사실적입니다."
+      }
+    ]
+  },
+  {
+    "index": 14,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Camera Compare",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 갤럭시 Z 폴드4와 비교한 결과입니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250701010001/34290/7709ac6e-9a5c-4f11-be7f-89de66b37ebf.jpg?$FB_TYPE_A_JPG$",
+        "alt": "카메라 스펙 비교하기 갤럭시 Z 폴드7 200MP 광각 카메라, 갤럭시 Z 폴드4 50MP 광각 카메라"
+      }
+    ]
+  },
+  {
+    "index": 15,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Bring details out of the dark",
+    "title": "어두운 곳에서도 선명한 영상 촬영",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "rgb(255, 255, 255)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(255, 255, 255)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "video",
+        "src": "//images.samsung.com/kdp/cms_task/C20250716000011/35175/e6b16c8d-5ee9-44eb-a532-a111f5ff170b.mp4",
+        "poster": ""
+      }
+    ]
+  },
+  {
+    "index": 16,
+    "type": "imgBottom",
+    "cptnm": "갤럭시 Z 폴드7_어두운 곳에서도 선명한 영상 촬영-2",
+    "title": "",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250716000007/35171/16969e6b-58d4-4b55-b1aa-4b7198c75a47.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시 Z 폴드7로 영상을 촬영하고 있습니다. 나이토그래피로 어두운 환경에서도 선명한 디테일이 유지됩니다."
+      }
+    ]
+  },
+  {
+    "index": 17,
+    "type": "stcText",
+    "cptnm": "",
+    "title": "",
+    "description": "저조도에서도 놀랍도록 또렷한 영상을 촬영해 보세요.\n\n고성능 센서와 AP에 내장된  향상된 ProVisual Engine 의 조합으로\n\n낮에도 밤에도 풍부한 명암비로 디테일까지 생생하게 촬영할 수 있죠.\n\n또한, 노이즈를 줄여 영상을 따로 보정하지 않아도  어둠 속에서 선명한 영상을 담아낼 수 있습니다.\n&nbsp;",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(212, 212, 212)"
+    },
+    "media": []
+  },
+  {
+    "index": 18,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Bring details out of the dark(text)",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.\n* 조명 조건, 피사체의 수, 초점이 맞지 않거나 움직이는 등 촬영 조건에 따라 결과는 달라질 수 있습니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 19,
+    "type": "split5050_left",
+    "cptnm": "Galaxy Z Fold7_Pro-level shooting",
+    "title": "전문가처럼 촬영하고 \n대화면에서 편집까지",
+    "description": "갤럭시 Z 폴드7의 대화면 메인 디스플레이에서는 \n2억 화소 카메라로 촬영한 결과물을 넓게 펼쳐 \n디테일까지 놓치지 않고 편집할 수 있죠.\n촬영에서 편집과 공유까지, 한 번에 쉽게 이루어집니다.",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "rgb(255, 255, 255)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(255, 255, 255)"
+    },
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(212, 212, 212)"
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010046/34192/ebe00691-1af6-4937-82a1-f0431f9badb8.jpg?$FB_TYPE_B_JPG$",
+        "alt": "갤럭시 Z 폴드7을 펼쳐 대화면으로 영상을 촬영하고 편집하는 모습입니다."
+      }
+    ]
+  },
+  {
+    "index": 20,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Increase immersion",
+    "title": "몰입감은 높이고, 불편한 소음은 낮추고",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "rgb(255, 255, 255)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(255, 255, 255)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "video",
+        "src": "//images.samsung.com/kdp/cms_task/C20250829000275/36319/ba0ba515-aaa5-42c2-b317-8dbb8edbb9d1.mp4",
+        "poster": ""
+      }
+    ]
+  },
+  {
+    "index": 21,
+    "type": "stcText",
+    "cptnm": "",
+    "title": "",
+    "description": "오디오 지우개로 영상 속  원치 않는 배경 소음 을 깔끔하게 제거해 보세요.\n\nGalaxy AI가 갤러리에서 단 한 번의 탭으로 오디오를 감지하고 미세 조정까지 완료하죠.\n\n삼성 노트, 비디오 플레이어, 음성 녹음 등  더 많은 앱에서 사용할 수 있어  한층 편리해졌습니다.\n\n&nbsp;",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(212, 212, 212)"
+    },
+    "media": []
+  },
+  {
+    "index": 22,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Increase immersion",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.\n* 오디오 지우개의 결과는 영상 내 존재하는 소리에 따라 결과는 다를 수 있습니다. 삼성 계정 로그인이 필요합니다. 음성, 음악, 바람, 자연, 군중, 소음과 같은 특정 유형의 소리만 감지할 수 있습니다. \n갤러리, 삼성 노트, 비디오 플레이어, 음성 녹음 및 통화 녹음 텍스트 변환에서 접근 가능한 일반적인 동영상/오디오 형식과 호환됩니다. \n실제 감지되는 소리는 오디오 소스 및 영상의 상태에 따라 다를 수 있습니다. 결과의 정확성은 보장되지 않습니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 23,
+    "type": "split5050_right",
+    "cptnm": "Galaxy Z Fold7_Wider angle for epic group selfies",
+    "title": "더 넓어진 화각으로 \n더 많은 사람과 함께, 찰칵",
+    "description": "메인 디스플레이의 한층 더 업그레이드된 천만 화소 카메라로 \n더 많은 사람들과 함께 셀피를 남겨보세요. \n또렷하고 선명해진 화질로 생동감 넘치는 순간을 촬영하고,\n넓어진 화각으로 더 많은 사람과 멋진 배경을 한 번에 담을 수 있죠. \n한 사람도 빠짐 없이 모두와 소중한 추억을 남겨보세요.",
+    "disclaimer": "* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.\n* 조명 조건, 피사체의 수, 초점이 맞지 않거나 움직이는 피사체 등 \n촬영 조건에 따라 결과는 달라질 수 있습니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "rgb(255, 255, 255)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(255, 255, 255)"
+    },
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(212, 212, 212)"
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250829000270/36314/ae84d069-c60b-47b0-b49a-7cbbd7274440.jpg?$FB_TYPE_B_JPG$",
+        "alt": "갤럭시 Z 폴드7으로 단체 셀피를 촬영하고 있습니다. 커버 디스플레이와 메인 디스플레이에서 모두 단체 셀피를 찍을 수 있으며 메인 디스플레이는 더 넓은 화각으로 사진을 더 자세히 볼 수 있습니다."
+      }
+    ]
+  },
+  {
+    "index": 24,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Ultra sleek. Ultra powerful(1)",
+    "title": "슬림한 바디에\n압도적인 강력함",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "rgb(255, 255, 255)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(255, 255, 255)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010048/34194/98b743c4-c0f1-4ec9-9487-bb5d21b41419.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시 Z 폴드7을 게임 콘솔처럼 접어 가로로 펼친 모습입니다. 게임이 실행 중이며, Vulkan 최적화 및 레이 트레이싱을 탑재한 강력한 프로세서 덕분에 몰입감 넘치는 게임을 즐길 수 있습니다. 게임이 전환되면서 기기 내부의 칩 보드가 표시됩니다."
+      }
+    ]
+  },
+  {
+    "index": 25,
+    "type": "textSimple",
+    "cptnm": "",
+    "title": "",
+    "description": "갤럭시 Z 폴드7의 역대급 대화면과 강력해진 갤럭시용 스냅드래곤® 모바일 프로세서로 몰입감 넘치는 게이밍 경험을 즐겨보세요.\n\n 차세대 프로세서는 CPU, GPU, NPU 성능이 모두 놀랍도록 향상되어 압도적 게이밍 경험과 AI 성능을 완성합니다.\n\n Vulkan 최적화로 몰입감이 강화되고 실시간 레이 트레이싱으로 장면마다 생동감이 넘치는 그래픽을 즐길 수 있죠.\n\n 실감나는 플레이를 위한 mDNle 탑재로 배터리 소모는 줄이고 최대 전력 효율로 화질을 개선합니다.\n&nbsp;",
+    "disclaimer": "",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(212, 212, 212)"
+    },
+    "media": []
+  },
+  {
+    "index": 26,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Ultra sleek. Ultra powerful(2)",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.\n* 스냅드래곤(Snapdragon)은 Qualcomm Technologies, Inc 및 그 자회사의 제품입니다.\n* AP 성능 관련 수치는 자사 실험을 기준으로 측정된 값입니다.\n* 전작 대비 AP 성능이 향상되었습니다. \n* 실제 성능은 사용자 환경, 조건, 사전에 설치된 소프트웨어 및 앱에 따라 달라집니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010050/34196/c7c9b70a-30d2-4a45-a4aa-e1fba8aa6bd2.jpg?$FB_TYPE_A_JPG$",
+        "alt": "CPU 38% 따라올 수 없는 퍼포먼스 GPU 26% 놀랍도록 부드러운 그래픽 NPU 41%  신속하고 스마트한 AI 성능 HONHAI STARRAIL 로고, HOYOVERSE 로고"
+      }
+    ]
+  },
+  {
+    "index": 27,
+    "type": "split5050_right",
+    "cptnm": "Galaxy Z Fold7_Efficient battery powers all-day use",
+    "title": "종일 집중할 수 있는\n대용량, 고효율 배터리",
+    "description": "외출 중에도 배터리 걱정 없이 게임, 동영상 시청, 멀티태스킹을 즐겨보세요. \n넉넉한 4,400mAh 용량과 모바일에 최적화된\nmDNle 기술로 배터리 소모를 줄여 최대 전력 효율을 자랑합니다. \n우리가 배터리에 원하던 모든 것이 담겨있죠.",
+    "disclaimer": "* 실제 배터리 사용 시간은 네트워크 환경, 사용된 기능이나 앱, 통화 및 메시지 빈도, \n충전 횟수 등 기타 여러 요인에 따라 다를 수 있습니다. 일반적이고 평균적인 사용 패턴을 \n기준으로, UX Connect Research가 SM-F966 사전 출시 모델을 LTE, 5G 서브6 네트워크를 \n이용해 2025년 6월 12일부터 2025년 6월 20일까지 미국에서 독립적으로 집계하고 측정한 \n실험 결과입니다. 5G mmWave 네트워크로 실험하지 않았습니다.\n* LTE를 이용한 기본 세팅에서 블루투스로 이어폰에 연결된 출시 이전 모델을 기준으로 자사 \n실험실에서 테스트한 것을 기반으로 산출한 결과값입니다. 비디오 재생(장치에 저장된 비디오, \n파일 해상도 720p) 중 배터리 용량 대비 추정 및 배터리 전력 소비에 대한 전류 측정입니다. \n실제 비디오 재생 시간은 네트워크 연결, 설정, 비디오 파일 형식, 화면 밝기, 배터리 상태 및 \n기타 요인에 따라 다를 수 있습니다. 메모리 12GB 기준으로 실험한 수치입니다.\n* 제3자 실험실 조건에서 테스트한 일반적인 결과 값입니다. IEC 표준 61960 요구 사항에 따라 \n테스트된 배터리 샘플 간의 용량 편차를 고려한 추정 평균 값입니다. \n갤럭시 Z 폴드7의 정격 용량은 4,272mAh입니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "rgb(255, 255, 255)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(255, 255, 255)"
+    },
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(212, 212, 212)"
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010051/34197/d368cfa3-1b00-4fa9-9ea8-d070b8dec353.jpg?$FB_TYPE_B_JPG$",
+        "alt": "갤럭시 Z 폴드7이 접혀 있고, 커버 디스플레이 상단에 배터리 아이콘이 있습니다. 배터리 용량은 4,400mAh입니다."
+      }
+    ]
+  },
+  {
+    "index": 28,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_battery Compare",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 갤럭시 Z 폴드4와 비교한 결과입니다.\n* LTE를 이용한 기본 세팅에서 블루투스로 이어폰에 연결된 출시 이전 모델을 기준으로 자사 실험실에서 테스트한 것을 기반으로 산출한 결과값입니다. \n비디오 재생(장치에 저장된 비디오, 파일 해상도 720p) 중 배터리 용량 대비 추정 및 배터리 전력 소비에 대한 전류 측정입니다. \n실제 비디오 재생 시간은 네트워크 연결, 설정, 비디오 파일 형식, 화면 밝기, 배터리 상태 및 기타 요인에 따라 다를 수 있습니다. \n메모리 12GB 기준으로 실험한 수치입니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250701010002/34291/4a4892cb-46c0-42d6-bd06-619f1759d371.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시 Z 폴드7 배터리, 얼마나 오래 지속될까요? 동영상 시청 최대 24시간,갤럭시 Z폴드4 대비 동영상  시청 최대 +4시간"
+      }
+    ]
+  },
+  {
+    "index": 29,
+    "type": "split5050_left",
+    "cptnm": "Galaxy Z Fold7_Space for everything you need",
+    "title": "필요한 모든 것을 위한\n넉넉한 저장 공간",
+    "description": "12GB, 16GB 메모리와 함께 256GB, 512GB, 1TB의\n3가지 저장 공간 옵션을 제공합니다. \n용도에 맞게 자유롭게 선택해 보세요.\n게임을 좋아하거나, 대용량 앱 다운로드, 고해상도의 동영상 촬영을\n자주 하는 경우라면 최대 1TB의 넉넉한 저장 공간을 선택하여 \n용량 부족이나 속도 저하 걱정 없이 소중한 모든 것을 저장할 수도 있죠.",
+    "disclaimer": "* 메모리 및 구매 가능한 스토리지(저장 용량) 옵션은 국가, 지역, 이동통신사에 따라 달라질 수 있습니다. \n실제 사용 가능한 스토리지(저장 용량)는 미리 설치된 소프트웨어에 따라 다를 수 있습니다. \n갤럭시 Z 폴드7의 스토리지(저장 용량) 1TB 모델은 메모리 16GB의 블루 쉐도우, 제트블랙 \n2가지 색상으로만 운영됩니다.",
+    "bgColor": "rgb(0, 0, 0)",
+    "textColor": "rgb(255, 255, 255)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(255, 255, 255)"
+    },
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(212, 212, 212)"
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010053/34199/1733d3a5-b587-4aa8-ba24-40ac77553cc6.jpg?$FB_TYPE_B_JPG$",
+        "alt": "저장 공간을 표현하는 아이콘들이 보입니다. 왼쪽 상단에는 커피가 올려진 갈색 노트가 보이는 모서리가 둥근 사각형 아이콘이 있고 그 옆에 갤럭시 카메라 아이콘이 보입니다. 카메라 아이콘 옆에는 갈색 줄무늬 고양이가 보이는 모서리가 둥근 사각형 아이콘이 있습니다. 가운데에는 Internal storage 표시와 함께 저장 공간이 얼마나 남았는지 표현하는 막대가 있습니다. 보라색은 비디오, 핑크색은 이미지 주황색은 문서 로 나누어 각각의 저장 공간으 표현합니다. 이미지 하단 왼쪽에는 갤럭시 문서 아이콘이 있고 오른족에는 재생버튼이 있는 동영상 아이콘이 보입니다."
+      }
+    ]
+  },
+  {
+    "index": 30,
+    "type": "fullBleed",
+    "cptnm": "Galaxy Z Fold7_Galaxy AI meets the big screen",
+    "title": "",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "left",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010055/34201/cec0bb3f-2b82-4da4-abdc-52b8f43d265b.jpg?$ORIGIN_JPG$",
+        "alt": "대화면에서 펼쳐지는 Galaxy AI 문구와 파란색 별 4개가 보입니다."
+      }
+    ]
+  },
+  {
+    "index": 31,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Edit with detail side-by-side",
+    "title": "한 화면에서 원본과 나란히 비교하며 \n디테일하게 편집해보세요",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "video",
+        "src": "//images.samsung.com/kdp/cms_task/C20250829000269/36313/8ab3744a-5e8b-4fe3-bb6b-f505fc71601a.mp4",
+        "poster": ""
+      }
+    ]
+  },
+  {
+    "index": 32,
+    "type": "stcText",
+    "cptnm": "",
+    "title": "",
+    "description": "포토 어시스트의 원본과 수정본을 나란히 보는 기능으로 \n\n한 화면에서 두 가지 버전을 비교하면서 사진을 편집할 수 있습니다.\n\n객체를 길게 눌러 이동, 삭제 또는 확대하거나 각도를 조정하고 배경을 채워보세요.\n&nbsp;",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": []
+  },
+  {
+    "index": 33,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Edit with detail side-by-side(text)",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 포토 어시스트의 생성형 편집 기능은 네트워크 연결 및 삼성 계정 로그인이 필요합니다. 생성형 편집으로 편집하면 사진 크기가 최대 12MP로 조정되며, \nAI에 의해 이미지가 생성되었음을 나타내기 위해, 저장되는 이미지 결과물 위에 워터마크가 덧씌워집니다. 생성된 결과물의 정확성과 신뢰성은 보장되지 않습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 34,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Go live",
+    "title": "답이 필요할 땐 \n언제든 물어보세요",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "video",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000008/36767/db29016d-137c-4c40-a6e1-4520ed2e5662.mp4",
+        "poster": ""
+      }
+    ]
+  },
+  {
+    "index": 35,
+    "type": "stcText",
+    "cptnm": "",
+    "title": "",
+    "description": "갤럭시 Z 폴드7에서 화면 공유를 사용하여 Gemini Live를 만나보세요. \n\n측면 버튼을 눌러 Gemini Live를 실행하고 자연스럽게 대화하며  실시간으로 정보를 얻어 보세요.\n\n카메라를 활용해 순간을 공유하며 다양한 의견과 아이디어를 바로 요청할 수 있습니다.",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": []
+  },
+  {
+    "index": 36,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Go live",
+    "title": "",
+    "description": "",
+    "disclaimer": "* Gemini는 Google LLC의 상표입니다. 설명을 위해 연출된 예시 이미지로, 결과는 달라질 수 있습니다. \nGemini Live 사용 시 인터넷 연결 및 Google 계정 로그인이 필요합니다. 서비스의 이용 가능 여부는 국가 및 언어, 기기 모델에 따라 다를 수 있습니다. 기능 및 결과는 구독 여부에 따라 다를 수 있습니다. \n특정 기능 및 특정 계정과 호환됩니다. 현재 직접 관리하는 개인 Google 계정이나 관리자가 Gemini 접근을 허용한 직장 또는 학교 계정을 사용할 수 있습니다. \n개인 또는 학교 Google 계정으로 Gemini를 사용하려면 만 13세(또는 거주 국가에서 적용되는 연령) 이상이어야 하며, 직장 계정으로 Gemini를 사용하려면 만 18세 이상이어야 합니다. 결과의 정확성은 보장되지 않습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 37,
+    "type": "fullBleed",
+    "cptnm": "Galaxy Z Flip7_Go live",
+    "title": "",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "left",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250725000120/35525/34e042b5-199d-4569-adac-7a068ff6421c.jpg?$ORIGIN_JPG$",
+        "alt": "Google Gemini 로고가 보입니다."
+      }
+    ]
+  },
+  {
+    "index": 38,
+    "type": "imgBottom",
+    "cptnm": "갤럭시 Z 플립",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 이해를 돕기 위해 순서를 단축한 이미지입니다. 설명을 위해 연출된 예시 이미지로 결과는 달라질 수 있습니다. 답변의 정확성을 확인해보세요. Gemini는 Google LLC의 상표입니다. \n이용 약관이 적용됩니다. 구독 시 Google One, AI 크레딧 및 혜택 약관에 동의하는 것으로 간주됩니다. 프로모션은 2026년 7월 20일에 종료됩니다. \n만 18세 이상만 이용할 수 있습니다. 무료 체험 기간 종료 후에는 월 29,000원의 요금을 내야 사용이 가능하며, 결제 일정 도래 전 사전 동의를 구하는 요청이 있을 예정입니다. \n기기 구매를 취소하면 구독이 취소될 수 있습니다. 자세한 약관은 https://one.google.com/offer/terms-and-conditions/samsung-flipfold7-6month-trial에서 확인하세요.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250901000292/36336/19b54d12-e719-4563-9703-888106ef5284.jpg?$FB_TYPE_A_JPG$",
+        "alt": "2TB 클라우드 스토리지 업그레이드  혜택이 포함된 Google AI Pro를  6개월 동안 무료로 누려보세요. 6개월 무료 체험으로 동영상 생성 모델인 Veo3로\u000b오디오가 포함된 영상을 제작하는 등\u000bGemini의 더 많은 강력한 기능을 누려보세요.\u000b2TB의 안전한 클라우드 스토리지도 함께 제공됩니다."
+      }
+    ]
+  },
+  {
+    "index": 39,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Personalized briefings with Now Brief",
+    "title": "나만을 위한 맞춤형 브리핑\nNow Brief",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250829000267/36311/61a0abb4-34f3-4205-87ed-940fe5de7dbd.jpg?$FB_TYPE_A_JPG$",
+        "alt": "갤럭시 Z 폴드7이 메인 디스플레이가 노출되도록 펼쳐져 있습니다. Now Brief가 활성화되어 있고, 주말 브리핑에는 사진 추억, 예정된 일정, 최신 날씨, 기타 운동 정보가 표시됩니다. 기기 측면에는 에너지 점수와 달리기 정보를 포함한 Now Brief 관련 정보가 추가로 표시됩니다."
+      }
+    ]
+  },
+  {
+    "index": 40,
+    "type": "stcText",
+    "cptnm": "",
+    "title": "",
+    "description": "갤럭시 Z 폴드7의 대화면에서 Now Brief로 새로운 하루의 흐름을 확인해 보세요.\n\n더 커진 메인 디스플레이를 펼쳐서 최신 날씨와 에너지 점수 같은 맞춤형 정보를 한눈에 확인할 수 있습니다.\n&nbsp;",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": []
+  },
+  {
+    "index": 41,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Personalized briefings with Now Brief(text)",
+    "title": "",
+    "description": "",
+    "disclaimer": "* Now Brief 기능을 사용하려면 삼성 계정 로그인이 필요합니다. 서비스의 이용 가능 여부는 국가 및 언어, 기기 모델, 앱에 따라 다를 수 있습니다. 일부 기능은 네트워크 연결이 필요할 수 있습니다. \n사용자는 사진, 비디오, 오디오 파일, 캘린더 이벤트와 같은 기능에 액세스할 수 있는 권한을 허용해야 합니다. 노출 정책에 따라 일상 컨텐츠가 표시되지 않을 수 있습니다. \n일상 컨텐츠에서 제공하는 사진 설명은 사용자의 의도와 일치하지 않을 수 있습니다.\n일정 및 할 일 알림은 삼성 캘린더가 설치되어 있고, 안드로이드 캘린더 데이터베이스를 활용하는 캘린더 앱과 호환되는 경우에만 사용할 수 있습니다. \n쿠폰 알림 기능은 삼성 월렛에 추가된 만료일이 있는 쿠폰에만 사용할 수 있습니다. \n에너지 점수를 확인하려면 삼성 갤럭시 워치나 삼성 갤럭시 링에서 측정한 건강 데이터를 삼성 헬스 앱과 동기화해야 합니다. 결과는 개인적인 참고용일 뿐입니다. 의료 전문가에게 조언을 구하시기 바랍니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 42,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Assist by Galaxy AI(title)",
+    "title": "Galaxy AI로 스마트하고 간편하게 요약 정리",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 43,
+    "type": "carousel",
+    "cptnm": "Galaxy Z Fold7_Assist by Galaxy AI(carousel)",
+    "title": "",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250714000213/35132/86913557-ac5a-4f33-bbfb-3858eeb690e0.jpg?$ORIGIN_JPG$",
+        "alt": "갤럭시 Z 폴드7의 커버 디스플레이에서 왼쪽 화면에 떠있는 웹사이트의 텍스트 내용을 Galaxy AI가 요약 생성하고 있습니다. 파란색 커서를 따라 폴드7 커버 디스플레이 중간에 웹사이트에 대해 요약되는 효과가 보입니다."
+      },
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250714000213/35132/87fc41fb-ca4b-4c2c-b7e4-1eaab5a16702.jpg?$ORIGIN_JPG$",
+        "alt": "Galaxy AI가 녹음 내용을 요약하고 관련 키워드를 추출한 다음, 내용을 기반으로 일정을 제안합니다."
+      }
+    ]
+  },
+  {
+    "index": 44,
+    "type": "textSimple",
+    "cptnm": "Galaxy Z Fold7_Assist by Galaxy AI(text)",
+    "title": "",
+    "description": "",
+    "disclaimer": "* 글쓰기 어시스트의 글쓰기 기능은 네트워크 연결 및 삼성 계정 로그인이 필요합니다. \n해당 기능은 특정 글자 수가 충족되면 활성화됩니다. 서비스 이용 가능 여부는 언어에 따라 다를 수 있습니다. 결과의 정확성은 보장되지 않습니다.\n* 텍스트 변환 어시스트의 텍스트 변환 및 요약 기능은 네트워크 연결 및 삼성 계정 로그인이 필요합니다. \n텍스트 변환 어시스트 기능은 사전 설치된 삼성 전화 앱 및 삼성 노트, 삼성 통역 앱을 사용하여 녹음된 파일에서만 사용 가능합니다. \n삼성 전화 앱의 음성 녹음 기능은 일부 국가에서 지원되지 않을 수 있습니다. 오디오 파일은 3시간 이내의 길이일 경우 처리 가능합니다. \n요약 기능은 일정 문자 수 이상, 제한 글자 수 미만일 때 사용할 수 있습니다.  서비스 이용 가능 여부는 언어 및 지역에 따라 다를 수 있습니다. \n일부 언어는 언어 팩 다운로드가 필요할 수 있습니다. 결과의 정확성은 보장되지 않습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "center",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": []
+  },
+  {
+    "index": 45,
+    "type": "fullBleed",
+    "cptnm": "Galaxy Z Fold7_Your privacy. Secured(1)",
+    "title": "",
+    "description": "",
+    "disclaimer": "",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "",
+    "textAlign": "left",
+    "titleStyles": {},
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010067/34213/39c8ed3a-c5c2-4baf-b8ab-7efdbd6b4c64.jpg?$ORIGIN_JPG$",
+        "alt": "삼성 녹스 볼트의 로고가 떠있는 갤럭시 Z 폴드7이 보입니다."
+      }
+    ]
+  },
+  {
+    "index": 46,
+    "type": "imgBottom",
+    "cptnm": "Galaxy Z Fold7_Your privacy. Secured(2)",
+    "title": "AI 시대에 걸맞은 \n철저한 개인정보 보호",
+    "description": "",
+    "disclaimer": "* Personal Data Engine은 '퍼스널 데이터 인텔리전스' 메뉴가 켜져 있을 때만 작동합니다. '퍼스널 데이터 인텔리전스' 메뉴를 끄면 분석된 데이터는 삭제됩니다. \n현재 Personal Data Engine은 삼성 기본 앱 내에서만 데이터를 분석하고 있습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {},
+    "media": [
+      {
+        "type": "image",
+        "src": "//images.samsung.com/kdp/cms_task/C20250625010068/34214/67317b31-3e4f-465c-bad7-9483ebf4bae5.jpg?$FB_TYPE_A_JPG$",
+        "alt": "온 디바이스 보호 개인화된 모바일 경험을 제공하기 위한 Personal Data Engine의 사용자 데이터는 삼성 녹스 볼트(Samsung Knox Vault) 플랫폼을 통해 안전하게 보호됩니다. 직접 선택하는 데이터 처리 방식 AI시대 더욱 소중한 개인정보, 갤럭시라면 안심할 수 있죠. Galaxy AI 사용시 데이터를 기기 내에서 처리할지, 클라우드에서 처리할지 직접 선택할 수 있습니다. 기기 간 연결을 통한 보안 강화 Knox Matrix Trust Chain 기술을 사용해 연결된 갤럭시 기기 전반의 보안을 더욱 강화했습니다. 이제 갤럭시 스마트폰에서 연결된 다른 기기의 보안 상태 및 보안 위협을 직접 모니터링할 수 있습니다."
+      }
+    ]
+  },
+  {
+    "index": 47,
+    "type": "split5050_left",
+    "cptnm": "Galaxy Z Fold7_One UI 8. All new for Fold",
+    "title": "완전히 새로운\n갤럭시 Z 폴드7을 위해 \n진화한 One UI 8",
+    "description": "사용자에게 최적화된 최고의 One UI 8을 만나보세요.\n더 커진 메인 디스플레이와 커버 디스플레이를 위해\n완전히 새롭게 설계했습니다.\n취향에 맞게 꾸밀 수 있는 맞춤형 배경화면과 반응형 날씨 및 \n갤러리 위젯으로 나만을 위한 특별한 갤럭시 Z 폴드7을 완성할 수 있죠.",
+    "disclaimer": "* 일부 위젯 기능을 사용하기 위해서는 네트워크 연결 및 삼성 계정 로그인이 \n필요할 수 있습니다. 앱에서 지원되는 기능의 이용 가능 여부는 국가에 따라 다를 수 있습니다.\n* 날씨 배경화면 기능을 사용하려면 날씨 데이터를 수신하기 위해 네트워크 연결이 필요합니다. \n기기에 데이터가 수신되면 네트워크 연결 없이도 날씨 데이터를 반영할 수 있습니다. \n서비스는 지역 날씨 정보 업데이트에 의존하므로 실시간 날씨 반영이 지연될 수 있습니다. \n일부 실내, 야간 및 저해상도 사진은 호환되지 않을 수 있습니다. \n생성된 결과의 정확성과 신뢰성은 보장되지 않습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": [
+      {
+        "type": "video",
+        "src": "//images.samsung.com/kdp/cms_task/C20250924000012/36771/c2ba075e-ce85-4546-807e-14013d34e808.mp4",
+        "poster": ""
+      }
+    ]
+  },
+  {
+    "index": 48,
+    "type": "split5050_right",
+    "cptnm": "Galaxy Z Fold7_Made to be just your type",
+    "title": "쓸수록 돋보이는\n새로운 디자인",
+    "description": "갤럭시 Z 폴드7의 커버 디스플레이는 164.8mm로 더 넓어지고,\n바디는 더 슬림해져 그립감이 개선되고 타이핑은 더욱 자연스럽죠.\n이제 한 손으로도 쉽고 편하게 작업을 완료하세요.",
+    "disclaimer": "* 이전 갤럭시 Z 폴드 시리즈와 비교한 결과입니다.\n* 갤럭시 Z 폴드7의 커버 디스플레이 크기는 코너 곡선을 제외하고 직각화하여 \n대각선으로 측정 시 164.8mm, 직각화하지 않고 측정 시 164.2mm입니다. \n둥근 모서리와 카메라 홀로 인해 실제 보이는 영역은 디스플레이 크기보다 작습니다.",
+    "bgColor": "rgb(255, 255, 255)",
+    "textColor": "rgb(0, 0, 0)",
+    "textAlign": "center",
+    "titleStyles": {
+      "fontSize": "46.2208px",
+      "fontWeight": 700,
+      "lineHeight": 1.17,
+      "color": "rgb(0, 0, 0)"
+    },
+    "descStyles": {
+      "fontSize": "16px",
+      "fontWeight": 400,
+      "lineHeight": 1.88,
+      "color": "rgb(0, 0, 0)"
+    },
+    "media": [
+      {
+        "type": "video",
+        "src": "//images.samsung.com/kdp/cms_task/C20250716000016/35180/b9d04fd4-8a4e-46d5-98f7-723e5aa37973.mp4",
+        "poster": ""
+      }
+    ]
+  }
+]

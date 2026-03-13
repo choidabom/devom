@@ -7,6 +7,7 @@ import { buildLandingPage } from "./landingPage"
 import { buildFoodProduct } from "./foodProduct"
 import { buildProductContent } from "./productContent"
 import { buildGalaxyFlip } from "./galaxyFlip"
+import { buildGalaxyFold } from "./galaxyFold"
 
 export interface TemplateMetadata {
   id: string
@@ -27,6 +28,7 @@ export const TEMPLATES: TemplateMetadata[] = [
   { id: 'food-product', name: 'Food Product', description: 'Fresh food product page with reviews and delivery info', category: 'marketing' },
   { id: 'product-content', name: 'Product Content', description: 'Product description content for e-commerce platforms', category: 'content' },
   { id: 'galaxy-flip', name: 'Galaxy Z Flip7', description: 'Smartphone product features showcase page', category: 'marketing' },
+  { id: 'galaxy-fold', name: 'Galaxy Z Fold7', description: 'Foldable smartphone product features showcase page', category: 'marketing' },
 ]
 
 export const TEMPLATE_BUILDERS: Record<string, TemplateBuilder> = {
@@ -39,4 +41,5 @@ export const TEMPLATE_BUILDERS: Record<string, TemplateBuilder> = {
   'food-product': buildFoodProduct,
   'product-content': buildProductContent,
   'galaxy-flip': buildGalaxyFlip,
+  'galaxy-fold': buildGalaxyFold,
 }
