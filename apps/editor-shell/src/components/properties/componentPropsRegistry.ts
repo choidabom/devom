@@ -16,6 +16,7 @@ export const COMPONENT_PROPS: Record<string, PropField[]> = {
     { key: "label", label: "Label", type: "text", default: "Button", singleOnly: true },
     { key: "variant", label: "Variant", type: "select", options: ["default", "destructive", "outline", "secondary", "ghost", "link"], default: "default" },
     { key: "size", label: "Size", type: "select", options: ["default", "sm", "lg", "icon"], default: "default" },
+    { key: "formRole", label: "Form Role", type: "select", options: ["none", "submit", "reset"], default: "none" },
   ],
   "sc:card": [
     { key: "title", label: "Title", type: "text", default: "", singleOnly: true },

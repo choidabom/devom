@@ -429,8 +429,20 @@ export const ElementRenderer = observer(function ElementRenderer({
 
   const content = getElementContent(element.type, element.props, editorMode)
 
+  // Determine wrapper tag: form elements use <form> in interact mode
+  const isFormInteract = element.type === "form" && editorMode === "interact"
+  const WrapperTag = isFormInteract ? "form" : "div"
+
+  // Form submit handler
+  const handleFormSubmit = isFormInteract
+    ? (e: React.FormEvent) => {
+        e.preventDefault()
+        // Form runtime will handle this in Task 9
+      }
+    : undefined
+
   return (
-    <div
+    <WrapperTag
       data-element-id={element.id}
       style={{
         ...element.style,
@@ -459,6 +471,7 @@ export const ElementRenderer = observer(function ElementRenderer({
       }}
       onClick={handleClick}
       onPointerDown={inAutoLayout ? handleAutoLayoutPointerDown : handlePointerDown}
+      onSubmit={handleFormSubmit}
     >
       {content}
       {hasContentWrapper ? (
@@ -520,6 +533,6 @@ export const ElementRenderer = observer(function ElementRenderer({
           />
         ))
       )}
-    </div>
+    </WrapperTag>
   )
 })

@@ -6,6 +6,19 @@ import { T } from "../theme"
 import { SizingSection } from "./SizingSection"
 import { PropSection, PropGrid, PropCompact, PropSelect, PropRow, PropToggleRow, ColorPickerPopover } from "./properties/PropWidgets"
 import { COMPONENT_PROPS } from "./properties/componentPropsRegistry"
+import type { FormFieldConfig } from "@devom/editor-core"
+
+const FORM_FIELD_TYPES = new Set(["sc:input", "sc:textarea", "sc:checkbox", "sc:switch", "sc:select", "sc:radio-group", "sc:slider"])
+
+const VALIDATION_FIELDS: Record<string, string[]> = {
+  "sc:input": ["required", "min", "max", "pattern", "message"],
+  "sc:textarea": ["required", "min", "max", "pattern", "message"],
+  "sc:checkbox": ["required", "message"],
+  "sc:switch": ["required", "message"],
+  "sc:select": ["required", "message"],
+  "sc:radio-group": ["required", "message"],
+  "sc:slider": ["min", "max", "message"],
+}
 
 export const PropertiesPanel = observer(function PropertiesPanel() {
   const elements = selectionStore.selectedElements
@@ -329,6 +342,14 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
 
       {/* Section Props */}
       {!isMulti && element.role && <SectionPropsSection element={element} inputStyle={inputStyle} syncToCanvas={syncToCanvas} />}
+
+      {/* Form Field Section */}
+      {!isMulti && FORM_FIELD_TYPES.has(element.type) && (
+        <FormFieldSection element={element} updateFormField={(formField) => updateFormField(element.id, formField)} syncToCanvas={syncToCanvas} />
+      )}
+
+      {/* Form Container Section */}
+      {!isMulti && element.type === "form" && <FormContainerSection element={element} updateProp={updateProp} />}
     </div>
   )
 })

@@ -320,6 +320,9 @@ export function useShellMessages({
           }
           break
         }
+        case "FORM_SUBMIT_RESULT":
+          console.log("[Form Submit]", msg.payload.formId, msg.payload.values)
+          break
       }
     })
 

@@ -219,6 +219,8 @@ const registry: Record<string, ContentRenderer> = {
       </RadioGroup>
     )
   },
+
+  form: () => null, // children rendered by ElementRenderer, form tag wraps them
 }
 
 export function getElementContent(type: string, props: Record<string, unknown>, editorMode: "edit" | "interact"): React.ReactNode {
