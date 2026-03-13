@@ -1,21 +1,35 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { observer } from "mobx-react-lite"
 import html2canvas from "html2canvas"
 import { jsPDF } from "jspdf"
-import { exportToJSON, exportToJSX, exportToHTML, convertToPageLayout } from "@devom/editor-core"
+import { exportToJSON, exportToJSX, exportToHTML, exportToFormCode, convertToPageLayout } from "@devom/editor-core"
 import { documentStore } from "../stores"
 import { T } from "../theme"
 
 export const ExportModal = observer(function ExportModal({ onClose }: { onClose: () => void }) {
-  const [format, setFormat] = useState<"html" | "jsx" | "json">("html")
+  const [format, setFormat] = useState<"html" | "jsx" | "json" | "form">("html")
   const [copied, setCopied] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const data = documentStore.toSerializable()
   // Always export as page layout (flex column) regardless of canvas/page mode
   const exportElements = documentStore.canvasMode === "canvas" ? convertToPageLayout(data.elements, data.rootId) : data.elements
 
+  // Check if document has form elements
+  const hasForms = useMemo(() => {
+    for (const el of Object.values(data.elements)) {
+      if (el.type === "form") return true
+    }
+    return false
+  }, [data.elements])
+
   const output =
-    format === "html" ? exportToHTML(exportElements, data.rootId) : format === "jsx" ? exportToJSX(exportElements, data.rootId) : exportToJSON(exportElements, data.rootId)
+    format === "html"
+      ? exportToHTML(exportElements, data.rootId)
+      : format === "jsx"
+        ? exportToJSX(exportElements, data.rootId)
+        : format === "form"
+          ? exportToFormCode(data.elements, data.rootId)
+          : exportToJSON(exportElements, data.rootId)
 
   const handleCopy = () => {
     navigator.clipboard.writeText(output)
@@ -125,6 +139,24 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
                 {f}
               </button>
             ))}
+            {hasForms && (
+              <button
+                onClick={() => setFormat("form")}
+                style={{
+                  padding: "6px 14px",
+                  background: format === "form" ? T.accent : "transparent",
+                  color: format === "form" ? "#fff" : T.text,
+                  border: `1px solid ${format === "form" ? T.accent : T.inputBorder}`,
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  textTransform: "uppercase",
+                }}
+              >
+                FORM
+              </button>
+            )}
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button
