@@ -1,0 +1,45 @@
+import type { DocumentStore } from "../../stores/DocumentStore"
+import { buildDashboard } from "./dashboard"
+import { buildLoginForm } from "./loginForm"
+import { buildPricingPage } from "./pricingPage"
+import { buildSettingsPage } from "./settingsPage"
+import { buildLandingPage } from "./landingPage"
+import { buildFoodProduct } from "./foodProduct"
+import { buildProductContent } from "./productContent"
+import { buildGalaxyFlip } from "./galaxyFlip"
+import { buildGalaxyFold } from "./galaxyFold"
+
+export interface TemplateMetadata {
+  id: string
+  name: string
+  description: string
+  category: 'dashboard' | 'form' | 'marketing' | 'content'
+}
+
+export type TemplateBuilder = (store: DocumentStore) => void
+
+export const TEMPLATES: TemplateMetadata[] = [
+  { id: 'blank', name: 'Blank Canvas', description: 'Empty canvas to start from scratch', category: 'content' },
+  { id: 'dashboard', name: 'SaaS Dashboard', description: 'Analytics dashboard with stats, table, and team', category: 'dashboard' },
+  { id: 'login-form', name: 'Login Form', description: 'Authentication form with social login', category: 'form' },
+  { id: 'pricing', name: 'Pricing Page', description: 'Three-tier pricing with feature comparison', category: 'marketing' },
+  { id: 'settings', name: 'Settings Page', description: 'Account settings with tabs, forms and switches', category: 'form' },
+  { id: 'landing', name: 'Product Detail', description: 'Korean e-commerce style product detail page', category: 'marketing' },
+  { id: 'food-product', name: 'Food Product', description: 'Fresh food product page with reviews and delivery info', category: 'marketing' },
+  { id: 'product-content', name: 'Product Content', description: 'Product description content for e-commerce platforms', category: 'content' },
+  { id: 'galaxy-flip', name: 'Galaxy Z Flip7', description: 'Smartphone product features showcase page', category: 'marketing' },
+  { id: 'galaxy-fold', name: 'Galaxy Z Fold7', description: 'Foldable smartphone product features showcase page', category: 'marketing' },
+]
+
+export const TEMPLATE_BUILDERS: Record<string, TemplateBuilder> = {
+  blank: (store) => store.resetDocument(),
+  dashboard: buildDashboard,
+  'login-form': buildLoginForm,
+  'pricing': buildPricingPage,
+  'settings': buildSettingsPage,
+  'landing': buildLandingPage,
+  'food-product': buildFoodProduct,
+  'product-content': buildProductContent,
+  'galaxy-flip': buildGalaxyFlip,
+  'galaxy-fold': buildGalaxyFold,
+}
