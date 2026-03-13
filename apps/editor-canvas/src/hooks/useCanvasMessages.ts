@@ -182,7 +182,7 @@ export function useCanvasMessages({
         }
         break
     }
-  }, [pageViewport])
+  }, [canvasMode, pageViewport])
 
   return { handleShellMessage }
 }

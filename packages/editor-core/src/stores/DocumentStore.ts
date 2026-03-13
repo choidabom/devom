@@ -112,7 +112,7 @@ export class DocumentStore {
     }
 
     this.elements.set(id, element)
-    parent.children.push(id)
+    parent.children = [...parent.children, id]
     return id
   }
 
@@ -127,7 +127,7 @@ export class DocumentStore {
     if (element.parentId) {
       const parent = this.elements.get(element.parentId)
       if (parent && !parent.children.includes(element.id)) {
-        parent.children.push(element.id)
+        parent.children = [...parent.children, element.id]
       }
     }
   }
@@ -175,8 +175,7 @@ export class DocumentStore {
 
     const parent = element.parentId ? this.elements.get(element.parentId) : undefined
     if (parent) {
-      const idx = parent.children.indexOf(id)
-      if (idx !== -1) parent.children.splice(idx, 1)
+      parent.children = parent.children.filter(c => c !== id)
     }
 
     this.elements.delete(id)
@@ -266,21 +265,19 @@ export class DocumentStore {
 
     const oldParent = element.parentId ? this.elements.get(element.parentId) : undefined
     if (oldParent) {
-      const idx = oldParent.children.indexOf(id)
-      if (idx !== -1) oldParent.children.splice(idx, 1)
+      oldParent.children = oldParent.children.filter(c => c !== id)
     }
 
     element.parentId = newParentId
-    newParent.children.splice(index, 0, id)
+    newParent.children = [...newParent.children.slice(0, index), id, ...newParent.children.slice(index)]
   }
 
   reorderChild(parentId: string, childId: string, newIndex: number) {
     const parent = this.elements.get(parentId)
     if (!parent) return
-    const oldIndex = parent.children.indexOf(childId)
-    if (oldIndex === -1) return
-    parent.children.splice(oldIndex, 1)
-    parent.children.splice(newIndex, 0, childId)
+    if (!parent.children.includes(childId)) return
+    const filtered = parent.children.filter(c => c !== childId)
+    parent.children = [...filtered.slice(0, newIndex), childId, ...filtered.slice(newIndex)]
   }
 
   reparentElement(id: string, newParentId: string, index: number, dropPosition?: { x: number; y: number }) {
@@ -290,12 +287,11 @@ export class DocumentStore {
 
     const oldParent = element.parentId ? this.elements.get(element.parentId) : undefined
     if (oldParent) {
-      const idx = oldParent.children.indexOf(id)
-      if (idx !== -1) oldParent.children.splice(idx, 1)
+      oldParent.children = oldParent.children.filter(c => c !== id)
     }
 
     element.parentId = newParentId
-    newParent.children.splice(index, 0, id)
+    newParent.children = [...newParent.children.slice(0, index), id, ...newParent.children.slice(index)]
 
     if (newParent.layoutMode === 'flex') {
       const { position, left, top, ...rest } = element.style

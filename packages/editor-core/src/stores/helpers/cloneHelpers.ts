@@ -67,7 +67,7 @@ export function cloneTree(
 
     elements.set(newId, cloned)
     if (isTop) {
-      target.children.push(newId)
+      target.children = [...target.children, newId]
       newTopIds.push(newId)
     }
   }

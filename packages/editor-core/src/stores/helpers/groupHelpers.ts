@@ -141,7 +141,7 @@ export function groupElements(
     }
 
     el.parentId = groupId
-    group.children.push(id)
+    group.children = [...group.children, id]
   }
 
   lca.children = [

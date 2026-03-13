@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import type { EditorMessage, ElementType, SectionRole } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 
@@ -174,14 +174,27 @@ export function useShellMessages({
     })
   }, [getVisibleCanvasInfo, setEditorMode, setShowPanels])
 
+  // Refs to avoid stale closures in the bridge message handler
+  const handlersRef = useRef({
+    editorMode, handleDelete, handleUndo, handleRedo,
+    handleCopy, handleCut, handlePaste, handleDuplicate,
+    getVisibleCanvasInfo, setCanvasZoom,
+  })
+  handlersRef.current = {
+    editorMode, handleDelete, handleUndo, handleRedo,
+    handleCopy, handleCut, handlePaste, handleDuplicate,
+    getVisibleCanvasInfo, setCanvasZoom,
+  }
+
   useEffect(() => {
     const dispose = bridge.onMessage((msg: EditorMessage) => {
+      const h = handlersRef.current
       switch (msg.type) {
         case "CANVAS_READY": {
           const data = documentStore.toSerializable()
           bridge.send({ type: "SYNC_DOCUMENT", payload: data })
           if (documentStore.canvasMode !== 'canvas') {
-            { const info = getVisibleCanvasInfo(); bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: documentStore.canvasMode, ...info } }) }
+            { const info = h.getVisibleCanvasInfo(); bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: documentStore.canvasMode, ...info } }) }
             setCanvasMode(documentStore.canvasMode)
           }
           break
@@ -219,24 +232,24 @@ export function useShellMessages({
           break
         case "KEY_EVENT": {
           const k = msg.payload
-          if (k.key === "Escape" && editorMode === "interact") {
+          if (k.key === "Escape" && h.editorMode === "interact") {
             setEditorMode("edit")
             bridge.send({ type: "SET_MODE", payload: { mode: "edit" } })
             setShowPanels(true)
             return
           }
           if (k.key === "Delete" || k.key === "Backspace") {
-            handleDelete()
+            h.handleDelete()
           }
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyZ") {
-            if (k.shiftKey) handleRedo()
-            else handleUndo()
+            if (k.shiftKey) h.handleRedo()
+            else h.handleUndo()
           }
           if ((k.metaKey || k.ctrlKey) && k.code === "Backslash") { setShowPanels(prev => !prev); return }
-          if ((k.metaKey || k.ctrlKey) && k.code === "KeyC") handleCopy()
-          if ((k.metaKey || k.ctrlKey) && k.code === "KeyX") handleCut()
-          if ((k.metaKey || k.ctrlKey) && k.code === "KeyV") handlePaste()
-          if ((k.metaKey || k.ctrlKey) && k.code === "KeyD") handleDuplicate()
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyC") h.handleCopy()
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyX") h.handleCut()
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyV") h.handlePaste()
+          if ((k.metaKey || k.ctrlKey) && k.code === "KeyD") h.handleDuplicate()
           break
         }
         case "REORDER_CHILD":
@@ -252,7 +265,7 @@ export function useShellMessages({
         case "SET_PAGE_VIEWPORT_REQUEST":
           documentStore.setPageViewport(msg.payload.width)
           syncToCanvas()
-          { const info = getVisibleCanvasInfo(); bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: msg.payload.width, ...info } }) }
+          { const info = h.getVisibleCanvasInfo(); bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: msg.payload.width, ...info } }) }
           break
         case "INSERT_SECTION_REQUEST":
           historyStore.pushSnapshot()
@@ -284,7 +297,7 @@ export function useShellMessages({
           break
         }
         case "ZOOM_CHANGED":
-          setCanvasZoom(msg.payload.zoom)
+          h.setCanvasZoom(msg.payload.zoom)
           break
         case "UNGROUP_ELEMENTS_REQUEST": {
           const ids = msg.payload.ids.filter((id: string) => {

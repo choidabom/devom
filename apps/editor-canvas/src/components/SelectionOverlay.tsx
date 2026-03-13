@@ -121,6 +121,7 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
       target.releasePointerCapture(e.pointerId)
       target.removeEventListener("pointermove", onMove)
       target.removeEventListener("pointerup", onUp)
+      target.removeEventListener("pointercancel", onCancel)
       resizeCleanupRef.current = null
     }
 
@@ -164,9 +165,12 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
       })
     }
 
+    const onCancel = () => { cleanup() }
+
     resizeCleanupRef.current = cleanup
     target.addEventListener("pointermove", onMove)
     target.addEventListener("pointerup", onUp)
+    target.addEventListener("pointercancel", onCancel)
   }
 
   return (
