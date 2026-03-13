@@ -43,6 +43,22 @@ const registry: Record<string, ContentRenderer> = {
     </div>
   ),
 
+  video: (props) => props.src ? (
+    <video
+      src={String(props.src)}
+      autoPlay={props.autoplay !== false}
+      muted={props.muted !== false}
+      loop={props.loop !== false}
+      controls={Boolean(props.controls)}
+      playsInline
+      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+    />
+  ) : (
+    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>
+      Video
+    </div>
+  ),
+
   "sc:button": (props) => (
     <Button
       variant={(props.variant as "default" | "destructive" | "outline" | "secondary" | "ghost" | "link") ?? "default"}

@@ -4,6 +4,7 @@ export type ElementType =
   | "div"
   | "text"
   | "image"
+  | "video"
   | "button"
   | "input"
   | "flex"
@@ -145,6 +146,7 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
     top: 100,
     fontSize: 16,
     color: "#1a202c",
+    whiteSpace: "pre-line",
   },
   image: {
     position: "absolute",
@@ -154,6 +156,15 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
     height: 200,
     objectFit: "cover",
     backgroundColor: "#cbd5e0",
+  },
+  video: {
+    position: "absolute",
+    left: 100,
+    top: 100,
+    width: 400,
+    height: 300,
+    objectFit: "cover",
+    backgroundColor: "#1a1a2e",
   },
   button: {
     position: "absolute",

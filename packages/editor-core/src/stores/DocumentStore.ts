@@ -16,11 +16,13 @@ export class DocumentStore {
   viewport = { width: 1280, height: 800 }
   canvasMode: CanvasMode = 'canvas'
   pageViewport: PageViewportWidth = 1280
+  currentTemplateId: string | null = null
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true })
     this.initRoot()
-    this.loadTemplate('food-product')
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('devom-editor-template') : null
+    this.loadTemplate(saved || 'food-product')
   }
 
   private initRoot() {
@@ -55,6 +57,10 @@ export class DocumentStore {
     this.elements.clear()
     this.initRoot()
     builder(this)
+    this.currentTemplateId = templateId
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('devom-editor-template', templateId)
+    }
   }
 
   resetDocument() {

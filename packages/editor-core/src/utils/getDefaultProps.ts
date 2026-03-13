@@ -6,6 +6,8 @@ export function getDefaultProps(type: ElementType): Record<string, unknown> {
       return { content: "Text" }
     case "image":
       return { src: "", alt: "Image" }
+    case "video":
+      return { src: "", autoplay: true, muted: true, loop: true, controls: false }
     case "button":
       return { label: "Button" }
     case "input":

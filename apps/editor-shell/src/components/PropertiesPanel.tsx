@@ -207,6 +207,11 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
         <ImageSection element={element} updateProp={updateProp} updateStyle={updateStyle} />
       )}
 
+      {/* Video Properties */}
+      {!isMulti && element.type === "video" && (
+        <VideoSection element={element} updateProp={updateProp} updateStyle={updateStyle} />
+      )}
+
       {/* Text Content */}
       {!isMulti && element.type === "text" && (
         <PropSection title="Text">
@@ -424,6 +429,18 @@ function ImageSection({ element, updateProp, updateStyle }: { element: EditorEle
         Change Image
       </button>
       <div style={{ marginBottom: 6 }}>
+        <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>URL</div>
+        <input
+          value={src.startsWith('data:') ? '' : src}
+          onChange={e => updateProp('src', e.target.value)}
+          style={{
+            width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+            borderRadius: 4, background: T.inputBg, color: T.text, boxSizing: 'border-box',
+          }}
+          placeholder="https://..."
+        />
+      </div>
+      <div style={{ marginBottom: 6 }}>
         <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>Alt Text</div>
         <input
           value={alt}
@@ -433,6 +450,50 @@ function ImageSection({ element, updateProp, updateStyle }: { element: EditorEle
             borderRadius: 4, background: T.inputBg, color: T.text, boxSizing: 'border-box',
           }}
           placeholder="Describe the image"
+        />
+      </div>
+      <div>
+        <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>Object Fit</div>
+        <select
+          value={objectFit}
+          onChange={e => updateStyle('objectFit', e.target.value)}
+          style={{
+            width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+            borderRadius: 4, background: T.inputBg, color: T.text,
+          }}
+        >
+          <option value="cover">Cover</option>
+          <option value="contain">Contain</option>
+          <option value="fill">Fill</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+    </div>
+  )
+}
+
+function VideoSection({ element, updateProp, updateStyle }: { element: EditorElement; updateProp: (k: string, v: string) => void; updateStyle: (k: string, v: string) => void }) {
+  const src = String(element.props.src ?? '')
+  const objectFit = String(element.style.objectFit ?? 'cover')
+
+  return (
+    <div style={{ padding: "8px 12px", borderBottom: `1px solid ${T.border}`, marginBottom: 10 }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: T.text, marginBottom: 8 }}>Video</div>
+      {src && (
+        <div style={{ marginBottom: 8, borderRadius: 6, overflow: 'hidden', border: `1px solid ${T.inputBorder}` }}>
+          <video src={src} muted style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
+        </div>
+      )}
+      <div style={{ marginBottom: 6 }}>
+        <div style={{ fontSize: 10, color: T.textSub, marginBottom: 2 }}>URL</div>
+        <input
+          value={src}
+          onChange={e => updateProp('src', e.target.value)}
+          style={{
+            width: '100%', padding: '4px 6px', fontSize: 11, border: `1px solid ${T.inputBorder}`,
+            borderRadius: 4, background: T.inputBg, color: T.text, boxSizing: 'border-box',
+          }}
+          placeholder="https://..."
         />
       </div>
       <div>

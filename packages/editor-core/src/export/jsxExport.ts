@@ -310,6 +310,7 @@ function getHtmlTag(el: EditorElement): string {
     case "button": return "button"
     case "input": return "input"
     case "image": return "img"
+    case "video": return "video"
     default: return "div"
   }
 }
@@ -322,6 +323,7 @@ function getHtmlContent(el: EditorElement): string {
 
 function getHtmlPropsString(el: EditorElement): string {
   if (el.type === "image" && el.props.src) return ` src="${escapeHtml(String(el.props.src))}" alt="${escapeHtml(String(el.props.alt ?? ""))}"`
+  if (el.type === "video" && el.props.src) return ` src="${escapeHtml(String(el.props.src))}"${el.props.autoplay !== false ? ' autoPlay' : ''}${el.props.muted !== false ? ' muted' : ''}${el.props.loop !== false ? ' loop' : ''}${el.props.controls ? ' controls' : ''} playsInline`
   if (el.type === "input") return ` placeholder="${escapeHtml(String(el.props.placeholder ?? ""))}"`
   return ""
 }

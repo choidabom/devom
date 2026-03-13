@@ -60,6 +60,20 @@ function renderHTML(
     return
   }
 
+  if (el.type === "video") {
+    const attrs = [
+      `style="${escapeHtml(cssToInline(style))}"`,
+      `src="${escapeHtml(String(el.props.src ?? ""))}"`,
+      el.props.autoplay !== false ? 'autoplay' : '',
+      el.props.muted !== false ? 'muted' : '',
+      el.props.loop !== false ? 'loop' : '',
+      el.props.controls ? 'controls' : '',
+      'playsinline',
+    ].filter(Boolean).join(' ')
+    lines.push(`${pad}<video ${attrs}></video>`)
+    return
+  }
+
   if (el.type === "button") {
     lines.push(`${pad}<button style="${escapeHtml(cssToInline(style))}">${escapeHtml(String(el.props.label ?? "Button"))}</button>`)
     return

@@ -204,6 +204,7 @@ export const App = observer(function App() {
             onToggleCanvasMode={handleToggleCanvasMode}
             onAddSection={handleAddSection}
             onLoadTemplate={handleLoadTemplate}
+            currentTemplateId={documentStore.currentTemplateId}
           />
         </div>
       )}

@@ -5,7 +5,7 @@ import {
   AlignLeft, AlignCenterHorizontal, AlignRight,
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowLeftRight, ArrowUpDown,
-  PanelTop, LayoutDashboard, LayoutTemplate, FileDown,
+  PanelTop, LayoutDashboard, LayoutTemplate, FileDown, Check,
 } from "lucide-react"
 import type { ElementType, SectionRole } from "@devom/editor-core"
 import { TEMPLATES } from "@devom/editor-core"
@@ -31,6 +31,7 @@ interface ToolbarProps {
   onToggleCanvasMode: () => void
   onAddSection?: (role: SectionRole) => void
   onLoadTemplate?: (templateId: string) => void
+  currentTemplateId?: string | null
 }
 
 const S = 15
@@ -67,7 +68,8 @@ const SECTION_PRESETS: { role: SectionRole; label: string }[] = [
   { role: 'footer', label: 'Footer' },
 ]
 
-export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection, onLoadTemplate }: ToolbarProps) {
+export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete, onAlign, canUndo, canRedo, hasSelection, multiSelected, editorMode, onToggleMode, canvasMode, onToggleCanvasMode, onAddSection, onLoadTemplate, currentTemplateId }: ToolbarProps) {
+  const currentTemplateName = TEMPLATES.find(t => t.id === currentTemplateId)?.name
   const [showShadcn, setShowShadcn] = useState(false)
   const [showSections, setShowSections] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
@@ -234,7 +236,9 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
         <div ref={templatesDropRef} style={{ position: "relative" }}>
           <ToolBtn
             wide
-            icon={<span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 12, fontWeight: 600 }}>Templates <ChevronDown size={10} /></span>}
+            icon={<span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 12, fontWeight: 600 }}>
+              {currentTemplateName ?? "Templates"} <ChevronDown size={10} />
+            </span>}
             title="Load Template"
             onClick={() => setShowTemplates(v => !v)}
             active={showTemplates}
@@ -245,26 +249,32 @@ export function Toolbar({ onAdd, onUndo, onRedo, onExport, onImportJSX, onDelete
               background: "#fff", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
               border: "1px solid #e2e8f0", padding: 4, zIndex: 200, minWidth: 220,
             }}>
-              {TEMPLATES.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => {
-                    if (confirm('Replace current document with template?')) {
-                      onLoadTemplate?.(t.id)
-                    }
-                    setShowTemplates(false)
-                  }}
-                  style={{
-                    display: "block", width: "100%", textAlign: "left", padding: "8px 10px",
-                    fontSize: 12, border: "none", background: "none", cursor: "pointer", borderRadius: 4,
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "#f1f5f9")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "none")}
-                >
-                  <div style={{ fontWeight: 500 }}>{t.name}</div>
-                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{t.description}</div>
-                </button>
-              ))}
+              {TEMPLATES.map(t => {
+                const isActive = t.id === currentTemplateId
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      if (confirm('Replace current document with template?')) {
+                        onLoadTemplate?.(t.id)
+                      }
+                      setShowTemplates(false)
+                    }}
+                    style={{
+                      display: "flex", alignItems: "flex-start", gap: 6, width: "100%", textAlign: "left", padding: "8px 10px",
+                      fontSize: 12, border: "none", background: isActive ? T.accentLight : "none", cursor: "pointer", borderRadius: 4,
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = isActive ? T.accentLight : "#f1f5f9")}
+                    onMouseLeave={e => (e.currentTarget.style.background = isActive ? T.accentLight : "none")}
+                  >
+                    <span style={{ width: 14, flexShrink: 0, color: T.accent }}>{isActive ? <Check size={12} /> : null}</span>
+                    <div>
+                      <div style={{ fontWeight: 500, color: isActive ? T.accent : undefined }}>{t.name}</div>
+                      <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{t.description}</div>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
