@@ -7,6 +7,7 @@ export type ElementType =
   | "video"
   | "button"
   | "input"
+  | "form"
   | "flex"
   | "grid"
   | "sc:button"
@@ -30,6 +31,20 @@ export type ElementType =
   | "sc:accordion"
   | "sc:radio-group"
 
+export interface ValidationRule {
+  required?: boolean | string
+  min?: number
+  max?: number
+  pattern?: string | "email" | "url"
+  message?: string
+}
+
+export interface FormFieldConfig {
+  name: string
+  defaultValue?: string | number | boolean
+  validation?: ValidationRule
+}
+
 export interface EditorElement {
   id: string
   type: ElementType
@@ -47,6 +62,7 @@ export interface EditorElement {
   role?: SectionRole
   sectionProps?: SectionProps
   gridProps?: GridProps
+  formField?: FormFieldConfig
 }
 
 export interface EditorDocument {
@@ -187,6 +203,18 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
     borderRadius: 6,
     fontSize: 14,
     width: 200,
+  },
+  form: {
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    padding: 24,
+    minWidth: 300,
+    minHeight: 100,
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: 8,
   },
   flex: {
     position: "relative",
