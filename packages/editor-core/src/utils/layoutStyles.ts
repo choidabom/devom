@@ -58,8 +58,12 @@ export function getChildSizingStyles(
   const crossDim = parentDirection === 'row' ? 'height' : 'width'
 
   if (mainSizing === 'fill') {
-    const minW = parentFlexWrap === 'wrap' && typeof child.style.minWidth === 'number' ? child.style.minWidth : 0
-    styles.flex = `1 0 ${minW}px`
+    const dim = child.style[mainDim]
+    let basis = typeof dim === 'number' ? dim : 0
+    if (parentFlexWrap === 'wrap' && parentDirection === 'row' && typeof child.style.minWidth === 'number') {
+      basis = child.style.minWidth
+    }
+    styles.flex = `1 0 ${basis}px`
     styles[mainDim] = undefined
   } else if (mainSizing === 'hug') {
     styles[mainDim] = 'fit-content'

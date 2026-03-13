@@ -121,7 +121,7 @@ export function buildGalaxyFlip(store: DocumentStore): void {
         name: 'Visual',
         style: { ...rel, width: W, height: 600, objectFit: 'cover' },
         props: { src, alt: title || 'Feature image' },
-        sizing: { w: 'fill', h: 'fill' },
+        sizing: { w: 'fill', h: 'hug' },
       })
     } else if (videoUrl) {
       const vSrc = videoUrl.startsWith('//') ? 'https:' + videoUrl : videoUrl
@@ -129,7 +129,7 @@ export function buildGalaxyFlip(store: DocumentStore): void {
         name: 'Video',
         style: { ...rel, width: W, height: 600, objectFit: 'cover' },
         props: { src: vSrc, autoplay: true, muted: true, loop: true, controls: false },
-        sizing: { w: 'fill', h: 'fill' },
+        sizing: { w: 'fill', h: 'hug' },
       })
     }
     // 디스클레이머 (이미지 아래)
@@ -158,7 +158,7 @@ export function buildGalaxyFlip(store: DocumentStore): void {
           name: 'Visual',
           style: { ...rel, width: 720, height: 500, objectFit: 'cover' },
           props: { src: imgUrl.startsWith('//') ? 'https:' + imgUrl : imgUrl, alt: title || '' },
-          sizing: { w: 'fill', h: 'fill' },
+          sizing: { w: 'fill', h: 'hug' },
         })
       } else if (_videoUrl) {
         const vSrc = _videoUrl.startsWith('//') ? 'https:' + _videoUrl : _videoUrl
@@ -166,7 +166,7 @@ export function buildGalaxyFlip(store: DocumentStore): void {
           name: 'Video',
           style: { ...rel, width: 720, height: 500, objectFit: 'cover' },
           props: { src: vSrc, autoplay: true, muted: true, loop: true, controls: false },
-          sizing: { w: 'fill', h: 'fill' },
+          sizing: { w: 'fill', h: 'hug' },
         })
       }
     }
@@ -213,26 +213,19 @@ export function buildGalaxyFlip(store: DocumentStore): void {
       name: 'Bleed Image',
       style: { ...rel, width: W, height: 700, objectFit: 'cover' },
       props: { src, alt: '' },
-      sizing: { w: 'fill', h: 'fill' },
+      sizing: { w: 'fill', h: 'hug' },
     })
   }
 
   // ════════════════════════════════════════════
   // Hero KV
   // ════════════════════════════════════════════
-  const heroSection = add('div', page, {
+  add('image', page, {
     name: 'Hero KV',
-    style: { ...rel, width: 'auto', height: 810, ...box, overflow: 'hidden' },
-    sizing: { w: 'fill', h: 'fixed' },
+    style: { ...rel, width: W, height: 810, objectFit: 'cover' },
+    props: { src: 'https://images.samsung.com/kdp/static/pd/smartphone/pd-kv-galaxy-z-flip7-pc-kv-img-v2.jpg', alt: '블루 쉐도우 색상의 갤럭시 Z 플립7' },
+    sizing: { w: 'fill', h: 'hug' },
   })
-  if (heroSection) {
-    add('image', heroSection, {
-      name: 'Hero BG',
-      style: { ...rel, width: W, height: 810, objectFit: 'cover' },
-      props: { src: 'https://images.samsung.com/kdp/static/pd/smartphone/pd-kv-galaxy-z-flip7-pc-kv-img-v2.jpg', alt: '블루 쉐도우 색상의 갤럭시 Z 플립7' },
-      sizing: { w: 'fill', h: 'fill' },
-    })
-  }
 
   // ════════════════════════════════════════════
   // Component 0: Disclaimer
