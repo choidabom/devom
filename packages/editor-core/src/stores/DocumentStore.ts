@@ -11,6 +11,7 @@ import {
   type EditorElement,
   type ElementTemplate,
   type ElementType,
+  type FormFieldConfig,
   type GridProps,
   type LayoutProps,
   type SectionProps,
@@ -126,6 +127,12 @@ export class DocumentStore {
       element.sizing = { w: "fill", h: "hug" }
     }
 
+    // Auto-set layoutMode for 'form'
+    if (type === "form") {
+      element.layoutMode = "flex"
+      element.layoutProps = { ...element.layoutProps, direction: "column", gap: 16 }
+    }
+
     this.elements.set(id, element)
     parent.children.push(id)
     return id
@@ -215,6 +222,12 @@ export class DocumentStore {
     const element = this.elements.get(id)
     if (!element) return
     Object.assign(element.props, props)
+  }
+
+  updateFormField(id: string, formField: FormFieldConfig | undefined) {
+    const element = this.elements.get(id)
+    if (!element) return
+    element.formField = formField
   }
 
   // --- Layout ---
@@ -352,6 +365,20 @@ export class DocumentStore {
 
   ungroupElements(ids: string[]): string[] {
     return ungroupHelper(this.elements, this.rootId, ids)
+  }
+
+  // --- Form Helpers ---
+
+  getFormFields(formId: string): Array<{ element: EditorElement; formField: FormFieldConfig }> {
+    const result: Array<{ element: EditorElement; formField: FormFieldConfig }> = []
+    const traverse = (id: string) => {
+      const el = this.elements.get(id)
+      if (!el) return
+      if (el.formField) result.push({ element: el, formField: el.formField })
+      el.children.forEach(traverse)
+    }
+    traverse(formId)
+    return result
   }
 
   // --- Canvas Mode (delegated) ---

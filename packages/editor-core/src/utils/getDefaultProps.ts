@@ -64,6 +64,8 @@ export function getDefaultProps(type: ElementType): Record<string, unknown> {
       }
     case "sc:radio-group":
       return { label: "Plan", options: ["Free", "Pro", "Enterprise"], value: "Free" }
+    case "form":
+      return { name: "form" }
     default:
       return {}
   }

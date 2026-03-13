@@ -60,6 +60,11 @@ export function cloneTree(
       canvasPosition: null,
     }
 
+    // Handle formField: auto-append _copy to name
+    if (cloned.formField) {
+      cloned.formField = { ...cloned.formField, name: cloned.formField.name + "_copy" }
+    }
+
     elements.set(newId, cloned)
     if (isTop) {
       target.children.push(newId)
