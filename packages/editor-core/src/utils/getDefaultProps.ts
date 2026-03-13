@@ -47,9 +47,21 @@ export function getDefaultProps(type: ElementType): Record<string, unknown> {
     case "sc:select":
       return { placeholder: "Select option", options: ["Option 1", "Option 2", "Option 3"] }
     case "sc:table":
-      return { headers: ["Name", "Status", "Amount"], rows: [["Alice", "Active", "₩250,000"], ["Bob", "Pending", "₩150,000"], ["Charlie", "Active", "₩350,000"]] }
+      return {
+        headers: ["Name", "Status", "Amount"],
+        rows: [
+          ["Alice", "Active", "₩250,000"],
+          ["Bob", "Pending", "₩150,000"],
+          ["Charlie", "Active", "₩350,000"],
+        ],
+      }
     case "sc:accordion":
-      return { items: [{ title: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." }, { title: "Is it styled?", content: "Yes. It comes with default styles." }] }
+      return {
+        items: [
+          { title: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." },
+          { title: "Is it styled?", content: "Yes. It comes with default styles." },
+        ],
+      }
     case "sc:radio-group":
       return { label: "Plan", options: ["Free", "Pro", "Enterprise"], value: "Free" }
     default:

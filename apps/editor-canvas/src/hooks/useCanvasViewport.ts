@@ -22,17 +22,17 @@ export function useCanvasViewport(outerRef: React.RefObject<HTMLDivElement | nul
         const mx = e.clientX - rect.left
         const my = e.clientY - rect.top
         const factor = e.deltaY > 0 ? 0.95 : 1.05
-        setViewport(prev => {
+        setViewport((prev) => {
           const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prev.zoom * factor))
           const scale = newZoom / prev.zoom
           return { zoom: newZoom, panX: mx - (mx - prev.panX) * scale, panY: my - (my - prev.panY) * scale }
         })
       } else {
-        setViewport(prev => ({ ...prev, panX: prev.panX - e.deltaX, panY: prev.panY - e.deltaY }))
+        setViewport((prev) => ({ ...prev, panX: prev.panX - e.deltaX, panY: prev.panY - e.deltaY }))
       }
     }
-    el.addEventListener('wheel', onWheel, { passive: false })
-    return () => el.removeEventListener('wheel', onWheel)
+    el.addEventListener("wheel", onWheel, { passive: false })
+    return () => el.removeEventListener("wheel", onWheel)
   }, [editorMode, outerRef])
 
   return { viewport, setViewport, viewportRef, spaceHeldRef, panDragRef }

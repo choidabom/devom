@@ -6,14 +6,14 @@
 
 ## Behavior Rules
 
-| Action | When Locked |
-|---|---|
-| Click select | Allowed |
-| Drag move | Blocked |
-| Resize | Blocked (handles hidden) |
-| Delete key | Blocked |
-| Property editing (Properties Panel) | Allowed |
-| Lock/Unlock toggle | Allowed |
+| Action                              | When Locked              |
+| ----------------------------------- | ------------------------ |
+| Click select                        | Allowed                  |
+| Drag move                           | Blocked                  |
+| Resize                              | Blocked (handles hidden) |
+| Delete key                          | Blocked                  |
+| Property editing (Properties Panel) | Allowed                  |
+| Lock/Unlock toggle                  | Allowed                  |
 
 ## Lock/Unlock UI Locations
 
@@ -34,29 +34,37 @@
 ## Affected Systems
 
 ### 1. DocumentStore
+
 - Add `toggleLock(id: string)` action
 - Add `isLocked(id: string)` helper
 
 ### 2. Canvas — ElementRenderer
+
 - Block drag initiation for locked elements
 - When multi-dragging, if any element in selection is locked, block all movement
 
 ### 3. Canvas — SelectionOverlay
+
 - When selected element is locked: hide resize handles, show lock icon instead
 
 ### 4. Shell — App (message handling)
+
 - Filter out locked elements from DELETE key handling
 
 ### 5. Shell — PropertiesPanel
+
 - Add lock toggle button (top of panel)
 
 ### 6. Shell — LeftPanel
+
 - Add lock icon toggle per layer item
 
 ### 7. Canvas — Context Menu (new)
+
 - Right-click on element shows context menu with Lock/Unlock option
 
 ### 8. Protocol
+
 - Add `TOGGLE_LOCK` message (Shell → Canvas)
 - Add `CONTEXT_MENU_ACTION` message (Canvas → Shell) for right-click actions
 

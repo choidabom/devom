@@ -1,10 +1,6 @@
 import { type ReactNode, useState, useCallback, useEffect } from "react"
 import { observer } from "mobx-react-lite"
-import {
-  Lock, Unlock, Square, Columns3, Type, LayoutGrid,
-  ImageIcon, MousePointerClick, TextCursorInput, ChevronRight,
-  LayoutList,
-} from "lucide-react"
+import { Lock, Unlock, Square, Columns3, Type, LayoutGrid, ImageIcon, MousePointerClick, TextCursorInput, ChevronRight, LayoutList } from "lucide-react"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
@@ -57,10 +53,18 @@ export const LeftPanel = observer(function LeftPanel() {
   }, [])
 
   return (
-    <div style={{ background: T.panel, borderRadius: T.panelRadius, boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`, height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: "14px 16px 10px", fontSize: 13, fontWeight: 600, color: T.text }}>
-        Layers
-      </div>
+    <div
+      style={{
+        background: T.panel,
+        borderRadius: T.panelRadius,
+        boxShadow: T.panelShadow,
+        border: `1px solid ${T.panelBorder}`,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div style={{ padding: "14px 16px 10px", fontSize: 13, fontWeight: 600, color: T.text }}>Layers</div>
       <div style={{ flex: 1, overflowY: "auto", padding: "0 6px 8px" }}>
         <LayerTree elementId={documentStore.rootId} depth={0} collapsedIds={collapsedIds} onToggleCollapse={toggleCollapse} />
       </div>
@@ -68,8 +72,16 @@ export const LeftPanel = observer(function LeftPanel() {
   )
 })
 
-const LayerTree = observer(function LayerTree({ elementId, depth, collapsedIds, onToggleCollapse }: {
-  elementId: string; depth: number; collapsedIds: Set<string>; onToggleCollapse: (id: string) => void
+const LayerTree = observer(function LayerTree({
+  elementId,
+  depth,
+  collapsedIds,
+  onToggleCollapse,
+}: {
+  elementId: string
+  depth: number
+  collapsedIds: Set<string>
+  onToggleCollapse: (id: string) => void
 }) {
   const element = documentStore.getElement(elementId)
   const [hovered, setHovered] = useState(false)
@@ -81,16 +93,20 @@ const LayerTree = observer(function LayerTree({ elementId, depth, collapsedIds, 
 
   const S = 12
   const iconMap: Record<string, ReactNode> = {
-    div: <Square size={S} />, flex: <Columns3 size={S} />, grid: <LayoutGrid size={S} />,
-    text: <Type size={S} />, image: <ImageIcon size={S} />,
-    button: <MousePointerClick size={S} />, input: <TextCursorInput size={S} />,
-    "sc:button": <MousePointerClick size={S} />, "sc:card": <Square size={S} />,
-    "sc:input": <TextCursorInput size={S} />, "sc:badge": <Square size={S} />,
+    div: <Square size={S} />,
+    flex: <Columns3 size={S} />,
+    grid: <LayoutGrid size={S} />,
+    text: <Type size={S} />,
+    image: <ImageIcon size={S} />,
+    button: <MousePointerClick size={S} />,
+    input: <TextCursorInput size={S} />,
+    "sc:button": <MousePointerClick size={S} />,
+    "sc:card": <Square size={S} />,
+    "sc:input": <TextCursorInput size={S} />,
+    "sc:badge": <Square size={S} />,
   }
   const icon = iconMap[element.type] ?? <Square size={S} />
-  const displayIcon = element.layoutMode === 'flex'
-    ? <LayoutList size={S} />
-    : icon
+  const displayIcon = element.layoutMode === "flex" ? <LayoutList size={S} /> : icon
 
   return (
     <div>
@@ -128,7 +144,10 @@ const LayerTree = observer(function LayerTree({ elementId, depth, collapsedIds, 
       >
         {hasChildren && !isRoot ? (
           <span
-            onClick={(e) => { e.stopPropagation(); onToggleCollapse(elementId) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleCollapse(elementId)
+            }}
             style={{ display: "flex", flexShrink: 0, cursor: "pointer", opacity: 0.5, transition: "transform 0.15s", transform: collapsed ? "rotate(0deg)" : "rotate(90deg)" }}
           >
             <ChevronRight size={10} />
@@ -138,11 +157,7 @@ const LayerTree = observer(function LayerTree({ elementId, depth, collapsedIds, 
         ) : null}
         <span style={{ opacity: isSelected ? 0.8 : 0.5, display: "flex", flexShrink: 0 }}>{displayIcon}</span>
         <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{element.name}</span>
-        {element.layoutMode === 'flex' && (
-          <span style={{ fontSize: 10, opacity: 0.4, flexShrink: 0 }}>
-            {element.layoutProps.direction === 'row' ? '→' : '↓'}
-          </span>
-        )}
+        {element.layoutMode === "flex" && <span style={{ fontSize: 10, opacity: 0.4, flexShrink: 0 }}>{element.layoutProps.direction === "row" ? "→" : "↓"}</span>}
         {!isRoot && (
           <span
             onClick={(e) => {
@@ -164,9 +179,8 @@ const LayerTree = observer(function LayerTree({ elementId, depth, collapsedIds, 
           </span>
         )}
       </div>
-      {!collapsed && element.children.map((childId) => (
-        <LayerTree key={childId} elementId={childId} depth={depth + 1} collapsedIds={collapsedIds} onToggleCollapse={onToggleCollapse} />
-      ))}
+      {!collapsed &&
+        element.children.map((childId) => <LayerTree key={childId} elementId={childId} depth={depth + 1} collapsedIds={collapsedIds} onToggleCollapse={onToggleCollapse} />)}
     </div>
   )
 })

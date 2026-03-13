@@ -15,6 +15,7 @@
 ### Task 1: Add file upload to Toolbar Image button
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/Toolbar.tsx`
 - Modify: `apps/editor-shell/src/App.tsx`
 - Modify: `packages/editor-core/src/stores/DocumentStore.ts`
@@ -32,6 +33,7 @@ addElement(type: ElementType, parentId?: string, initialProps?: Record<string, u
 ```
 
 메서드 내부에서 props 생성 라인 (line ~266):
+
 ```typescript
 // 기존
 props: this.getDefaultProps(type),
@@ -48,26 +50,32 @@ props: { ...this.getDefaultProps(type), ...(initialProps ?? {}) },
 
 ```typescript
 // 기존
-const handleAddElement = useCallback((type: ElementType) => {
-  historyStore.pushSnapshot()
-  const id = documentStore.addElement(type)
-  if (id) {
-    selectionStore.select(id)
-    syncToCanvas()
-    bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
-  }
-}, [syncToCanvas])
+const handleAddElement = useCallback(
+  (type: ElementType) => {
+    historyStore.pushSnapshot()
+    const id = documentStore.addElement(type)
+    if (id) {
+      selectionStore.select(id)
+      syncToCanvas()
+      bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
+    }
+  },
+  [syncToCanvas]
+)
 
 // 변경
-const handleAddElement = useCallback((type: ElementType, props?: Record<string, unknown>) => {
-  historyStore.pushSnapshot()
-  const id = documentStore.addElement(type, undefined, props)
-  if (id) {
-    selectionStore.select(id)
-    syncToCanvas()
-    bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
-  }
-}, [syncToCanvas])
+const handleAddElement = useCallback(
+  (type: ElementType, props?: Record<string, unknown>) => {
+    historyStore.pushSnapshot()
+    const id = documentStore.addElement(type, undefined, props)
+    if (id) {
+      selectionStore.select(id)
+      syncToCanvas()
+      bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
+    }
+  },
+  [syncToCanvas]
+)
 ```
 
 - [ ] **Step 3: Add hidden file input ref and handler to Toolbar**
@@ -77,31 +85,35 @@ Toolbar 컴포넌트 내부, 기존 state 선언들 아래에 추가. `useRef`, 
 ```typescript
 const fileInputRef = useRef<HTMLInputElement>(null)
 
-const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0]
-  if (!file) return
+const handleImageUpload = useCallback(
+  (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  // 5MB limit
-  if (file.size > 5 * 1024 * 1024) {
-    alert('Image file size must be under 5MB')
-    return
-  }
+    // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image file size must be under 5MB")
+      return
+    }
 
-  const reader = new FileReader()
-  reader.onload = () => {
-    const dataUrl = reader.result as string
-    onAdd("image", { src: dataUrl, alt: file.name })
-  }
-  reader.readAsDataURL(file)
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      onAdd("image", { src: dataUrl, alt: file.name })
+    }
+    reader.readAsDataURL(file)
 
-  // Reset input so same file can be re-selected
-  e.target.value = ''
-}, [onAdd])
+    // Reset input so same file can be re-selected
+    e.target.value = ""
+  },
+  [onAdd]
+)
 ```
 
 - [ ] **Step 4: Update onAdd prop type and Image button**
 
 Toolbar의 `onAdd` prop 타입 수정 (line ~25):
+
 ```typescript
 // 기존
 onAdd: (type: ElementType) => void
@@ -111,6 +123,7 @@ onAdd: (type: ElementType, props?: Record<string, unknown>) => void
 ```
 
 기존 Image 버튼 (line ~99):
+
 ```typescript
 // 기존
 <ToolBtn icon={<ImageIcon size={S} />} title="Image" onClick={() => onAdd("image")} />
@@ -136,6 +149,7 @@ Expected: SUCCESS
 Run: `pnpm dev`
 
 테스트:
+
 1. Toolbar의 Image 아이콘 클릭 → 파일 선택 다이얼로그 열림
 2. 이미지 파일 선택 → Canvas에 이미지 요소 추가됨 (200x200, 이미지 표시)
 3. 5MB 초과 파일 선택 → alert 표시, 요소 추가 안 됨
@@ -155,11 +169,13 @@ git commit -m "feat(editor): add image file upload via Toolbar"
 ### Task 2: Add image properties to PropertiesPanel
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/PropertiesPanel.tsx`
 
 - [ ] **Step 1: Read current PropertiesPanel structure**
 
 먼저 `PropertiesPanel.tsx`를 읽어서 기존 패턴 확인. 핵심 콜백:
+
 - `updateStyle(key: string, value: string)` — line 15, `historyStore.pushSnapshot()` + 선택된 모든 요소에 스타일 적용
 - `updateProp(key: string, value: string)` — line 24, `historyStore.pushSnapshot()` + 선택된 모든 요소에 props 적용
 
@@ -262,6 +278,7 @@ Expected: SUCCESS
 - [ ] **Step 4: Manual test**
 
 테스트:
+
 1. 이미지 요소 선택 → PropertiesPanel에 썸네일, Change Image 버튼, Alt, Object Fit 표시
 2. "Change Image" 클릭 → 파일 선택 → 이미지 교체
 3. Alt text 수정 → props 업데이트 (export 시 alt 반영 확인)

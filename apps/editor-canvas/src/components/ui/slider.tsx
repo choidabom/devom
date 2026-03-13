@@ -10,18 +10,8 @@ interface SliderProps extends Omit<React.ComponentProps<"input">, "type" | "valu
   step?: number
 }
 
-function Slider({
-  className,
-  defaultValue,
-  value,
-  onValueChange,
-  min = 0,
-  max = 100,
-  step = 1,
-  disabled,
-  ...props
-}: SliderProps) {
-  const initialValue = (value?.[0] ?? defaultValue?.[0] ?? min)
+function Slider({ className, defaultValue, value, onValueChange, min = 0, max = 100, step = 1, disabled, ...props }: SliderProps) {
+  const initialValue = value?.[0] ?? defaultValue?.[0] ?? min
 
   return (
     <input

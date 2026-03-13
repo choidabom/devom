@@ -88,7 +88,7 @@ function renderElement(el: EditorElement, elements: Record<string, EditorElement
 // --- Compute effective style (shared by both renderers) ---
 
 function computeEffectiveStyle(el: EditorElement, elements: Record<string, EditorElement>): CSSProperties {
-  const parent = el.parentId ? elements[el.parentId] ?? null : null
+  const parent = el.parentId ? (elements[el.parentId] ?? null) : null
   return computeElementStyle(el, parent)
 }
 
@@ -307,11 +307,16 @@ function renderHtmlElement(el: EditorElement, elements: Record<string, EditorEle
 
 function getHtmlTag(el: EditorElement): string {
   switch (el.type) {
-    case "button": return "button"
-    case "input": return "input"
-    case "image": return "img"
-    case "video": return "video"
-    default: return "div"
+    case "button":
+      return "button"
+    case "input":
+      return "input"
+    case "image":
+      return "img"
+    case "video":
+      return "video"
+    default:
+      return "div"
   }
 }
 
@@ -323,7 +328,8 @@ function getHtmlContent(el: EditorElement): string {
 
 function getHtmlPropsString(el: EditorElement): string {
   if (el.type === "image" && el.props.src) return ` src="${escapeHtml(String(el.props.src))}" alt="${escapeHtml(String(el.props.alt ?? ""))}"`
-  if (el.type === "video" && el.props.src) return ` src="${escapeHtml(String(el.props.src))}"${el.props.autoplay !== false ? ' autoPlay' : ''}${el.props.muted !== false ? ' muted' : ''}${el.props.loop !== false ? ' loop' : ''}${el.props.controls ? ' controls' : ''} playsInline`
+  if (el.type === "video" && el.props.src)
+    return ` src="${escapeHtml(String(el.props.src))}"${el.props.autoplay !== false ? " autoPlay" : ""}${el.props.muted !== false ? " muted" : ""}${el.props.loop !== false ? " loop" : ""}${el.props.controls ? " controls" : ""} playsInline`
   if (el.type === "input") return ` placeholder="${escapeHtml(String(el.props.placeholder ?? ""))}"`
   return ""
 }
@@ -333,9 +339,11 @@ function getHtmlPropsString(el: EditorElement): string {
 function styleToJsx(style: CSSProperties): string {
   const entries = Object.entries(style).filter(([, v]) => v !== undefined && v !== "")
   if (entries.length === 0) return ""
-  const inner = entries.map(([k, v]) => {
-    const val = typeof v === "number" ? String(v) : `"${v}"`
-    return `${k}: ${val}`
-  }).join(", ")
+  const inner = entries
+    .map(([k, v]) => {
+      const val = typeof v === "number" ? String(v) : `"${v}"`
+      return `${k}: ${val}`
+    })
+    .join(", ")
   return ` style={{ ${inner} }}`
 }

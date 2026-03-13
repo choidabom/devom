@@ -20,7 +20,7 @@ export function computeElementStyle(el: EditorElement, parent: EditorElement | n
   const style: CSSProperties = { ...el.style }
 
   // Remove absolute positioning for auto-layout children
-  if (parent?.layoutMode === 'flex' || parent?.layoutMode === 'grid') {
+  if (parent?.layoutMode === "flex" || parent?.layoutMode === "grid") {
     delete style.position
     delete (style as Record<string, unknown>).left
     delete (style as Record<string, unknown>).top
@@ -30,7 +30,7 @@ export function computeElementStyle(el: EditorElement, parent: EditorElement | n
   Object.assign(style, getContainerStyles(el))
 
   // Add child sizing styles
-  if (parent?.layoutMode === 'flex' && parent.layoutProps) {
+  if (parent?.layoutMode === "flex" && parent.layoutProps) {
     Object.assign(style, getChildSizingStyles(el, parent.layoutProps.direction, parent.layoutProps.flexWrap))
   }
 

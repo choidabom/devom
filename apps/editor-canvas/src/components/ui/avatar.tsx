@@ -8,11 +8,7 @@ interface AvatarProps extends React.ComponentProps<"div"> {
   size?: "default" | "sm" | "lg"
 }
 
-function Avatar({
-  className,
-  size = "default",
-  ...props
-}: AvatarProps) {
+function Avatar({ className, size = "default", ...props }: AvatarProps) {
   return (
     <div
       data-slot="avatar"
@@ -29,31 +25,12 @@ function Avatar({
 }
 
 function AvatarImage({ className, ...props }: React.ComponentProps<"img">) {
-  return (
-    <img
-      data-slot="avatar-image"
-      className={cn(
-        "aspect-square h-full w-full rounded-full object-cover",
-        className
-      )}
-      {...props}
-    />
-  )
+  return <img data-slot="avatar-image" className={cn("aspect-square h-full w-full rounded-full object-cover", className)} {...props} />
 }
 
-function AvatarFallback({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function AvatarFallback({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="avatar-fallback"
-      className={cn(
-        "flex h-full w-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground",
-        className
-      )}
-      {...props}
-    />
+    <div data-slot="avatar-fallback" className={cn("flex h-full w-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground", className)} {...props} />
   )
 }
 
@@ -71,39 +48,17 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
 }
 
 function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="avatar-group"
-      className={cn(
-        "flex -space-x-2",
-        className
-      )}
-      {...props}
-    />
-  )
+  return <div data-slot="avatar-group" className={cn("flex -space-x-2", className)} {...props} />
 }
 
-function AvatarGroupCount({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function AvatarGroupCount({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="avatar-group-count"
-      className={cn(
-        "relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background",
-        className
-      )}
+      className={cn("relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background", className)}
       {...props}
     />
   )
 }
 
-export {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
-  AvatarBadge,
-}
+export { Avatar, AvatarImage, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarBadge }

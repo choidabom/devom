@@ -59,10 +59,5 @@ export function wrapMessage(message: EditorMessage): WrappedMessage {
 }
 
 export function isEditorMessage(data: unknown): data is WrappedMessage {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "source" in data &&
-    (data as WrappedMessage).source === EDITOR_MESSAGE_SOURCE
-  )
+  return typeof data === "object" && data !== null && "source" in data && (data as WrappedMessage).source === EDITOR_MESSAGE_SOURCE
 }

@@ -15,6 +15,7 @@
 ### Task 1: Add `toggleLock` action to DocumentStore
 
 **Files:**
+
 - Modify: `packages/editor-core/src/stores/DocumentStore.ts:84` (before `removeElement`)
 
 - [ ] **Step 1: Add `toggleLock` method**
@@ -41,6 +42,7 @@ git commit -m "feat(editor-core): add toggleLock action to DocumentStore"
 ### Task 2: Add `TOGGLE_LOCK` and `CONTEXT_MENU_ACTION` to protocol
 
 **Files:**
+
 - Modify: `packages/editor-core/src/protocol.ts`
 
 - [ ] **Step 1: Add `TOGGLE_LOCK` to `ShellToCanvasMessage`**
@@ -69,6 +71,7 @@ git commit -m "feat(editor-core): add TOGGLE_LOCK and CONTEXT_MENU_ACTION protoc
 ### Task 3: Block multi-drag when any selected element is locked
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 
 Currently the drag handler (line 49) blocks drag only for the clicked element itself. When a non-locked element is dragged as part of a group containing locked elements, the non-locked ones still move. The design requires blocking the entire group.
@@ -80,7 +83,7 @@ After line 59 (`const startY = e.clientY`), insert the group-lock check BEFORE t
 ```typescript
 // Block entire group drag if any selected element is locked
 const dragIds = selectedIds.includes(elementId) ? selectedIds : [elementId]
-const hasLockedInGroup = dragIds.some(id => {
+const hasLockedInGroup = dragIds.some((id) => {
   const el = documentStore.getElement(id)
   return el?.locked
 })
@@ -108,6 +111,7 @@ git commit -m "feat(editor-canvas): block multi-drag when any selected element i
 ### Task 4: Show lock icon instead of resize handles when element is locked
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/SelectionOverlay.tsx:65-180`
 
 - [ ] **Step 1: Block resize for locked elements**
@@ -198,6 +202,7 @@ git commit -m "feat(editor-canvas): show lock icon instead of resize handles for
 ### Task 5: Add lock toggle to PropertiesPanel
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/PropertiesPanel.tsx`
 
 - [ ] **Step 1: Add lock toggle button at the top of the panel**
@@ -205,8 +210,10 @@ git commit -m "feat(editor-canvas): show lock icon instead of resize handles for
 After the multi-select count display (line 49) and before the Position section (line 52), add a lock toggle:
 
 ```tsx
-{/* Lock toggle */}
-<div style={{ padding: "0 14px 10px", borderBottom: `1px solid ${T.border}`, marginBottom: 10 }}>
+{
+  /* Lock toggle */
+}
+;<div style={{ padding: "0 14px 10px", borderBottom: `1px solid ${T.border}`, marginBottom: 10 }}>
   <button
     onClick={() => {
       historyStore.pushSnapshot()
@@ -220,16 +227,16 @@ After the multi-select count display (line 49) and before the Position section (
       alignItems: "center",
       gap: 6,
       padding: "5px 10px",
-      background: elements.some(el => el.locked) ? T.accent : T.inputBg,
-      color: elements.some(el => el.locked) ? "#fff" : T.text,
-      border: `1px solid ${elements.some(el => el.locked) ? T.accent : T.inputBorder}`,
+      background: elements.some((el) => el.locked) ? T.accent : T.inputBg,
+      color: elements.some((el) => el.locked) ? "#fff" : T.text,
+      border: `1px solid ${elements.some((el) => el.locked) ? T.accent : T.inputBorder}`,
       borderRadius: 6,
       fontSize: 12,
       cursor: "pointer",
       width: "100%",
     }}
   >
-    {elements.some(el => el.locked) ? "🔒 Locked" : "🔓 Unlocked"}
+    {elements.some((el) => el.locked) ? "🔒 Locked" : "🔓 Unlocked"}
   </button>
 </div>
 ```
@@ -248,6 +255,7 @@ git commit -m "feat(editor-shell): add lock toggle button to PropertiesPanel"
 ### Task 6: Add lock icon toggle to LeftPanel
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/LeftPanel.tsx`
 
 - [ ] **Step 1: Import stores needed for lock toggle**
@@ -263,27 +271,29 @@ import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 In the `LayerTree` component, keep existing lines 62-65 (expansion arrow + icon span). Replace line 66 (`{element.name}`) with the name wrapped in a flex span, followed by the lock toggle:
 
 ```tsx
-<span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{element.name}</span>
-{!isRoot && (
-  <span
-    onClick={(e) => {
-      e.stopPropagation()
-      historyStore.pushSnapshot()
-      documentStore.toggleLock(elementId)
-      bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
-    }}
-    style={{
-      fontSize: 11,
-      opacity: element.locked ? 1 : 0,
-      cursor: "pointer",
-      padding: "0 2px",
-      transition: "opacity 0.15s",
-      ...(hovered && !element.locked ? { opacity: 0.3 } : {}),
-    }}
-  >
-    {element.locked ? "🔒" : "🔓"}
-  </span>
-)}
+;<span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{element.name}</span>
+{
+  !isRoot && (
+    <span
+      onClick={(e) => {
+        e.stopPropagation()
+        historyStore.pushSnapshot()
+        documentStore.toggleLock(elementId)
+        bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+      }}
+      style={{
+        fontSize: 11,
+        opacity: element.locked ? 1 : 0,
+        cursor: "pointer",
+        padding: "0 2px",
+        transition: "opacity 0.15s",
+        ...(hovered && !element.locked ? { opacity: 0.3 } : {}),
+      }}
+    >
+      {element.locked ? "🔒" : "🔓"}
+    </span>
+  )
+}
 ```
 
 The lock icon is: always visible when locked, shown at 0.3 opacity on hover when unlocked, hidden otherwise.
@@ -302,6 +312,7 @@ git commit -m "feat(editor-shell): add lock icon toggle to LeftPanel layer items
 ### Task 7: Create ContextMenu component in Canvas
 
 **Files:**
+
 - Create: `apps/editor-canvas/src/components/ContextMenu.tsx`
 
 - [ ] **Step 1: Create the ContextMenu component**
@@ -358,7 +369,7 @@ export function ContextMenu({ documentStore, selectedIds, bridge }: ContextMenuP
 
   // If target is in selection, apply to all selected; otherwise just the target
   const actionIds = selectedIds.includes(menu.targetId) ? selectedIds : [menu.targetId]
-  const anyLocked = actionIds.some(id => documentStore.getElement(id)?.locked)
+  const anyLocked = actionIds.some((id) => documentStore.getElement(id)?.locked)
 
   const handleToggleLock = () => {
     bridge.send({
@@ -393,8 +404,12 @@ export function ContextMenu({ documentStore, selectedIds, bridge }: ContextMenuP
           alignItems: "center",
           gap: 8,
         }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9" }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
+        onMouseEnter={(e) => {
+          ;(e.currentTarget as HTMLElement).style.background = "#f1f5f9"
+        }}
+        onMouseLeave={(e) => {
+          ;(e.currentTarget as HTMLElement).style.background = "transparent"
+        }}
       >
         <span style={{ fontSize: 12 }}>{anyLocked ? "🔓" : "🔒"}</span>
         {anyLocked ? "Unlock" : "Lock"}
@@ -414,6 +429,7 @@ git commit -m "feat(editor-canvas): create ContextMenu component with lock/unloc
 ### Task 8: Wire ContextMenu into Canvas App
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/App.tsx`
 
 - [ ] **Step 1: Import ContextMenu**
@@ -442,6 +458,7 @@ git commit -m "feat(editor-canvas): wire ContextMenu into Canvas App"
 ### Task 9: Handle `CONTEXT_MENU_ACTION` in Shell App
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/App.tsx`
 
 - [ ] **Step 1: Add `CONTEXT_MENU_ACTION` handler in the message switch**
@@ -477,9 +494,11 @@ git commit -m "feat(editor-shell): handle CONTEXT_MENU_ACTION for lock/unlock fr
 ### Task 10: Allow click-select on locked elements
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx:34-47`
 
 Currently line 36 blocks click entirely for locked elements:
+
 ```typescript
 if (element.locked) return
 ```

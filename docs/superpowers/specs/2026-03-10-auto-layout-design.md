@@ -6,31 +6,31 @@ EditorElement에 `layoutMode` 속성을 추가하여 임의의 요소를 Flexbox
 
 ## Decisions
 
-| 항목 | 결정 | 근거 |
-|------|------|------|
-| 범위 | Figma 스타일 Auto Layout | 업계 표준, 데우스와 동일 수준 |
-| 컨테이너 진입 | 캔버스 드래그 앤 드롭 | 직관적, Figma/데우스 방식 |
-| 사이징 모델 | Fixed/Hug/Fill | 3가지 모두 필요, DOM CSS로 자연스럽게 매핑 |
-| 순서 변경 | 삽입 인디케이터 (파란 라인) | 구현 난이도 대비 UX 최적 |
-| 스타일 전환 | 자동 (absolute ↔ flow) | 드롭 행위가 의도를 표현 |
-| 구현 방식 | layoutMode 프로퍼티 추가 | 타입과 레이아웃 관심사 분리, 유연성 |
+| 항목          | 결정                        | 근거                                       |
+| ------------- | --------------------------- | ------------------------------------------ |
+| 범위          | Figma 스타일 Auto Layout    | 업계 표준, 데우스와 동일 수준              |
+| 컨테이너 진입 | 캔버스 드래그 앤 드롭       | 직관적, Figma/데우스 방식                  |
+| 사이징 모델   | Fixed/Hug/Fill              | 3가지 모두 필요, DOM CSS로 자연스럽게 매핑 |
+| 순서 변경     | 삽입 인디케이터 (파란 라인) | 구현 난이도 대비 UX 최적                   |
+| 스타일 전환   | 자동 (absolute ↔ flow)     | 드롭 행위가 의도를 표현                    |
+| 구현 방식     | layoutMode 프로퍼티 추가    | 타입과 레이아웃 관심사 분리, 유연성        |
 
 ## Data Model
 
 ### New Types
 
 ```typescript
-type SizingMode = 'fixed' | 'hug' | 'fill'
+type SizingMode = "fixed" | "hug" | "fill"
 
 interface LayoutProps {
-  direction: 'row' | 'column'
+  direction: "row" | "column"
   gap: number
   paddingTop: number
   paddingRight: number
   paddingBottom: number
   paddingLeft: number
-  alignItems: 'start' | 'center' | 'end' | 'stretch'
-  justifyContent: 'start' | 'center' | 'end' | 'space-between'
+  alignItems: "start" | "center" | "end" | "stretch"
+  justifyContent: "start" | "center" | "end" | "space-between"
 }
 
 interface SizingProps {
@@ -44,7 +44,7 @@ interface SizingProps {
 ```typescript
 interface EditorElement {
   // ...existing fields
-  layoutMode: 'none' | 'flex'
+  layoutMode: "none" | "flex"
   layoutProps: LayoutProps
   sizing: SizingProps
 }
@@ -54,32 +54,32 @@ interface EditorElement {
 
 ```typescript
 const DEFAULT_LAYOUT_PROPS: LayoutProps = {
-  direction: 'column',
+  direction: "column",
   gap: 8,
   paddingTop: 8,
   paddingRight: 8,
   paddingBottom: 8,
   paddingLeft: 8,
-  alignItems: 'start',
-  justifyContent: 'start',
+  alignItems: "start",
+  justifyContent: "start",
 }
 
 const DEFAULT_SIZING: SizingProps = {
-  w: 'fixed',
-  h: 'fixed',
+  w: "fixed",
+  h: "fixed",
 }
 ```
 
 ### CSS Mapping
 
-| State | CSS Applied |
-|-------|-------------|
-| `layoutMode: 'flex'` | `display: flex`, `flexDirection`, `gap`, `padding`, `alignItems`, `justifyContent` |
-| Child `sizing.w: 'fill'` (parent row) | `flex: 1 0 0`, width removed |
-| Child `sizing.w: 'hug'` | `width: fit-content` |
-| Child `sizing.w: 'fixed'` | Existing width preserved |
-| Auto Layout child | `position: relative`, `left`/`top` removed |
-| Non-Auto Layout child | `position: absolute` (existing behavior) |
+| State                                 | CSS Applied                                                                        |
+| ------------------------------------- | ---------------------------------------------------------------------------------- |
+| `layoutMode: 'flex'`                  | `display: flex`, `flexDirection`, `gap`, `padding`, `alignItems`, `justifyContent` |
+| Child `sizing.w: 'fill'` (parent row) | `flex: 1 0 0`, width removed                                                       |
+| Child `sizing.w: 'hug'`               | `width: fit-content`                                                               |
+| Child `sizing.w: 'fixed'`             | Existing width preserved                                                           |
+| Auto Layout child                     | `position: relative`, `left`/`top` removed                                         |
+| Non-Auto Layout child                 | `position: absolute` (existing behavior)                                           |
 
 ### Invariants
 
@@ -162,16 +162,17 @@ Replaces Position(X,Y) / Size(W,H) when parent is Auto Layout:
 
 ### Conditional Display Logic
 
-| Selection State | Shown Sections |
-|-----------------|----------------|
-| Absolute element | Position(X,Y) + Size(W,H) + Style |
-| Auto Layout container | **Auto Layout** + Size(W,H) + Style |
-| Auto Layout child | **Sizing** (no Position) + Style |
-| Nested (container + child) | Auto Layout + Sizing |
+| Selection State            | Shown Sections                      |
+| -------------------------- | ----------------------------------- |
+| Absolute element           | Position(X,Y) + Size(W,H) + Style   |
+| Auto Layout container      | **Auto Layout** + Size(W,H) + Style |
+| Auto Layout child          | **Sizing** (no Position) + Style    |
+| Nested (container + child) | Auto Layout + Sizing                |
 
 ### LeftPanel Change
 
 Auto Layout containers get visual distinction in layer tree:
+
 - Flex icon + direction indicator next to container name
 
 ## Message Protocol
@@ -218,9 +219,9 @@ reparentElement(id, newParentId, index, dropPosition?)
 
 ### Impact on Existing Messages
 
-| Existing Message | Change |
-|------------------|--------|
-| `ELEMENTS_MOVED` | Ignored for Auto Layout children (use reorder instead) |
-| `ELEMENT_RESIZED` | Converts fill/hug to fixed before applying |
-| `SYNC_DOCUMENT` | Includes new fields (layoutMode, layoutProps, sizing) |
-| `ADD_ELEMENT` | Auto-applies flow style if parent is flex |
+| Existing Message  | Change                                                 |
+| ----------------- | ------------------------------------------------------ |
+| `ELEMENTS_MOVED`  | Ignored for Auto Layout children (use reorder instead) |
+| `ELEMENT_RESIZED` | Converts fill/hug to fixed before applying             |
+| `SYNC_DOCUMENT`   | Includes new fields (layoutMode, layoutProps, sizing)  |
+| `ADD_ELEMENT`     | Auto-applies flow style if parent is flex              |

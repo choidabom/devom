@@ -22,12 +22,26 @@ interface ElementRendererProps {
   zoom?: number
 }
 
-export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, onInsertionIndicator, onDropHighlight, documentStore, bridge, editorMode, zoom = 1 }: ElementRendererProps) {
+export const ElementRenderer = observer(function ElementRenderer({
+  elementId,
+  selectedIds,
+  onSelect,
+  onDragChange,
+  onSnapLines,
+  onInsertionIndicator,
+  onDropHighlight,
+  documentStore,
+  bridge,
+  editorMode,
+  zoom = 1,
+}: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
-    return () => { dragCleanupRef.current?.() }
+    return () => {
+      dragCleanupRef.current?.()
+    }
   }, [])
 
   if (!element || !element.visible) return null
@@ -38,10 +52,8 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   // Auto Layout styles
   const containerStyles = getContainerStyles(element)
   const parent = element.parentId ? documentStore.getElement(element.parentId) : undefined
-  const inAutoLayout = (parent?.layoutMode === 'flex' || parent?.layoutMode === 'grid') && !!parent?.layoutProps
-  const childSizingStyles = inAutoLayout
-    ? getChildSizingStyles(element, parent!.layoutProps.direction, parent!.layoutProps.flexWrap)
-    : {}
+  const inAutoLayout = (parent?.layoutMode === "flex" || parent?.layoutMode === "grid") && !!parent?.layoutProps
+  const childSizingStyles = inAutoLayout ? getChildSizingStyles(element, parent!.layoutProps.direction, parent!.layoutProps.flexWrap) : {}
 
   // Section styles
   const sectionStyles = getSectionStyles(element)
@@ -64,10 +76,13 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   }
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.button === 2) return  // Right-click: skip drag, let contextmenu handle
+    if (e.button === 2) return // Right-click: skip drag, let contextmenu handle
     if (editorMode === "interact") return
-    if (element.locked || isRoot) { e.stopPropagation(); return }
-    if (inAutoLayout) return  // Auto-layout drag handled separately
+    if (element.locked || isRoot) {
+      e.stopPropagation()
+      return
+    }
+    if (inAutoLayout) return // Auto-layout drag handled separately
     if (element.style.position !== "absolute") return
     e.stopPropagation()
     e.preventDefault()
@@ -79,7 +94,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
 
     // Block entire group drag if any selected element is locked
     const dragIds = selectedIds.includes(elementId) ? selectedIds : [elementId]
-    const hasLockedInGroup = dragIds.some(id => {
+    const hasLockedInGroup = dragIds.some((id) => {
       const el = documentStore.getElement(id)
       return el?.locked
     })
@@ -90,7 +105,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
 
     // Collect all dragged elements (selected group or just this one)
     const dragTargets = dragIds
-      .map(id => {
+      .map((id) => {
         const el = documentStore.getElement(id)
         if (!el || el.locked || el.parentId === null || el.style.position !== "absolute") return null
         const dom = document.querySelector(`[data-element-id="${id}"]`) as HTMLElement | null
@@ -179,13 +194,10 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         onDropHighlight?.(dropTarget.containerId)
         const container = documentStore.getElement(dropTarget.containerId)
         if (container) {
-          const indicator = calcInsertionIndicator(
-            dropTarget.containerId, dropTarget.insertIndex,
-            container.layoutProps.direction, dragIds, documentStore,
-          )
+          const indicator = calcInsertionIndicator(dropTarget.containerId, dropTarget.insertIndex, container.layoutProps.direction, dragIds, documentStore)
           onInsertionIndicator?.(indicator)
         }
-        onSnapLines?.([])  // Disable snap when over a container
+        onSnapLines?.([]) // Disable snap when over a container
       } else {
         onDropHighlight?.(null)
         onInsertionIndicator?.(null)
@@ -213,7 +225,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         }
         onInsertionIndicator?.(null)
         onDropHighlight?.(null)
-        return  // Skip the normal absolute move logic
+        return // Skip the normal absolute move logic
       }
 
       const dx = (me.clientX - startX) / z + lastSnapDx
@@ -268,18 +280,21 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   }
 
   const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
-    if (e.button === 2) return  // Right-click: skip drag, let contextmenu handle
+    if (e.button === 2) return // Right-click: skip drag, let contextmenu handle
     if (editorMode === "interact") return
-    if (element.locked || isRoot) { e.stopPropagation(); return }
+    if (element.locked || isRoot) {
+      e.stopPropagation()
+      return
+    }
     if (!inAutoLayout || !parent) return
     e.stopPropagation()
     e.preventDefault()
 
     // Page mode: if the root-level ancestor is absolute-positioned, move it instead of reordering
     // Canvas mode: always allow individual element reorder within container
-    const rootAncestor = documentStore.canvasMode === 'page' ? findRootAncestor() : null
+    const rootAncestor = documentStore.canvasMode === "page" ? findRootAncestor() : null
     const z = zoom
-    if (rootAncestor && rootAncestor.el.style.position === 'absolute') {
+    if (rootAncestor && rootAncestor.el.style.position === "absolute") {
       const target = e.currentTarget as HTMLElement
       const containerDom = rootAncestor.dom
       target.setPointerCapture(e.pointerId)
@@ -289,7 +304,11 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       onDragChange?.(true)
 
       const cleanup = () => {
-        try { target.releasePointerCapture(e.pointerId) } catch { /* */ }
+        try {
+          target.releasePointerCapture(e.pointerId)
+        } catch {
+          /* */
+        }
         target.removeEventListener("pointermove", onMove)
         target.removeEventListener("pointerup", onUp)
         target.removeEventListener("pointercancel", onCancel)
@@ -305,11 +324,14 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         containerDom.style.transform = `translate(${dx / z}px, ${dy / z}px)`
       }
       const onUp = (me: PointerEvent) => {
-        if (!hasMoved) { cleanup(); return }
+        if (!hasMoved) {
+          cleanup()
+          return
+        }
         const dx = (me.clientX - startX) / z
         const dy = (me.clientY - startY) / z
-        const curLeft = typeof rootAncestor.el.style.left === 'number' ? rootAncestor.el.style.left : 0
-        const curTop = typeof rootAncestor.el.style.top === 'number' ? rootAncestor.el.style.top : 0
+        const curLeft = typeof rootAncestor.el.style.left === "number" ? rootAncestor.el.style.left : 0
+        const curTop = typeof rootAncestor.el.style.top === "number" ? rootAncestor.el.style.top : 0
         const newX = Math.round(curLeft + dx)
         const newY = Math.round(curTop + dy)
         documentStore.updateStyle(rootAncestor.id, { left: newX, top: newY })
@@ -319,7 +341,9 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
           payload: { id: rootAncestor.id, x: newX, y: newY },
         })
       }
-      const onCancel = () => { cleanup() }
+      const onCancel = () => {
+        cleanup()
+      }
       dragCleanupRef.current = cleanup
       target.addEventListener("pointermove", onMove)
       target.addEventListener("pointerup", onUp)
@@ -368,13 +392,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         onDropHighlight?.(dropTarget.containerId)
         const container = documentStore.getElement(dropTarget.containerId)
         if (container) {
-          const indicator = calcInsertionIndicator(
-            dropTarget.containerId,
-            dropTarget.insertIndex,
-            container.layoutProps.direction,
-            [elementId],
-            documentStore,
-          )
+          const indicator = calcInsertionIndicator(dropTarget.containerId, dropTarget.insertIndex, container.layoutProps.direction, [elementId], documentStore)
           onInsertionIndicator?.(indicator)
         }
       } else {
@@ -399,7 +417,9 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       }
     }
 
-    const onCancel = () => { cleanup() }
+    const onCancel = () => {
+      cleanup()
+    }
 
     dragCleanupRef.current = cleanup
     target.addEventListener("pointermove", onMove)
@@ -414,24 +434,27 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       data-element-id={element.id}
       style={{
         ...element.style,
-        ...(inAutoLayout ? { position: 'relative' as const, left: undefined, top: undefined } : {}),
+        ...(inAutoLayout ? { position: "relative" as const, left: undefined, top: undefined } : {}),
         ...containerStyles,
         ...sectionStyles,
         ...childSizingStyles,
-        ...(isRoot && documentStore.canvasMode === 'page' && editorMode !== 'interact' ? {
-          boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
-          borderRadius: 2,
-        } : {}),
+        ...(isRoot && documentStore.canvasMode === "page" && editorMode !== "interact"
+          ? {
+              boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+              borderRadius: 2,
+            }
+          : {}),
         // Interact mode: convert fixed widths to max-width for responsiveness
-        ...(editorMode === "interact" && inAutoLayout && typeof element.style.width === 'number'
-          && childSizingStyles.flex === undefined ? {
-          maxWidth: element.style.width,
-          width: '100%',
-          overflowX: 'auto' as const,
-        } : {}),
+        ...(editorMode === "interact" && inAutoLayout && typeof element.style.width === "number" && childSizingStyles.flex === undefined
+          ? {
+              maxWidth: element.style.width,
+              width: "100%",
+              overflowX: "auto" as const,
+            }
+          : {}),
         outline: editorMode === "edit" && isSelected ? "1.5px dashed #6366f1" : undefined,
         outlineOffset: editorMode === "edit" && isSelected ? 2 : undefined,
-        cursor: editorMode === "interact" ? undefined : (element.locked || isRoot ? "default" : (inAutoLayout ? "grab" : "move")),
+        cursor: editorMode === "interact" ? undefined : element.locked || isRoot ? "default" : inAutoLayout ? "grab" : "move",
         userSelect: editorMode === "interact" ? undefined : "none",
       }}
       onClick={handleClick}
@@ -441,25 +464,62 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       {hasContentWrapper ? (
         <div style={contentStyles}>
           {element.children.map((childId) => (
-            <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+            <ElementRenderer
+              key={childId}
+              elementId={childId}
+              selectedIds={selectedIds}
+              onSelect={onSelect}
+              onDragChange={onDragChange}
+              onSnapLines={onSnapLines}
+              onInsertionIndicator={onInsertionIndicator}
+              onDropHighlight={onDropHighlight}
+              documentStore={documentStore}
+              bridge={bridge}
+              editorMode={editorMode}
+              zoom={zoom}
+            />
           ))}
         </div>
-      ) : isRoot && documentStore.canvasMode === 'page' && editorMode === 'edit' ? (
+      ) : isRoot && documentStore.canvasMode === "page" && editorMode === "edit" ? (
         <>
           <SectionInsertButton index={0} onInsert={handleInsertSection} />
           {element.children.map((childId, i) => (
             <React.Fragment key={childId}>
-              <ElementRenderer elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+              <ElementRenderer
+                elementId={childId}
+                selectedIds={selectedIds}
+                onSelect={onSelect}
+                onDragChange={onDragChange}
+                onSnapLines={onSnapLines}
+                onInsertionIndicator={onInsertionIndicator}
+                onDropHighlight={onDropHighlight}
+                documentStore={documentStore}
+                bridge={bridge}
+                editorMode={editorMode}
+                zoom={zoom}
+              />
               <SectionInsertButton index={i + 1} onInsert={handleInsertSection} />
             </React.Fragment>
           ))}
         </>
       ) : (
         element.children.map((childId) => (
-          <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+          <ElementRenderer
+            key={childId}
+            elementId={childId}
+            selectedIds={selectedIds}
+            onSelect={onSelect}
+            onDragChange={onDragChange}
+            onSnapLines={onSnapLines}
+            onInsertionIndicator={onInsertionIndicator}
+            onDropHighlight={onDropHighlight}
+            documentStore={documentStore}
+            bridge={bridge}
+            editorMode={editorMode}
+            zoom={zoom}
+          />
         ))
       )}
     </div>
   )
 })
-

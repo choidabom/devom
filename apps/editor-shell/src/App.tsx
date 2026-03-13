@@ -66,14 +66,7 @@ export const App = observer(function App() {
 
   const { handleCopy, handleCut, handlePaste, handleDuplicate, handleDelete } = useClipboard(syncToCanvas)
 
-  const {
-    handleAddElement,
-    handleAddSection,
-    handleLoadTemplate,
-    handleAlign,
-    handleToggleCanvasMode,
-    handleToggleMode,
-  } = useShellMessages({
+  const { handleAddElement, handleAddSection, handleLoadTemplate, handleAlign, handleToggleCanvasMode, handleToggleMode } = useShellMessages({
     editorMode,
     setEditorMode,
     setCanvasMode,
@@ -125,14 +118,20 @@ export const App = observer(function App() {
     const onDragStart = (e: DragEvent) => {
       if (e.dataTransfer?.types.includes("application/devom-element")) setIsDndActive(true)
     }
-    const onDragEnd = () => { setIsDndActive(false); setIsDndOver(false) }
+    const onDragEnd = () => {
+      setIsDndActive(false)
+      setIsDndOver(false)
+    }
     document.addEventListener("dragstart", onDragStart)
     document.addEventListener("dragend", onDragEnd)
-    return () => { document.removeEventListener("dragstart", onDragStart); document.removeEventListener("dragend", onDragEnd) }
+    return () => {
+      document.removeEventListener("dragstart", onDragStart)
+      document.removeEventListener("dragend", onDragEnd)
+    }
   }, [])
 
-  const handleImportJSX = useCallback((code: string, mode: 'replace' | 'add') => {
-    if (mode === 'replace' && !confirm('Replace current document with imported JSX?')) return
+  const handleImportJSX = useCallback((code: string, mode: "replace" | "add") => {
+    if (mode === "replace" && !confirm("Replace current document with imported JSX?")) return
 
     setImportWarnings([])
     const result = importJSX(code)
@@ -144,7 +143,7 @@ export const App = observer(function App() {
 
     historyStore.pushSnapshot()
 
-    if (mode === 'replace') {
+    if (mode === "replace") {
       documentStore.resetDocument()
     }
 
@@ -155,36 +154,59 @@ export const App = observer(function App() {
       setShowImportModal(false)
       setImportWarnings([])
     } else {
-      setImportWarnings([...result.warnings, 'No importable elements found in the provided code.'])
+      setImportWarnings([...result.warnings, "No importable elements found in the provided code."])
     }
   }, [])
 
   const selectedElements = selectionStore.selectedElements
-  const hasSelection = selectedElements.length > 0 && selectedElements.some(el => !el.locked)
+  const hasSelection = selectedElements.length > 0 && selectedElements.some((el) => !el.locked)
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: T.bg, color: T.text, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      {editorMode === "interact" && canvasMode === 'page' && (
-        <div style={{
-          position: "fixed", top: 16, right: 16, zIndex: 100,
-          display: "flex", alignItems: "center", gap: 8,
-          background: "rgba(0,0,0,0.7)", borderRadius: 20, padding: "6px 16px",
-          backdropFilter: "blur(8px)",
-        }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        background: T.bg,
+        color: T.text,
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      }}
+    >
+      {editorMode === "interact" && canvasMode === "page" && (
+        <div
+          style={{
+            position: "fixed",
+            top: 16,
+            right: 16,
+            zIndex: 100,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "rgba(0,0,0,0.7)",
+            borderRadius: 20,
+            padding: "6px 16px",
+            backdropFilter: "blur(8px)",
+          }}
+        >
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Preview</span>
           <button
             onClick={handleToggleMode}
             style={{
-              padding: "4px 12px", fontSize: 11, fontWeight: 500,
-              background: "#fff", color: "#000", border: "none",
-              borderRadius: 12, cursor: "pointer",
+              padding: "4px 12px",
+              fontSize: 11,
+              fontWeight: 500,
+              background: "#fff",
+              color: "#000",
+              border: "none",
+              borderRadius: 12,
+              cursor: "pointer",
             }}
           >
             Exit (V)
           </button>
         </div>
       )}
-      {(editorMode !== "interact" || canvasMode === 'canvas') && (
+      {(editorMode !== "interact" || canvasMode === "canvas") && (
         <div data-guide="toolbar">
           <Toolbar
             onAdd={handleAddElement}
@@ -222,7 +244,9 @@ export const App = observer(function App() {
           {isDndActive && (
             <div
               style={{
-                position: "absolute", inset: 0, zIndex: 5,
+                position: "absolute",
+                inset: 0,
+                zIndex: 5,
                 background: isDndOver ? "rgba(99, 102, 241, 0.06)" : "transparent",
                 border: isDndOver ? "2px dashed rgba(99, 102, 241, 0.4)" : "2px solid transparent",
                 borderRadius: isDndOver ? 8 : 0,
@@ -255,21 +279,37 @@ export const App = observer(function App() {
         </div>
 
         {/* Panels — overlay on top of canvas */}
-        <div data-guide="layers" style={{
-          position: "absolute", left: 0, top: 0, bottom: 0, width: leftPanelWidth,
-          padding: "0 0 8px 8px", display: "flex", flexDirection: "column", gap: 8,
-          transform: showPanels ? "translateX(0)" : "translateX(-100%)",
-          transition: "transform 0.2s ease",
-          zIndex: 10,
-        }}>
+        <div
+          data-guide="layers"
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: leftPanelWidth,
+            padding: "0 0 8px 8px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            transform: showPanels ? "translateX(0)" : "translateX(-100%)",
+            transition: "transform 0.2s ease",
+            zIndex: 10,
+          }}
+        >
           <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <LeftPanel />
           </div>
           {/* Resize handle — wider hit area, thin visible line */}
           <div
             style={{
-              position: "absolute", right: -4, top: 0, bottom: 0, width: 8,
-              cursor: "col-resize", zIndex: 11, touchAction: "none",
+              position: "absolute",
+              right: -4,
+              top: 0,
+              bottom: 0,
+              width: 8,
+              cursor: "col-resize",
+              zIndex: 11,
+              touchAction: "none",
             }}
             onPointerDown={(e) => {
               e.preventDefault()
@@ -306,43 +346,88 @@ export const App = observer(function App() {
             }}
           >
             {/* Thin visible line in the center of the hit area */}
-            <div style={{
-              position: "absolute", left: 3, top: 0, bottom: 0, width: 1,
-              transition: "background 0.15s ease",
-            }} />
+            <div
+              style={{
+                position: "absolute",
+                left: 3,
+                top: 0,
+                bottom: 0,
+                width: 1,
+                transition: "background 0.15s ease",
+              }}
+            />
           </div>
         </div>
 
-        <div data-guide="properties" style={{
-          position: "absolute", right: 0, top: 0, bottom: 0, width: 280,
-          padding: "0 8px 8px 8px",
-          transform: showPanels ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.2s ease",
-          zIndex: 10,
-        }}>
-          <div style={{ background: T.panel, borderRadius: T.panelRadius, boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`, height: "100%", overflowY: "auto", display: "flex", flexDirection: "column" }}>
-            {editorMode === "interact" ? (
-              <CodePreviewPanel />
-            ) : selectedElements.length > 0 ? <PropertiesPanel /> : (
-              <GuidePanel />
-            )}
+        <div
+          data-guide="properties"
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: 280,
+            padding: "0 8px 8px 8px",
+            transform: showPanels ? "translateX(0)" : "translateX(100%)",
+            transition: "transform 0.2s ease",
+            zIndex: 10,
+          }}
+        >
+          <div
+            style={{
+              background: T.panel,
+              borderRadius: T.panelRadius,
+              boxShadow: T.panelShadow,
+              border: `1px solid ${T.panelBorder}`,
+              height: "100%",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {editorMode === "interact" ? <CodePreviewPanel /> : selectedElements.length > 0 ? <PropertiesPanel /> : <GuidePanel />}
           </div>
         </div>
 
         {/* Zoom controls — bottom-right, above panels */}
-        {(editorMode !== "interact" || canvasMode === 'canvas') && (
-          <div style={{
-            position: "absolute", bottom: 12, right: showPanels ? 296 : 12,
-            display: "flex", alignItems: "center", gap: 4,
-            background: T.panel, borderRadius: 8,
-            padding: "4px 8px", fontSize: 11,
-            boxShadow: T.panelShadow, border: `1px solid ${T.panelBorder}`,
-            zIndex: 10, userSelect: "none",
-            transition: "right 0.2s ease",
-          }}>
-            <button onClick={() => bridge.send({ type: "ZOOM_OUT" })} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: T.textSub, padding: "0 2px", lineHeight: 1 }}>−</button>
-            <span onClick={() => bridge.send({ type: "ZOOM_RESET" })} style={{ cursor: "pointer", minWidth: 36, textAlign: "center", fontSize: 11, fontWeight: 500, color: T.textSub }}>{Math.round(canvasZoom * 100)}%</span>
-            <button onClick={() => bridge.send({ type: "ZOOM_IN" })} style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: T.textSub, padding: "0 2px", lineHeight: 1 }}>+</button>
+        {(editorMode !== "interact" || canvasMode === "canvas") && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 12,
+              right: showPanels ? 296 : 12,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              background: T.panel,
+              borderRadius: 8,
+              padding: "4px 8px",
+              fontSize: 11,
+              boxShadow: T.panelShadow,
+              border: `1px solid ${T.panelBorder}`,
+              zIndex: 10,
+              userSelect: "none",
+              transition: "right 0.2s ease",
+            }}
+          >
+            <button
+              onClick={() => bridge.send({ type: "ZOOM_OUT" })}
+              style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: T.textSub, padding: "0 2px", lineHeight: 1 }}
+            >
+              −
+            </button>
+            <span
+              onClick={() => bridge.send({ type: "ZOOM_RESET" })}
+              style={{ cursor: "pointer", minWidth: 36, textAlign: "center", fontSize: 11, fontWeight: 500, color: T.textSub }}
+            >
+              {Math.round(canvasZoom * 100)}%
+            </span>
+            <button
+              onClick={() => bridge.send({ type: "ZOOM_IN" })}
+              style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: T.textSub, padding: "0 2px", lineHeight: 1 }}
+            >
+              +
+            </button>
           </div>
         )}
       </div>
@@ -351,11 +436,14 @@ export const App = observer(function App() {
       {showImportModal && (
         <ImportJSXModal
           onImport={handleImportJSX}
-          onClose={() => { setShowImportModal(false); setImportWarnings([]) }}
+          onClose={() => {
+            setShowImportModal(false)
+            setImportWarnings([])
+          }}
           warnings={importWarnings}
         />
       )}
-      {(editorMode !== "interact" || canvasMode === 'canvas') && <LayoutGuide />}
+      {(editorMode !== "interact" || canvasMode === "canvas") && <LayoutGuide />}
     </div>
   )
 })

@@ -13,6 +13,7 @@
 ## Task 1: editor-core 패키지 스캐폴딩
 
 **Files:**
+
 - Create: `packages/editor-core/package.json`
 - Create: `packages/editor-core/tsconfig.json`
 - Create: `packages/editor-core/vite.config.ts`
@@ -123,6 +124,7 @@ git commit -m "feat(editor-core): scaffold editor-core package"
 ## Task 2: 타입 정의 및 프로토콜
 
 **Files:**
+
 - Create: `packages/editor-core/src/types.ts`
 - Create: `packages/editor-core/src/protocol.ts`
 - Modify: `packages/editor-core/src/index.ts`
@@ -132,14 +134,7 @@ git commit -m "feat(editor-core): scaffold editor-core package"
 ```typescript
 import type { CSSProperties } from "react"
 
-export type ElementType =
-  | "div"
-  | "text"
-  | "image"
-  | "button"
-  | "input"
-  | "flex"
-  | "grid"
+export type ElementType = "div" | "text" | "image" | "button" | "input" | "flex" | "grid"
 
 export interface EditorElement {
   id: string
@@ -269,12 +264,7 @@ export function wrapMessage(message: EditorMessage): WrappedMessage {
 }
 
 export function isEditorMessage(data: unknown): data is WrappedMessage {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "source" in data &&
-    (data as WrappedMessage).source === EDITOR_MESSAGE_SOURCE
-  )
+  return typeof data === "object" && data !== null && "source" in data && (data as WrappedMessage).source === EDITOR_MESSAGE_SOURCE
 }
 ```
 
@@ -302,6 +292,7 @@ git commit -m "feat(editor-core): add types and protocol definitions"
 ## Task 3: MobX DocumentStore
 
 **Files:**
+
 - Create: `packages/editor-core/src/stores/DocumentStore.ts`
 - Create: `packages/editor-core/src/stores/index.ts`
 - Modify: `packages/editor-core/src/index.ts`
@@ -490,6 +481,7 @@ git commit -m "feat(editor-core): add DocumentStore with MobX"
 ## Task 4: SelectionStore + HistoryStore + ViewportStore
 
 **Files:**
+
 - Create: `packages/editor-core/src/stores/SelectionStore.ts`
 - Create: `packages/editor-core/src/stores/HistoryStore.ts`
 - Create: `packages/editor-core/src/stores/ViewportStore.ts`
@@ -508,9 +500,13 @@ export class SelectionStore {
   selectedBounds: ElementBounds | null = null
 
   constructor(private documentStore: DocumentStore) {
-    makeAutoObservable(this, {
-      selectedElement: computed,
-    }, { autoBind: true })
+    makeAutoObservable(
+      this,
+      {
+        selectedElement: computed,
+      },
+      { autoBind: true }
+    )
   }
 
   get selectedElement(): EditorElement | undefined {
@@ -661,6 +657,7 @@ git commit -m "feat(editor-core): add Selection, History, Viewport stores"
 ## Task 5: MessageBridge (쉘-캔버스 통신)
 
 **Files:**
+
 - Create: `packages/editor-core/src/bridge/MessageBridge.ts`
 - Create: `packages/editor-core/src/bridge/index.ts`
 - Modify: `packages/editor-core/src/index.ts`
@@ -746,6 +743,7 @@ git commit -m "feat(editor-core): add MessageBridge for shell-canvas communicati
 ## Task 6: editor-canvas 앱 스캐폴딩
 
 **Files:**
+
 - Create: `apps/editor-canvas/package.json`
 - Create: `apps/editor-canvas/tsconfig.json`
 - Create: `apps/editor-canvas/vite.config.ts`
@@ -829,8 +827,18 @@ export default defineConfig({
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Editor Canvas</title>
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body,
+      #root {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
     </style>
   </head>
   <body>
@@ -850,7 +858,7 @@ import { App } from "./App"
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 )
 ```
 
@@ -926,11 +934,7 @@ const ElementRenderer = observer(function ElementRenderer({ elementId }: { eleme
   const content = getElementContent(element.type, element.props)
 
   return (
-    <div
-      data-element-id={element.id}
-      style={element.style}
-      onClick={handleClick}
-    >
+    <div data-element-id={element.id} style={element.style} onClick={handleClick}>
       {content}
       {element.children.map((childId) => (
         <ElementRenderer key={childId} elementId={childId} />
@@ -948,9 +952,11 @@ function getElementContent(type: string, props: Record<string, unknown>): React.
     case "input":
       return <input placeholder={String(props.placeholder ?? "")} style={{ width: "100%", border: "none", outline: "none", background: "transparent", font: "inherit" }} readOnly />
     case "image":
-      return props.src
-        ? <img src={String(props.src)} alt={String(props.alt ?? "")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" }}>Image</div>
+      return props.src ? (
+        <img src={String(props.src)} alt={String(props.alt ?? "")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      ) : (
+        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" }}>Image</div>
+      )
     default:
       return null
   }
@@ -974,6 +980,7 @@ git commit -m "feat(editor-canvas): scaffold canvas app with element renderer"
 ## Task 7: editor-shell 앱 스캐폴딩
 
 **Files:**
+
 - Create: `apps/editor-shell/package.json`
 - Create: `apps/editor-shell/tsconfig.json`
 - Create: `apps/editor-shell/vite.config.ts`
@@ -1058,8 +1065,19 @@ export default defineConfig({
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Editor Shell</title>
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body, #root { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body,
+      #root {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
     </style>
   </head>
   <body>
@@ -1091,7 +1109,7 @@ import { App } from "./App"
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 )
 ```
 
@@ -1210,12 +1228,7 @@ export const App = observer(function App() {
 
         {/* Canvas iframe */}
         <div style={{ flex: 1, position: "relative" }}>
-          <iframe
-            ref={iframeRef}
-            src="http://localhost:4001"
-            style={{ width: "100%", height: "100%", border: "none" }}
-            title="Editor Canvas"
-          />
+          <iframe ref={iframeRef} src="http://localhost:4001" style={{ width: "100%", height: "100%", border: "none" }} title="Editor Canvas" />
         </div>
 
         {/* Properties */}
@@ -1292,7 +1305,9 @@ const PropertiesPanel = observer(function PropertiesPanel() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <div style={{ fontSize: 13, fontWeight: 600 }}>{element.type} — {element.name}</div>
+      <div style={{ fontSize: 13, fontWeight: 600 }}>
+        {element.type} — {element.name}
+      </div>
 
       <PropSection title="Layout">
         <PropRow label="x" value={element.style.left ?? 0} onChange={(v) => updateStyle("left", v)} />
@@ -1358,6 +1373,7 @@ git commit -m "feat(editor-shell): scaffold shell app with toolbar, layers, prop
 ## Task 8: 캔버스 드래그 & 리사이즈
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/App.tsx`
 
 **Step 1: Add drag and resize to ElementRenderer**
@@ -1366,6 +1382,7 @@ git commit -m "feat(editor-shell): scaffold shell app with toolbar, layers, prop
 기존 `ElementRenderer`를 수정하여 선택 UI(파란 테두리 + 리사이즈 핸들)와 드래그 로직을 포함시킨다.
 
 주요 변경:
+
 - 선택된 요소에 파란 아웃라인 + 8방향 리사이즈 핸들 표시
 - `pointerdown` → `pointermove` → `pointerup`으로 드래그 구현
 - 드래그 완료 시 `ELEMENT_MOVED` 메시지를 쉘로 전송
@@ -1386,6 +1403,7 @@ case "SELECT_ELEMENT":
 ```
 
 드래그 핸들러:
+
 ```tsx
 const handlePointerDown = (e: React.PointerEvent) => {
   e.stopPropagation()
@@ -1428,6 +1446,7 @@ const handlePointerDown = (e: React.PointerEvent) => {
 **Step 2: Verify drag works**
 
 Run both servers:
+
 ```bash
 # Terminal 1
 pnpm --filter @devom/editor-core build
@@ -1452,6 +1471,7 @@ git commit -m "feat(editor-canvas): add drag and resize interaction"
 ## Task 9: 내보내기 기능
 
 **Files:**
+
 - Create: `packages/editor-core/src/export/jsonExport.ts`
 - Create: `packages/editor-core/src/export/jsxExport.ts`
 - Create: `packages/editor-core/src/export/htmlExport.ts`
@@ -1510,10 +1530,14 @@ function renderElement(el: EditorElement, elements: Map<string, EditorElement>, 
 
 function getTag(el: EditorElement): string {
   switch (el.type) {
-    case "button": return "button"
-    case "input": return "input"
-    case "image": return "img"
-    default: return "div"
+    case "button":
+      return "button"
+    case "input":
+      return "input"
+    case "image":
+      return "img"
+    default:
+      return "div"
   }
 }
 
@@ -1532,10 +1556,12 @@ function getPropsString(el: EditorElement): string {
 function styleToString(style: CSSProperties): string {
   const entries = Object.entries(style).filter(([, v]) => v !== undefined && v !== "")
   if (entries.length === 0) return ""
-  const inner = entries.map(([k, v]) => {
-    const val = typeof v === "number" ? String(v) : `"${v}"`
-    return `${k}: ${val}`
-  }).join(", ")
+  const inner = entries
+    .map(([k, v]) => {
+      const val = typeof v === "number" ? String(v) : `"${v}"`
+      return `${k}: ${val}`
+    })
+    .join(", ")
   return ` style={{ ${inner} }}`
 }
 ```
@@ -1550,11 +1576,7 @@ export function exportToHTML(elements: Map<string, EditorElement>, rootId: strin
   const root = elements.get(rootId)
   if (!root) return ""
 
-  const lines: string[] = [
-    "<!DOCTYPE html>",
-    "<html><head><meta charset=\"UTF-8\"><style>* { margin: 0; box-sizing: border-box; }</style></head>",
-    "<body>",
-  ]
+  const lines: string[] = ["<!DOCTYPE html>", '<html><head><meta charset="UTF-8"><style>* { margin: 0; box-sizing: border-box; }</style></head>', "<body>"]
   renderHTML(root, elements, lines, 2)
   lines.push("</body></html>")
   return lines.join("\n")
@@ -1630,6 +1652,7 @@ git commit -m "feat(editor-core): add JSON, JSX, HTML export"
 ## Task 10: 쉘에 내보내기 UI 연결
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/App.tsx`
 
 **Step 1: Add export buttons and modal to shell toolbar**
@@ -1641,10 +1664,12 @@ git commit -m "feat(editor-core): add JSON, JSX, HTML export"
 import { exportToJSON, exportToJSX, exportToHTML } from "@devom/editor-core"
 
 // 툴바에 Export 버튼 추가
-<ToolButton label="Export" onClick={() => setShowExport(true)} />
+;<ToolButton label="Export" onClick={() => setShowExport(true)} />
 
 // 모달 컴포넌트
-{showExport && <ExportModal onClose={() => setShowExport(false)} />}
+{
+  showExport && <ExportModal onClose={() => setShowExport(false)} />
+}
 ```
 
 **Step 2: Verify export flow**
@@ -1666,6 +1691,7 @@ git commit -m "feat(editor-shell): add export UI with JSON, JSX, HTML formats"
 ## Task 11: turbo 설정 및 통합 dev 스크립트
 
 **Files:**
+
 - Modify: `/Users/dabom-choi/StudySource/devom/package.json` (root)
 
 **Step 1: Add editor dev script to root package.json**
@@ -1695,16 +1721,16 @@ git commit -m "feat: add editor dev and build scripts"
 
 ## Task Summary
 
-| # | Task | Package | Description |
-|---|------|---------|-------------|
-| 1 | editor-core 스캐폴딩 | editor-core | package.json, tsconfig, vite config |
-| 2 | 타입 & 프로토콜 | editor-core | EditorElement, EditorDocument, messages |
-| 3 | DocumentStore | editor-core | MobX store for element tree |
-| 4 | Selection/History/Viewport | editor-core | Supporting stores |
-| 5 | MessageBridge | editor-core | postMessage wrapper |
-| 6 | editor-canvas 스캐폴딩 | editor-canvas | Vite app + element renderer |
-| 7 | editor-shell 스캐폴딩 | editor-shell | Vite app + toolbar, layers, properties |
-| 8 | 드래그 & 리사이즈 | editor-canvas | Pointer events interaction |
-| 9 | 내보내기 | editor-core | JSON, JSX, HTML export |
-| 10 | 내보내기 UI | editor-shell | Export modal |
-| 11 | 통합 스크립트 | root | turbo dev/build scripts |
+| #   | Task                       | Package       | Description                             |
+| --- | -------------------------- | ------------- | --------------------------------------- |
+| 1   | editor-core 스캐폴딩       | editor-core   | package.json, tsconfig, vite config     |
+| 2   | 타입 & 프로토콜            | editor-core   | EditorElement, EditorDocument, messages |
+| 3   | DocumentStore              | editor-core   | MobX store for element tree             |
+| 4   | Selection/History/Viewport | editor-core   | Supporting stores                       |
+| 5   | MessageBridge              | editor-core   | postMessage wrapper                     |
+| 6   | editor-canvas 스캐폴딩     | editor-canvas | Vite app + element renderer             |
+| 7   | editor-shell 스캐폴딩      | editor-shell  | Vite app + toolbar, layers, properties  |
+| 8   | 드래그 & 리사이즈          | editor-canvas | Pointer events interaction              |
+| 9   | 내보내기                   | editor-core   | JSON, JSX, HTML export                  |
+| 10  | 내보내기 UI                | editor-shell  | Export modal                            |
+| 11  | 통합 스크립트              | root          | turbo dev/build scripts                 |

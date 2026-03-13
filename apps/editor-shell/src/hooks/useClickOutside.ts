@@ -1,10 +1,6 @@
 import { useEffect, type RefObject } from "react"
 
-export function useClickOutside(
-  ref: RefObject<HTMLElement | null>,
-  isOpen: boolean,
-  onClose: () => void,
-) {
+export function useClickOutside(ref: RefObject<HTMLElement | null>, isOpen: boolean, onClose: () => void) {
   useEffect(() => {
     if (!isOpen) return
     const onClick = (e: MouseEvent) => {

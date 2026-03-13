@@ -2,11 +2,7 @@ import { nanoid } from "nanoid"
 import type { ObservableMap } from "mobx"
 import { DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type EditorElement } from "../../types"
 
-export function findLCA(
-  elements: ObservableMap<string, EditorElement>,
-  rootId: string,
-  ids: string[],
-): string | null {
+export function findLCA(elements: ObservableMap<string, EditorElement>, rootId: string, ids: string[]): string | null {
   if (ids.length === 0) return null
 
   const paths: string[][] = []
@@ -23,11 +19,11 @@ export function findLCA(
   }
 
   let lca = rootId
-  const minLen = Math.min(...paths.map(p => p.length))
+  const minLen = Math.min(...paths.map((p) => p.length))
   for (let i = 0; i < minLen; i++) {
     const val = paths[0]?.[i]
     if (!val) break
-    if (paths.every(p => p[i] === val)) {
+    if (paths.every((p) => p[i] === val)) {
       lca = val
     } else {
       break
@@ -37,11 +33,7 @@ export function findLCA(
   return lca
 }
 
-export function isAncestor(
-  elements: ObservableMap<string, EditorElement>,
-  ancestorId: string,
-  descendantId: string,
-): boolean {
+export function isAncestor(elements: ObservableMap<string, EditorElement>, ancestorId: string, descendantId: string): boolean {
   let current: string | null = descendantId
   while (current) {
     const el = elements.get(current)
@@ -56,9 +48,9 @@ export function groupElements(
   elements: ObservableMap<string, EditorElement>,
   rootId: string,
   ids: string[],
-  elementBounds: Record<string, { left: number; top: number; width: number; height: number }>,
+  elementBounds: Record<string, { left: number; top: number; width: number; height: number }>
 ): string | null {
-  const validIds = ids.filter(id => {
+  const validIds = ids.filter((id) => {
     const el = elements.get(id)
     return el && !el.locked && id !== rootId
   })
@@ -77,7 +69,10 @@ export function groupElements(
     if (!elementBounds[id]) return null
   }
 
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity
   for (const id of validIds) {
     const b = elementBounds[id]!
     minX = Math.min(minX, b.left)
@@ -91,12 +86,12 @@ export function groupElements(
 
   const group: EditorElement = {
     id: groupId,
-    type: 'div',
+    type: "div",
     name: `Group-${groupId.slice(0, 4)}`,
     parentId: lcaId,
     children: [],
     style: {
-      position: 'absolute' as const,
+      position: "absolute" as const,
       left: minX,
       top: minY,
       width: maxX - minX,
@@ -105,7 +100,7 @@ export function groupElements(
     props: {},
     locked: false,
     visible: true,
-    layoutMode: 'none' as const,
+    layoutMode: "none" as const,
     layoutProps: { ...DEFAULT_LAYOUT_PROPS },
     sizing: { ...DEFAULT_SIZING },
     canvasPosition: null,
@@ -127,7 +122,7 @@ export function groupElements(
 
     const oldParent = el.parentId ? elements.get(el.parentId) : undefined
     if (oldParent) {
-      oldParent.children = oldParent.children.filter(c => c !== id)
+      oldParent.children = oldParent.children.filter((c) => c !== id)
     }
 
     const b = elementBounds[id]
@@ -135,7 +130,7 @@ export function groupElements(
     const top = b ? b.top - minY : 0
     el.style = {
       ...el.style,
-      position: 'absolute' as const,
+      position: "absolute" as const,
       left,
       top,
     }
@@ -144,20 +139,12 @@ export function groupElements(
     group.children.push(id)
   }
 
-  lca.children = [
-    ...lca.children.slice(0, insertIndex),
-    groupId,
-    ...lca.children.slice(insertIndex),
-  ]
+  lca.children = [...lca.children.slice(0, insertIndex), groupId, ...lca.children.slice(insertIndex)]
 
   return groupId
 }
 
-export function ungroupElements(
-  elements: ObservableMap<string, EditorElement>,
-  rootId: string,
-  ids: string[],
-): string[] {
+export function ungroupElements(elements: ObservableMap<string, EditorElement>, rootId: string, ids: string[]): string[] {
   const newSelection: string[] = []
 
   for (const id of ids) {
@@ -181,11 +168,11 @@ export function ungroupElements(
 
         child.parentId = parent.id
 
-        if (parent.layoutMode === 'flex' || parent.layoutMode === 'grid') {
+        if (parent.layoutMode === "flex" || parent.layoutMode === "grid") {
           const { position, left, top, ...rest } = child.style
-          child.style = { ...rest, position: 'relative' as const }
+          child.style = { ...rest, position: "relative" as const }
         } else {
-          child.style = { ...child.style, position: 'absolute' as const }
+          child.style = { ...child.style, position: "absolute" as const }
         }
 
         newSelection.push(childId)
@@ -204,7 +191,7 @@ export function ungroupElements(
       const grandparent = parent.parentId ? elements.get(parent.parentId) : undefined
       if (!grandparent) continue
 
-      parent.children = parent.children.filter(cid => cid !== id)
+      parent.children = parent.children.filter((cid) => cid !== id)
 
       const parentIndex = grandparent.children.indexOf(parent.id)
       const gpBefore = grandparent.children.slice(0, parentIndex + 1)
@@ -212,11 +199,11 @@ export function ungroupElements(
       grandparent.children = [...gpBefore, id, ...gpAfter]
       element.parentId = grandparent.id
 
-      if (grandparent.layoutMode === 'flex' || grandparent.layoutMode === 'grid') {
+      if (grandparent.layoutMode === "flex" || grandparent.layoutMode === "grid") {
         const { position, left, top, ...rest } = element.style
-        element.style = { ...rest, position: 'relative' as const }
+        element.style = { ...rest, position: "relative" as const }
       } else {
-        element.style = { ...element.style, position: 'absolute' as const }
+        element.style = { ...element.style, position: "absolute" as const }
       }
 
       newSelection.push(id)

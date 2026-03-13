@@ -1,7 +1,22 @@
 import { makeAutoObservable, observable } from "mobx"
 import { nanoid } from "nanoid"
 import type { CSSProperties } from "react"
-import { DEFAULT_ELEMENT_STYLE, DEFAULT_GRID_PROPS, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type CanvasMode, type PageViewportWidth, type EditorElement, type ElementTemplate, type ElementType, type GridProps, type LayoutProps, type SectionProps, type SectionRole, type SizingProps } from "../types"
+import {
+  DEFAULT_ELEMENT_STYLE,
+  DEFAULT_GRID_PROPS,
+  DEFAULT_LAYOUT_PROPS,
+  DEFAULT_SIZING,
+  type CanvasMode,
+  type PageViewportWidth,
+  type EditorElement,
+  type ElementTemplate,
+  type ElementType,
+  type GridProps,
+  type LayoutProps,
+  type SectionProps,
+  type SectionRole,
+  type SizingProps,
+} from "../types"
 import { createSectionPreset } from "../presets/sectionPresets"
 import { TEMPLATE_BUILDERS } from "../presets/templates"
 import { getDefaultProps } from "../utils/getDefaultProps"
@@ -14,15 +29,15 @@ export class DocumentStore {
   rootId = ""
   name = "Untitled"
   viewport = { width: 1280, height: 800 }
-  canvasMode: CanvasMode = 'canvas'
+  canvasMode: CanvasMode = "canvas"
   pageViewport: PageViewportWidth = 1280
   currentTemplateId: string | null = null
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true })
     this.initRoot()
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('devom-editor-template') : null
-    this.loadTemplate(saved || 'food-product')
+    const saved = typeof window !== "undefined" ? localStorage.getItem("devom-editor-template") : null
+    this.loadTemplate(saved || "galaxy-flip")
   }
 
   private initRoot() {
@@ -44,7 +59,7 @@ export class DocumentStore {
       props: {},
       locked: true,
       visible: true,
-      layoutMode: 'none' as const,
+      layoutMode: "none" as const,
       layoutProps: { ...DEFAULT_LAYOUT_PROPS },
       sizing: { ...DEFAULT_SIZING },
       canvasPosition: null,
@@ -58,8 +73,8 @@ export class DocumentStore {
     this.initRoot()
     builder(this)
     this.currentTemplateId = templateId
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('devom-editor-template', templateId)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("devom-editor-template", templateId)
     }
   }
 
@@ -98,17 +113,17 @@ export class DocumentStore {
       props: { ...getDefaultProps(type), ...(initialProps ?? {}) },
       locked: false,
       visible: true,
-      layoutMode: 'none' as const,
+      layoutMode: "none" as const,
       layoutProps: { ...DEFAULT_LAYOUT_PROPS },
       sizing: { ...DEFAULT_SIZING },
       canvasPosition: null,
     }
 
     // Page Mode: root children default to flow layout
-    if (this.canvasMode === 'page' && targetParentId === this.rootId) {
+    if (this.canvasMode === "page" && targetParentId === this.rootId) {
       const { position, left, top, ...rest } = element.style
-      element.style = { ...rest, position: 'relative' as const }
-      element.sizing = { w: 'fill', h: 'hug' }
+      element.style = { ...rest, position: "relative" as const }
+      element.sizing = { w: "fill", h: "hug" }
     }
 
     this.elements.set(id, element)
@@ -119,7 +134,7 @@ export class DocumentStore {
   addElementFromRemote(element: EditorElement) {
     this.elements.set(element.id, {
       ...element,
-      layoutMode: element.layoutMode ?? 'none',
+      layoutMode: element.layoutMode ?? "none",
       layoutProps: element.layoutProps ?? { ...DEFAULT_LAYOUT_PROPS },
       sizing: element.sizing ?? { ...DEFAULT_SIZING },
       canvasPosition: element.canvasPosition ?? null,
@@ -204,19 +219,19 @@ export class DocumentStore {
 
   // --- Layout ---
 
-  setLayoutMode(id: string, mode: 'none' | 'flex' | 'grid') {
+  setLayoutMode(id: string, mode: "none" | "flex" | "grid") {
     const element = this.elements.get(id)
     if (!element || element.locked || id === this.rootId) return
     element.layoutMode = mode
-    if (mode === 'flex') {
+    if (mode === "flex") {
       element.layoutProps = { ...DEFAULT_LAYOUT_PROPS }
       for (const childId of element.children) {
         const child = this.elements.get(childId)
         if (!child) continue
         const { position, left, top, ...rest } = child.style
-        child.style = { ...rest, position: 'relative' as const }
+        child.style = { ...rest, position: "relative" as const }
       }
-    } else if (mode === 'grid') {
+    } else if (mode === "grid") {
       if (!element.gridProps) {
         element.gridProps = { ...DEFAULT_GRID_PROPS }
       }
@@ -224,20 +239,20 @@ export class DocumentStore {
         const child = this.elements.get(childId)
         if (!child) continue
         const { position, left, top, ...rest } = child.style
-        child.style = { ...rest, position: 'relative' as const }
+        child.style = { ...rest, position: "relative" as const }
       }
     } else {
       for (const childId of element.children) {
         const child = this.elements.get(childId)
         if (!child) continue
-        child.style = { ...child.style, position: 'absolute' as const, left: 0, top: 0 }
+        child.style = { ...child.style, position: "absolute" as const, left: 0, top: 0 }
       }
     }
   }
 
   updateLayoutProps(id: string, props: Partial<LayoutProps>) {
     const element = this.elements.get(id)
-    if (!element || element.layoutMode !== 'flex') return
+    if (!element || element.layoutMode !== "flex") return
     Object.assign(element.layoutProps, props)
   }
 
@@ -297,14 +312,14 @@ export class DocumentStore {
     element.parentId = newParentId
     newParent.children.splice(index, 0, id)
 
-    if (newParent.layoutMode === 'flex') {
+    if (newParent.layoutMode === "flex") {
       const { position, left, top, ...rest } = element.style
-      element.style = { ...rest, position: 'relative' as const }
+      element.style = { ...rest, position: "relative" as const }
       element.sizing = { ...DEFAULT_SIZING }
     } else {
       element.style = {
         ...element.style,
-        position: 'absolute' as const,
+        position: "absolute" as const,
         left: dropPosition?.x ?? 0,
         top: dropPosition?.y ?? 0,
       }
@@ -349,7 +364,7 @@ export class DocumentStore {
 
   setPageViewport(width: PageViewportWidth) {
     this.pageViewport = width
-    if (this.canvasMode === 'page') {
+    if (this.canvasMode === "page") {
       const root = this.elements.get(this.rootId)
       if (root) {
         root.style = { ...root.style, width }
@@ -372,7 +387,7 @@ export class DocumentStore {
     for (const [key, el] of Object.entries(data.elements)) {
       this.elements.set(key, {
         ...el,
-        layoutMode: el.layoutMode ?? 'none',
+        layoutMode: el.layoutMode ?? "none",
         layoutProps: { ...DEFAULT_LAYOUT_PROPS, ...el.layoutProps },
         sizing: el.sizing ?? { ...DEFAULT_SIZING },
         canvasPosition: el.canvasPosition ?? null,
@@ -380,5 +395,4 @@ export class DocumentStore {
     }
     this.rootId = data.rootId
   }
-
 }

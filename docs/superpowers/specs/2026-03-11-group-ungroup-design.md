@@ -74,9 +74,9 @@ Shell 처리:
 
 ## 수정 파일
 
-| 파일 | 변경 내용 |
-|------|----------|
-| `packages/editor-core/src/stores/DocumentStore.ts` | `groupElements()` 추가 |
-| `packages/editor-core/src/protocol.ts` | `GROUP_ELEMENTS_REQUEST`, `UNGROUP_ELEMENTS_REQUEST` 메시지 추가 |
-| `apps/editor-shell/src/App.tsx` | Group/Ungroup 메시지 핸들러 |
-| `apps/editor-canvas/src/App.tsx` | Cmd+G / Cmd+Shift+G 키보드 단축키 → REQUEST 전송 |
+| 파일                                               | 변경 내용                                                        |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| `packages/editor-core/src/stores/DocumentStore.ts` | `groupElements()` 추가                                           |
+| `packages/editor-core/src/protocol.ts`             | `GROUP_ELEMENTS_REQUEST`, `UNGROUP_ELEMENTS_REQUEST` 메시지 추가 |
+| `apps/editor-shell/src/App.tsx`                    | Group/Ungroup 메시지 핸들러                                      |
+| `apps/editor-canvas/src/App.tsx`                   | Cmd+G / Cmd+Shift+G 키보드 단축키 → REQUEST 전송                 |

@@ -13,15 +13,7 @@ interface SwitchProps {
   size?: "sm" | "default"
 }
 
-function Switch({
-  className,
-  checked: controlledChecked,
-  onCheckedChange,
-  defaultChecked = false,
-  disabled = false,
-  id,
-  size = "default",
-}: SwitchProps) {
+function Switch({ className, checked: controlledChecked, onCheckedChange, defaultChecked = false, disabled = false, id, size = "default" }: SwitchProps) {
   const [internalChecked, setInternalChecked] = React.useState(defaultChecked)
   const isChecked = controlledChecked ?? internalChecked
 
@@ -56,11 +48,7 @@ function Switch({
         className={cn(
           "pointer-events-none block rounded-full bg-background ring-0 transition-transform",
           size === "default" ? "h-4 w-4" : "h-3 w-3",
-          isChecked
-            ? size === "default"
-              ? "translate-x-[14px]"
-              : "translate-x-[10px]"
-            : "translate-x-0"
+          isChecked ? (size === "default" ? "translate-x-[14px]" : "translate-x-[10px]") : "translate-x-0"
         )}
       />
     </button>

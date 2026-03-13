@@ -10,6 +10,7 @@
 ## Executive Summary
 
 The bcFeatures section is a comprehensive product features showcase built with a **component-based architecture**. It uses:
+
 - **Modular component system** with BEM-like naming (`wrap-component`, `component-contents`)
 - **Responsive design** with separate mobile/desktop variants (`.mo-ver`, `.pc-ver`)
 - **Lazy-loaded images** using `lozad` library
@@ -21,6 +22,7 @@ The bcFeatures section is a comprehensive product features showcase built with a
 ## 1. Overall Architecture
 
 ### Container Structure
+
 ```html
 <div class="tab_con bcFeatures">
   <article class="component-content component01 open" id="compGoodsFeatures">
@@ -32,6 +34,7 @@ The bcFeatures section is a comprehensive product features showcase built with a
 ```
 
 ### Component Hierarchy
+
 1. **Root:** `.tab_con.bcFeatures` - Tab container
 2. **Article:** `.component-content.component01.open` - Main content article
 3. **Wrapper:** `.heightWrap` - Height management wrapper
@@ -43,14 +46,14 @@ The bcFeatures section is a comprehensive product features showcase built with a
 
 ### Component Distribution (39 total components)
 
-| Component Type | Count | Usage |
-|----------------|-------|-------|
-| `feature-benefit img-bottom` | 17 | Product feature with bottom image |
-| `textbox-simple` | 9 | Text-only disclaimer/description sections |
-| `textbox-simple stc-component` | 6 | Styled text blocks (special formatting) |
-| `feature-benefit img-left-5to5` | 3 | 50/50 split with image on left |
-| `feature-benefit img-right-5to5` | 2 | 50/50 split with image on right |
-| `feature-full-bleed` | 4 | Full-width hero sections |
+| Component Type                   | Count | Usage                                     |
+| -------------------------------- | ----- | ----------------------------------------- |
+| `feature-benefit img-bottom`     | 17    | Product feature with bottom image         |
+| `textbox-simple`                 | 9     | Text-only disclaimer/description sections |
+| `textbox-simple stc-component`   | 6     | Styled text blocks (special formatting)   |
+| `feature-benefit img-left-5to5`  | 3     | 50/50 split with image on left            |
+| `feature-benefit img-right-5to5` | 2     | 50/50 split with image on right           |
+| `feature-full-bleed`             | 4     | Full-width hero sections                  |
 
 ### Base Component Structure
 
@@ -58,10 +61,7 @@ All components follow this pattern:
 
 ```html
 <div class="wrap-component [TYPE] new-component [SPACING] w1440px [LAYOUT]">
-  <div class="component-contents [SPACING] [TEXT_ALIGN]"
-       style="background-color:#FFFFFF"
-       data-cptnm="[COMPONENT_NAME]">
-
+  <div class="component-contents [SPACING] [TEXT_ALIGN]" style="background-color:#FFFFFF" data-cptnm="[COMPONENT_NAME]">
     <div class="component-text">
       <div class="component-text-inner">
         <div class="box-title">
@@ -78,7 +78,6 @@ All components follow this pattern:
     <div class="visual-area">
       <!-- Image or video content -->
     </div>
-
   </div>
 </div>
 ```
@@ -90,10 +89,12 @@ All components follow this pattern:
 ### Color Palette
 
 **Background Colors:**
+
 - `#FFFFFF` - White (primary background)
 - `#000000` - Black (hero sections, contrast backgrounds)
 
 **Text Colors:**
+
 - `#000000` - Black text (primary)
 - `#FFFFFF` - White text (on dark backgrounds)
 - `#d4d4d4` - Light gray (subtle text)
@@ -101,33 +102,39 @@ All components follow this pattern:
 ### Spacing Utilities
 
 **Padding Top (pt-):**
+
 - `pt-none` - No top padding
 - `pt-nrml` - Normal top padding (~60-80px estimated)
 
 **Padding Bottom (pb-):**
+
 - `pb-none` - No bottom padding
 - `pb-nrml` - Normal bottom padding (~60-80px estimated)
 
 ### Text Alignment
 
 **Desktop (txt-):**
+
 - `txt-top-center` - Top aligned, center
 - `txt-top-left` - Top aligned, left
 - `txt-mid-center` - Middle aligned, center
 - `txt-mid-left` - Middle aligned, left
 
 **Mobile (txtm-):**
+
 - `txtm-top-center` - Mobile: top center
 - `txtm-top-left` - Mobile: top left
 
 ### Layout Modifiers
 
 **Image Position:**
+
 - `img-bottom` - Image below text (most common)
 - `img-left-5to5` - Image left, text right (50/50)
 - `img-right-5to5` - Image right, text left (50/50)
 
 **Container:**
+
 - `w1440px` - Max width 1440px (all components)
 - `fixWidth` - Fixed width container
 - `new-component` - Marks newer component version
@@ -137,6 +144,7 @@ All components follow this pattern:
 ## 4. Responsive Strategy
 
 ### Device Breakpoint
+
 - Desktop: `min-width: 801px`
 - Mobile: `max-width: 800px`
 
@@ -146,14 +154,10 @@ Every text element is duplicated with device-specific classes:
 
 ```html
 <!-- Mobile -->
-<h2 class="title mo-ver" style="color:#000000">
-  AI폰, 한 손에 쏙<br>
-</h2>
+<h2 class="title mo-ver" style="color:#000000">AI폰, 한 손에 쏙<br /></h2>
 
 <!-- Desktop -->
-<h2 class="title pc-ver" style="color:#000000">
-  AI폰, 한 손에 쏙<br>
-</h2>
+<h2 class="title pc-ver" style="color:#000000">AI폰, 한 손에 쏙<br /></h2>
 ```
 
 ### Responsive Images
@@ -162,11 +166,9 @@ Uses `<picture>` with `<source>` elements:
 
 ```html
 <picture class="stc-features-kv__picture">
-  <source media="(min-width:801px)"
-          srcset="//images.samsung.com/.../pc-kv-img-v2.jpg">
-  <source media="(max-width:800px)"
-          srcset="//images.samsung.com/.../mo-kv-img-v2.jpg">
-  <img src="//images.samsung.com/.../pc-kv-img-v2.jpg" alt="...">
+  <source media="(min-width:801px)" srcset="//images.samsung.com/.../pc-kv-img-v2.jpg" />
+  <source media="(max-width:800px)" srcset="//images.samsung.com/.../mo-kv-img-v2.jpg" />
+  <img src="//images.samsung.com/.../pc-kv-img-v2.jpg" alt="..." />
 </picture>
 ```
 
@@ -175,10 +177,7 @@ Uses `<picture>` with `<source>` elements:
 Images use the `lozad` library:
 
 ```html
-<img class="lozad obj-m"
-     src="/sec/static/_images/common/img_baseimg_null.png"
-     data-src="//images.samsung.com/kdp/.../image.jpg?$FB_TYPE_A_MO_JPG$"
-     alt="...">
+<img class="lozad obj-m" src="/sec/static/_images/common/img_baseimg_null.png" data-src="//images.samsung.com/kdp/.../image.jpg?$FB_TYPE_A_MO_JPG$" alt="..." />
 ```
 
 ---
@@ -237,25 +236,20 @@ Images use the `lozad` library:
       <h2>Galaxy Z Flip7</h2>
       <p>Galaxy AI</p>
     </div>
-    <a class="stc-features-kv__cta"
-       href="https://www.samsung.com/sec/smartphones/galaxy-z-flip7/"
-       aria-label="Galaxy Z Flip7 더 알아보기">
+    <a class="stc-features-kv__cta" href="https://www.samsung.com/sec/smartphones/galaxy-z-flip7/" aria-label="Galaxy Z Flip7 더 알아보기">
       <span class="blind">더 알아보기</span>
     </a>
   </div>
   <picture class="stc-features-kv__picture">
-    <source media="(min-width:801px)"
-            srcset="//images.samsung.com/.../pd-kv-galaxy-z-flip7-pc-kv-img-v2.jpg">
-    <source media="(max-width:800px)"
-            srcset="//images.samsung.com/.../pd-kv-galaxy-z-flip7-mo-kv-img-v2.jpg">
-    <img class="stc-features-kv__img"
-         src="//images.samsung.com/.../pd-kv-galaxy-z-flip7-pc-kv-img-v2.jpg"
-         alt="블루 쉐도우 색상의 갤럭시 Z 플립7...">
+    <source media="(min-width:801px)" srcset="//images.samsung.com/.../pd-kv-galaxy-z-flip7-pc-kv-img-v2.jpg" />
+    <source media="(max-width:800px)" srcset="//images.samsung.com/.../pd-kv-galaxy-z-flip7-mo-kv-img-v2.jpg" />
+    <img class="stc-features-kv__img" src="//images.samsung.com/.../pd-kv-galaxy-z-flip7-pc-kv-img-v2.jpg" alt="블루 쉐도우 색상의 갤럭시 Z 플립7..." />
   </picture>
 </section>
 ```
 
 **Key Features:**
+
 - Absolutely positioned text overlay (67.5% from left on desktop)
 - Fluid CTA button sizing using viewport units
 - Hidden text in `.blind` class for SEO/accessibility
@@ -269,15 +263,12 @@ Images use the `lozad` library:
 
 ```html
 <div class="wrap-component feature-benefit new-component pt-none pb-none w1440px img-bottom">
-  <div class="component-contents type-video pt-nrml pb-nrml txt-mid-center txtm-top-center"
-       style="background-color:#FFFFFF"
-       data-cptnm="Galaxy Z Flip7_AI Phone in One Hand">
-
+  <div class="component-contents type-video pt-nrml pb-nrml txt-mid-center txtm-top-center" style="background-color:#FFFFFF" data-cptnm="Galaxy Z Flip7_AI Phone in One Hand">
     <div class="component-text">
       <div class="component-text-inner">
         <div class="box-title">
-          <h2 class="title mo-ver" style="color:#000000">AI폰, 한 손에 쏙<br></h2>
-          <h2 class="title pc-ver" style="color:#000000">AI폰, 한 손에 쏙<br></h2>
+          <h2 class="title mo-ver" style="color:#000000">AI폰, 한 손에 쏙<br /></h2>
+          <h2 class="title pc-ver" style="color:#000000">AI폰, 한 손에 쏙<br /></h2>
         </div>
       </div>
     </div>
@@ -296,16 +287,16 @@ Images use the `lozad` library:
 
       <div class="video nonImg">
         <video id="videoLayer_2900381_vod" playsinline="">
-          <source src="//images.samsung.com/.../video.mp4" type="video/mp4">
+          <source src="//images.samsung.com/.../video.mp4" type="video/mp4" />
         </video>
       </div>
     </div>
-
   </div>
 </div>
 ```
 
 **Features:**
+
 - Supports both image and video content
 - Structured data (JSON-LD) for SEO
 - Custom video player script (`vodPlayer.create()`)
@@ -319,9 +310,7 @@ Images use the `lozad` library:
 
 ```html
 <div class="wrap-component textbox-simple new-component pt-none pb-none w1440px">
-  <div class="component-contents pt-none pb-nrml txt-top-center txtm-top-center"
-       style="background-color:#FFFFFF"
-       data-cptnm="Galaxy Z Flip7_kv(text)">
+  <div class="component-contents pt-none pb-nrml txt-top-center txtm-top-center" style="background-color:#FFFFFF" data-cptnm="Galaxy Z Flip7_kv(text)">
     <div class="component-text">
       <div class="component-text-inner">
         <div class="box-title">
@@ -329,13 +318,13 @@ Images use the `lozad` library:
         </div>
         <div class="box-disc">
           <p class="disc mo-ver" style="color:#000000">
-            * 특정 AI 기능 사용을 위해서는 삼성 계정 로그인이 필요합니다.<br>
-            * 삼성은 AI 기능 결과의 정확성, 완성도, 신뢰성에 대해 보장하지 않습니다.<br>
+            * 특정 AI 기능 사용을 위해서는 삼성 계정 로그인이 필요합니다.<br />
+            * 삼성은 AI 기능 결과의 정확성, 완성도, 신뢰성에 대해 보장하지 않습니다.<br />
             <!-- More disclaimers... -->
           </p>
           <p class="disc pc-ver" style="color:#000000">
-            * 특정 AI 기능 사용을 위해서는 삼성 계정 로그인이 필요합니다.<br>
-            * 삼성은 AI 기능 결과의 정확성, 완성도, 신뢰성에 대해 보장하지 않습니다.<br>
+            * 특정 AI 기능 사용을 위해서는 삼성 계정 로그인이 필요합니다.<br />
+            * 삼성은 AI 기능 결과의 정확성, 완성도, 신뢰성에 대해 보장하지 않습니다.<br />
             <!-- More disclaimers... -->
           </p>
         </div>
@@ -351,20 +340,18 @@ Used for styled text blocks with emphasis:
 
 ```html
 <div class="wrap-component textbox-simple new-component pt-none pb-none w1440px stc-component">
-  <div class="component-contents pt-nrml pb-nrml txt-top-center txtm-top-center"
-       style="background-color:#FFFFFF">
+  <div class="component-contents pt-nrml pb-nrml txt-top-center txtm-top-center" style="background-color:#FFFFFF">
     <div class="component-text">
       <div class="component-text-inner">
         <div class="box-title">
           <p class="desc mo-ver" style="color:#000000">
-            지금껏 본 적 없는 <br>
-            <strong>최상의 슬림함과 강력한 내구성</strong>까지 지닌<br>
-            갤럭시 Z 플립을 만나보세요.<br>
+            지금껏 본 적 없는 <br />
+            <strong>최상의 슬림함과 강력한 내구성</strong>까지 지닌<br />
+            갤럭시 Z 플립을 만나보세요.<br />
             <!-- More marketing copy... -->
           </p>
           <p class="desc pc-ver" style="color:#000000">
-            지금껏 본 적 없는 <strong>최상의 슬림함과 강력한 내구성</strong>까지 지닌
-            갤럭시 Z 플립을 만나보세요.<br>
+            지금껏 본 적 없는 <strong>최상의 슬림함과 강력한 내구성</strong>까지 지닌 갤럭시 Z 플립을 만나보세요.<br />
             <!-- More marketing copy... -->
           </p>
         </div>
@@ -382,10 +369,7 @@ Used for styled text blocks with emphasis:
 
 ```html
 <div class="wrap-component feature-full-bleed new-component pt-none pb-none w1440px">
-  <div class="component-contents pt-nrml pb-nrml txt-mid-center txtm-top-center"
-       style="background-color:#000000"
-       data-cptnm="Component Name">
-
+  <div class="component-contents pt-nrml pb-nrml txt-mid-center txtm-top-center" style="background-color:#000000" data-cptnm="Component Name">
     <div class="component-text">
       <div class="component-text-inner">
         <div class="box-title">
@@ -398,12 +382,12 @@ Used for styled text blocks with emphasis:
     <div class="visual-area">
       <!-- Full-width image or video -->
     </div>
-
   </div>
 </div>
 ```
 
 **Characteristics:**
+
 - Often uses black background (`#000000`)
 - White text for contrast
 - Edge-to-edge visuals
@@ -418,10 +402,7 @@ Used for styled text blocks with emphasis:
 
 ```html
 <div class="wrap-component feature-benefit new-component pt-none pb-none w1440px img-left-5to5">
-  <div class="component-contents pt-nrml pb-nrml txt-mid-left txtm-top-left"
-       style="background-color:#FFFFFF"
-       data-cptnm="Component Name">
-
+  <div class="component-contents pt-nrml pb-nrml txt-mid-left txtm-top-left" style="background-color:#FFFFFF" data-cptnm="Component Name">
     <!-- Text in one column, image in the other -->
     <div class="component-text">
       <!-- Text content -->
@@ -430,12 +411,12 @@ Used for styled text blocks with emphasis:
     <div class="visual-area">
       <!-- Image content -->
     </div>
-
   </div>
 </div>
 ```
 
 **Layout Behavior:**
+
 - Desktop: Side-by-side 50/50 columns
 - Mobile: Stacks vertically (image likely above or below text)
 - Text alignment changes: `txt-mid-left` vs `txt-mid-center`
@@ -449,6 +430,7 @@ Used for styled text blocks with emphasis:
 Pattern: `https://images.samsung.com/kdp/cms_task/[TASK_ID]/[SUB_ID]/[GUID].[ext]?$[TRANSFORM]$`
 
 **Image Transforms:**
+
 - `$FB_TYPE_A_JPG$` - Desktop full-bleed image
 - `$FB_TYPE_A_MO_JPG$` - Mobile full-bleed image
 - `$FB_TYPE_B_JPG$` - Secondary image type
@@ -477,14 +459,18 @@ https://images.samsung.com/kdp/cms_task/C20250624010007/34087/cd21606c-4b3f-4da3
 **Placeholder:** `/sec/static/_images/common/img_baseimg_null.png`
 
 **Pattern:**
+
 ```html
-<img class="lozad obj-m"
-     src="/sec/static/_images/common/img_baseimg_null.png"
-     data-src="//images.samsung.com/kdp/.../actual-image.jpg?$FB_TYPE_A_MO_JPG$"
-     alt="Descriptive alt text">
+<img
+  class="lozad obj-m"
+  src="/sec/static/_images/common/img_baseimg_null.png"
+  data-src="//images.samsung.com/kdp/.../actual-image.jpg?$FB_TYPE_A_MO_JPG$"
+  alt="Descriptive alt text"
+/>
 ```
 
 **Object-fit classes:**
+
 - `obj-m` - Object fit for mobile images
 
 ---
@@ -511,23 +497,19 @@ https://images.samsung.com/kdp/cms_task/C20250624010007/34087/cd21606c-4b3f-4da3
   <!-- Video Element -->
   <div class="video nonImg">
     <video id="videoLayer_2900381_vod" playsinline="">
-      <source src="//images.samsung.com/.../video.mp4" type="video/mp4">
+      <source src="//images.samsung.com/.../video.mp4" type="video/mp4" />
     </video>
   </div>
 
   <!-- Custom Player Script -->
   <script>
-    vodPlayer.create(
-      "//images.samsung.com/.../video.mp4",
-      "videoLayer_2900381_vod",
-      "video",
-      true
-    );
+    vodPlayer.create("//images.samsung.com/.../video.mp4", "videoLayer_2900381_vod", "video", true)
   </script>
 </div>
 ```
 
 **Key Features:**
+
 - JSON-LD structured data for SEO
 - Custom `vodPlayer` initialization
 - `playsinline` attribute for mobile
@@ -540,6 +522,7 @@ https://images.samsung.com/kdp/cms_task/C20250624010007/34087/cd21606c-4b3f-4da3
 **Purpose:** Analytics tracking, content management
 
 **Examples:**
+
 1. `Galaxy Z Flip7_kv(text)` - Key visual text
 2. `Galaxy Z Flip7_AI Phone in One Hand` - Feature section
 3. `Galaxy Z Flip7_Ultra sleek. Ultra pocketable` - Product benefit
@@ -558,6 +541,7 @@ https://images.samsung.com/kdp/cms_task/C20250624010007/34087/cd21606c-4b3f-4da3
 ### Screen Reader Support
 
 **Hidden Text Pattern:**
+
 ```html
 <div class="blind">
   <h2>Galaxy Z Flip7</h2>
@@ -570,9 +554,7 @@ https://images.samsung.com/kdp/cms_task/C20250624010007/34087/cd21606c-4b3f-4da3
 ### ARIA Labels
 
 ```html
-<a class="stc-features-kv__cta"
-   href="..."
-   aria-label="Galaxy Z Flip7 더 알아보기">
+<a class="stc-features-kv__cta" href="..." aria-label="Galaxy Z Flip7 더 알아보기">
   <span class="blind">더 알아보기</span>
 </a>
 ```
@@ -592,17 +574,19 @@ https://images.samsung.com/kdp/cms_task/C20250624010007/34087/cd21606c-4b3f-4da3
 ### Data Attributes
 
 **Component Tracking:**
+
 ```html
 data-cptnm="Galaxy Z Flip7_AI Phone in One Hand"
 ```
 
 **Omniture Tracking:**
+
 ```html
-data-omni-type="microsite_contentinter"
-data-omni="pd:smartphones:galaxy_z_flip7:kv:view_more"
+data-omni-type="microsite_contentinter" data-omni="pd:smartphones:galaxy_z_flip7:kv:view_more"
 ```
 
 **Dynamic Insights:**
+
 ```html
 data-di-id="di-id-f6c3ac13-3fa2636a"
 ```
@@ -613,52 +597,52 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
 
 ### Complete Class List (71 unique classes)
 
-| Class | Usage |
-|-------|-------|
-| `alt-content` | Alternative content |
-| `award-box`, `award-item`, `award-list` | Award display components |
-| `bcFeatures` | Root container |
-| `blind` | Screen reader only content |
-| `blk` | Block element |
-| `box-article`, `box-disc`, `box-title` | Content boxes |
-| `btn`, `btn-d`, `btn-type2` | Button variants |
-| `btn_award_more`, `btn_detail_more` | Specific action buttons |
-| `btn_moreview_close`, `btn_moreview_open` | Toggle buttons |
-| `col3` | 3-column layout |
-| `component-con`, `component-content`, `component-contents` | Component containers |
-| `component-text`, `component-text-inner` | Text containers |
-| `component01` | Component type identifier |
-| `desc` | Description text |
-| `detail_more` | Detail expansion |
-| `disc` | Disclaimer text |
-| `feature-benefit`, `feature-full-bleed` | Feature component types |
-| `fixWidth` | Fixed width container |
-| `heightWrap` | Height wrapper |
-| `img`, `img-bottom`, `img-left-5to5`, `img-right-5to5` | Image positioning |
-| `itm-notice` | Notice item |
-| `lozad` | Lazy loading library class |
-| `mo-ver`, `pc-ver` | Mobile/desktop visibility |
-| `moreview-box` | Expandable content box |
-| `new-component` | New component marker |
-| `nonImg` | Non-image content |
-| `obj-m` | Object-fit mobile |
-| `open` | Open/expanded state |
-| `pb-none`, `pb-nrml` | Padding-bottom utilities |
-| `pt-none`, `pt-nrml` | Padding-top utilities |
-| `shadow-box` | Box with shadow |
-| `stc-component` | Special text component |
-| `stc-features-kv` | Key visual section |
-| `stc-features-kv__cta`, `stc-features-kv__img`, `stc-features-kv__picture`, `stc-features-kv__text-wrap` | KV sub-elements (BEM) |
-| `tab_con` | Tab container |
-| `title` | Title element |
-| `txt-mid-center`, `txt-mid-left`, `txt-top-center`, `txt-top-left` | Text alignment (desktop) |
-| `txtm-top-center`, `txtm-top-left` | Text alignment (mobile) |
-| `type-video` | Video content type |
-| `vdoDim` | Video dimension container |
-| `video` | Video element |
-| `visual-area` | Visual content area |
-| `w1440px` | Max width 1440px |
-| `wrap-component` | Component wrapper |
+| Class                                                                                                    | Usage                      |
+| -------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `alt-content`                                                                                            | Alternative content        |
+| `award-box`, `award-item`, `award-list`                                                                  | Award display components   |
+| `bcFeatures`                                                                                             | Root container             |
+| `blind`                                                                                                  | Screen reader only content |
+| `blk`                                                                                                    | Block element              |
+| `box-article`, `box-disc`, `box-title`                                                                   | Content boxes              |
+| `btn`, `btn-d`, `btn-type2`                                                                              | Button variants            |
+| `btn_award_more`, `btn_detail_more`                                                                      | Specific action buttons    |
+| `btn_moreview_close`, `btn_moreview_open`                                                                | Toggle buttons             |
+| `col3`                                                                                                   | 3-column layout            |
+| `component-con`, `component-content`, `component-contents`                                               | Component containers       |
+| `component-text`, `component-text-inner`                                                                 | Text containers            |
+| `component01`                                                                                            | Component type identifier  |
+| `desc`                                                                                                   | Description text           |
+| `detail_more`                                                                                            | Detail expansion           |
+| `disc`                                                                                                   | Disclaimer text            |
+| `feature-benefit`, `feature-full-bleed`                                                                  | Feature component types    |
+| `fixWidth`                                                                                               | Fixed width container      |
+| `heightWrap`                                                                                             | Height wrapper             |
+| `img`, `img-bottom`, `img-left-5to5`, `img-right-5to5`                                                   | Image positioning          |
+| `itm-notice`                                                                                             | Notice item                |
+| `lozad`                                                                                                  | Lazy loading library class |
+| `mo-ver`, `pc-ver`                                                                                       | Mobile/desktop visibility  |
+| `moreview-box`                                                                                           | Expandable content box     |
+| `new-component`                                                                                          | New component marker       |
+| `nonImg`                                                                                                 | Non-image content          |
+| `obj-m`                                                                                                  | Object-fit mobile          |
+| `open`                                                                                                   | Open/expanded state        |
+| `pb-none`, `pb-nrml`                                                                                     | Padding-bottom utilities   |
+| `pt-none`, `pt-nrml`                                                                                     | Padding-top utilities      |
+| `shadow-box`                                                                                             | Box with shadow            |
+| `stc-component`                                                                                          | Special text component     |
+| `stc-features-kv`                                                                                        | Key visual section         |
+| `stc-features-kv__cta`, `stc-features-kv__img`, `stc-features-kv__picture`, `stc-features-kv__text-wrap` | KV sub-elements (BEM)      |
+| `tab_con`                                                                                                | Tab container              |
+| `title`                                                                                                  | Title element              |
+| `txt-mid-center`, `txt-mid-left`, `txt-top-center`, `txt-top-left`                                       | Text alignment (desktop)   |
+| `txtm-top-center`, `txtm-top-left`                                                                       | Text alignment (mobile)    |
+| `type-video`                                                                                             | Video content type         |
+| `vdoDim`                                                                                                 | Video dimension container  |
+| `video`                                                                                                  | Video element              |
+| `visual-area`                                                                                            | Visual content area        |
+| `w1440px`                                                                                                | Max width 1440px           |
+| `wrap-component`                                                                                         | Component wrapper          |
 
 ---
 
@@ -668,24 +652,16 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
 
 ```html
 <div class="box-title">
-  <h2 class="title mo-ver" style="color:#000000">
-    Mobile Heading<br>
-  </h2>
-  <h2 class="title pc-ver" style="color:#000000">
-    Desktop Heading<br>
-  </h2>
+  <h2 class="title mo-ver" style="color:#000000">Mobile Heading<br /></h2>
+  <h2 class="title pc-ver" style="color:#000000">Desktop Heading<br /></h2>
 </div>
 ```
 
 ### Description Text
 
 ```html
-<p class="desc mo-ver" style="color:#000000">
-  Mobile description with <strong>emphasis</strong><br>
-</p>
-<p class="desc pc-ver" style="color:#000000">
-  Desktop description with <strong>emphasis</strong><br>
-</p>
+<p class="desc mo-ver" style="color:#000000">Mobile description with <strong>emphasis</strong><br /></p>
+<p class="desc pc-ver" style="color:#000000">Desktop description with <strong>emphasis</strong><br /></p>
 ```
 
 ### Disclaimer Text
@@ -693,17 +669,18 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
 ```html
 <div class="box-disc">
   <p class="disc mo-ver" style="color:#000000">
-    * Disclaimer line 1<br>
-    * Disclaimer line 2<br>
+    * Disclaimer line 1<br />
+    * Disclaimer line 2<br />
   </p>
   <p class="disc pc-ver" style="color:#000000">
-    * Disclaimer line 1<br>
-    * Disclaimer line 2<br>
+    * Disclaimer line 1<br />
+    * Disclaimer line 2<br />
   </p>
 </div>
 ```
 
 **Typography Notes:**
+
 - All colors applied via inline styles
 - Manual `<br>` tags for line breaks (different on mobile vs desktop)
 - Strong emphasis using `<strong>` tags
@@ -764,6 +741,7 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
 ### For Editor Template Replication
 
 #### 14.1 Component System
+
 - Create reusable component templates for each type:
   - `FeatureBenefit` (with layout variants: bottom, left, right)
   - `TextboxSimple` (with stc variant)
@@ -771,21 +749,31 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
   - `HeroKV`
 
 #### 14.2 Responsive Approach
+
 - **Option A:** Use CSS media queries instead of duplicate content
+
   ```css
-  .title { display: none; }
+  .title {
+    display: none;
+  }
   @media (max-width: 800px) {
-    .title.mo-ver { display: block; }
+    .title.mo-ver {
+      display: block;
+    }
   }
   @media (min-width: 801px) {
-    .title.pc-ver { display: block; }
+    .title.pc-ver {
+      display: block;
+    }
   }
   ```
 
 - **Option B:** Keep dual-content approach for SEO/different text lengths
 
 #### 14.3 Spacing System
+
 - Define CSS variables for consistent spacing:
+
   ```css
   :root {
     --pt-none: 0;
@@ -803,29 +791,33 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
   ```
 
 #### 14.4 Color System
+
 - Use CSS custom properties for theming:
   ```css
   :root {
-    --bg-white: #FFFFFF;
+    --bg-white: #ffffff;
     --bg-black: #000000;
     --text-primary: #000000;
-    --text-inverse: #FFFFFF;
+    --text-inverse: #ffffff;
     --text-muted: #d4d4d4;
   }
   ```
 
 #### 14.5 Image Optimization
+
 - Implement lazy loading (Intersection Observer or library)
 - Use `<picture>` for art direction
 - Provide fallback placeholder images
 
 #### 14.6 Accessibility
+
 - Include `.blind` utility class for screen reader text
 - Add proper ARIA labels to interactive elements
 - Ensure keyboard navigation works
 - Maintain semantic HTML structure
 
 #### 14.7 Typography
+
 - Extract font sizes, weights, line heights from visual inspection
 - Create utility classes for text alignment variants
 - Support `<strong>` emphasis within body text
@@ -835,6 +827,7 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
 ## 15. Key Technical Patterns
 
 ### Pattern 1: BEM-like Component Naming
+
 ```
 .stc-features-kv               (Block)
 .stc-features-kv__text-wrap    (Element)
@@ -843,6 +836,7 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
 ```
 
 ### Pattern 2: Modifier Classes
+
 ```
 .new-component      (Version marker)
 .pt-none, .pb-none  (Spacing modifiers)
@@ -851,6 +845,7 @@ data-di-id="di-id-f6c3ac13-3fa2636a"
 ```
 
 ### Pattern 3: Data Attributes for Non-Styling Purposes
+
 ```
 data-cptnm          (Component name for CMS/analytics)
 data-omni           (Analytics tracking)
@@ -859,29 +854,31 @@ data-type="seo"     (Metadata marker)
 ```
 
 ### Pattern 4: Inline Styles for Dynamic Content
+
 ```html
-style="background-color:#FFFFFF"
-style="color:#000000"
+style="background-color:#FFFFFF" style="color:#000000"
 ```
+
 Likely populated by CMS, allowing per-component customization
 
 ### Pattern 5: Lazy Loading
+
 ```html
-src="/sec/static/_images/common/img_baseimg_null.png"
-data-src="//images.samsung.com/actual-image.jpg"
-class="lozad"
+src="/sec/static/_images/common/img_baseimg_null.png" data-src="//images.samsung.com/actual-image.jpg" class="lozad"
 ```
 
 ### Pattern 6: Responsive Images
+
 ```html
 <picture>
-  <source media="(min-width:801px)" srcset="desktop.jpg">
-  <source media="(max-width:800px)" srcset="mobile.jpg">
-  <img src="desktop.jpg" alt="...">
+  <source media="(min-width:801px)" srcset="desktop.jpg" />
+  <source media="(max-width:800px)" srcset="mobile.jpg" />
+  <img src="desktop.jpg" alt="..." />
 </picture>
 ```
 
 ### Pattern 7: SEO Structured Data
+
 ```html
 <script type="application/ld+json" data-type="seo">
   { "@type": "VideoObject", ... }
@@ -893,22 +890,27 @@ class="lozad"
 ## 16. Visual Design Analysis
 
 ### Spacing & Rhythm
+
 - **Component Padding:** Appears to be ~60-80px top/bottom on desktop, ~40px on mobile
 - **Max Width:** 1440px content container
 - **Margins:** Auto-centered containers
 
 ### Color Usage
+
 - **High Contrast:** Pure black (#000000) and white (#FFFFFF)
 - **Minimalist Palette:** Only 3 colors total
 - **Background Contrast:** Alternating white sections with occasional black for drama
 
 ### Image Treatment
+
 - **High-Quality Product Photography:** Professional product shots
 - **Consistent Aspect Ratios:** Images appear to follow standard aspect ratios per component type
 - **Alt Text:** Detailed Korean descriptions for accessibility
 
 ### Typography Hierarchy (Estimated)
+
 Based on class names and context:
+
 - **H2 Titles:** Large, bold, primary messaging
 - **Descriptions (`.desc`):** Medium body text with occasional `<strong>` emphasis
 - **Disclaimers (`.disc`):** Smaller, lighter text with asterisks
@@ -920,6 +922,7 @@ Based on class names and context:
 ### Component Name Distribution
 
 Most common themes:
+
 1. **AI Features** - "AI Phone in One Hand"
 2. **Design** - "Ultra sleek. Ultra pocketable", "Bold colors"
 3. **Durability** - "Thinnest yet most durable Flip"

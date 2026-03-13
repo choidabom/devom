@@ -35,29 +35,27 @@ const registry: Record<string, ContentRenderer> = {
     />
   ),
 
-  image: (props) => props.src ? (
-    <img src={String(props.src)} alt={String(props.alt ?? "")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-  ) : (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>
-      Image
-    </div>
-  ),
+  image: (props) =>
+    props.src ? (
+      <img src={String(props.src)} alt={String(props.alt ?? "")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    ) : (
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>Image</div>
+    ),
 
-  video: (props) => props.src ? (
-    <video
-      src={String(props.src)}
-      autoPlay={props.autoplay !== false}
-      muted={props.muted !== false}
-      loop={props.loop !== false}
-      controls={Boolean(props.controls)}
-      playsInline
-      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-    />
-  ) : (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>
-      Video
-    </div>
-  ),
+  video: (props) =>
+    props.src ? (
+      <video
+        src={String(props.src)}
+        autoPlay={props.autoplay !== false}
+        muted={props.muted !== false}
+        loop={props.loop !== false}
+        controls={Boolean(props.controls)}
+        playsInline
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+    ) : (
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>Video</div>
+    ),
 
   "sc:button": (props) => (
     <Button
@@ -74,19 +72,15 @@ const registry: Record<string, ContentRenderer> = {
         <CardTitle>{String(props.title ?? "Card Title")}</CardTitle>
         <CardDescription>{String(props.description ?? "")}</CardDescription>
       </CardHeader>
-      <CardContent><p>{String(props.content ?? "")}</p></CardContent>
+      <CardContent>
+        <p>{String(props.content ?? "")}</p>
+      </CardContent>
     </Card>
   ),
 
-  "sc:input": (props, editorMode) => (
-    <Input placeholder={String(props.placeholder ?? "")} type={String(props.type ?? "text")} readOnly={editorMode === "edit"} />
-  ),
+  "sc:input": (props, editorMode) => <Input placeholder={String(props.placeholder ?? "")} type={String(props.type ?? "text")} readOnly={editorMode === "edit"} />,
 
-  "sc:badge": (props) => (
-    <Badge variant={(props.variant as "default" | "secondary" | "destructive" | "outline") ?? "default"}>
-      {String(props.label ?? "Badge")}
-    </Badge>
-  ),
+  "sc:badge": (props) => <Badge variant={(props.variant as "default" | "secondary" | "destructive" | "outline") ?? "default"}>{String(props.label ?? "Badge")}</Badge>,
 
   "sc:checkbox": (props) => (
     <div className="flex items-center space-x-2">
@@ -104,9 +98,7 @@ const registry: Record<string, ContentRenderer> = {
 
   "sc:label": (props) => <Label>{String(props.text ?? "Label")}</Label>,
 
-  "sc:textarea": (props, editorMode) => (
-    <Textarea placeholder={String(props.placeholder ?? "")} rows={Number(props.rows ?? 3)} readOnly={editorMode === "edit"} />
-  ),
+  "sc:textarea": (props, editorMode) => <Textarea placeholder={String(props.placeholder ?? "")} rows={Number(props.rows ?? 3)} readOnly={editorMode === "edit"} />,
 
   "sc:avatar": (props) => (
     <Avatar>
@@ -126,21 +118,18 @@ const registry: Record<string, ContentRenderer> = {
     </div>
   ),
 
-  "sc:slider": (props) => (
-    <Slider
-      defaultValue={[Number(props.value ?? 50)]}
-      min={Number(props.min ?? 0)}
-      max={Number(props.max ?? 100)}
-      step={Number(props.step ?? 1)}
-    />
-  ),
+  "sc:slider": (props) => <Slider defaultValue={[Number(props.value ?? 50)]} min={Number(props.min ?? 0)} max={Number(props.max ?? 100)} step={Number(props.step ?? 1)} />,
 
   "sc:tabs": (props) => {
     const tabs = (props.tabs as string[]) ?? ["Tab 1", "Tab 2"]
     return (
       <Tabs defaultValue={String(props.activeTab ?? tabs[0])}>
         <TabsList>
-          {tabs.map((t: string) => <TabsTrigger key={t} value={t}>{t}</TabsTrigger>)}
+          {tabs.map((t: string) => (
+            <TabsTrigger key={t} value={t}>
+              {t}
+            </TabsTrigger>
+          ))}
         </TabsList>
         {tabs.map((t: string) => (
           <TabsContent key={t} value={t}>
@@ -168,7 +157,11 @@ const registry: Record<string, ContentRenderer> = {
           <SelectValue placeholder={String(props.placeholder ?? "Select")} />
         </SelectTrigger>
         <SelectContent>
-          {options.map((o: string) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+          {options.map((o: string) => (
+            <SelectItem key={o} value={o}>
+              {o}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     )
@@ -181,13 +174,17 @@ const registry: Record<string, ContentRenderer> = {
       <Table>
         <TableHeader>
           <TableRow>
-            {headers.map((h: string) => <TableHead key={h}>{h}</TableHead>)}
+            {headers.map((h: string) => (
+              <TableHead key={h}>{h}</TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((row: string[], i: number) => (
             <TableRow key={i}>
-              {row.map((cell: string, j: number) => <TableCell key={j}>{cell}</TableCell>)}
+              {row.map((cell: string, j: number) => (
+                <TableCell key={j}>{cell}</TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>

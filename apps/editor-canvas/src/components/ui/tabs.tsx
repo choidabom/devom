@@ -18,13 +18,7 @@ interface TabsProps extends React.ComponentProps<"div"> {
   onValueChange?: (value: string) => void
 }
 
-function Tabs({
-  className,
-  defaultValue,
-  value: controlledValue,
-  onValueChange,
-  ...props
-}: TabsProps) {
+function Tabs({ className, defaultValue, value: controlledValue, onValueChange, ...props }: TabsProps) {
   const [internalValue, setInternalValue] = React.useState(defaultValue || "")
   const value = controlledValue ?? internalValue
 
@@ -38,44 +32,25 @@ function Tabs({
 
   return (
     <TabsContext.Provider value={{ value, onValueChange: handleValueChange }}>
-      <div
-        data-slot="tabs"
-        className={cn("flex flex-col gap-2", className)}
-        {...props}
-      />
+      <div data-slot="tabs" className={cn("flex flex-col gap-2", className)} {...props} />
     </TabsContext.Provider>
   )
 }
 
-const tabsListVariants = cva(
-  "inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground",
-  {
-    variants: {
-      variant: {
-        default: "bg-muted",
-        line: "gap-1 bg-transparent rounded-none",
-      },
+const tabsListVariants = cva("inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground", {
+  variants: {
+    variant: {
+      default: "bg-muted",
+      line: "gap-1 bg-transparent rounded-none",
     },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
 
-function TabsList({
-  className,
-  variant = "default",
-  ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof tabsListVariants>) {
-  return (
-    <div
-      data-slot="tabs-list"
-      data-variant={variant}
-      role="tablist"
-      className={cn(tabsListVariants({ variant }), className)}
-      {...props}
-    />
-  )
+function TabsList({ className, variant = "default", ...props }: React.ComponentProps<"div"> & VariantProps<typeof tabsListVariants>) {
+  return <div data-slot="tabs-list" data-variant={variant} role="tablist" className={cn(tabsListVariants({ variant }), className)} {...props} />
 }
 
 interface TabsTriggerProps extends React.ComponentProps<"button"> {
@@ -118,14 +93,7 @@ function TabsContent({ className, value: contentValue, ...props }: TabsContentPr
 
   if (context.value !== contentValue) return null
 
-  return (
-    <div
-      data-slot="tabs-content"
-      role="tabpanel"
-      className={cn("flex-1 text-sm outline-none", className)}
-      {...props}
-    />
-  )
+  return <div data-slot="tabs-content" role="tabpanel" className={cn("flex-1 text-sm outline-none", className)} {...props} />
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants }

@@ -5,10 +5,10 @@ import { getDefaultProps } from "../../utils/getDefaultProps"
 
 export interface AddElementOverrides {
   name?: string
-  style?: Partial<EditorElement['style']>
+  style?: Partial<EditorElement["style"]>
   props?: Record<string, unknown>
-  layoutMode?: 'none' | 'flex'
-  layoutProps?: Partial<EditorElement['layoutProps']>
+  layoutMode?: "none" | "flex"
+  layoutProps?: Partial<EditorElement["layoutProps"]>
   sizing?: Partial<SizingProps>
 }
 
@@ -18,7 +18,7 @@ export function createTemplateHelper(store: DocumentStore) {
     const parent = store.elements.get(parentId)
     if (!parent) {
       console.error(`[createTemplateHelper] Parent element not found: ${parentId}`)
-      return ''
+      return ""
     }
     store.elements.set(id, {
       id,
@@ -30,7 +30,7 @@ export function createTemplateHelper(store: DocumentStore) {
       props: { ...getDefaultProps(type), ...overrides.props },
       locked: false,
       visible: true,
-      layoutMode: overrides.layoutMode ?? 'none',
+      layoutMode: overrides.layoutMode ?? "none",
       layoutProps: { ...DEFAULT_LAYOUT_PROPS, ...overrides.layoutProps },
       sizing: { ...DEFAULT_SIZING, ...overrides.sizing },
       canvasPosition: null,

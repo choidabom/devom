@@ -1,9 +1,5 @@
 import { T } from "../theme"
-import {
-  Mouse, ZoomIn, Copy, Undo2, Lock,
-  LayoutGrid, PanelTop, Hand, Keyboard, Layers, FileDown,
-  ImageIcon,
-} from "lucide-react"
+import { Mouse, ZoomIn, Copy, Undo2, Lock, LayoutGrid, PanelTop, Hand, Keyboard, Layers, FileDown, ImageIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
 const S = 14
@@ -59,24 +55,26 @@ const SECTIONS: { title: string; items: { icon: ReactNode; label: string; shortc
   },
   {
     title: "Export",
-    items: [
-      { icon: <FileDown size={S} />, label: "Export HTML / JSX / PDF", shortcut: "Toolbar \u2192 Export" },
-    ],
+    items: [{ icon: <FileDown size={S} />, label: "Export HTML / JSX / PDF", shortcut: "Toolbar \u2192 Export" }],
   },
 ]
 
 export function GuidePanel() {
   return (
     <div style={{ padding: "12px 14px", overflowY: "auto", flex: 1 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 12 }}>
-        Quick Guide
-      </div>
-      {SECTIONS.map(section => (
+      <div style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 12 }}>Quick Guide</div>
+      {SECTIONS.map((section) => (
         <div key={section.title} style={{ marginBottom: 14 }}>
-          <div style={{
-            fontSize: 10, fontWeight: 600, color: T.textMuted,
-            textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6,
-          }}>
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              color: T.textMuted,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+              marginBottom: 6,
+            }}
+          >
             {section.title}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -84,20 +82,30 @@ export function GuidePanel() {
               <div
                 key={i}
                 style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "5px 6px", borderRadius: 6,
-                  fontSize: 12, color: T.text,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "5px 6px",
+                  borderRadius: 6,
+                  fontSize: 12,
+                  color: T.text,
                 }}
               >
                 <span style={{ color: T.textMuted, flexShrink: 0, display: "flex" }}>{item.icon}</span>
                 <span style={{ flex: 1 }}>{item.label}</span>
                 {item.shortcut && (
-                  <span style={{
-                    fontSize: 10, color: T.textMuted,
-                    background: T.inputBg, padding: "2px 6px",
-                    borderRadius: 4, border: `1px solid ${T.inputBorder}`,
-                    whiteSpace: "nowrap", flexShrink: 0,
-                  }}>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: T.textMuted,
+                      background: T.inputBg,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      border: `1px solid ${T.inputBorder}`,
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
+                  >
                     {item.shortcut}
                   </span>
                 )}

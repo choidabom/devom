@@ -15,6 +15,7 @@
 ### Task 1: Add message types to protocol
 
 **Files:**
+
 - Modify: `packages/editor-core/src/protocol.ts`
 
 - [ ] **Step 1: Add GROUP/UNGROUP_ELEMENTS_REQUEST to CanvasToShellMessage**
@@ -45,6 +46,7 @@ git commit -m "feat(editor-core): add GROUP/UNGROUP_ELEMENTS_REQUEST message typ
 ### Task 2: Add groupElements() to DocumentStore
 
 **Files:**
+
 - Modify: `packages/editor-core/src/stores/DocumentStore.ts`
 
 - [ ] **Step 1: Add findLCA helper method**
@@ -230,6 +232,7 @@ git commit -m "feat(editor-core): add groupElements() with LCA and Canvas-measur
 ### Task 3: Add Cmd+G / Cmd+Shift+G handlers in Canvas
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/App.tsx`
 
 - [ ] **Step 1: Add explicit Cmd+G handler in Canvas onKeyDown**
@@ -283,11 +286,13 @@ if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === "KeyG") {
 - [ ] **Step 2: Remove KeyG from generic KEY_EVENT forward**
 
 기존 코드 (line ~165):
+
 ```typescript
 if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyV", "KeyD", "KeyG"].includes(e.code)) {
 ```
 
 `"KeyG"` 제거 (이제 위에서 직접 처리):
+
 ```typescript
 if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyV", "KeyD"].includes(e.code)) {
 ```
@@ -309,6 +314,7 @@ git commit -m "feat(editor-canvas): add Cmd+G/Cmd+Shift+G handlers with DOM boun
 ### Task 4: Handle GROUP/UNGROUP_ELEMENTS_REQUEST in Shell
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/App.tsx`
 
 - [ ] **Step 1: Add GROUP_ELEMENTS_REQUEST / UNGROUP_ELEMENTS_REQUEST handlers**
@@ -346,6 +352,7 @@ case "UNGROUP_ELEMENTS_REQUEST": {
 - [ ] **Step 2: Remove Cmd+Shift+G from KEY_EVENT handler**
 
 기존 KEY_EVENT handler (line ~85):
+
 ```typescript
 if ((k.metaKey || k.ctrlKey) && k.shiftKey && k.code === "KeyG") handleUngroup()
 ```
@@ -364,6 +371,7 @@ Expected: SUCCESS
 Run: `cd /Users/dabom-choi/StudySource/devom && pnpm dev`
 
 테스트 시나리오:
+
 1. Canvas에서 요소 2개 이상 생성 (Frame + Text 등)
 2. Shift+Click으로 다중 선택
 3. Cmd+G → 요소들이 Group 컨테이너로 묶임, LeftPanel에 `Group-xxxx` 표시

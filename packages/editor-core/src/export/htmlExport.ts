@@ -29,14 +29,13 @@ export function exportToHTML(elements: Record<string, EditorElement>, rootId: st
   return lines.join("\n")
 }
 
-
 function renderHTML(
   el: EditorElement,
   elements: Record<string, EditorElement>,
   getEl: (id: string) => EditorElement | undefined,
   lines: string[],
   indent: number,
-  parent: EditorElement | null,
+  parent: EditorElement | null
 ) {
   const pad = " ".repeat(indent)
   const style = computeElementStyle(el, parent)
@@ -64,12 +63,14 @@ function renderHTML(
     const attrs = [
       `style="${escapeHtml(cssToInline(style))}"`,
       `src="${escapeHtml(String(el.props.src ?? ""))}"`,
-      el.props.autoplay !== false ? 'autoplay' : '',
-      el.props.muted !== false ? 'muted' : '',
-      el.props.loop !== false ? 'loop' : '',
-      el.props.controls ? 'controls' : '',
-      'playsinline',
-    ].filter(Boolean).join(' ')
+      el.props.autoplay !== false ? "autoplay" : "",
+      el.props.muted !== false ? "muted" : "",
+      el.props.loop !== false ? "loop" : "",
+      el.props.controls ? "controls" : "",
+      "playsinline",
+    ]
+      .filter(Boolean)
+      .join(" ")
     lines.push(`${pad}<video ${attrs}></video>`)
     return
   }
@@ -99,7 +100,7 @@ function renderShadcnHTML(
   getEl: (id: string) => EditorElement | undefined,
   lines: string[],
   indent: number,
-  parent: EditorElement | null,
+  parent: EditorElement | null
 ) {
   const pad = " ".repeat(indent)
   const p = el.props
@@ -111,14 +112,22 @@ function renderShadcnHTML(
       const size = String(p.size ?? "default")
       const btnStyle: CSSProperties = {
         ...baseStyle,
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        borderRadius: 6, fontWeight: 500, fontSize: size === 'sm' ? 13 : 14,
-        padding: size === 'sm' ? '6px 12px' : size === 'lg' ? '12px 24px' : '8px 16px',
-        ...(variant === 'default' ? { backgroundColor: '#0f172a', color: '#ffffff' } :
-          variant === 'destructive' ? { backgroundColor: '#ef4444', color: '#ffffff' } :
-          variant === 'outline' ? { backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #e2e8f0' } :
-          variant === 'ghost' ? { backgroundColor: 'transparent', color: '#0f172a' } :
-          { backgroundColor: '#0f172a', color: '#ffffff' }),
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 6,
+        fontWeight: 500,
+        fontSize: size === "sm" ? 13 : 14,
+        padding: size === "sm" ? "6px 12px" : size === "lg" ? "12px 24px" : "8px 16px",
+        ...(variant === "default"
+          ? { backgroundColor: "#0f172a", color: "#ffffff" }
+          : variant === "destructive"
+            ? { backgroundColor: "#ef4444", color: "#ffffff" }
+            : variant === "outline"
+              ? { backgroundColor: "transparent", color: "#0f172a", border: "1px solid #e2e8f0" }
+              : variant === "ghost"
+                ? { backgroundColor: "transparent", color: "#0f172a" }
+                : { backgroundColor: "#0f172a", color: "#ffffff" }),
       }
       lines.push(`${pad}<button style="${escapeHtml(cssToInline(btnStyle))}">${escapeHtml(String(p.label ?? "Button"))}</button>`)
       break
@@ -132,12 +141,19 @@ function renderShadcnHTML(
       const variant = String(p.variant ?? "default")
       const badgeStyle: CSSProperties = {
         ...baseStyle,
-        display: 'inline-flex', alignItems: 'center',
-        borderRadius: 9999, fontSize: 11, fontWeight: 600, padding: '2px 8px',
-        ...(variant === 'default' ? { backgroundColor: '#0f172a', color: '#ffffff' } :
-          variant === 'secondary' ? { backgroundColor: '#f1f5f9', color: '#0f172a' } :
-          variant === 'destructive' ? { backgroundColor: '#ef4444', color: '#ffffff' } :
-          { backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #e2e8f0' }),
+        display: "inline-flex",
+        alignItems: "center",
+        borderRadius: 9999,
+        fontSize: 11,
+        fontWeight: 600,
+        padding: "2px 8px",
+        ...(variant === "default"
+          ? { backgroundColor: "#0f172a", color: "#ffffff" }
+          : variant === "secondary"
+            ? { backgroundColor: "#f1f5f9", color: "#0f172a" }
+            : variant === "destructive"
+              ? { backgroundColor: "#ef4444", color: "#ffffff" }
+              : { backgroundColor: "#f1f5f9", color: "#0f172a", border: "1px solid #e2e8f0" }),
       }
       lines.push(`${pad}<span style="${escapeHtml(cssToInline(badgeStyle))}">${escapeHtml(String(p.label ?? "Badge"))}</span>`)
       break
@@ -145,9 +161,16 @@ function renderShadcnHTML(
     case "sc:avatar": {
       const avatarStyle: CSSProperties = {
         ...baseStyle,
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: 36, height: 36, borderRadius: '50%',
-        backgroundColor: '#f1f5f9', color: '#64748b', fontSize: 13, fontWeight: 600,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 36,
+        height: 36,
+        borderRadius: "50%",
+        backgroundColor: "#f1f5f9",
+        color: "#64748b",
+        fontSize: 13,
+        fontWeight: 600,
         flexShrink: 0,
       }
       lines.push(`${pad}<div style="${escapeHtml(cssToInline(avatarStyle))}">${escapeHtml(String(p.fallback ?? ""))}</div>`)
@@ -155,8 +178,8 @@ function renderShadcnHTML(
     }
     case "sc:progress": {
       const value = Number(p.value ?? 60)
-      const outerStyle: CSSProperties = { ...baseStyle, height: 6, backgroundColor: '#f1f5f9', borderRadius: 9999, overflow: 'hidden' }
-      const innerStyle: CSSProperties = { width: `${value}%`, height: '100%', backgroundColor: '#3b82f6', borderRadius: 9999 }
+      const outerStyle: CSSProperties = { ...baseStyle, height: 6, backgroundColor: "#f1f5f9", borderRadius: 9999, overflow: "hidden" }
+      const innerStyle: CSSProperties = { width: `${value}%`, height: "100%", backgroundColor: "#3b82f6", borderRadius: 9999 }
       lines.push(`${pad}<div style="${escapeHtml(cssToInline(outerStyle))}">`)
       lines.push(`${pad}  <div style="${escapeHtml(cssToInline(innerStyle))}"></div>`)
       lines.push(`${pad}</div>`)
@@ -165,13 +188,19 @@ function renderShadcnHTML(
     case "sc:switch": {
       const checked = Boolean(p.checked)
       const label = String(p.label ?? "")
-      const wrapStyle: CSSProperties = { ...baseStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }
+      const wrapStyle: CSSProperties = { ...baseStyle, display: "flex", alignItems: "center", justifyContent: "space-between" }
       const trackStyle: CSSProperties = {
-        width: 40, height: 22, borderRadius: 9999, padding: 2, flexShrink: 0,
-        backgroundColor: checked ? '#0f172a' : '#e2e8f0',
-        display: 'flex', alignItems: checked ? 'center' : 'center', justifyContent: checked ? 'flex-end' : 'flex-start',
+        width: 40,
+        height: 22,
+        borderRadius: 9999,
+        padding: 2,
+        flexShrink: 0,
+        backgroundColor: checked ? "#0f172a" : "#e2e8f0",
+        display: "flex",
+        alignItems: checked ? "center" : "center",
+        justifyContent: checked ? "flex-end" : "flex-start",
       }
-      const thumbStyle: CSSProperties = { width: 18, height: 18, borderRadius: '50%', backgroundColor: '#ffffff' }
+      const thumbStyle: CSSProperties = { width: 18, height: 18, borderRadius: "50%", backgroundColor: "#ffffff" }
       lines.push(`${pad}<div style="${escapeHtml(cssToInline(wrapStyle))}">`)
       if (label) lines.push(`${pad}  <span style="font-size: 13px; color: #0f172a">${escapeHtml(label)}</span>`)
       lines.push(`${pad}  <div style="${escapeHtml(cssToInline(trackStyle))}">`)
@@ -183,14 +212,18 @@ function renderShadcnHTML(
     case "sc:tabs": {
       const tabs = (p.tabs as string[]) ?? []
       const active = String(p.activeTab ?? tabs[0] ?? "")
-      const wrapStyle: CSSProperties = { ...baseStyle, display: 'flex', gap: 0, borderBottom: '1px solid #e2e8f0' }
+      const wrapStyle: CSSProperties = { ...baseStyle, display: "flex", gap: 0, borderBottom: "1px solid #e2e8f0" }
       lines.push(`${pad}<div style="${escapeHtml(cssToInline(wrapStyle))}">`)
       for (const tab of tabs) {
         const isActive = tab === active
         const tabStyle: CSSProperties = {
-          padding: '10px 16px', fontSize: 13, fontWeight: 500, color: isActive ? '#0f172a' : '#64748b',
-          borderBottom: isActive ? '2px solid #0f172a' : '2px solid transparent', cursor: 'pointer',
-          backgroundColor: 'transparent',
+          padding: "10px 16px",
+          fontSize: 13,
+          fontWeight: 500,
+          color: isActive ? "#0f172a" : "#64748b",
+          borderBottom: isActive ? "2px solid #0f172a" : "2px solid transparent",
+          cursor: "pointer",
+          backgroundColor: "transparent",
         }
         lines.push(`${pad}  <button style="${escapeHtml(cssToInline(tabStyle))}">${escapeHtml(tab)}</button>`)
       }
@@ -216,8 +249,11 @@ function renderShadcnHTML(
     }
     case "sc:alert": {
       const alertStyle: CSSProperties = {
-        ...baseStyle, padding: '12px 16px', borderRadius: 8,
-        border: '1px solid #e2e8f0', backgroundColor: '#ffffff',
+        ...baseStyle,
+        padding: "12px 16px",
+        borderRadius: 8,
+        border: "1px solid #e2e8f0",
+        backgroundColor: "#ffffff",
       }
       lines.push(`${pad}<div style="${escapeHtml(cssToInline(alertStyle))}">`)
       if (p.title) lines.push(`${pad}  <div style="font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 4px">${escapeHtml(String(p.title))}</div>`)
@@ -226,9 +262,9 @@ function renderShadcnHTML(
       break
     }
     case "sc:checkbox": {
-      const wrapStyle: CSSProperties = { ...baseStyle, display: 'flex', alignItems: 'center', gap: 8 }
+      const wrapStyle: CSSProperties = { ...baseStyle, display: "flex", alignItems: "center", gap: 8 }
       lines.push(`${pad}<label style="${escapeHtml(cssToInline(wrapStyle))}">`)
-      lines.push(`${pad}  <input type="checkbox" ${p.checked ? 'checked' : ''} style="width: 16px; height: 16px; accent-color: #0f172a" />`)
+      lines.push(`${pad}  <input type="checkbox" ${p.checked ? "checked" : ""} style="width: 16px; height: 16px; accent-color: #0f172a" />`)
       lines.push(`${pad}  <span style="font-size: 13px; color: #0f172a">${escapeHtml(String(p.label ?? ""))}</span>`)
       lines.push(`${pad}</label>`)
       break
@@ -236,8 +272,14 @@ function renderShadcnHTML(
     case "sc:select": {
       const options = (p.options as string[]) ?? []
       const selectStyle: CSSProperties = {
-        ...baseStyle, padding: '8px 12px', fontSize: 14, border: '1px solid #e2e8f0',
-        borderRadius: 6, backgroundColor: '#ffffff', color: '#0f172a', width: '100%',
+        ...baseStyle,
+        padding: "8px 12px",
+        fontSize: 14,
+        border: "1px solid #e2e8f0",
+        borderRadius: 6,
+        backgroundColor: "#ffffff",
+        color: "#0f172a",
+        width: "100%",
       }
       lines.push(`${pad}<select style="${escapeHtml(cssToInline(selectStyle))}">`)
       if (p.placeholder) lines.push(`${pad}  <option value="" disabled selected>${escapeHtml(String(p.placeholder))}</option>`)
@@ -261,11 +303,11 @@ function renderShadcnHTML(
       const options = (p.options as string[]) ?? []
       const value = String(p.value ?? "")
       const groupName = `radio-${el.id.slice(0, 6)}`
-      lines.push(`${pad}<fieldset style="${escapeHtml(cssToInline({ ...baseStyle, border: 'none', display: 'flex', flexDirection: 'column', gap: 8 }))}">`)
+      lines.push(`${pad}<fieldset style="${escapeHtml(cssToInline({ ...baseStyle, border: "none", display: "flex", flexDirection: "column", gap: 8 }))}">`)
       if (p.label) lines.push(`${pad}  <legend style="font-size: 13px; font-weight: 500; color: #0f172a; margin-bottom: 4px">${escapeHtml(String(p.label))}</legend>`)
       for (const opt of options) {
         lines.push(`${pad}  <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #0f172a">`)
-        lines.push(`${pad}    <input type="radio" name="${groupName}" value="${escapeHtml(opt)}" ${opt === value ? 'checked' : ''} style="accent-color: #0f172a" />`)
+        lines.push(`${pad}    <input type="radio" name="${groupName}" value="${escapeHtml(opt)}" ${opt === value ? "checked" : ""} style="accent-color: #0f172a" />`)
         lines.push(`${pad}    ${escapeHtml(opt)}`)
         lines.push(`${pad}  </label>`)
       }
@@ -276,36 +318,50 @@ function renderShadcnHTML(
       const horizontal = p.orientation !== "vertical"
       const sepStyle: CSSProperties = {
         ...baseStyle,
-        ...(horizontal ? { height: 1, width: '100%', backgroundColor: '#e2e8f0' } : { width: 1, height: '100%', backgroundColor: '#e2e8f0' }),
+        ...(horizontal ? { height: 1, width: "100%", backgroundColor: "#e2e8f0" } : { width: 1, height: "100%", backgroundColor: "#e2e8f0" }),
       }
       lines.push(`${pad}<div style="${escapeHtml(cssToInline(sepStyle))}"></div>`)
       break
     }
     case "sc:label": {
-      lines.push(`${pad}<label style="${escapeHtml(cssToInline({ ...baseStyle, fontSize: 13, fontWeight: 500, color: '#0f172a' }))}">${escapeHtml(String(p.text ?? "Label"))}</label>`)
+      lines.push(
+        `${pad}<label style="${escapeHtml(cssToInline({ ...baseStyle, fontSize: 13, fontWeight: 500, color: "#0f172a" }))}">${escapeHtml(String(p.text ?? "Label"))}</label>`
+      )
       break
     }
     case "sc:textarea": {
-      lines.push(`${pad}<textarea style="${escapeHtml(cssToInline(baseStyle))}" rows="${Number(p.rows ?? 3)}" placeholder="${escapeHtml(String(p.placeholder ?? ""))}">${escapeHtml(String(p.value ?? ""))}</textarea>`)
+      lines.push(
+        `${pad}<textarea style="${escapeHtml(cssToInline(baseStyle))}" rows="${Number(p.rows ?? 3)}" placeholder="${escapeHtml(String(p.placeholder ?? ""))}">${escapeHtml(String(p.value ?? ""))}</textarea>`
+      )
       break
     }
     case "sc:skeleton": {
-      const skelStyle: CSSProperties = { ...baseStyle, backgroundColor: '#f1f5f9', borderRadius: 6, height: 20, animation: 'pulse 2s ease-in-out infinite' }
+      const skelStyle: CSSProperties = { ...baseStyle, backgroundColor: "#f1f5f9", borderRadius: 6, height: 20, animation: "pulse 2s ease-in-out infinite" }
       lines.push(`${pad}<div style="${escapeHtml(cssToInline(skelStyle))}"></div>`)
       break
     }
     case "sc:slider": {
-      const sliderStyle: CSSProperties = { ...baseStyle, width: '100%' }
-      lines.push(`${pad}<input type="range" min="${Number(p.min ?? 0)}" max="${Number(p.max ?? 100)}" value="${Number(p.value ?? 50)}" step="${Number(p.step ?? 1)}" style="${escapeHtml(cssToInline(sliderStyle))}" />`)
+      const sliderStyle: CSSProperties = { ...baseStyle, width: "100%" }
+      lines.push(
+        `${pad}<input type="range" min="${Number(p.min ?? 0)}" max="${Number(p.max ?? 100)}" value="${Number(p.value ?? 50)}" step="${Number(p.step ?? 1)}" style="${escapeHtml(cssToInline(sliderStyle))}" />`
+      )
       break
     }
     case "sc:toggle": {
       const pressed = Boolean(p.pressed)
       const toggleStyle: CSSProperties = {
-        ...baseStyle, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        padding: '8px 12px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-        backgroundColor: pressed ? '#f1f5f9' : 'transparent', color: '#0f172a',
-        border: '1px solid #e2e8f0',
+        ...baseStyle,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "8px 12px",
+        borderRadius: 6,
+        fontSize: 13,
+        fontWeight: 500,
+        cursor: "pointer",
+        backgroundColor: pressed ? "#f1f5f9" : "transparent",
+        color: "#0f172a",
+        border: "1px solid #e2e8f0",
       }
       lines.push(`${pad}<button style="${escapeHtml(cssToInline(toggleStyle))}">${escapeHtml(String(p.label ?? ""))}</button>`)
       break
@@ -322,14 +378,13 @@ function renderShadcnHTML(
   }
 }
 
-
 function cssToInline(style: CSSProperties): string {
   return Object.entries(style)
     .filter(([, v]) => v !== undefined && v !== "")
     .map(([k, v]) => {
       const prop = k.replace(/([A-Z])/g, "-$1").toLowerCase()
       const val = typeof v === "number" && !["opacity", "zIndex", "flex", "order", "flexGrow", "flexShrink", "fontWeight", "lineHeight"].includes(k) ? `${v}px` : v
-      return `${prop}: ${String(val).replace(/[;"\\]/g, '')}`
+      return `${prop}: ${String(val).replace(/[;"\\]/g, "")}`
     })
     .join("; ")
 }

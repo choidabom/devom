@@ -37,21 +37,27 @@ export function useShellMessages({
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }, [])
 
-  const handleAddElement = useCallback((type: ElementType, props?: Record<string, unknown>) => {
-    historyStore.pushSnapshot()
-    const id = documentStore.addElement(type, undefined, props)
-    if (id) {
-      selectionStore.select(id)
-      syncToCanvas()
-      bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
-    }
-  }, [syncToCanvas])
+  const handleAddElement = useCallback(
+    (type: ElementType, props?: Record<string, unknown>) => {
+      historyStore.pushSnapshot()
+      const id = documentStore.addElement(type, undefined, props)
+      if (id) {
+        selectionStore.select(id)
+        syncToCanvas()
+        bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [id] } })
+      }
+    },
+    [syncToCanvas]
+  )
 
-  const handleAddSection = useCallback((role: SectionRole) => {
-    historyStore.pushSnapshot()
-    documentStore.addSection(role)
-    syncToCanvas()
-  }, [syncToCanvas])
+  const handleAddSection = useCallback(
+    (role: SectionRole) => {
+      historyStore.pushSnapshot()
+      documentStore.addSection(role)
+      syncToCanvas()
+    },
+    [syncToCanvas]
+  )
 
   const handleLoadTemplate = useCallback((templateId: string) => {
     historyStore.pushSnapshot()
@@ -59,114 +65,118 @@ export function useShellMessages({
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }, [])
 
-  const handleAlign = useCallback((type: import("../components/Toolbar").AlignType) => {
-    const elements = selectionStore.selectedElements.filter(
-      el => !el.locked && el.id !== documentStore.rootId && el.style.position === "absolute"
-    )
-    if (elements.length < 2) return
+  const handleAlign = useCallback(
+    (type: import("../components/Toolbar").AlignType) => {
+      const elements = selectionStore.selectedElements.filter((el) => !el.locked && el.id !== documentStore.rootId && el.style.position === "absolute")
+      if (elements.length < 2) return
 
-    historyStore.pushSnapshot()
+      historyStore.pushSnapshot()
 
-    const bounds = elements.map(el => ({
-      id: el.id,
-      left: typeof el.style.left === "number" ? el.style.left : 0,
-      top: typeof el.style.top === "number" ? el.style.top : 0,
-      width: typeof el.style.width === "number" ? el.style.width : 100,
-      height: typeof el.style.height === "number" ? el.style.height : 40,
-    }))
+      const bounds = elements.map((el) => ({
+        id: el.id,
+        left: typeof el.style.left === "number" ? el.style.left : 0,
+        top: typeof el.style.top === "number" ? el.style.top : 0,
+        width: typeof el.style.width === "number" ? el.style.width : 100,
+        height: typeof el.style.height === "number" ? el.style.height : 40,
+      }))
 
-    switch (type) {
-      case "left": {
-        const min = Math.min(...bounds.map(b => b.left))
-        for (const b of bounds) documentStore.updateStyle(b.id, { left: min })
-        break
-      }
-      case "right": {
-        const max = Math.max(...bounds.map(b => b.left + b.width))
-        for (const b of bounds) documentStore.updateStyle(b.id, { left: max - b.width })
-        break
-      }
-      case "center-h": {
-        const min = Math.min(...bounds.map(b => b.left))
-        const max = Math.max(...bounds.map(b => b.left + b.width))
-        const center = (min + max) / 2
-        for (const b of bounds) documentStore.updateStyle(b.id, { left: Math.round(center - b.width / 2) })
-        break
-      }
-      case "top": {
-        const min = Math.min(...bounds.map(b => b.top))
-        for (const b of bounds) documentStore.updateStyle(b.id, { top: min })
-        break
-      }
-      case "bottom": {
-        const max = Math.max(...bounds.map(b => b.top + b.height))
-        for (const b of bounds) documentStore.updateStyle(b.id, { top: max - b.height })
-        break
-      }
-      case "center-v": {
-        const min = Math.min(...bounds.map(b => b.top))
-        const max = Math.max(...bounds.map(b => b.top + b.height))
-        const center = (min + max) / 2
-        for (const b of bounds) documentStore.updateStyle(b.id, { top: Math.round(center - b.height / 2) })
-        break
-      }
-      case "distribute-h": {
-        if (bounds.length < 3) break
-        const sorted = [...bounds].sort((a, b) => a.left - b.left)
-        const first = sorted[0]!
-        const last = sorted[sorted.length - 1]!
-        const totalWidth = sorted.reduce((sum, b) => sum + b.width, 0)
-        const gap = (last.left + last.width - first.left - totalWidth) / (sorted.length - 1)
-        let x = first.left + first.width + gap
-        for (let i = 1; i < sorted.length - 1; i++) {
-          documentStore.updateStyle(sorted[i]!.id, { left: Math.round(x) })
-          x += sorted[i]!.width + gap
+      switch (type) {
+        case "left": {
+          const min = Math.min(...bounds.map((b) => b.left))
+          for (const b of bounds) documentStore.updateStyle(b.id, { left: min })
+          break
         }
-        break
-      }
-      case "distribute-v": {
-        if (bounds.length < 3) break
-        const sorted = [...bounds].sort((a, b) => a.top - b.top)
-        const first = sorted[0]!
-        const last = sorted[sorted.length - 1]!
-        const totalHeight = sorted.reduce((sum, b) => sum + b.height, 0)
-        const gap = (last.top + last.height - first.top - totalHeight) / (sorted.length - 1)
-        let y = first.top + first.height + gap
-        for (let i = 1; i < sorted.length - 1; i++) {
-          documentStore.updateStyle(sorted[i]!.id, { top: Math.round(y) })
-          y += sorted[i]!.height + gap
+        case "right": {
+          const max = Math.max(...bounds.map((b) => b.left + b.width))
+          for (const b of bounds) documentStore.updateStyle(b.id, { left: max - b.width })
+          break
         }
-        break
+        case "center-h": {
+          const min = Math.min(...bounds.map((b) => b.left))
+          const max = Math.max(...bounds.map((b) => b.left + b.width))
+          const center = (min + max) / 2
+          for (const b of bounds) documentStore.updateStyle(b.id, { left: Math.round(center - b.width / 2) })
+          break
+        }
+        case "top": {
+          const min = Math.min(...bounds.map((b) => b.top))
+          for (const b of bounds) documentStore.updateStyle(b.id, { top: min })
+          break
+        }
+        case "bottom": {
+          const max = Math.max(...bounds.map((b) => b.top + b.height))
+          for (const b of bounds) documentStore.updateStyle(b.id, { top: max - b.height })
+          break
+        }
+        case "center-v": {
+          const min = Math.min(...bounds.map((b) => b.top))
+          const max = Math.max(...bounds.map((b) => b.top + b.height))
+          const center = (min + max) / 2
+          for (const b of bounds) documentStore.updateStyle(b.id, { top: Math.round(center - b.height / 2) })
+          break
+        }
+        case "distribute-h": {
+          if (bounds.length < 3) break
+          const sorted = [...bounds].sort((a, b) => a.left - b.left)
+          const first = sorted[0]!
+          const last = sorted[sorted.length - 1]!
+          const totalWidth = sorted.reduce((sum, b) => sum + b.width, 0)
+          const gap = (last.left + last.width - first.left - totalWidth) / (sorted.length - 1)
+          let x = first.left + first.width + gap
+          for (let i = 1; i < sorted.length - 1; i++) {
+            documentStore.updateStyle(sorted[i]!.id, { left: Math.round(x) })
+            x += sorted[i]!.width + gap
+          }
+          break
+        }
+        case "distribute-v": {
+          if (bounds.length < 3) break
+          const sorted = [...bounds].sort((a, b) => a.top - b.top)
+          const first = sorted[0]!
+          const last = sorted[sorted.length - 1]!
+          const totalHeight = sorted.reduce((sum, b) => sum + b.height, 0)
+          const gap = (last.top + last.height - first.top - totalHeight) / (sorted.length - 1)
+          let y = first.top + first.height + gap
+          for (let i = 1; i < sorted.length - 1; i++) {
+            documentStore.updateStyle(sorted[i]!.id, { top: Math.round(y) })
+            y += sorted[i]!.height + gap
+          }
+          break
+        }
       }
-    }
 
-    syncToCanvas()
-  }, [syncToCanvas])
+      syncToCanvas()
+    },
+    [syncToCanvas]
+  )
 
   const handleToggleCanvasMode = useCallback(() => {
-    setCanvasMode(prev => {
-      const next = prev === 'canvas' ? 'page' : 'canvas'
+    setCanvasMode((prev) => {
+      const next = prev === "canvas" ? "page" : "canvas"
       historyStore.pushSnapshot()
       documentStore.setCanvasMode(next)
       syncToCanvas()
-      { const info = getVisibleCanvasInfo(); bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: next, ...info } }) }
+      {
+        const info = getVisibleCanvasInfo()
+        bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: next, ...info } })
+      }
       return next
     })
   }, [syncToCanvas, getVisibleCanvasInfo, setCanvasMode])
 
   const handleToggleMode = useCallback(() => {
-    setEditorMode(prev => {
+    setEditorMode((prev) => {
       const next = prev === "edit" ? "interact" : "edit"
       bridge.send({ type: "SET_MODE", payload: { mode: next, canvasMode: documentStore.canvasMode } })
       if (next === "interact") {
         selectionStore.clear()
-        if (documentStore.canvasMode === 'page') setShowPanels(false)
+        if (documentStore.canvasMode === "page") setShowPanels(false)
       } else {
         setShowPanels(true)
-        if (documentStore.canvasMode === 'page') {
+        if (documentStore.canvasMode === "page") {
           requestAnimationFrame(() => {
             const info = getVisibleCanvasInfo()
-            bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: 'page', ...info } })
+            bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: "page", ...info } })
           })
         }
       }
@@ -180,8 +190,11 @@ export function useShellMessages({
         case "CANVAS_READY": {
           const data = documentStore.toSerializable()
           bridge.send({ type: "SYNC_DOCUMENT", payload: data })
-          if (documentStore.canvasMode !== 'canvas') {
-            { const info = getVisibleCanvasInfo(); bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: documentStore.canvasMode, ...info } }) }
+          if (documentStore.canvasMode !== "canvas") {
+            {
+              const info = getVisibleCanvasInfo()
+              bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: documentStore.canvasMode, ...info } })
+            }
             setCanvasMode(documentStore.canvasMode)
           }
           break
@@ -232,7 +245,10 @@ export function useShellMessages({
             if (k.shiftKey) handleRedo()
             else handleUndo()
           }
-          if ((k.metaKey || k.ctrlKey) && k.code === "Backslash") { setShowPanels(prev => !prev); return }
+          if ((k.metaKey || k.ctrlKey) && k.code === "Backslash") {
+            setShowPanels((prev) => !prev)
+            return
+          }
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyC") handleCopy()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyX") handleCut()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyV") handlePaste()
@@ -252,7 +268,10 @@ export function useShellMessages({
         case "SET_PAGE_VIEWPORT_REQUEST":
           documentStore.setPageViewport(msg.payload.width)
           syncToCanvas()
-          { const info = getVisibleCanvasInfo(); bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: msg.payload.width, ...info } }) }
+          {
+            const info = getVisibleCanvasInfo()
+            bridge.send({ type: "SET_PAGE_VIEWPORT", payload: { width: msg.payload.width, ...info } })
+          }
           break
         case "INSERT_SECTION_REQUEST":
           historyStore.pushSnapshot()
@@ -274,7 +293,7 @@ export function useShellMessages({
           historyStore.pushSnapshot()
           const id = documentStore.addElement(elType)
           if (id) {
-            if (documentStore.canvasMode === 'canvas') {
+            if (documentStore.canvasMode === "canvas") {
               documentStore.updateStyle(id, { left: msg.payload.x, top: msg.payload.y })
             }
             selectionStore.select(id)

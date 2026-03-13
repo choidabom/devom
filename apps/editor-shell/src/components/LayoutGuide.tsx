@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react"
 
-interface Rect { left: number; top: number; width: number; height: number }
+interface Rect {
+  left: number
+  top: number
+  width: number
+  height: number
+}
 
 const REGIONS = [
   {
@@ -86,12 +91,23 @@ export function LayoutGuide() {
       <button
         onClick={() => setOpen(!open)}
         style={{
-          position: "fixed", bottom: 16, right: 16, zIndex: 9999,
-          width: 32, height: 32, borderRadius: 8, border: "none",
+          position: "fixed",
+          bottom: 16,
+          right: 16,
+          zIndex: 9999,
+          width: 32,
+          height: 32,
+          borderRadius: 8,
+          border: "none",
           background: open ? "#6366f1" : "rgba(0,0,0,0.5)",
-          color: "#fff", fontSize: 14, cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)", transition: "all 0.2s",
+          color: "#fff",
+          fontSize: 14,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          transition: "all 0.2s",
         }}
         title="Layout Guide"
       >
@@ -101,29 +117,40 @@ export function LayoutGuide() {
       {open && (
         <div
           style={{
-            position: "fixed", inset: 0, zIndex: 9998,
-            background: "rgba(10,10,15,0.5)", backdropFilter: "blur(2px)",
+            position: "fixed",
+            inset: 0,
+            zIndex: 9998,
+            background: "rgba(10,10,15,0.5)",
+            backdropFilter: "blur(2px)",
           }}
           onClick={() => setOpen(false)}
         >
           {/* Tabs */}
           <div
             style={{
-              position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)",
-              display: "flex", gap: 2, background: "rgba(0,0,0,0.75)",
-              borderRadius: 10, padding: 3, zIndex: 10, backdropFilter: "blur(12px)",
+              position: "fixed",
+              bottom: 16,
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              gap: 2,
+              background: "rgba(0,0,0,0.75)",
+              borderRadius: 10,
+              padding: 3,
+              zIndex: 10,
+              backdropFilter: "blur(12px)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <TBtn active={tab === "regions"} onClick={() => setTab("regions")}>UI Regions</TBtn>
-            <TBtn active={tab === "arch"} onClick={() => setTab("arch")}>Architecture</TBtn>
+            <TBtn active={tab === "regions"} onClick={() => setTab("regions")}>
+              UI Regions
+            </TBtn>
+            <TBtn active={tab === "arch"} onClick={() => setTab("arch")}>
+              Architecture
+            </TBtn>
           </div>
 
-          {tab === "regions" ? (
-            <RegionsView rects={rects} selectedRegion={selectedRegion} onSelectRegion={setSelectedRegion} />
-          ) : (
-            <ArchView />
-          )}
+          {tab === "regions" ? <RegionsView rects={rects} selectedRegion={selectedRegion} onSelectRegion={setSelectedRegion} /> : <ArchView />}
         </div>
       )}
 
@@ -137,23 +164,29 @@ export function LayoutGuide() {
 
 function TBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} style={{
-      padding: "6px 16px", border: "none", borderRadius: 8, cursor: "pointer",
-      fontSize: 12, fontWeight: 600, transition: "all 0.15s",
-      background: active ? "#fff" : "transparent",
-      color: active ? "#1e1e2e" : "rgba(255,255,255,0.5)",
-    }}>{children}</button>
+    <button
+      onClick={onClick}
+      style={{
+        padding: "6px 16px",
+        border: "none",
+        borderRadius: 8,
+        cursor: "pointer",
+        fontSize: 12,
+        fontWeight: 600,
+        transition: "all 0.15s",
+        background: active ? "#fff" : "transparent",
+        color: active ? "#1e1e2e" : "rgba(255,255,255,0.5)",
+      }}
+    >
+      {children}
+    </button>
   )
 }
 
 // --- Regions: non-overlapping overlays + detail tooltip near selected ---
 
-function RegionsView({ rects, selectedRegion, onSelectRegion }: {
-  rects: Record<string, Rect>
-  selectedRegion: string | null
-  onSelectRegion: (id: string) => void
-}) {
-  const selected = REGIONS.find(r => r.id === selectedRegion)
+function RegionsView({ rects, selectedRegion, onSelectRegion }: { rects: Record<string, Rect>; selectedRegion: string | null; onSelectRegion: (id: string) => void }) {
+  const selected = REGIONS.find((r) => r.id === selectedRegion)
   const selectedRect = selectedRegion ? rects[selectedRegion] : null
 
   // Adjust Canvas rect to exclude Layers area (they overlap)
@@ -203,10 +236,16 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
         return (
           <div
             key={r.id}
-            onClick={(e) => { e.stopPropagation(); onSelectRegion(r.id) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onSelectRegion(r.id)
+            }}
             style={{
               position: "absolute",
-              left: rect.left, top: rect.top, width: rect.width, height: rect.height,
+              left: rect.left,
+              top: rect.top,
+              width: rect.width,
+              height: rect.height,
               background: isActive ? `rgba(${r.color}, 0.12)` : `rgba(${r.color}, 0.04)`,
               border: `2px solid rgba(${r.color}, ${isActive ? 0.8 : 0.3})`,
               borderRadius: 6,
@@ -216,13 +255,22 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
             }}
           >
             {/* Label badge */}
-            <div style={{
-              position: "absolute", top: 8, left: 8,
-              background: `rgba(${r.color}, ${isActive ? 1 : 0.7})`, color: "#fff",
-              padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)", whiteSpace: "nowrap",
-              transition: "all 0.15s",
-            }}>
+            <div
+              style={{
+                position: "absolute",
+                top: 8,
+                left: 8,
+                background: `rgba(${r.color}, ${isActive ? 1 : 0.7})`,
+                color: "#fff",
+                padding: "3px 10px",
+                borderRadius: 6,
+                fontSize: 11,
+                fontWeight: 700,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                whiteSpace: "nowrap",
+                transition: "all 0.15s",
+              }}
+            >
               {r.label}
             </div>
           </div>
@@ -251,25 +299,41 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
           }}
         >
           {/* Tech badge */}
-          <div style={{
-            fontSize: 11, fontFamily: "'SF Mono', Menlo, monospace",
-            color: "rgba(255,255,255,0.35)", marginBottom: 10,
-          }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontFamily: "'SF Mono', Menlo, monospace",
+              color: "rgba(255,255,255,0.35)",
+              marginBottom: 10,
+            }}
+          >
             {selected.tech}
           </div>
 
           {/* Description bullets */}
           <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
             {selected.lines.map((line, li) => (
-              <div key={li} style={{
-                fontSize: 12.5, color: "rgba(255,255,255,0.8)", lineHeight: 1.6,
-                paddingLeft: 14, position: "relative",
-              }}>
-                <span style={{
-                  position: "absolute", left: 0, top: 7,
-                  width: 5, height: 5, borderRadius: "50%",
-                  background: `rgba(${selected.color}, 0.6)`,
-                }} />
+              <div
+                key={li}
+                style={{
+                  fontSize: 12.5,
+                  color: "rgba(255,255,255,0.8)",
+                  lineHeight: 1.6,
+                  paddingLeft: 14,
+                  position: "relative",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 7,
+                    width: 5,
+                    height: 5,
+                    borderRadius: "50%",
+                    background: `rgba(${selected.color}, 0.6)`,
+                  }}
+                />
                 {line}
               </div>
             ))}
@@ -277,25 +341,34 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
 
           {/* Keys */}
           {"keys" in selected && selected.keys && (
-            <div style={{
-              marginTop: 10, paddingTop: 8,
-              borderTop: "1px solid rgba(255,255,255,0.08)",
-              fontSize: 11, fontFamily: "'SF Mono', Menlo, monospace",
-              color: "rgba(255,255,255,0.5)",
-            }}>
+            <div
+              style={{
+                marginTop: 10,
+                paddingTop: 8,
+                borderTop: "1px solid rgba(255,255,255,0.08)",
+                fontSize: 11,
+                fontFamily: "'SF Mono', Menlo, monospace",
+                color: "rgba(255,255,255,0.5)",
+              }}
+            >
               {selected.keys}
             </div>
           )}
 
           {/* Data flow */}
           {"flow" in selected && selected.flow && (
-            <div style={{
-              marginTop: 8, paddingTop: 8,
-              borderTop: "1px solid rgba(255,255,255,0.08)",
-              fontSize: 11, fontFamily: "'SF Mono', Menlo, monospace",
-              color: "rgba(255,255,255,0.4)", lineHeight: 1.6,
-              whiteSpace: "pre-line",
-            }}>
+            <div
+              style={{
+                marginTop: 8,
+                paddingTop: 8,
+                borderTop: "1px solid rgba(255,255,255,0.08)",
+                fontSize: 11,
+                fontFamily: "'SF Mono', Menlo, monospace",
+                color: "rgba(255,255,255,0.4)",
+                lineHeight: 1.6,
+                whiteSpace: "pre-line",
+              }}
+            >
               {selected.flow}
             </div>
           )}
@@ -310,60 +383,73 @@ function RegionsView({ rects, selectedRegion, onSelectRegion }: {
 function ArchView() {
   const cards = [
     {
-      label: "SHELL", title: "editor-shell (:4000)", color: "59, 130, 246",
+      label: "SHELL",
+      title: "editor-shell (:4000)",
+      color: "59, 130, 246",
       sections: [
-        { h: "Stores (MobX)", items: [
-          "DocumentStore — observable.map<id, EditorElement>로 요소 트리 관리",
-          "SelectionStore — selectedIds[] 배열로 다중 선택 지원, toggle/setIds 메서드",
-          "HistoryStore — JSON 스냅샷 스택으로 Undo/Redo 구현",
-          "모든 Store는 makeAutoObservable → observer 컴포넌트 자동 리렌더",
-        ]},
-        { h: "역할", items: [
-          "상태의 단일 소스 (Single Source of Truth)",
-          "사용자 입력 처리 → Store 업데이트 → Canvas 동기화",
-          "iframe 로드 시 SYNC_DOCUMENT로 초기 상태 전송",
-        ]},
+        {
+          h: "Stores (MobX)",
+          items: [
+            "DocumentStore — observable.map<id, EditorElement>로 요소 트리 관리",
+            "SelectionStore — selectedIds[] 배열로 다중 선택 지원, toggle/setIds 메서드",
+            "HistoryStore — JSON 스냅샷 스택으로 Undo/Redo 구현",
+            "모든 Store는 makeAutoObservable → observer 컴포넌트 자동 리렌더",
+          ],
+        },
+        { h: "역할", items: ["상태의 단일 소스 (Single Source of Truth)", "사용자 입력 처리 → Store 업데이트 → Canvas 동기화", "iframe 로드 시 SYNC_DOCUMENT로 초기 상태 전송"] },
       ],
     },
     {
-      label: "BRIDGE", title: "MessageBridge (postMessage)", color: "236, 72, 153",
+      label: "BRIDGE",
+      title: "MessageBridge (postMessage)",
+      color: "236, 72, 153",
       sections: [
-        { h: "왜 postMessage?", items: [
-          "iframe은 별도 window → 직접 함수 호출이나 상태 공유 불가",
-          "MobX observable은 iframe 경계를 넘으면 반응성이 깨짐",
-          "postMessage + JSON 직렬화로 안전하게 데이터 전달",
-        ]},
-        { h: "동기화 전략", items: [
-          "개별 UPDATE 대신 전체 SYNC_DOCUMENT 사용",
-          "Object.assign은 MobX 추적 불가 → loadFromSerializable()로 Map 재구축",
-          "toSerializable()로 MobX proxy 제거 (JSON.parse/stringify)",
-        ]},
-        { h: "메시지 흐름", items: [
-          "Shell→Canvas: SYNC_DOCUMENT, ADD_ELEMENT, SELECT_ELEMENT(ids[])",
-          "Canvas→Shell: ELEMENT_CLICKED(shiftKey), ELEMENTS_MOVED, MARQUEE_SELECT",
-        ]},
+        {
+          h: "왜 postMessage?",
+          items: [
+            "iframe은 별도 window → 직접 함수 호출이나 상태 공유 불가",
+            "MobX observable은 iframe 경계를 넘으면 반응성이 깨짐",
+            "postMessage + JSON 직렬화로 안전하게 데이터 전달",
+          ],
+        },
+        {
+          h: "동기화 전략",
+          items: [
+            "개별 UPDATE 대신 전체 SYNC_DOCUMENT 사용",
+            "Object.assign은 MobX 추적 불가 → loadFromSerializable()로 Map 재구축",
+            "toSerializable()로 MobX proxy 제거 (JSON.parse/stringify)",
+          ],
+        },
+        { h: "메시지 흐름", items: ["Shell→Canvas: SYNC_DOCUMENT, ADD_ELEMENT, SELECT_ELEMENT(ids[])", "Canvas→Shell: ELEMENT_CLICKED(shiftKey), ELEMENTS_MOVED, MARQUEE_SELECT"] },
       ],
     },
     {
-      label: "CANVAS", title: "editor-canvas (:4001)", color: "139, 92, 246",
+      label: "CANVAS",
+      title: "editor-canvas (:4001)",
+      color: "139, 92, 246",
       sections: [
-        { h: "왜 별도 앱?", items: [
-          "실제 React 컴포넌트를 격리 환경에서 렌더링",
-          "shadcn/ui + Tailwind CSS가 에디터 UI와 충돌 방지",
-          "디자인한 컴포넌트를 그대로 코드로 추출 가능",
-        ]},
-        { h: "렌더링 파이프라인", items: [
-          "SYNC_DOCUMENT 수신 → loadFromSerializable()로 Store 재구축",
-          "ElementRenderer가 rootId부터 재귀 순회하며 DOM 생성",
-          "getElementContent()가 타입별 실제 컴포넌트(Button, Card...) 매핑",
-        ]},
-        { h: "인터랙션", items: [
-          "드래그: setPointerCapture → transform 실시간 이동 → 최종 좌표 Shell 전송",
-          "다중 드래그: 선택 그룹 전체 DOM transform 동시 이동 → ELEMENTS_MOVED 배치 전송",
-          "Marquee: 배경 드래그 → 영역 내 요소 자동 다중 선택 (MARQUEE_SELECT)",
-          "리사이즈: getBoundingClientRect로 실제 DOM 크기 측정 → 8방향 핸들",
-          "Shift+Click: 기존 선택에 토글 추가/제거",
-        ]},
+        {
+          h: "왜 별도 앱?",
+          items: ["실제 React 컴포넌트를 격리 환경에서 렌더링", "shadcn/ui + Tailwind CSS가 에디터 UI와 충돌 방지", "디자인한 컴포넌트를 그대로 코드로 추출 가능"],
+        },
+        {
+          h: "렌더링 파이프라인",
+          items: [
+            "SYNC_DOCUMENT 수신 → loadFromSerializable()로 Store 재구축",
+            "ElementRenderer가 rootId부터 재귀 순회하며 DOM 생성",
+            "getElementContent()가 타입별 실제 컴포넌트(Button, Card...) 매핑",
+          ],
+        },
+        {
+          h: "인터랙션",
+          items: [
+            "드래그: setPointerCapture → transform 실시간 이동 → 최종 좌표 Shell 전송",
+            "다중 드래그: 선택 그룹 전체 DOM transform 동시 이동 → ELEMENTS_MOVED 배치 전송",
+            "Marquee: 배경 드래그 → 영역 내 요소 자동 다중 선택 (MARQUEE_SELECT)",
+            "리사이즈: getBoundingClientRect로 실제 DOM 크기 측정 → 8방향 핸들",
+            "Shift+Click: 기존 선택에 토글 추가/제거",
+          ],
+        },
       ],
     },
   ]
@@ -372,30 +458,50 @@ function ArchView() {
     <div
       onClick={(e) => e.stopPropagation()}
       style={{
-        position: "absolute", inset: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "32px 32px 70px", gap: 20,
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "32px 32px 70px",
+        gap: 20,
       }}
     >
       {cards.map((card, ci) => (
-        <div key={card.title} style={{
-          flex: 1, maxWidth: 320,
-          background: "rgba(20,20,28,0.96)", border: `1px solid rgba(${card.color}, 0.25)`,
-          borderRadius: 16, padding: "20px 18px",
-          backdropFilter: "blur(16px)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-          animation: `ci 0.3s ease-out ${ci * 0.08}s both`,
-        }}>
+        <div
+          key={card.title}
+          style={{
+            flex: 1,
+            maxWidth: 320,
+            background: "rgba(20,20,28,0.96)",
+            border: `1px solid rgba(${card.color}, 0.25)`,
+            borderRadius: 16,
+            padding: "20px 18px",
+            backdropFilter: "blur(16px)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+            animation: `ci 0.3s ease-out ${ci * 0.08}s both`,
+          }}
+        >
           <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2, color: `rgba(${card.color}, 0.6)`, marginBottom: 4 }}>{card.label}</div>
           <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 16, fontFamily: "'SF Mono', Menlo, monospace" }}>{card.title}</div>
 
           {card.sections.map((s, si) => (
             <div key={si} style={{ marginBottom: si < card.sections.length - 1 ? 12 : 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", marginBottom: 5, paddingBottom: 3, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>{s.h}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)", marginBottom: 5, paddingBottom: 3, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                {s.h}
+              </div>
               {s.items.map((item, ii) => (
-                <div key={ii} style={{
-                  fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.6,
-                  paddingLeft: 12, position: "relative", marginBottom: 2,
-                }}>
+                <div
+                  key={ii}
+                  style={{
+                    fontSize: 12,
+                    color: "rgba(255,255,255,0.7)",
+                    lineHeight: 1.6,
+                    paddingLeft: 12,
+                    position: "relative",
+                    marginBottom: 2,
+                  }}
+                >
                   <span style={{ position: "absolute", left: 0, top: 7, width: 4, height: 4, borderRadius: "50%", background: `rgba(${card.color}, 0.4)` }} />
                   {item}
                 </div>

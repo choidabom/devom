@@ -40,10 +40,10 @@ export interface EditorElement {
   props: Record<string, unknown>
   locked: boolean
   visible: boolean
-  layoutMode: 'none' | 'flex' | 'grid'
+  layoutMode: "none" | "flex" | "grid"
   layoutProps: LayoutProps
   sizing: SizingProps
-  canvasPosition: { left: number; top: number; width?: CSSProperties['width']; sizing?: SizingProps } | null
+  canvasPosition: { left: number; top: number; width?: CSSProperties["width"]; sizing?: SizingProps } | null
   role?: SectionRole
   sectionProps?: SectionProps
   gridProps?: GridProps
@@ -64,18 +64,18 @@ export interface ElementBounds {
   height: number
 }
 
-export type SizingMode = 'fixed' | 'hug' | 'fill'
+export type SizingMode = "fixed" | "hug" | "fill"
 
 export interface LayoutProps {
-  direction: 'row' | 'column'
+  direction: "row" | "column"
   gap: number
   paddingTop: number
   paddingRight: number
   paddingBottom: number
   paddingLeft: number
-  alignItems: 'start' | 'center' | 'end' | 'stretch'
-  justifyContent: 'start' | 'center' | 'end' | 'space-between'
-  flexWrap: 'nowrap' | 'wrap'
+  alignItems: "start" | "center" | "end" | "stretch"
+  justifyContent: "start" | "center" | "end" | "space-between"
+  flexWrap: "nowrap" | "wrap"
 }
 
 export interface SizingProps {
@@ -101,33 +101,33 @@ export const DEFAULT_GRID_PROPS: GridProps = {
   gap: 24,
 }
 
-export type SectionRole = 'section' | 'hero' | 'features' | 'cta' | 'footer' | 'header'
+export type SectionRole = "section" | "hero" | "features" | "cta" | "footer" | "header"
 
 export const DEFAULT_LAYOUT_PROPS: LayoutProps = {
-  direction: 'column',
+  direction: "column",
   gap: 8,
   paddingTop: 8,
   paddingRight: 8,
   paddingBottom: 8,
   paddingLeft: 8,
-  alignItems: 'start',
-  justifyContent: 'start',
-  flexWrap: 'nowrap',
+  alignItems: "start",
+  justifyContent: "start",
+  flexWrap: "nowrap",
 }
 
 export const DEFAULT_SIZING: SizingProps = {
-  w: 'fixed',
-  h: 'fixed',
+  w: "fixed",
+  h: "fixed",
 }
 
-export type CanvasMode = 'canvas' | 'page'
+export type CanvasMode = "canvas" | "page"
 
 export type PageViewportWidth = 1280 | 768 | 375
 
 export const PAGE_VIEWPORT_PRESETS = [
-  { label: 'Desktop', width: 1280 as PageViewportWidth },
-  { label: 'Tablet', width: 768 as PageViewportWidth },
-  { label: 'Mobile', width: 375 as PageViewportWidth },
+  { label: "Desktop", width: 1280 as PageViewportWidth },
+  { label: "Tablet", width: 768 as PageViewportWidth },
+  { label: "Mobile", width: 375 as PageViewportWidth },
 ] as const
 
 export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
@@ -324,6 +324,6 @@ export const DEFAULT_ELEMENT_STYLE: Record<ElementType, CSSProperties> = {
   },
 }
 
-export type ElementTemplate = Omit<EditorElement, 'id' | 'parentId' | 'children'> & {
+export type ElementTemplate = Omit<EditorElement, "id" | "parentId" | "children"> & {
   children: ElementTemplate[]
 }
