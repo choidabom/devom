@@ -89,7 +89,10 @@ export function useCanvasMessages({
           const vp = viewportRef.current
           const x = (msg.payload.clientX - vp.panX) / vp.zoom
           const y = (msg.payload.clientY - vp.panY) / vp.zoom
-          bridge.send({ type: "DND_CREATE_ELEMENT", payload: { elementType: msg.payload.elementType, x: Math.round(x), y: Math.round(y) } })
+          bridge.send({
+            type: "DND_CREATE_ELEMENT",
+            payload: { elementType: msg.payload.elementType, x: Math.round(x), y: Math.round(y), extraProps: msg.payload.extraProps },
+          })
           break
         }
         case "ADD_ELEMENT":

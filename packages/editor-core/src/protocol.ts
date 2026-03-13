@@ -28,7 +28,7 @@ export type ShellToCanvasMessage =
   | { type: "UPDATE_SECTION_PROPS"; payload: { id: string; sectionProps: Partial<SectionProps> } }
   | { type: "UPDATE_GRID_PROPS"; payload: { id: string; gridProps: Partial<GridProps> } }
   | { type: "ADD_SECTION"; payload: { preset: SectionRole; index?: number } }
-  | { type: "DND_DROP"; payload: { elementType: string; clientX: number; clientY: number } }
+  | { type: "DND_DROP"; payload: { elementType: string; clientX: number; clientY: number; extraProps?: Record<string, unknown> } }
   | { type: "ZOOM_IN" }
   | { type: "ZOOM_OUT" }
   | { type: "ZOOM_RESET" }
@@ -50,7 +50,7 @@ export type CanvasToShellMessage =
   | { type: "INSERT_SECTION_REQUEST"; payload: { preset: SectionRole; index: number } }
   | { type: "GROUP_ELEMENTS_REQUEST"; payload: { ids: string[]; elementBounds: Record<string, { left: number; top: number; width: number; height: number }> } }
   | { type: "UNGROUP_ELEMENTS_REQUEST"; payload: { ids: string[] } }
-  | { type: "DND_CREATE_ELEMENT"; payload: { elementType: string; x: number; y: number } }
+  | { type: "DND_CREATE_ELEMENT"; payload: { elementType: string; x: number; y: number; extraProps?: Record<string, unknown> } }
   | { type: "ZOOM_CHANGED"; payload: { zoom: number } }
   | { type: "FORM_SUBMIT_RESULT"; formId: string; values: Record<string, unknown> }
 

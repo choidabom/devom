@@ -15,11 +15,13 @@
 ## File Structure
 
 ### New Files
+
 - `packages/editor-core/src/export/formCodeExport.ts` — react-hook-form + zod code generator
 - `packages/editor-core/src/utils/validateField.ts` — Lightweight validation engine (shared between Canvas runtime and export)
 - `apps/editor-canvas/src/hooks/useFormRuntime.ts` — Canvas form state/errors/submit logic
 
 ### Modified Files
+
 - `packages/editor-core/src/types.ts` — FormFieldConfig, ValidationRule, 'form' ElementType, formField on EditorElement
 - `packages/editor-core/src/stores/DocumentStore.ts` — updateFormField, form-aware addElement, duplicate name on copy
 - `packages/editor-core/src/protocol.ts` — SET_INTERACTION_FORM_STATE, FORM_SUBMIT_RESULT messages
@@ -39,6 +41,7 @@
 ### Task 1: Add Form Types to editor-core
 
 **Files:**
+
 - Modify: `packages/editor-core/src/types.ts`
 
 - [ ] **Step 1: Add FormFieldConfig and ValidationRule types**
@@ -50,7 +53,7 @@ export interface ValidationRule {
   required?: boolean | string
   min?: number
   max?: number
-  pattern?: string | 'email' | 'url'
+  pattern?: string | "email" | "url"
   message?: string
 }
 
@@ -96,6 +99,7 @@ feat(editor-core): add form state types (FormFieldConfig, ValidationRule, form E
 ### Task 2: Add Protocol Messages
 
 **Files:**
+
 - Modify: `packages/editor-core/src/protocol.ts`
 
 - [ ] **Step 1: Add FormFieldRuntime type**
@@ -136,6 +140,7 @@ feat(editor-core): add form state protocol messages
 ### Task 3: DocumentStore — Form Support
 
 **Files:**
+
 - Modify: `packages/editor-core/src/stores/DocumentStore.ts`
 - Modify: `packages/editor-core/src/utils/getDefaultProps.ts`
 
@@ -174,7 +179,7 @@ In the duplicate logic, when copying an element with formField, auto-append `_co
 
 ```typescript
 if (clone.formField) {
-  clone.formField = { ...clone.formField, name: clone.formField.name + '_copy' }
+  clone.formField = { ...clone.formField, name: clone.formField.name + "_copy" }
 }
 ```
 
@@ -201,9 +206,9 @@ getFormFields(formId: string): Array<{ element: EditorElement; formField: FormFi
 In addElement, after creating the element, if type is 'form':
 
 ```typescript
-if (type === 'form') {
-  newElement.layoutMode = 'flex'
-  newElement.layoutProps = { ...newElement.layoutProps, direction: 'column', gap: 16 }
+if (type === "form") {
+  newElement.layoutMode = "flex"
+  newElement.layoutProps = { ...newElement.layoutProps, direction: "column", gap: 16 }
 }
 ```
 
@@ -218,57 +223,53 @@ feat(editor-core): add form support to DocumentStore and defaults
 ### Task 4: Validation Engine
 
 **Files:**
+
 - Create: `packages/editor-core/src/utils/validateField.ts`
 
 - [ ] **Step 1: Create validateField utility**
 
 ```typescript
-import type { ValidationRule } from '../types'
+import type { ValidationRule } from "../types"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const URL_REGEX = /^https?:\/\/.+/
 
-export function validateField(
-  value: unknown,
-  rule: ValidationRule
-): string | null {
-  const strVal = value == null ? '' : String(value)
-  const isEmpty = value === '' || value == null || value === false
+export function validateField(value: unknown, rule: ValidationRule): string | null {
+  const strVal = value == null ? "" : String(value)
+  const isEmpty = value === "" || value == null || value === false
 
   if (rule.required && isEmpty) {
-    return typeof rule.required === 'string'
-      ? rule.required
-      : rule.message || '필수 항목입니다'
+    return typeof rule.required === "string" ? rule.required : rule.message || "필수 항목입니다"
   }
 
   if (!isEmpty && rule.min != null) {
-    if (typeof value === 'number' && value < rule.min) {
+    if (typeof value === "number" && value < rule.min) {
       return rule.message || `최소 ${rule.min}`
     }
-    if (typeof value === 'string' && value.length < rule.min) {
+    if (typeof value === "string" && value.length < rule.min) {
       return rule.message || `최소 ${rule.min}자`
     }
   }
 
   if (!isEmpty && rule.max != null) {
-    if (typeof value === 'number' && value > rule.max) {
+    if (typeof value === "number" && value > rule.max) {
       return rule.message || `최대 ${rule.max}`
     }
-    if (typeof value === 'string' && value.length > rule.max) {
+    if (typeof value === "string" && value.length > rule.max) {
       return rule.message || `최대 ${rule.max}자`
     }
   }
 
   if (!isEmpty && rule.pattern) {
-    if (rule.pattern === 'email' && !EMAIL_REGEX.test(strVal)) {
-      return rule.message || '이메일 형식이 올바르지 않습니다'
+    if (rule.pattern === "email" && !EMAIL_REGEX.test(strVal)) {
+      return rule.message || "이메일 형식이 올바르지 않습니다"
     }
-    if (rule.pattern === 'url' && !URL_REGEX.test(strVal)) {
-      return rule.message || 'URL 형식이 올바르지 않습니다'
+    if (rule.pattern === "url" && !URL_REGEX.test(strVal)) {
+      return rule.message || "URL 형식이 올바르지 않습니다"
     }
-    if (rule.pattern !== 'email' && rule.pattern !== 'url') {
+    if (rule.pattern !== "email" && rule.pattern !== "url") {
       if (!new RegExp(rule.pattern).test(strVal)) {
-        return rule.message || '형식이 올바르지 않습니다'
+        return rule.message || "형식이 올바르지 않습니다"
       }
     }
   }
@@ -282,7 +283,7 @@ export function validateField(
 Add to `packages/editor-core/src/index.ts`:
 
 ```typescript
-export { validateField } from './utils/validateField'
+export { validateField } from "./utils/validateField"
 ```
 
 - [ ] **Step 3: Run lint & commit**
@@ -298,6 +299,7 @@ feat(editor-core): add validateField utility for form validation
 ### Task 5: Toolbar — Form Dropdown
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/Toolbar.tsx`
 
 - [ ] **Step 1: Add FORM_ITEMS constant**
@@ -306,15 +308,15 @@ Near the existing SHADCN_COMPONENTS array, add:
 
 ```typescript
 const FORM_ITEMS = [
-  { type: 'form' as const, label: 'Form Container', category: 'Container' },
-  { type: 'sc:input' as const, label: 'Input', category: 'Fields' },
-  { type: 'sc:textarea' as const, label: 'Textarea', category: 'Fields' },
-  { type: 'sc:checkbox' as const, label: 'Checkbox', category: 'Fields' },
-  { type: 'sc:switch' as const, label: 'Switch', category: 'Fields' },
-  { type: 'sc:select' as const, label: 'Select', category: 'Fields' },
-  { type: 'sc:radio-group' as const, label: 'RadioGroup', category: 'Fields' },
-  { type: 'sc:slider' as const, label: 'Slider', category: 'Fields' },
-  { type: 'sc:button' as const, label: 'Submit Button', category: 'Actions' },
+  { type: "form" as const, label: "Form Container", category: "Container" },
+  { type: "sc:input" as const, label: "Input", category: "Fields" },
+  { type: "sc:textarea" as const, label: "Textarea", category: "Fields" },
+  { type: "sc:checkbox" as const, label: "Checkbox", category: "Fields" },
+  { type: "sc:switch" as const, label: "Switch", category: "Fields" },
+  { type: "sc:select" as const, label: "Select", category: "Fields" },
+  { type: "sc:radio-group" as const, label: "RadioGroup", category: "Fields" },
+  { type: "sc:slider" as const, label: "Slider", category: "Fields" },
+  { type: "sc:button" as const, label: "Submit Button", category: "Actions" },
 ] as const
 ```
 
@@ -335,10 +337,8 @@ When creating element from Form dropdown, pass `initialProps` and `formField`:
 const isFormDropdown = true // track which dropdown the drag came from
 // In the DND_CREATE_ELEMENT handler:
 if (isFormItem) {
-  const formField = itemType !== 'form' && itemType !== 'sc:button'
-    ? { name: `${itemType.replace('sc:', '')}_${Date.now() % 1000}` }
-    : undefined
-  const extraProps = itemType === 'sc:button' ? { formRole: 'submit' } : {}
+  const formField = itemType !== "form" && itemType !== "sc:button" ? { name: `${itemType.replace("sc:", "")}_${Date.now() % 1000}` } : undefined
+  const extraProps = itemType === "sc:button" ? { formRole: "submit" } : {}
   // pass formField and extraProps to addElement
 }
 ```
@@ -346,6 +346,7 @@ if (isFormItem) {
 - [ ] **Step 4: Auto-create form container if needed**
 
 When dropping a form field and no form container exists as parent:
+
 1. Create `form` element first
 2. Add the field as child of the new form
 
@@ -360,6 +361,7 @@ feat(editor-shell): add Form dropdown to Toolbar
 ### Task 6: PropertiesPanel — Form Field Section
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/PropertiesPanel.tsx`
 - Modify: `apps/editor-shell/src/components/properties/componentPropsRegistry.ts`
 
@@ -374,10 +376,7 @@ Add to `sc:button` entry:
 - [ ] **Step 2: Define FORM_FIELD_TYPES constant**
 
 ```typescript
-const FORM_FIELD_TYPES = new Set([
-  'sc:input', 'sc:textarea', 'sc:checkbox', 'sc:switch',
-  'sc:select', 'sc:radio-group', 'sc:slider',
-])
+const FORM_FIELD_TYPES = new Set(["sc:input", "sc:textarea", "sc:checkbox", "sc:switch", "sc:select", "sc:radio-group", "sc:slider"])
 ```
 
 - [ ] **Step 3: Add Form Field toggle section to PropertiesPanel**
@@ -404,13 +403,13 @@ Each sub-field: calls `documentStore.updateFormField(id, { ...current, [key]: va
 
 ```typescript
 const VALIDATION_FIELDS: Record<string, string[]> = {
-  'sc:input': ['required', 'min', 'max', 'pattern', 'message'],
-  'sc:textarea': ['required', 'min', 'max', 'pattern', 'message'],
-  'sc:checkbox': ['required', 'message'],
-  'sc:switch': ['required', 'message'],
-  'sc:select': ['required', 'message'],
-  'sc:radio-group': ['required', 'message'],
-  'sc:slider': ['min', 'max', 'message'],
+  "sc:input": ["required", "min", "max", "pattern", "message"],
+  "sc:textarea": ["required", "min", "max", "pattern", "message"],
+  "sc:checkbox": ["required", "message"],
+  "sc:switch": ["required", "message"],
+  "sc:select": ["required", "message"],
+  "sc:radio-group": ["required", "message"],
+  "sc:slider": ["min", "max", "message"],
 }
 ```
 
@@ -442,6 +441,7 @@ feat(editor-shell): add Form Field section to PropertiesPanel
 ### Task 7: ExportModal — Form Code Tab
 
 **Files:**
+
 - Create: `packages/editor-core/src/export/formCodeExport.ts`
 - Modify: `packages/editor-core/src/export/index.ts`
 - Modify: `apps/editor-shell/src/components/ExportModal.tsx`
@@ -451,41 +451,42 @@ feat(editor-shell): add Form Field section to PropertiesPanel
 This generates complete react-hook-form + zod code from form elements.
 
 ```typescript
-import type { EditorElement, FormFieldConfig } from '../types'
+import type { EditorElement, FormFieldConfig } from "../types"
 
 interface FormInfo {
   formElement: EditorElement
   fields: Array<{ element: EditorElement; formField: FormFieldConfig }>
 }
 
-export function exportToFormCode(
-  elements: Map<string, EditorElement>,
-  rootId: string
-): string {
+export function exportToFormCode(elements: Map<string, EditorElement>, rootId: string): string {
   const forms = collectForms(elements, rootId)
-  if (forms.length === 0) return '// No form elements found'
-  return forms.map(f => generateFormCode(f)).join('\n\n')
+  if (forms.length === 0) return "// No form elements found"
+  return forms.map((f) => generateFormCode(f)).join("\n\n")
 }
 ```
 
 Core logic:
+
 - `collectForms()`: Walk tree, find `form` type elements, collect their formField descendants
 - `generateFormCode(form)`: Generate imports + zod schema + useForm + JSX
 - `generateZodField(formField, elementType)`: Map ValidationRule to zod chain
 - `generateFieldBinding(element, formField)`: Map component type to field render pattern
 
 **Zod generation per type:**
+
 - Input/Textarea → `z.string()` + validation chain
 - Checkbox/Switch → `z.boolean()` + optional refine
 - Select/RadioGroup → `z.string()` + optional min(1)
 - Slider → `z.number()` + optional min/max
 
 **Pattern preset handling:**
+
 - `pattern: 'email'` → `.email("이메일 형식이 아닙니다")`
 - `pattern: 'url'` → `.url("URL 형식이 아닙니다")`
 - custom string → `.regex(new RegExp("..."), "...")`
 
 **Field binding per component:**
+
 - Input: `<Input {...field} placeholder="..." />`
 - Textarea: `<Textarea {...field} />`
 - Checkbox: `<Checkbox checked={field.value} onCheckedChange={field.onChange} />`
@@ -501,7 +502,7 @@ Core logic:
 Add to `packages/editor-core/src/export/index.ts`:
 
 ```typescript
-export { exportToFormCode } from './formCodeExport'
+export { exportToFormCode } from "./formCodeExport"
 ```
 
 - [ ] **Step 3: Add Form Code tab to ExportModal**
@@ -509,7 +510,7 @@ export { exportToFormCode } from './formCodeExport'
 Extend format type:
 
 ```typescript
-type ExportFormat = 'html' | 'jsx' | 'json' | 'form'
+type ExportFormat = "html" | "jsx" | "json" | "form"
 ```
 
 Add tab button (only visible when document contains form elements):
@@ -539,6 +540,7 @@ feat(editor): add Form Code export with react-hook-form + zod generation
 ### Task 8: Canvas — Form Element Rendering
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/componentRegistry.tsx`
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 
@@ -555,6 +557,7 @@ The `form` type renders as a `<form>` tag in ElementRenderer, not in the registr
 - [ ] **Step 2: Update ElementRenderer for form type**
 
 In ElementRenderer, when element.type is 'form':
+
 - Edit mode: render as `<div>` (normal container behavior)
 - Interact mode: render as `<form>` with `onSubmit` handler that calls the form runtime
 
@@ -580,6 +583,7 @@ feat(editor-canvas): render form element as <form> tag in Interact mode
 ### Task 9: Canvas — Form Runtime Hook
 
 **Files:**
+
 - Create: `apps/editor-canvas/src/hooks/useFormRuntime.ts`
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 - Modify: `apps/editor-canvas/src/components/componentRegistry.tsx`
@@ -587,9 +591,9 @@ feat(editor-canvas): render form element as <form> tag in Interact mode
 - [ ] **Step 1: Create useFormRuntime hook**
 
 ```typescript
-import { useState, useCallback } from 'react'
-import type { EditorElement, FormFieldConfig, ValidationRule } from '@devom/editor-core'
-import { validateField } from '@devom/editor-core'
+import { useState, useCallback } from "react"
+import type { EditorElement, FormFieldConfig, ValidationRule } from "@devom/editor-core"
+import { validateField } from "@devom/editor-core"
 
 interface FormRuntime {
   values: Record<string, unknown>
@@ -599,15 +603,11 @@ interface FormRuntime {
   handleReset: () => void
 }
 
-export function useFormRuntime(
-  formId: string,
-  fields: Array<{ elementId: string; formField: FormFieldConfig }>,
-  enabled: boolean
-): FormRuntime {
+export function useFormRuntime(formId: string, fields: Array<{ elementId: string; formField: FormFieldConfig }>, enabled: boolean): FormRuntime {
   const buildDefaults = useCallback(() => {
     const defaults: Record<string, unknown> = {}
     for (const f of fields) {
-      defaults[f.formField.name] = f.formField.defaultValue ?? ''
+      defaults[f.formField.name] = f.formField.defaultValue ?? ""
     }
     return defaults
   }, [fields])
@@ -616,30 +616,33 @@ export function useFormRuntime(
   const [errors, setErrors] = useState<Record<string, string | null>>({})
 
   const setValue = useCallback((name: string, value: unknown) => {
-    setValues(prev => ({ ...prev, [name]: value }))
-    setErrors(prev => ({ ...prev, [name]: null })) // clear error on input
+    setValues((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({ ...prev, [name]: null })) // clear error on input
   }, [])
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault()
-    const newErrors: Record<string, string | null> = {}
-    let hasError = false
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      const newErrors: Record<string, string | null> = {}
+      let hasError = false
 
-    for (const f of fields) {
-      if (f.formField.validation) {
-        const error = validateField(values[f.formField.name], f.formField.validation)
-        newErrors[f.formField.name] = error
-        if (error) hasError = true
+      for (const f of fields) {
+        if (f.formField.validation) {
+          const error = validateField(values[f.formField.name], f.formField.validation)
+          newErrors[f.formField.name] = error
+          if (error) hasError = true
+        }
       }
-    }
 
-    setErrors(newErrors)
+      setErrors(newErrors)
 
-    if (!hasError) {
-      // Toast with result
-      showFormToast(values)
-    }
-  }, [fields, values])
+      if (!hasError) {
+        // Toast with result
+        showFormToast(values)
+      }
+    },
+    [fields, values]
+  )
 
   const handleReset = useCallback(() => {
     setValues(buildDefaults())
@@ -651,7 +654,7 @@ export function useFormRuntime(
 
 function showFormToast(values: Record<string, unknown>) {
   // Simple toast overlay — positioned at bottom-center of canvas
-  const toast = document.createElement('div')
+  const toast = document.createElement("div")
   toast.style.cssText = `
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     background: #18181b; color: #fafafa; padding: 12px 20px; border-radius: 8px;
@@ -668,6 +671,7 @@ function showFormToast(values: Record<string, unknown>) {
 - [ ] **Step 2: Integrate useFormRuntime into ElementRenderer**
 
 For elements inside a form container in Interact mode:
+
 - Pass `formRuntime.values[name]` as controlled value
 - Pass `formRuntime.setValue` as onChange
 - Pass `formRuntime.errors[name]` for error display
@@ -676,7 +680,7 @@ This requires threading form context down. Use React Context:
 
 ```typescript
 // FormRuntimeContext.ts
-import { createContext, useContext } from 'react'
+import { createContext, useContext } from "react"
 
 interface FormRuntimeContextValue {
   values: Record<string, unknown>
@@ -722,7 +726,7 @@ Update getElementContent signature:
 export function getElementContent(
   type: string,
   props: Record<string, unknown>,
-  editorMode: 'edit' | 'interact',
+  editorMode: "edit" | "interact",
   formContext?: { value: unknown; error: string | null; onChange: (v: unknown) => void }
 ): React.ReactNode
 ```
@@ -788,6 +792,7 @@ feat(editor-canvas): add form runtime with validation, toast, and error display
 ### Task 10: Shell Message Handling
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/App.tsx` (or wherever Shell handles Canvas messages)
 
 - [ ] **Step 1: Handle FORM_SUBMIT_RESULT message**
@@ -842,7 +847,7 @@ feat(editor-shell): handle FORM_SUBMIT_RESULT message
 
 - [ ] **Step 5: Manual test — Edge cases**
 
-1. Duplicate form field (Cmd+D) → name gets _copy suffix
+1. Duplicate form field (Cmd+D) → name gets \_copy suffix
 2. Delete form field → no errors
 3. Move field outside form → formField retained but not included in validation
 4. Multiple forms → independent state, separate export functions

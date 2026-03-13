@@ -267,12 +267,26 @@ export const App = observer(function App() {
                 e.preventDefault()
                 setIsDndOver(false)
                 setIsDndActive(false)
-                const elementType = e.dataTransfer.getData("application/devom-element")
-                if (!elementType) return
+                const rawData = e.dataTransfer.getData("application/devom-element")
+                if (!rawData) return
+
+                // Parse drag data - could be plain string or JSON with metadata
+                let elementType: string
+                let extraProps: Record<string, unknown> | undefined
+                try {
+                  const parsed = JSON.parse(rawData)
+                  elementType = parsed.type
+                  const { type: _, ...rest } = parsed
+                  extraProps = Object.keys(rest).length > 0 ? rest : undefined
+                } catch {
+                  // Plain string (backward compatible)
+                  elementType = rawData
+                }
+
                 const rect = e.currentTarget.getBoundingClientRect()
                 const clientX = e.clientX - rect.left
                 const clientY = e.clientY - rect.top
-                bridge.send({ type: "DND_DROP", payload: { elementType, clientX, clientY } })
+                bridge.send({ type: "DND_DROP", payload: { elementType, clientX, clientY, extraProps } })
               }}
             />
           )}

@@ -291,7 +291,7 @@ export function useShellMessages({
         case "DND_CREATE_ELEMENT": {
           const elType = msg.payload.elementType as ElementType
           historyStore.pushSnapshot()
-          const id = documentStore.addElement(elType)
+          const id = documentStore.addElement(elType, undefined, msg.payload.extraProps)
           if (id) {
             if (documentStore.canvasMode === "canvas") {
               documentStore.updateStyle(id, { left: msg.payload.x, top: msg.payload.y })

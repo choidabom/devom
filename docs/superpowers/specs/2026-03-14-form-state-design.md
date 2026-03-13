@@ -12,14 +12,14 @@
 
 ## Decisions
 
-| 항목 | 결정 |
-|---|---|
-| 시나리오 | 에디터 프로토타이핑 + export 둘 다 |
-| 범위 | 단일 폼 (다중 폼은 독립 동작, 폼 간 연동 없음) |
-| Submit 동작 | Canvas에 toast/alert로 결과 JSON 표시 |
-| Validation 에러 | 필드 하단 에러 메시지 (FormMessage 스타일) |
-| 대상 컴포넌트 | 8개 (Input, Textarea, Checkbox, Switch, Select, RadioGroup, Slider, Button) |
-| 접근 방식 | Element-level formField 속성 (접근 A) |
+| 항목            | 결정                                                                        |
+| --------------- | --------------------------------------------------------------------------- |
+| 시나리오        | 에디터 프로토타이핑 + export 둘 다                                          |
+| 범위            | 단일 폼 (다중 폼은 독립 동작, 폼 간 연동 없음)                              |
+| Submit 동작     | Canvas에 toast/alert로 결과 JSON 표시                                       |
+| Validation 에러 | 필드 하단 에러 메시지 (FormMessage 스타일)                                  |
+| 대상 컴포넌트   | 8개 (Input, Textarea, Checkbox, Switch, Select, RadioGroup, Slider, Button) |
+| 접근 방식       | Element-level formField 속성 (접근 A)                                       |
 
 ---
 
@@ -29,17 +29,17 @@
 
 ```typescript
 interface FormFieldConfig {
-  name: string                    // 폼 필드명 ("email", "password")
-  defaultValue?: unknown          // 초기값
-  validation?: ValidationRule     // 검증 규칙
+  name: string // 폼 필드명 ("email", "password")
+  defaultValue?: unknown // 초기값
+  validation?: ValidationRule // 검증 규칙
 }
 
 interface ValidationRule {
-  required?: boolean | string     // true 또는 커스텀 에러 메시지
-  min?: number                    // 최소값/최소길이
-  max?: number                    // 최대값/최대길이
-  pattern?: string | 'email' | 'url'  // 프리셋 키워드 또는 커스텀 정규식
-  message?: string                // 기본 에러 메시지
+  required?: boolean | string // true 또는 커스텀 에러 메시지
+  min?: number // 최소값/최소길이
+  max?: number // 최대값/최대길이
+  pattern?: string | "email" | "url" // 프리셋 키워드 또는 커스텀 정규식
+  message?: string // 기본 에러 메시지
 }
 ```
 
@@ -48,7 +48,7 @@ interface ValidationRule {
 ```typescript
 interface EditorElement {
   // ...기존 필드
-  formField?: FormFieldConfig     // 폼 필드인 경우에만 존재
+  formField?: FormFieldConfig // 폼 필드인 경우에만 존재
 }
 ```
 
@@ -59,6 +59,7 @@ type ElementType = ... | 'form'
 ```
 
 `form` 타입 요소:
+
 - 자식으로 폼 필드 컴포넌트를 가짐
 - `layoutMode: 'flex'`로 기본 생성 (세로 정렬)
 - Canvas에서 `<form>` 태그로 렌더링
@@ -164,11 +165,11 @@ Canvas 내부에서 간단한 if 로직으로 실행 (zod 런타임 아님 — C
 
 ```typescript
 function validateField(value: unknown, rule: ValidationRule): string | null {
-  if (rule.required && !value) return typeof rule.required === 'string' ? rule.required : (rule.message || "필수 항목입니다")
-  if (rule.min != null && typeof value === 'string' && value.length < rule.min) return `최소 ${rule.min}자`
-  if (rule.min != null && typeof value === 'number' && value < rule.min) return `최소 ${rule.min}`
-  if (rule.max != null && typeof value === 'string' && value.length > rule.max) return `최대 ${rule.max}자`
-  if (rule.max != null && typeof value === 'number' && value > rule.max) return `최대 ${rule.max}`
+  if (rule.required && !value) return typeof rule.required === "string" ? rule.required : rule.message || "필수 항목입니다"
+  if (rule.min != null && typeof value === "string" && value.length < rule.min) return `최소 ${rule.min}자`
+  if (rule.min != null && typeof value === "number" && value < rule.min) return `최소 ${rule.min}`
+  if (rule.max != null && typeof value === "string" && value.length > rule.max) return `최대 ${rule.max}자`
+  if (rule.max != null && typeof value === "number" && value > rule.max) return `최대 ${rule.max}`
   if (rule.pattern && !new RegExp(rule.pattern).test(String(value))) return rule.message || "형식이 올바르지 않습니다"
   return null
 }
@@ -179,11 +180,9 @@ function validateField(value: unknown, rule: ValidationRule): string | null {
 Interaction 모드에서 formField가 있는 컴포넌트 아래에 에러 텍스트 렌더링:
 
 ```tsx
-{formError && (
-  <p style={{ color: 'hsl(0 84% 60%)', fontSize: 12, marginTop: 4 }}>
-    {formError}
-  </p>
-)}
+{
+  formError && <p style={{ color: "hsl(0 84% 60%)", fontSize: 12, marginTop: 4 }}>{formError}</p>
+}
 ```
 
 ---
@@ -206,14 +205,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
-} from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 const formSchema = z.object({
   email: z.string().min(1, "필수 항목입니다").email("이메일 형식이 아닙니다"),
   password: z.string().min(8, "최소 8자"),
-  agree: z.boolean().refine(v => v, "동의가 필요합니다"),
+  agree: z.boolean().refine((v) => v, "동의가 필요합니다"),
 })
 
 export function LoginForm() {
@@ -251,27 +248,27 @@ export function LoginForm() {
 
 ### 4.3 ValidationRule → zod Conversion
 
-| ValidationRule | zod 코드 |
-|---|---|
-| `required: true` | `.min(1, "필수")` (string) / `.refine(v => v, "필수")` (boolean) |
-| `required: "커스텀"` | `.min(1, "커스텀")` |
-| `min: 3` | `.min(3)` (string: 길이, number: 값) |
-| `max: 100` | `.max(100)` |
-| `pattern: "^\\S+@"` | `.regex(/^\S+@/, "형식 오류")` |
-| `pattern: "email"` | `.email("이메일 형식이 아닙니다")` |
-| `pattern: "url"` | `.url("URL 형식이 아닙니다")` |
+| ValidationRule       | zod 코드                                                         |
+| -------------------- | ---------------------------------------------------------------- |
+| `required: true`     | `.min(1, "필수")` (string) / `.refine(v => v, "필수")` (boolean) |
+| `required: "커스텀"` | `.min(1, "커스텀")`                                              |
+| `min: 3`             | `.min(3)` (string: 길이, number: 값)                             |
+| `max: 100`           | `.max(100)`                                                      |
+| `pattern: "^\\S+@"`  | `.regex(/^\S+@/, "형식 오류")`                                   |
+| `pattern: "email"`   | `.email("이메일 형식이 아닙니다")`                               |
+| `pattern: "url"`     | `.url("URL 형식이 아닙니다")`                                    |
 
 ### 4.4 Component Field Binding
 
-| 컴포넌트 | zod base type | 바인딩 패턴 |
-|---|---|---|
-| Input | `z.string()` | `{...field}` |
-| Textarea | `z.string()` | `{...field}` |
-| Checkbox | `z.boolean()` | `checked={field.value} onCheckedChange={field.onChange}` |
-| Switch | `z.boolean()` | `checked={field.value} onCheckedChange={field.onChange}` |
-| Select | `z.string()` | `onValueChange={field.onChange} value={field.value}` |
-| RadioGroup | `z.string()` | `onValueChange={field.onChange} value={field.value}` |
-| Slider | `z.number()` | `value={[field.value]} onValueChange={v => field.onChange(v[0])}` |
+| 컴포넌트   | zod base type | 바인딩 패턴                                                       |
+| ---------- | ------------- | ----------------------------------------------------------------- |
+| Input      | `z.string()`  | `{...field}`                                                      |
+| Textarea   | `z.string()`  | `{...field}`                                                      |
+| Checkbox   | `z.boolean()` | `checked={field.value} onCheckedChange={field.onChange}`          |
+| Switch     | `z.boolean()` | `checked={field.value} onCheckedChange={field.onChange}`          |
+| Select     | `z.string()`  | `onValueChange={field.onChange} value={field.value}`              |
+| RadioGroup | `z.string()`  | `onValueChange={field.onChange} value={field.value}`              |
+| Slider     | `z.number()`  | `value={[field.value]} onValueChange={v => field.onChange(v[0])}` |
 
 ### 4.5 Existing Exports Unchanged
 
@@ -292,6 +289,7 @@ HTML/JSX/JSON 탭은 현재 동작 유지. Form Code는 별도 탭.
 ```
 
 `FormFieldRuntime`:
+
 ```typescript
 interface FormFieldRuntime {
   elementId: string
@@ -315,6 +313,7 @@ interface FormFieldRuntime {
 ```
 
 Form 드롭다운 항목:
+
 - Form Container
 - ── Fields ──
 - Input
@@ -385,8 +384,8 @@ Form 드롭다운 항목:
 
 ## 9. Affected Packages
 
-| 패키지 | 변경 내용 |
-|---|---|
+| 패키지                 | 변경 내용                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/editor-core` | types.ts (FormFieldConfig, ValidationRule, form ElementType), DocumentStore, export 모듈 (formCodeExport.ts 추가), protocol 메시지 |
-| `apps/editor-shell` | PropertiesPanel (Form Field 섹션), Toolbar (Form 드롭다운), ExportModal (Form Code 탭) |
-| `apps/editor-canvas` | ElementRenderer (form 렌더링), form 런타임 로직 (formState, validation, toast, 에러 메시지) |
+| `apps/editor-shell`    | PropertiesPanel (Form Field 섹션), Toolbar (Form 드롭다운), ExportModal (Form Code 탭)                                             |
+| `apps/editor-canvas`   | ElementRenderer (form 렌더링), form 런타임 로직 (formState, validation, toast, 에러 메시지)                                        |

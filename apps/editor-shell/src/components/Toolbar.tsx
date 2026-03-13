@@ -21,6 +21,7 @@ import {
   LayoutTemplate,
   FileDown,
   Check,
+  ClipboardList,
 } from "lucide-react"
 import type { ElementType, SectionRole } from "@devom/editor-core"
 import { TEMPLATES } from "@devom/editor-core"
@@ -74,6 +75,18 @@ const SHADCN_COMPONENTS: { type: ElementType; label: string; category: string }[
   { type: "sc:table", label: "Table", category: "Data" },
 ]
 
+const FORM_ITEMS = [
+  { type: "form" as const, label: "Form Container", category: "Container" },
+  { type: "sc:input" as const, label: "Input", category: "Fields" },
+  { type: "sc:textarea" as const, label: "Textarea", category: "Fields" },
+  { type: "sc:checkbox" as const, label: "Checkbox", category: "Fields" },
+  { type: "sc:switch" as const, label: "Switch", category: "Fields" },
+  { type: "sc:select" as const, label: "Select", category: "Fields" },
+  { type: "sc:radio-group" as const, label: "RadioGroup", category: "Fields" },
+  { type: "sc:slider" as const, label: "Slider", category: "Fields" },
+  { type: "sc:button" as const, label: "Submit Button", category: "Actions" },
+]
+
 const SECTION_PRESETS: { role: SectionRole; label: string }[] = [
   { role: "section", label: "Empty Section" },
   { role: "header", label: "Header" },
@@ -105,9 +118,11 @@ export function Toolbar({
 }: ToolbarProps) {
   const currentTemplateName = TEMPLATES.find((t) => t.id === currentTemplateId)?.name
   const [showShadcn, setShowShadcn] = useState(false)
+  const [showForm, setShowForm] = useState(false)
   const [showSections, setShowSections] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const dropRef = useRef<HTMLDivElement>(null)
+  const formDropRef = useRef<HTMLDivElement>(null)
   const sectionsDropRef = useRef<HTMLDivElement>(null)
   const templatesDropRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -144,6 +159,15 @@ export function Toolbar({
     document.addEventListener("mousedown", onClick)
     return () => document.removeEventListener("mousedown", onClick)
   }, [showShadcn])
+
+  useEffect(() => {
+    if (!showForm) return
+    const onClick = (e: MouseEvent) => {
+      if (formDropRef.current && !formDropRef.current.contains(e.target as Node)) setShowForm(false)
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [showForm])
 
   useEffect(() => {
     if (!showSections) return
@@ -251,6 +275,93 @@ export function Toolbar({
                           {c.label}
                         </button>
                       ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Form dropdown */}
+        <div ref={formDropRef} style={{ position: "relative" }}>
+          <ToolBtn icon={<ClipboardList size={S} />} title="Form" onClick={() => setShowForm((v) => !v)} active={showForm} />
+          {showForm && (
+            <div
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                marginTop: 8,
+                padding: 8,
+                borderRadius: 12,
+                background: T.panel,
+                border: `1px solid ${T.panelBorder}`,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                zIndex: 1000,
+                width: 280,
+                maxHeight: 400,
+                overflowY: "auto",
+              }}
+            >
+              {["Container", "Fields", "Actions"].map((cat) => {
+                const items = FORM_ITEMS.filter((c) => c.category === cat)
+                if (items.length === 0) return null
+                return (
+                  <div key={cat}>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: T.textMuted, padding: "6px 8px 2px", textTransform: "uppercase", letterSpacing: 0.5 }}>{cat}</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 2, padding: "2px 0 6px" }}>
+                      {items.map((c) => {
+                        // Prepare metadata for form-specific items
+                        const isField = cat === "Fields"
+                        const isSubmitButton = c.type === "sc:button" && cat === "Actions"
+
+                        // Encode extra metadata in drag data
+                        const dragData = JSON.stringify({
+                          type: c.type,
+                          formField: isField ? { name: `field_${Date.now()}` } : undefined,
+                          formRole: isSubmitButton ? "submit" : undefined,
+                        })
+
+                        return (
+                          <button
+                            key={c.type}
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData("application/devom-element", dragData)
+                              e.dataTransfer.effectAllowed = "copy"
+                              setShowForm(false)
+                            }}
+                            onClick={() => {
+                              // Create element with form metadata
+                              const props: Record<string, unknown> = {}
+                              if (isField) {
+                                props.formField = { name: `field_${Date.now()}` }
+                              }
+                              if (isSubmitButton) {
+                                props.formRole = "submit"
+                              }
+                              onAdd(c.type, props)
+                              setShowForm(false)
+                            }}
+                            style={{
+                              padding: "4px 10px",
+                              fontSize: 12,
+                              borderRadius: 6,
+                              border: `1px solid ${T.panelBorder}`,
+                              background: "transparent",
+                              color: T.text,
+                              cursor: "grab",
+                              transition: "background 0.15s",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = T.hover)}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                          >
+                            {c.label}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )
