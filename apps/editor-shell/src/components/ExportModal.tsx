@@ -1,7 +1,14 @@
 import { useState, useCallback, useMemo, useRef } from "react"
 import { observer } from "mobx-react-lite"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter"
+import tsx from "react-syntax-highlighter/dist/esm/languages/prism/tsx"
+import html from "react-syntax-highlighter/dist/esm/languages/prism/markup"
+import json from "react-syntax-highlighter/dist/esm/languages/prism/json"
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
+
+SyntaxHighlighter.registerLanguage("tsx", tsx)
+SyntaxHighlighter.registerLanguage("html", html)
+SyntaxHighlighter.registerLanguage("json", json)
 import html2canvas from "html2canvas"
 import { jsPDF } from "jspdf"
 import { exportToJSON, exportToJSX, exportToHTML, convertToPageLayout } from "@devom/editor-core"
