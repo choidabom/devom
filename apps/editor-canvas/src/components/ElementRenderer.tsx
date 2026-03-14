@@ -6,6 +6,7 @@ import { getContainerStyles, getChildSizingStyles, getSectionStyles, getSectionC
 import { calcSnap, type SnapLine, type Bounds } from "../utils/snap"
 import { findDropTarget, calcInsertionIndicator } from "../utils/autoLayoutDrag"
 import { SectionInsertButton } from "./SectionInsertButton"
+import { FormFieldInsertButton } from "./FormFieldInsertButton"
 import { getElementContent } from "./componentRegistry"
 import { useFormRuntime } from "../hooks/useFormRuntime"
 import { FormRuntimeContext, useFormRuntimeContext } from "../contexts/FormRuntimeContext"
@@ -265,6 +266,12 @@ export const ElementRenderer = observer(function ElementRenderer({
     bridge.send({ type: "INSERT_SECTION_REQUEST", payload: { preset: role, index } })
   }
 
+  const handleInsertFormField = (formId: string, elementType: string) => {
+    bridge.send({ type: "ADD_FORM_FIELD_REQUEST", payload: { formId, elementType } })
+  }
+
+  const isFormEdit = element.type === "form" && editorMode === "edit"
+
   // Determine if this is a form in interact mode
   const isFormInteract = element.type === "form" && editorMode === "interact"
 
@@ -520,6 +527,29 @@ export const ElementRenderer = observer(function ElementRenderer({
               <SectionInsertButton index={i + 1} onInsert={handleInsertSection} />
             </React.Fragment>
           ))}
+        </>
+      )
+    }
+    if (isFormEdit) {
+      return (
+        <>
+          {element.children.map((childId) => (
+            <ElementRenderer
+              key={childId}
+              elementId={childId}
+              selectedIds={selectedIds}
+              onSelect={onSelect}
+              onDragChange={onDragChange}
+              onSnapLines={onSnapLines}
+              onInsertionIndicator={onInsertionIndicator}
+              onDropHighlight={onDropHighlight}
+              documentStore={documentStore}
+              bridge={bridge}
+              editorMode={editorMode}
+              zoom={zoom}
+            />
+          ))}
+          <FormFieldInsertButton formId={element.id} onInsert={handleInsertFormField} />
         </>
       )
     }

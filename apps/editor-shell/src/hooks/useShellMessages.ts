@@ -350,6 +350,19 @@ export function useShellMessages({
         case "FORM_SUBMIT_RESULT":
           console.log("[Form Submit]", msg.payload.formId, msg.payload.values)
           break
+        case "ADD_FORM_FIELD_REQUEST": {
+          historyStore.pushSnapshot()
+          const fieldType = msg.payload.elementType as ElementType
+          const isSubmit = fieldType === "sc:button"
+          const extraProps: Record<string, unknown> = isSubmit ? { formRole: "submit" } : { formField: { name: `field_${Date.now()}` } }
+          const fieldId = documentStore.addElement(fieldType, msg.payload.formId, extraProps)
+          if (fieldId) {
+            selectionStore.select(fieldId)
+            syncToCanvas()
+            bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [fieldId] } })
+          }
+          break
+        }
       }
     })
 

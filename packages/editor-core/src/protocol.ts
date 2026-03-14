@@ -53,6 +53,7 @@ export type CanvasToShellMessage =
   | { type: "DND_CREATE_ELEMENT"; payload: { elementType: string; x: number; y: number; extraProps?: Record<string, unknown> } }
   | { type: "ZOOM_CHANGED"; payload: { zoom: number } }
   | { type: "FORM_SUBMIT_RESULT"; formId: string; values: Record<string, unknown> }
+  | { type: "ADD_FORM_FIELD_REQUEST"; payload: { formId: string; elementType: string } }
 
 export type EditorMessage = ShellToCanvasMessage | CanvasToShellMessage
 
