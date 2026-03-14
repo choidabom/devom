@@ -66,7 +66,7 @@ export const App = observer(function App() {
 
   const { handleCopy, handleCut, handlePaste, handleDuplicate, handleDelete } = useClipboard(syncToCanvas)
 
-  const { handleAddElement, handleAddSection, handleLoadTemplate, handleAlign, handleToggleCanvasMode, handleToggleMode } = useShellMessages({
+  const { handleAddElement, handleAddSection, handleLoadTemplate, handleAddFormPreset, handleAlign, handleToggleCanvasMode, handleToggleMode } = useShellMessages({
     editorMode,
     setEditorMode,
     setCanvasMode,
@@ -226,6 +226,7 @@ export const App = observer(function App() {
             onToggleCanvasMode={handleToggleCanvasMode}
             onAddSection={handleAddSection}
             onLoadTemplate={handleLoadTemplate}
+            onAddFormPreset={handleAddFormPreset}
             currentTemplateId={documentStore.currentTemplateId}
           />
         </div>

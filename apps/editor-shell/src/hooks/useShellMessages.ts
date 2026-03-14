@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from "react"
-import type { EditorMessage, ElementType, SectionRole } from "@devom/editor-core"
+import type { EditorMessage, ElementType, FormPresetId, SectionRole } from "@devom/editor-core"
+import { buildFormPreset } from "@devom/editor-core"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 
 interface UseShellMessagesOptions {
@@ -90,6 +91,19 @@ export function useShellMessages({
     selectionStore.clear()
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }, [])
+
+  const handleAddFormPreset = useCallback(
+    (presetId: FormPresetId) => {
+      historyStore.pushSnapshot()
+      const formId = buildFormPreset(documentStore, presetId)
+      if (formId) {
+        selectionStore.select(formId)
+        syncToCanvas()
+        bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [formId] } })
+      }
+    },
+    [syncToCanvas]
+  )
 
   const handleAlign = useCallback(
     (type: import("../components/Toolbar").AlignType) => {
@@ -374,6 +388,7 @@ export function useShellMessages({
     handleAddElement,
     handleAddSection,
     handleLoadTemplate,
+    handleAddFormPreset,
     handleAlign,
     handleToggleCanvasMode,
     handleToggleMode,

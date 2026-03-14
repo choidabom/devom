@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid"
 import type { DocumentStore } from "../../stores/DocumentStore"
-import { DEFAULT_ELEMENT_STYLE, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type EditorElement, type ElementType, type SizingProps } from "../../types"
+import { DEFAULT_ELEMENT_STYLE, DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, type EditorElement, type ElementType, type FormFieldConfig, type SizingProps } from "../../types"
 import { getDefaultProps } from "../../utils/getDefaultProps"
 
 export interface AddElementOverrides {
@@ -10,6 +10,7 @@ export interface AddElementOverrides {
   layoutMode?: "none" | "flex"
   layoutProps?: Partial<EditorElement["layoutProps"]>
   sizing?: Partial<SizingProps>
+  formField?: FormFieldConfig
 }
 
 export function createTemplateHelper(store: DocumentStore) {
@@ -34,6 +35,7 @@ export function createTemplateHelper(store: DocumentStore) {
       layoutProps: { ...DEFAULT_LAYOUT_PROPS, ...overrides.layoutProps },
       sizing: { ...DEFAULT_SIZING, ...overrides.sizing },
       canvasPosition: null,
+      ...(overrides.formField ? { formField: overrides.formField } : {}),
     })
     parent.children.push(id)
     return id

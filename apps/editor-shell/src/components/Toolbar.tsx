@@ -23,8 +23,8 @@ import {
   Check,
   ClipboardList,
 } from "lucide-react"
-import type { ElementType, SectionRole } from "@devom/editor-core"
-import { TEMPLATES } from "@devom/editor-core"
+import type { ElementType, FormPresetId, SectionRole } from "@devom/editor-core"
+import { TEMPLATES, FORM_PRESETS } from "@devom/editor-core"
 import { T } from "../theme"
 
 export type AlignType = "left" | "center-h" | "right" | "top" | "center-v" | "bottom" | "distribute-h" | "distribute-v"
@@ -47,6 +47,7 @@ interface ToolbarProps {
   onToggleCanvasMode: () => void
   onAddSection?: (role: SectionRole) => void
   onLoadTemplate?: (templateId: string) => void
+  onAddFormPreset?: (presetId: FormPresetId) => void
   currentTemplateId?: string | null
 }
 
@@ -114,6 +115,7 @@ export function Toolbar({
   onToggleCanvasMode,
   onAddSection,
   onLoadTemplate,
+  onAddFormPreset,
   currentTemplateId,
 }: ToolbarProps) {
   const currentTemplateName = TEMPLATES.find((t) => t.id === currentTemplateId)?.name
@@ -305,6 +307,38 @@ export function Toolbar({
                 overflowY: "auto",
               }}
             >
+              {/* Presets */}
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: T.textMuted, padding: "6px 8px 2px", textTransform: "uppercase", letterSpacing: 0.5 }}>Presets</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "2px 0 6px" }}>
+                  {FORM_PRESETS.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        onAddFormPreset?.(p.id)
+                        setShowForm(false)
+                      }}
+                      style={{
+                        padding: "6px 10px",
+                        fontSize: 12,
+                        borderRadius: 6,
+                        border: `1px solid ${T.panelBorder}`,
+                        background: "transparent",
+                        color: T.text,
+                        cursor: "pointer",
+                        transition: "background 0.15s",
+                        textAlign: "left",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = T.hover)}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <span style={{ fontWeight: 500 }}>{p.label}</span>
+                      <span style={{ color: T.textMuted, marginLeft: 6, fontSize: 11 }}>{p.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ borderTop: `1px solid ${T.border}`, margin: "2px 0" }} />
               {["Container", "Fields", "Actions"].map((cat) => {
                 const items = FORM_ITEMS.filter((c) => c.category === cat)
                 if (items.length === 0) return null
