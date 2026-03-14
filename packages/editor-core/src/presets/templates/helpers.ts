@@ -11,6 +11,7 @@ export interface AddElementOverrides {
   layoutProps?: Partial<EditorElement["layoutProps"]>
   sizing?: Partial<SizingProps>
   formField?: FormFieldConfig
+  formRole?: "submit" | "reset"
 }
 
 export function createTemplateHelper(store: DocumentStore) {
@@ -36,6 +37,7 @@ export function createTemplateHelper(store: DocumentStore) {
       sizing: { ...DEFAULT_SIZING, ...overrides.sizing },
       canvasPosition: null,
       ...(overrides.formField ? { formField: overrides.formField } : {}),
+      ...(overrides.formRole ? { formRole: overrides.formRole } : {}),
     })
     parent.children.push(id)
     return id

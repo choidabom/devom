@@ -63,6 +63,7 @@ export interface EditorElement {
   sectionProps?: SectionProps
   gridProps?: GridProps
   formField?: FormFieldConfig
+  formRole?: "submit" | "reset"
 }
 
 export interface EditorDocument {

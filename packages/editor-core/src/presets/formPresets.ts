@@ -103,7 +103,8 @@ function buildSignupFields(add: ReturnType<typeof createTemplateHelper>, formId:
   add("sc:button", formId, {
     name: "Submit",
     style: { ...rel, width: undefined },
-    props: { label: "Create account", variant: "default", size: "default", formRole: "submit" },
+    props: { label: "Create account", variant: "default", size: "default" },
+    formRole: "submit",
     sizing: fieldSizing,
   })
 }
@@ -163,7 +164,8 @@ function buildContactFields(add: ReturnType<typeof createTemplateHelper>, formId
   add("sc:button", formId, {
     name: "Submit",
     style: { ...rel, width: undefined },
-    props: { label: "Send message", variant: "default", size: "default", formRole: "submit" },
+    props: { label: "Send message", variant: "default", size: "default" },
+    formRole: "submit",
     sizing: fieldSizing,
   })
 }
@@ -223,7 +225,8 @@ function buildFeedbackFields(add: ReturnType<typeof createTemplateHelper>, formI
   add("sc:button", formId, {
     name: "Submit",
     style: { ...rel, width: undefined },
-    props: { label: "Submit feedback", variant: "default", size: "default", formRole: "submit" },
+    props: { label: "Submit feedback", variant: "default", size: "default" },
+    formRole: "submit",
     sizing: fieldSizing,
   })
 }

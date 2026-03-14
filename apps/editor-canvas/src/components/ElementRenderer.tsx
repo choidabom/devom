@@ -467,7 +467,7 @@ export const ElementRenderer = observer(function ElementRenderer({
         }
       : undefined
 
-  const content = getElementContent(element.type, element.props, editorMode, fieldFormContext)
+  const content = getElementContent(element.type, element.props, editorMode, fieldFormContext, element.formRole)
 
   // Render error message for form fields
   const errorMessage =

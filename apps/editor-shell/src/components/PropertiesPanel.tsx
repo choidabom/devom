@@ -86,6 +86,14 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
+  const updateFormRole = (value: string) => {
+    historyStore.pushSnapshot()
+    for (const el of elements) {
+      documentStore.updateFormRole(el.id, value === "none" ? undefined : (value as "submit" | "reset"))
+    }
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
   const inputStyle = {
     width: "100%",
     padding: "5px 8px",
@@ -198,7 +206,12 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
                       onChange={(v) => updateProp(field.key, v)}
                     />
                   )
-                case "select":
+                case "select": {
+                  // formRole is stored as a top-level EditorElement field, not in props
+                  if (field.key === "formRole") {
+                    const formRoleValue = element.formRole ?? "none"
+                    return <PropSelect key={field.key} label={field.label} value={formRoleValue} options={field.options!} onChange={(v) => updateFormRole(v)} />
+                  }
                   return (
                     <PropSelect
                       key={field.key}
@@ -209,6 +222,7 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
                       mixed={sharedProp(field.key, String(field.default ?? "")) === MIXED}
                     />
                   )
+                }
                 case "toggle":
                   return <PropToggleRow key={field.key} label={field.label} value={Boolean(element.props[field.key])} onChange={(v) => updatePropTyped(field.key, v)} />
                 case "number": {

@@ -26,7 +26,7 @@ interface FormContext {
   onChange: (v: unknown) => void
 }
 
-type ContentRenderer = (props: Record<string, unknown>, editorMode: "edit" | "interact", formContext?: FormContext) => React.ReactNode
+type ContentRenderer = (props: Record<string, unknown>, editorMode: "edit" | "interact", formContext?: FormContext, formRole?: "submit" | "reset") => React.ReactNode
 
 const registry: Record<string, ContentRenderer> = {
   text: (props) => String(props.content ?? "Text"),
@@ -63,8 +63,7 @@ const registry: Record<string, ContentRenderer> = {
       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>Video</div>
     ),
 
-  "sc:button": (props, editorMode) => {
-    const formRole = props.formRole as string | undefined
+  "sc:button": (props, editorMode, _formContext, formRole) => {
     const buttonType = editorMode === "interact" && formRole === "submit" ? "submit" : editorMode === "interact" && formRole === "reset" ? "reset" : "button"
     return (
       <Button
@@ -305,7 +304,13 @@ const registry: Record<string, ContentRenderer> = {
   form: () => null, // children rendered by ElementRenderer, form tag wraps them
 }
 
-export function getElementContent(type: string, props: Record<string, unknown>, editorMode: "edit" | "interact", formContext?: FormContext): React.ReactNode {
+export function getElementContent(
+  type: string,
+  props: Record<string, unknown>,
+  editorMode: "edit" | "interact",
+  formContext?: FormContext,
+  formRole?: "submit" | "reset"
+): React.ReactNode {
   const renderer = registry[type]
-  return renderer ? renderer(props, editorMode, formContext) : null
+  return renderer ? renderer(props, editorMode, formContext, formRole) : null
 }

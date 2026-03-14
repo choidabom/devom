@@ -354,8 +354,8 @@ export function Toolbar({
                         // Encode extra metadata in drag data
                         const dragData = JSON.stringify({
                           type: c.type,
-                          formField: isField ? { name: `field_${Date.now()}` } : undefined,
-                          formRole: isSubmitButton ? "submit" : undefined,
+                          ...(isField ? { formField: { name: `field_${Date.now()}` } } : {}),
+                          ...(isSubmitButton ? { formRole: "submit" } : {}),
                         })
 
                         return (
@@ -368,7 +368,6 @@ export function Toolbar({
                               setShowForm(false)
                             }}
                             onClick={() => {
-                              // Create element with form metadata
                               const props: Record<string, unknown> = {}
                               if (isField) {
                                 props.formField = { name: `field_${Date.now()}` }

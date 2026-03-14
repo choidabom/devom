@@ -59,7 +59,7 @@ export function useShellMessages({
 
   function isFormChild(props?: Record<string, unknown>): boolean {
     if (!props) return false
-    return !!props.formField || props.formRole === "submit"
+    return !!props.formField || !!props.formRole
   }
 
   function ensureFormParent(props?: Record<string, unknown>): string | undefined {

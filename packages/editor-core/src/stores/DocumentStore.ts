@@ -107,10 +107,9 @@ export class DocumentStore {
     // Separate formField from props — it's a top-level EditorElement field
     const { formField, formRole, ...restProps } = (initialProps ?? {}) as Record<string, unknown> & {
       formField?: FormFieldConfig
-      formRole?: string
+      formRole?: "submit" | "reset"
     }
     const mergedProps = { ...getDefaultProps(type), ...restProps }
-    if (formRole) mergedProps.formRole = formRole
 
     const element: EditorElement = {
       id,
@@ -127,6 +126,7 @@ export class DocumentStore {
       sizing: { ...DEFAULT_SIZING },
       canvasPosition: null,
       ...(formField ? { formField } : {}),
+      ...(formRole ? { formRole } : {}),
     }
 
     // Page Mode: root children default to flow layout
@@ -238,6 +238,12 @@ export class DocumentStore {
     const element = this.elements.get(id)
     if (!element) return
     element.formField = formField
+  }
+
+  updateFormRole(id: string, formRole: "submit" | "reset" | undefined) {
+    const element = this.elements.get(id)
+    if (!element) return
+    element.formRole = formRole
   }
 
   // --- Layout ---
