@@ -525,7 +525,7 @@ function SegmentedControl<T extends string>({
   )
 }
 
-function PositionSection({
+const PositionSection = observer(function PositionSection({
   element,
   inAutoLayout,
   updateStyle,
@@ -580,7 +580,7 @@ function PositionSection({
       </div>
     </PropSection>
   )
-}
+})
 
 function ImageSection({ element, updateProp, updateStyle }: { element: EditorElement; updateProp: (k: string, v: string) => void; updateStyle: (k: string, v: string) => void }) {
   const src = String(element.props.src ?? "")
