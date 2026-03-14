@@ -6,7 +6,7 @@ import { T } from "./theme"
 import { Toolbar } from "./components/Toolbar"
 import { LeftPanel } from "./components/LeftPanel"
 import { PropertiesPanel } from "./components/PropertiesPanel"
-import { ExportModal } from "./components/ExportModal"
+import { ExportPanel } from "./components/ExportModal"
 import { ImportJSXModal } from "./components/ImportJSXModal"
 import { LayoutGuide } from "./components/LayoutGuide"
 import { GuidePanel } from "./components/GuidePanel"
@@ -383,7 +383,7 @@ export const App = observer(function App() {
             bottom: 0,
             width: 280,
             padding: "0 8px 8px 8px",
-            transform: showPanels ? "translateX(0)" : "translateX(100%)",
+            transform: showPanels && !showExport ? "translateX(0)" : "translateX(100%)",
             transition: "transform 0.2s ease",
             zIndex: 10,
           }}
@@ -445,9 +445,10 @@ export const App = observer(function App() {
             </button>
           </div>
         )}
-      </div>
 
-      {showExport && <ExportModal onClose={() => setShowExport(false)} />}
+        {/* Code panel — replaces properties when open */}
+        {showExport && <ExportPanel onClose={() => setShowExport(false)} />}
+      </div>
       {showImportModal && (
         <ImportJSXModal
           onImport={handleImportJSX}
