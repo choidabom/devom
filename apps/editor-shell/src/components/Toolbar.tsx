@@ -54,16 +54,16 @@ interface ToolbarProps {
 const S = 15
 
 const SHADCN_COMPONENTS: { type: ElementType; label: string; category: string }[] = [
-  { type: "sc:button", label: "Button", category: "Form" },
-  { type: "sc:input", label: "Input", category: "Form" },
-  { type: "sc:textarea", label: "Textarea", category: "Form" },
-  { type: "sc:checkbox", label: "Checkbox", category: "Form" },
-  { type: "sc:switch", label: "Switch", category: "Form" },
-  { type: "sc:slider", label: "Slider", category: "Form" },
-  { type: "sc:select", label: "Select", category: "Form" },
-  { type: "sc:radio-group", label: "Radio Group", category: "Form" },
-  { type: "sc:toggle", label: "Toggle", category: "Form" },
-  { type: "sc:label", label: "Label", category: "Form" },
+  { type: "sc:button", label: "Button", category: "Input" },
+  { type: "sc:input", label: "Input", category: "Input" },
+  { type: "sc:textarea", label: "Textarea", category: "Input" },
+  { type: "sc:checkbox", label: "Checkbox", category: "Input" },
+  { type: "sc:switch", label: "Switch", category: "Input" },
+  { type: "sc:slider", label: "Slider", category: "Input" },
+  { type: "sc:select", label: "Select", category: "Input" },
+  { type: "sc:radio-group", label: "Radio Group", category: "Input" },
+  { type: "sc:toggle", label: "Toggle", category: "Input" },
+  { type: "sc:label", label: "Label", category: "Input" },
   { type: "sc:card", label: "Card", category: "Display" },
   { type: "sc:badge", label: "Badge", category: "Display" },
   { type: "sc:alert", label: "Alert", category: "Display" },
@@ -241,7 +241,7 @@ export function Toolbar({
                 overflowY: "auto",
               }}
             >
-              {["Form", "Display", "Layout", "Data"].map((cat) => {
+              {["Input", "Display", "Layout", "Data"].map((cat) => {
                 const items = SHADCN_COMPONENTS.filter((c) => c.category === cat)
                 if (items.length === 0) return null
                 return (
