@@ -104,6 +104,14 @@ export class DocumentStore {
     const parent = this.elements.get(targetParentId)
     if (!parent) return ""
 
+    // Separate formField from props — it's a top-level EditorElement field
+    const { formField, formRole, ...restProps } = (initialProps ?? {}) as Record<string, unknown> & {
+      formField?: FormFieldConfig
+      formRole?: string
+    }
+    const mergedProps = { ...getDefaultProps(type), ...restProps }
+    if (formRole) mergedProps.formRole = formRole
+
     const element: EditorElement = {
       id,
       type,
@@ -111,13 +119,14 @@ export class DocumentStore {
       parentId: targetParentId,
       children: [],
       style: { ...DEFAULT_ELEMENT_STYLE[type] },
-      props: { ...getDefaultProps(type), ...(initialProps ?? {}) },
+      props: mergedProps,
       locked: false,
       visible: true,
       layoutMode: "none" as const,
       layoutProps: { ...DEFAULT_LAYOUT_PROPS },
       sizing: { ...DEFAULT_SIZING },
       canvasPosition: null,
+      ...(formField ? { formField } : {}),
     }
 
     // Page Mode: root children default to flow layout
@@ -130,7 +139,8 @@ export class DocumentStore {
     // Auto-set layoutMode for 'form'
     if (type === "form") {
       element.layoutMode = "flex"
-      element.layoutProps = { ...element.layoutProps, direction: "column", gap: 16 }
+      element.layoutProps = { ...element.layoutProps, direction: "column", gap: 20, paddingTop: 32, paddingRight: 32, paddingBottom: 32, paddingLeft: 32 }
+      element.sizing = { w: "fixed", h: "hug" }
     }
 
     this.elements.set(id, element)

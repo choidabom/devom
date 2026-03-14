@@ -33,6 +33,30 @@ export function useShellMessages({
   handleDuplicate,
   getVisibleCanvasInfo,
 }: UseShellMessagesOptions) {
+  function findFormContainer(): string | undefined {
+    const root = documentStore.root
+    if (!root) return undefined
+    for (const childId of root.children) {
+      const child = documentStore.getElement(childId)
+      if (child?.type === "form") return childId
+    }
+    return undefined
+  }
+
+  function isFormChild(props?: Record<string, unknown>): boolean {
+    if (!props) return false
+    return !!props.formField || props.formRole === "submit"
+  }
+
+  function ensureFormParent(props?: Record<string, unknown>): string | undefined {
+    if (!isFormChild(props)) return undefined
+    const existing = findFormContainer()
+    if (existing) return existing
+    // Auto-create a form container
+    const formId = documentStore.addElement("form" as ElementType)
+    return formId || undefined
+  }
+
   const syncToCanvas = useCallback(() => {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }, [])
@@ -40,7 +64,8 @@ export function useShellMessages({
   const handleAddElement = useCallback(
     (type: ElementType, props?: Record<string, unknown>) => {
       historyStore.pushSnapshot()
-      const id = documentStore.addElement(type, undefined, props)
+      const parentId = ensureFormParent(props)
+      const id = documentStore.addElement(type, parentId, props)
       if (id) {
         selectionStore.select(id)
         syncToCanvas()
@@ -62,6 +87,7 @@ export function useShellMessages({
   const handleLoadTemplate = useCallback((templateId: string) => {
     historyStore.pushSnapshot()
     documentStore.loadTemplate(templateId)
+    selectionStore.clear()
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }, [])
 
@@ -291,9 +317,10 @@ export function useShellMessages({
         case "DND_CREATE_ELEMENT": {
           const elType = msg.payload.elementType as ElementType
           historyStore.pushSnapshot()
-          const id = documentStore.addElement(elType, undefined, msg.payload.extraProps)
+          const parentId = ensureFormParent(msg.payload.extraProps)
+          const id = documentStore.addElement(elType, parentId, msg.payload.extraProps)
           if (id) {
-            if (documentStore.canvasMode === "canvas") {
+            if (documentStore.canvasMode === "canvas" && !parentId) {
               documentStore.updateStyle(id, { left: msg.payload.x, top: msg.payload.y })
             }
             selectionStore.select(id)
