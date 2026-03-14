@@ -2,12 +2,12 @@ import { useState, useCallback, useMemo, useRef } from "react"
 import { observer } from "mobx-react-lite"
 import html2canvas from "html2canvas"
 import { jsPDF } from "jspdf"
-import { exportToJSON, exportToJSX, exportToHTML, exportToFormCode, convertToPageLayout } from "@devom/editor-core"
+import { exportToJSON, exportToJSX, exportToHTML, convertToPageLayout } from "@devom/editor-core"
 import { documentStore } from "../stores"
 import { T } from "../theme"
 
 export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose: () => void }) {
-  const [format, setFormat] = useState<"html" | "jsx" | "json" | "form">("html")
+  const [format, setFormat] = useState<"html" | "jsx" | "json">("html")
   const [copied, setCopied] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
   const [panelWidth, setPanelWidth] = useState(480)
@@ -15,21 +15,11 @@ export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose:
   const data = documentStore.toSerializable()
   const exportElements = documentStore.canvasMode === "canvas" ? convertToPageLayout(data.elements, data.rootId) : data.elements
 
-  const hasForms = useMemo(() => {
-    for (const el of Object.values(data.elements)) {
-      if (el.type === "form") return true
-    }
-    return false
-  }, [data.elements])
-
-  const output =
-    format === "html"
-      ? exportToHTML(exportElements, data.rootId)
-      : format === "jsx"
-        ? exportToJSX(exportElements, data.rootId)
-        : format === "form"
-          ? exportToFormCode(data.elements, data.rootId)
-          : exportToJSON(exportElements, data.rootId)
+  const output = useMemo(() => {
+    if (format === "html") return exportToHTML(exportElements, data.rootId)
+    if (format === "json") return exportToJSON(exportElements, data.rootId)
+    return exportToJSX(exportElements, data.rootId)
+  }, [format, exportElements, data.rootId])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(output)
@@ -200,24 +190,6 @@ export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose:
                 {f}
               </button>
             ))}
-            {hasForms && (
-              <button
-                onClick={() => setFormat("form")}
-                style={{
-                  padding: "4px 10px",
-                  background: format === "form" ? T.accent : "transparent",
-                  color: format === "form" ? "#fff" : T.text,
-                  border: `1px solid ${format === "form" ? T.accent : T.inputBorder}`,
-                  borderRadius: 5,
-                  cursor: "pointer",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  textTransform: "uppercase",
-                }}
-              >
-                FORM
-              </button>
-            )}
           </div>
           <button
             onClick={onClose}

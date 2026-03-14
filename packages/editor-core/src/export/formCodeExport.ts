@@ -11,6 +11,19 @@ export function exportToFormCode(elements: Record<string, EditorElement>, rootId
   return forms.map((f) => generateFormCode(f)).join("\n\n")
 }
 
+export function getFormComponentName(formElement: EditorElement): string {
+  return toPascalCase(String(formElement.props.name || "MyForm"))
+}
+
+export function collectFormComponents(elements: Record<string, EditorElement>, rootId: string): Array<{ id: string; componentName: string; code: string }> {
+  const forms = collectForms(elements, rootId)
+  return forms.map((f) => ({
+    id: f.formElement.id,
+    componentName: getFormComponentName(f.formElement),
+    code: generateFormCode(f),
+  }))
+}
+
 function collectForms(elements: Record<string, EditorElement>, rootId: string): FormInfo[] {
   const forms: FormInfo[] = []
   const traverse = (id: string) => {

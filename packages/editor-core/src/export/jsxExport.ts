@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react"
 import type { EditorElement } from "../types"
 import { escapeJsx, escapeHtml, computeElementStyle } from "./utils"
+import { collectFormComponents } from "./formCodeExport"
 
 const SHADCN_IMPORTS: Record<string, { from: string; names: string[] }> = {
   "sc:button": { from: "@/components/ui/button", names: ["Button"] },
@@ -29,8 +30,15 @@ export function exportToJSX(elements: Record<string, EditorElement>, rootId: str
   const root = elements[rootId]
   if (!root) return ""
 
+  // Collect form components — these will be rendered as <ComponentName /> references
+  const formComponents = collectFormComponents(elements, rootId)
+  const formIdToName = new Map<string, string>()
+  for (const fc of formComponents) {
+    formIdToName.set(fc.id, fc.componentName)
+  }
+
   const usedTypes = new Set<string>()
-  collectTypes(root, elements, usedTypes)
+  collectTypes(root, elements, usedTypes, formIdToName)
 
   const lines: string[] = []
 
@@ -40,20 +48,31 @@ export function exportToJSX(elements: Record<string, EditorElement>, rootId: str
     lines.push("")
   }
 
-  lines.push("export default function Component() {")
+  lines.push("export default function Page() {")
   lines.push("  return (")
-  renderElement(root, elements, lines, 4)
+  renderElement(root, elements, lines, 4, formIdToName)
   lines.push("  )")
   lines.push("}")
+
+  // Append form component definitions
+  if (formComponents.length > 0) {
+    lines.push("")
+    for (const fc of formComponents) {
+      lines.push("")
+      lines.push(fc.code)
+    }
+  }
 
   return lines.join("\n")
 }
 
-function collectTypes(el: EditorElement, elements: Record<string, EditorElement>, types: Set<string>) {
+function collectTypes(el: EditorElement, elements: Record<string, EditorElement>, types: Set<string>, formIdToName: Map<string, string>) {
+  // Skip form subtrees — they're rendered as separate components
+  if (formIdToName.has(el.id)) return
   if (el.type.startsWith("sc:")) types.add(el.type)
   for (const childId of el.children) {
     const child = elements[childId]
-    if (child) collectTypes(child, elements, types)
+    if (child) collectTypes(child, elements, types, formIdToName)
   }
 }
 
@@ -77,11 +96,19 @@ function generateImports(types: Set<string>): string[] {
   return lines
 }
 
-function renderElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number) {
+function renderElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number, formIdToName: Map<string, string>) {
+  // Form elements → render as <ComponentName /> reference
+  const formName = formIdToName.get(el.id)
+  if (formName) {
+    const pad = " ".repeat(indent)
+    lines.push(`${pad}<${formName} />`)
+    return
+  }
+
   if (el.type.startsWith("sc:")) {
-    renderShadcnElement(el, elements, lines, indent)
+    renderShadcnElement(el, elements, lines, indent, formIdToName)
   } else {
-    renderHtmlElement(el, elements, lines, indent)
+    renderHtmlElement(el, elements, lines, indent, formIdToName)
   }
 }
 
@@ -94,7 +121,7 @@ function computeEffectiveStyle(el: EditorElement, elements: Record<string, Edito
 
 // --- shadcn component rendering ---
 
-function renderShadcnElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number) {
+function renderShadcnElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number, formIdToName: Map<string, string>) {
   const pad = " ".repeat(indent)
   const p = el.props
   const styleStr = styleToJsx(computeEffectiveStyle(el, elements))
@@ -121,7 +148,7 @@ function renderShadcnElement(el: EditorElement, elements: Record<string, EditorE
       }
       for (const childId of el.children) {
         const child = elements[childId]
-        if (child) renderElement(child, elements, lines, indent + 2)
+        if (child) renderElement(child, elements, lines, indent + 2, formIdToName)
       }
       lines.push(`${pad}</Card>`)
       break
@@ -275,7 +302,7 @@ function renderShadcnElement(el: EditorElement, elements: Record<string, EditorE
       lines.push(`${pad}<div${styleStr}>`)
       for (const childId of el.children) {
         const child = elements[childId]
-        if (child) renderElement(child, elements, lines, indent + 2)
+        if (child) renderElement(child, elements, lines, indent + 2, formIdToName)
       }
       lines.push(`${pad}</div>`)
     }
@@ -284,7 +311,7 @@ function renderShadcnElement(el: EditorElement, elements: Record<string, EditorE
 
 // --- HTML element rendering ---
 
-function renderHtmlElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number) {
+function renderHtmlElement(el: EditorElement, elements: Record<string, EditorElement>, lines: string[], indent: number, formIdToName: Map<string, string>) {
   const pad = " ".repeat(indent)
   const tag = getHtmlTag(el)
   const styleStr = styleToJsx(computeEffectiveStyle(el, elements))
@@ -299,7 +326,7 @@ function renderHtmlElement(el: EditorElement, elements: Record<string, EditorEle
     if (content) lines.push(`${pad}  ${content}`)
     for (const childId of el.children) {
       const child = elements[childId]
-      if (child) renderElement(child, elements, lines, indent + 2)
+      if (child) renderElement(child, elements, lines, indent + 2, formIdToName)
     }
     lines.push(`${pad}</${tag}>`)
   }
