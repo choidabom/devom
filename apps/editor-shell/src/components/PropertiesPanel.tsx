@@ -80,6 +80,12 @@ export const PropertiesPanel = observer(function PropertiesPanel() {
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
   }
 
+  const updateFormField = (id: string, formField: FormFieldConfig | undefined) => {
+    historyStore.pushSnapshot()
+    documentStore.updateFormField(id, formField)
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+  }
+
   const inputStyle = {
     width: "100%",
     padding: "5px 8px",
@@ -776,4 +782,305 @@ function SectionPropsSection({ element, inputStyle, syncToCanvas }: { element: E
       </div>
     </PropSection>
   )
+}
+
+function FormFieldSection({
+  element,
+  updateFormField,
+  syncToCanvas,
+}: {
+  element: EditorElement
+  updateFormField: (formField: FormFieldConfig | undefined) => void
+  syncToCanvas: () => void
+}) {
+  const isEnabled = element.formField !== undefined
+  const formField = element.formField ?? { name: "", validation: {} }
+  const allowedFields = VALIDATION_FIELDS[element.type] ?? []
+
+  // Check for duplicate names
+  let duplicateWarning = ""
+  if (isEnabled && formField.name) {
+    const formId = findParentForm(element.id)
+    if (formId) {
+      const fields = documentStore.getFormFields(formId)
+      const duplicates = fields.filter((f) => f.formField.name === formField.name && f.element.id !== element.id)
+      if (duplicates.length > 0) {
+        duplicateWarning = "Duplicate field name in form"
+      }
+    }
+  }
+
+  const toggleEnable = () => {
+    if (isEnabled) {
+      updateFormField(undefined)
+    } else {
+      const defaultName = element.type.replace("sc:", "") + "_" + (Date.now() % 1000)
+      updateFormField({ name: defaultName })
+    }
+  }
+
+  const updateField = (key: keyof FormFieldConfig, value: unknown) => {
+    const updated = { ...formField, [key]: value }
+    updateFormField(updated)
+  }
+
+  const updateValidation = (key: string, value: unknown) => {
+    const updated = { ...formField, validation: { ...formField.validation, [key]: value } }
+    updateFormField(updated)
+  }
+
+  return (
+    <PropSection title="Form Field">
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <span style={{ fontSize: 12, color: T.textSub }}>Enable</span>
+          <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+            <input type="checkbox" checked={isEnabled} onChange={toggleEnable} style={{ marginRight: 6 }} />
+          </label>
+        </div>
+
+        {isEnabled && (
+          <>
+            <div>
+              <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>Name</div>
+              <input
+                type="text"
+                value={formField.name}
+                onChange={(e) => updateField("name", e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "5px 8px",
+                  background: T.inputBg,
+                  border: `1px solid ${duplicateWarning ? "#ef4444" : T.inputBorder}`,
+                  borderRadius: 6,
+                  color: T.text,
+                  fontSize: 12,
+                  boxSizing: "border-box",
+                  outline: "none",
+                }}
+                placeholder="field_name"
+              />
+              {duplicateWarning && <div style={{ fontSize: 10, color: "#ef4444", marginTop: 2 }}>{duplicateWarning}</div>}
+            </div>
+
+            <div>
+              <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>Default Value</div>
+              <input
+                type="text"
+                value={String(formField.defaultValue ?? "")}
+                onChange={(e) => updateField("defaultValue", e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "5px 8px",
+                  background: T.inputBg,
+                  border: `1px solid ${T.inputBorder}`,
+                  borderRadius: 6,
+                  color: T.text,
+                  fontSize: 12,
+                  boxSizing: "border-box",
+                  outline: "none",
+                }}
+                placeholder=""
+              />
+            </div>
+
+            <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: 6, marginTop: 2 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: T.textSub, marginBottom: 6 }}>Validation</div>
+
+              {allowedFields.includes("required") && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ fontSize: 11, color: T.textSub }}>Required</span>
+                  <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(formField.validation?.required)}
+                      onChange={(e) => updateValidation("required", e.target.checked)}
+                      style={{ marginRight: 6 }}
+                    />
+                  </label>
+                </div>
+              )}
+
+              {allowedFields.includes("min") && (
+                <div style={{ marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>Min</div>
+                  <input
+                    type="number"
+                    value={formField.validation?.min ?? ""}
+                    onChange={(e) => updateValidation("min", e.target.value ? Number(e.target.value) : undefined)}
+                    style={{
+                      width: "100%",
+                      padding: "5px 8px",
+                      background: T.inputBg,
+                      border: `1px solid ${T.inputBorder}`,
+                      borderRadius: 6,
+                      color: T.text,
+                      fontSize: 12,
+                      boxSizing: "border-box",
+                      outline: "none",
+                    }}
+                    placeholder=""
+                  />
+                </div>
+              )}
+
+              {allowedFields.includes("max") && (
+                <div style={{ marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>Max</div>
+                  <input
+                    type="number"
+                    value={formField.validation?.max ?? ""}
+                    onChange={(e) => updateValidation("max", e.target.value ? Number(e.target.value) : undefined)}
+                    style={{
+                      width: "100%",
+                      padding: "5px 8px",
+                      background: T.inputBg,
+                      border: `1px solid ${T.inputBorder}`,
+                      borderRadius: 6,
+                      color: T.text,
+                      fontSize: 12,
+                      boxSizing: "border-box",
+                      outline: "none",
+                    }}
+                    placeholder=""
+                  />
+                </div>
+              )}
+
+              {allowedFields.includes("pattern") && (
+                <>
+                  <div style={{ marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>Pattern</div>
+                    <select
+                      value={
+                        !formField.validation?.pattern
+                          ? "none"
+                          : formField.validation.pattern === "email" || formField.validation.pattern === "url"
+                            ? formField.validation.pattern
+                            : "custom"
+                      }
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val === "none") updateValidation("pattern", undefined)
+                        else if (val === "email" || val === "url") updateValidation("pattern", val)
+                        else updateValidation("pattern", "")
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "5px 8px",
+                        background: T.inputBg,
+                        border: `1px solid ${T.inputBorder}`,
+                        borderRadius: 6,
+                        color: T.text,
+                        fontSize: 12,
+                      }}
+                    >
+                      <option value="none">None</option>
+                      <option value="email">Email</option>
+                      <option value="url">URL</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+
+                  {formField.validation?.pattern && formField.validation.pattern !== "email" && formField.validation.pattern !== "url" && (
+                    <div style={{ marginBottom: 6 }}>
+                      <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>Custom Pattern</div>
+                      <input
+                        type="text"
+                        value={formField.validation.pattern}
+                        onChange={(e) => updateValidation("pattern", e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "5px 8px",
+                          background: T.inputBg,
+                          border: `1px solid ${T.inputBorder}`,
+                          borderRadius: 6,
+                          color: T.text,
+                          fontSize: 12,
+                          boxSizing: "border-box",
+                          outline: "none",
+                        }}
+                        placeholder="regex pattern"
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {allowedFields.includes("message") && (
+                <div>
+                  <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>Error Message</div>
+                  <input
+                    type="text"
+                    value={formField.validation?.message ?? ""}
+                    onChange={(e) => updateValidation("message", e.target.value || undefined)}
+                    style={{
+                      width: "100%",
+                      padding: "5px 8px",
+                      background: T.inputBg,
+                      border: `1px solid ${T.inputBorder}`,
+                      borderRadius: 6,
+                      color: T.text,
+                      fontSize: 12,
+                      boxSizing: "border-box",
+                      outline: "none",
+                    }}
+                    placeholder="Custom error message"
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </PropSection>
+  )
+}
+
+function FormContainerSection({ element, updateProp }: { element: EditorElement; updateProp: (k: string, v: string) => void }) {
+  const formName = String(element.props.name ?? "")
+  const fieldCount = documentStore.getFormFields(element.id).length
+
+  return (
+    <PropSection title="Form Settings">
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "0 14px" }}>
+        <div>
+          <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>Name</div>
+          <input
+            type="text"
+            value={formName}
+            onChange={(e) => updateProp("name", e.target.value)}
+            style={{
+              width: "100%",
+              padding: "5px 8px",
+              background: T.inputBg,
+              border: `1px solid ${T.inputBorder}`,
+              borderRadius: 6,
+              color: T.text,
+              fontSize: 12,
+              boxSizing: "border-box",
+              outline: "none",
+            }}
+            placeholder="form_name"
+          />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: T.textSub }}>
+          <span>Fields</span>
+          <span style={{ fontWeight: 600, color: T.text }}>{fieldCount}</span>
+        </div>
+      </div>
+    </PropSection>
+  )
+}
+
+// Helper to find parent form container
+function findParentForm(elementId: string): string | null {
+  let current = documentStore.getElement(elementId)
+  while (current && current.parentId) {
+    const parent = documentStore.getElement(current.parentId)
+    if (parent?.type === "form") return parent.id
+    current = parent
+  }
+  return null
 }
