@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useMemo } from "react"
 import { observer } from "mobx-react-lite"
-import type { DocumentStore, SectionRole } from "@devom/editor-core"
+import type { DocumentStore, SectionRole, FormFieldConfig } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
 import { getContainerStyles, getChildSizingStyles, getSectionStyles, getSectionContentStyles } from "@devom/editor-core"
 import { calcSnap, type SnapLine, type Bounds } from "../utils/snap"
 import { findDropTarget, calcInsertionIndicator } from "../utils/autoLayoutDrag"
 import { SectionInsertButton } from "./SectionInsertButton"
 import { getElementContent } from "./componentRegistry"
+import { useFormRuntime } from "../hooks/useFormRuntime"
+import { FormRuntimeContext, useFormRuntimeContext } from "../contexts/FormRuntimeContext"
 
 interface ElementRendererProps {
   elementId: string
@@ -263,6 +265,26 @@ export const ElementRenderer = observer(function ElementRenderer({
     bridge.send({ type: "INSERT_SECTION_REQUEST", payload: { preset: role, index } })
   }
 
+  // Determine if this is a form in interact mode
+  const isFormInteract = element.type === "form" && editorMode === "interact"
+
+  // Collect form fields for form elements
+  const formFields = useMemo(() => {
+    if (!isFormInteract) return []
+    const fields: Array<{ elementId: string; formField: FormFieldConfig }> = []
+    const traverse = (id: string) => {
+      const el = documentStore.getElement(id)
+      if (!el) return
+      if (el.formField) fields.push({ elementId: el.id, formField: el.formField })
+      el.children.forEach(traverse)
+    }
+    element.children.forEach((cid) => traverse(cid))
+    return fields
+  }, [isFormInteract, element.children, documentStore])
+
+  // Form runtime hook
+  const formRuntime = useFormRuntime(formFields, isFormInteract)
+
   // Find the root-level ancestor (direct child of root) for this element
   const findRootAncestor = (): { id: string; el: typeof element; dom: HTMLElement } | null => {
     let cur = element
@@ -427,19 +449,112 @@ export const ElementRenderer = observer(function ElementRenderer({
     target.addEventListener("pointercancel", onCancel)
   }
 
-  const content = getElementContent(element.type, element.props, editorMode)
+  // Get form context for form fields
+  const formCtx = useFormRuntimeContext()
+  const fieldFormContext =
+    formCtx && element.formField
+      ? {
+          value: formCtx.values[element.formField.name],
+          error: formCtx.errors[element.formField.name] ?? null,
+          onChange: (v: unknown) => formCtx.setValue(element.formField!.name, v),
+        }
+      : undefined
+
+  const content = getElementContent(element.type, element.props, editorMode, fieldFormContext)
+
+  // Render error message for form fields
+  const errorMessage =
+    editorMode === "interact" && element.formField && fieldFormContext?.error ? (
+      <p style={{ color: "hsl(0 84% 60%)", fontSize: 12, marginTop: 4, padding: "0 2px" }}>{fieldFormContext.error}</p>
+    ) : null
 
   // Determine wrapper tag: form elements use <form> in interact mode
-  const isFormInteract = element.type === "form" && editorMode === "interact"
   const WrapperTag = isFormInteract ? "form" : "div"
 
   // Form submit handler
-  const handleFormSubmit = isFormInteract
-    ? (e: React.FormEvent) => {
-        e.preventDefault()
-        // Form runtime will handle this in Task 9
-      }
-    : undefined
+  const handleFormSubmit = isFormInteract ? formRuntime.handleSubmit : undefined
+
+  // Render children JSX
+  const renderChildren = () => {
+    if (hasContentWrapper) {
+      return (
+        <div style={contentStyles}>
+          {element.children.map((childId) => (
+            <ElementRenderer
+              key={childId}
+              elementId={childId}
+              selectedIds={selectedIds}
+              onSelect={onSelect}
+              onDragChange={onDragChange}
+              onSnapLines={onSnapLines}
+              onInsertionIndicator={onInsertionIndicator}
+              onDropHighlight={onDropHighlight}
+              documentStore={documentStore}
+              bridge={bridge}
+              editorMode={editorMode}
+              zoom={zoom}
+            />
+          ))}
+        </div>
+      )
+    }
+    if (isRoot && documentStore.canvasMode === "page" && editorMode === "edit") {
+      return (
+        <>
+          <SectionInsertButton index={0} onInsert={handleInsertSection} />
+          {element.children.map((childId, i) => (
+            <React.Fragment key={childId}>
+              <ElementRenderer
+                elementId={childId}
+                selectedIds={selectedIds}
+                onSelect={onSelect}
+                onDragChange={onDragChange}
+                onSnapLines={onSnapLines}
+                onInsertionIndicator={onInsertionIndicator}
+                onDropHighlight={onDropHighlight}
+                documentStore={documentStore}
+                bridge={bridge}
+                editorMode={editorMode}
+                zoom={zoom}
+              />
+              <SectionInsertButton index={i + 1} onInsert={handleInsertSection} />
+            </React.Fragment>
+          ))}
+        </>
+      )
+    }
+    return element.children.map((childId) => (
+      <ElementRenderer
+        key={childId}
+        elementId={childId}
+        selectedIds={selectedIds}
+        onSelect={onSelect}
+        onDragChange={onDragChange}
+        onSnapLines={onSnapLines}
+        onInsertionIndicator={onInsertionIndicator}
+        onDropHighlight={onDropHighlight}
+        documentStore={documentStore}
+        bridge={bridge}
+        editorMode={editorMode}
+        zoom={zoom}
+      />
+    ))
+  }
+
+  // Wrap children with FormRuntimeContext for form elements in interact mode
+  const childrenContent = isFormInteract ? (
+    <FormRuntimeContext.Provider
+      value={{
+        values: formRuntime.values,
+        errors: formRuntime.errors,
+        setValue: formRuntime.setValue,
+      }}
+    >
+      {renderChildren()}
+    </FormRuntimeContext.Provider>
+  ) : (
+    renderChildren()
+  )
 
   return (
     <WrapperTag
@@ -474,65 +589,8 @@ export const ElementRenderer = observer(function ElementRenderer({
       onSubmit={handleFormSubmit}
     >
       {content}
-      {hasContentWrapper ? (
-        <div style={contentStyles}>
-          {element.children.map((childId) => (
-            <ElementRenderer
-              key={childId}
-              elementId={childId}
-              selectedIds={selectedIds}
-              onSelect={onSelect}
-              onDragChange={onDragChange}
-              onSnapLines={onSnapLines}
-              onInsertionIndicator={onInsertionIndicator}
-              onDropHighlight={onDropHighlight}
-              documentStore={documentStore}
-              bridge={bridge}
-              editorMode={editorMode}
-              zoom={zoom}
-            />
-          ))}
-        </div>
-      ) : isRoot && documentStore.canvasMode === "page" && editorMode === "edit" ? (
-        <>
-          <SectionInsertButton index={0} onInsert={handleInsertSection} />
-          {element.children.map((childId, i) => (
-            <React.Fragment key={childId}>
-              <ElementRenderer
-                elementId={childId}
-                selectedIds={selectedIds}
-                onSelect={onSelect}
-                onDragChange={onDragChange}
-                onSnapLines={onSnapLines}
-                onInsertionIndicator={onInsertionIndicator}
-                onDropHighlight={onDropHighlight}
-                documentStore={documentStore}
-                bridge={bridge}
-                editorMode={editorMode}
-                zoom={zoom}
-              />
-              <SectionInsertButton index={i + 1} onInsert={handleInsertSection} />
-            </React.Fragment>
-          ))}
-        </>
-      ) : (
-        element.children.map((childId) => (
-          <ElementRenderer
-            key={childId}
-            elementId={childId}
-            selectedIds={selectedIds}
-            onSelect={onSelect}
-            onDragChange={onDragChange}
-            onSnapLines={onSnapLines}
-            onInsertionIndicator={onInsertionIndicator}
-            onDropHighlight={onDropHighlight}
-            documentStore={documentStore}
-            bridge={bridge}
-            editorMode={editorMode}
-            zoom={zoom}
-          />
-        ))
-      )}
+      {errorMessage}
+      {childrenContent}
     </WrapperTag>
   )
 })
