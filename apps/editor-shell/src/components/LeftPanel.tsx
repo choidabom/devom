@@ -1,11 +1,41 @@
-import { type ReactNode, useState, useCallback, useEffect } from "react"
+import { type ReactNode, useState, useCallback, useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
 import { Lock, Unlock, Square, Columns3, Type, LayoutGrid, ImageIcon, MousePointerClick, TextCursorInput, ChevronRight, LayoutList } from "lucide-react"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
+// --- Layer DnD types ---
+type DropPosition = "before" | "inside" | "after"
+
+interface DragState {
+  dragId: string | null
+  overId: string | null
+  position: DropPosition | null
+}
+
+const INITIAL_DRAG: DragState = { dragId: null, overId: null, position: null }
+
+function isDescendant(ancestorId: string, targetId: string): boolean {
+  let el = documentStore.getElement(targetId)
+  while (el?.parentId) {
+    if (el.parentId === ancestorId) return true
+    el = documentStore.getElement(el.parentId)
+  }
+  return false
+}
+
+function canDrop(dragId: string, overId: string): boolean {
+  if (dragId === overId) return false
+  if (overId === documentStore.rootId) return false
+  if (isDescendant(dragId, overId)) return false
+  const el = documentStore.getElement(dragId)
+  if (!el || el.locked) return false
+  return true
+}
+
 export const LeftPanel = observer(function LeftPanel() {
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
+  const [drag, setDrag] = useState<DragState>(INITIAL_DRAG)
 
   const selectedKey = selectionStore.selectedIds.join(",")
 
@@ -52,6 +82,114 @@ export const LeftPanel = observer(function LeftPanel() {
     })
   }, [])
 
+  const handleDragStart = useCallback((id: string) => {
+    setDrag({ dragId: id, overId: null, position: null })
+  }, [])
+
+  const handleDragOver = useCallback(
+    (id: string, e: React.DragEvent) => {
+      if (!drag.dragId || !canDrop(drag.dragId, id)) return
+      e.preventDefault()
+      e.dataTransfer.dropEffect = "move"
+
+      const rect = e.currentTarget.getBoundingClientRect()
+      const y = e.clientY - rect.top
+      const ratio = y / rect.height
+
+      const overEl = documentStore.getElement(id)
+      const isContainer = overEl && (overEl.children.length > 0 || overEl.type === "div" || overEl.type === "form" || overEl.type === "flex" || overEl.type === "grid")
+
+      let position: DropPosition
+      if (isContainer) {
+        if (ratio < 0.25) position = "before"
+        else if (ratio > 0.75) position = "after"
+        else position = "inside"
+      } else {
+        position = ratio < 0.5 ? "before" : "after"
+      }
+
+      setDrag((prev) => (prev.overId === id && prev.position === position ? prev : { ...prev, overId: id, position }))
+    },
+    [drag.dragId]
+  )
+
+  const handleDragLeave = useCallback(() => {
+    setDrag((prev) => (prev.overId ? { ...prev, overId: null, position: null } : prev))
+  }, [])
+
+  const handleDrop = useCallback(() => {
+    const { dragId, overId, position } = drag
+    if (!dragId || !overId || !position) {
+      setDrag(INITIAL_DRAG)
+      return
+    }
+
+    const dragEl = documentStore.getElement(dragId)
+    const overEl = documentStore.getElement(overId)
+    if (!dragEl || !overEl) {
+      setDrag(INITIAL_DRAG)
+      return
+    }
+
+    historyStore.pushSnapshot()
+
+    if (position === "inside") {
+      // Reparent: move into overEl as last child
+      documentStore.reparentElement(dragId, overId, overEl.children.length)
+      // Auto-expand the target container
+      setCollapsedIds((prev) => {
+        if (prev.has(overId)) {
+          const next = new Set(prev)
+          next.delete(overId)
+          return next
+        }
+        return prev
+      })
+    } else {
+      const targetParentId = overEl.parentId
+      if (!targetParentId) {
+        setDrag(INITIAL_DRAG)
+        return
+      }
+      const parent = documentStore.getElement(targetParentId)
+      if (!parent) {
+        setDrag(INITIAL_DRAG)
+        return
+      }
+      const overIndex = parent.children.indexOf(overId)
+      if (overIndex === -1) {
+        setDrag(INITIAL_DRAG)
+        return
+      }
+
+      const isSameParent = dragEl.parentId === targetParentId
+      if (isSameParent) {
+        const insertIndex = position === "after" ? overIndex + 1 : overIndex
+        const dragIndex = parent.children.indexOf(dragId)
+        // No-op: dropping element onto its own position
+        if (dragIndex === insertIndex || dragIndex + 1 === insertIndex) {
+          setDrag(INITIAL_DRAG)
+          return
+        }
+        const adjustedIndex = dragIndex < insertIndex ? insertIndex - 1 : insertIndex
+        documentStore.reorderChild(targetParentId, dragId, adjustedIndex)
+      } else {
+        // Reparent to sibling position
+        const insertIndex = position === "after" ? overIndex + 1 : overIndex
+        documentStore.reparentElement(dragId, targetParentId, insertIndex)
+      }
+    }
+
+    bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+    selectionStore.select(dragId)
+    bridge.send({ type: "SELECT_ELEMENT", payload: { ids: [dragId] } })
+    setDrag(INITIAL_DRAG)
+  }, [drag])
+
+  const handleDragEnd = useCallback(() => {
+    setDrag(INITIAL_DRAG)
+  }, [])
+
   return (
     <div
       style={{
@@ -66,7 +204,18 @@ export const LeftPanel = observer(function LeftPanel() {
     >
       <div style={{ padding: "14px 16px 10px", fontSize: 13, fontWeight: 600, color: T.text }}>Layers</div>
       <div style={{ flex: 1, overflowY: "auto", padding: "0 6px 8px" }}>
-        <LayerTree elementId={documentStore.rootId} depth={0} collapsedIds={collapsedIds} onToggleCollapse={toggleCollapse} />
+        <LayerTree
+          elementId={documentStore.rootId}
+          depth={0}
+          collapsedIds={collapsedIds}
+          onToggleCollapse={toggleCollapse}
+          drag={drag}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
+        />
       </div>
     </div>
   )
@@ -77,19 +226,34 @@ const LayerTree = observer(function LayerTree({
   depth,
   collapsedIds,
   onToggleCollapse,
+  drag,
+  onDragStart,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onDragEnd,
 }: {
   elementId: string
   depth: number
   collapsedIds: Set<string>
   onToggleCollapse: (id: string) => void
+  drag: DragState
+  onDragStart: (id: string) => void
+  onDragOver: (id: string, e: React.DragEvent) => void
+  onDragLeave: () => void
+  onDrop: () => void
+  onDragEnd: () => void
 }) {
   const element = documentStore.getElement(elementId)
   const [hovered, setHovered] = useState(false)
+  const rowRef = useRef<HTMLDivElement>(null)
   const collapsed = collapsedIds.has(elementId)
   if (!element) return null
   const isSelected = selectionStore.selectedIds.includes(elementId)
   const isRoot = elementId === documentStore.rootId
   const hasChildren = element.children.length > 0
+  const isDragging = drag.dragId === elementId
+  const isDropTarget = drag.overId === elementId && drag.dragId !== null
 
   const S = 12
   const iconMap: Record<string, ReactNode> = {
@@ -108,10 +272,39 @@ const LayerTree = observer(function LayerTree({
   const icon = iconMap[element.type] ?? <Square size={S} />
   const displayIcon = element.layoutMode === "flex" ? <LayoutList size={S} /> : icon
 
+  // Drop indicator styles
+  const indicatorColor = T.accent
+  let dropIndicator: ReactNode = null
+  if (isDropTarget && drag.position === "before") {
+    dropIndicator = <div style={{ position: "absolute", top: 0, left: depth * 16 + 10, right: 6, height: 2, background: indicatorColor, borderRadius: 1, pointerEvents: "none" }} />
+  } else if (isDropTarget && drag.position === "after") {
+    dropIndicator = (
+      <div style={{ position: "absolute", bottom: 0, left: depth * 16 + 10, right: 6, height: 2, background: indicatorColor, borderRadius: 1, pointerEvents: "none" }} />
+    )
+  }
+
   return (
     <div>
       <div
+        ref={rowRef}
         data-layer-id={elementId}
+        draggable={!isRoot && !element.locked}
+        onDragStart={(e) => {
+          if (isRoot || element.locked) return
+          e.dataTransfer.effectAllowed = "move"
+          e.dataTransfer.setData("text/plain", elementId)
+          onDragStart(elementId)
+        }}
+        onDragOver={(e) => {
+          if (!isRoot) onDragOver(elementId, e)
+        }}
+        onDragLeave={onDragLeave}
+        onDrop={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onDrop()
+        }}
+        onDragEnd={onDragEnd}
         onClick={(e) => {
           if (!isRoot) {
             if (e.shiftKey) {
@@ -125,11 +318,12 @@ const LayerTree = observer(function LayerTree({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
+          position: "relative",
           padding: "6px 10px",
           paddingLeft: depth * 16 + 10,
           fontSize: 13,
-          cursor: isRoot ? "default" : "pointer",
-          background: isSelected ? T.accent : hovered && !isRoot ? T.hover : "transparent",
+          cursor: isRoot ? "default" : isDragging ? "grabbing" : "grab",
+          background: isDropTarget && drag.position === "inside" ? T.accentLight : isSelected ? T.accent : hovered && !isRoot ? T.hover : "transparent",
           borderRadius: 8,
           whiteSpace: "nowrap",
           overflow: "hidden",
@@ -140,8 +334,10 @@ const LayerTree = observer(function LayerTree({
           alignItems: "center",
           gap: 6,
           transition: "background 0.12s",
+          opacity: isDragging ? 0.4 : 1,
         }}
       >
+        {dropIndicator}
         {hasChildren && !isRoot ? (
           <span
             onClick={(e) => {
@@ -180,7 +376,21 @@ const LayerTree = observer(function LayerTree({
         )}
       </div>
       {!collapsed &&
-        element.children.map((childId) => <LayerTree key={childId} elementId={childId} depth={depth + 1} collapsedIds={collapsedIds} onToggleCollapse={onToggleCollapse} />)}
+        element.children.map((childId) => (
+          <LayerTree
+            key={childId}
+            elementId={childId}
+            depth={depth + 1}
+            collapsedIds={collapsedIds}
+            onToggleCollapse={onToggleCollapse}
+            drag={drag}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+            onDragEnd={onDragEnd}
+          />
+        ))}
     </div>
   )
 })
