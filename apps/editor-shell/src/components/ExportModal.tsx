@@ -1,10 +1,14 @@
 import { useState, useCallback, useMemo, useRef } from "react"
 import { observer } from "mobx-react-lite"
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
 import html2canvas from "html2canvas"
 import { jsPDF } from "jspdf"
 import { exportToJSON, exportToJSX, exportToHTML, convertToPageLayout } from "@devom/editor-core"
 import { documentStore } from "../stores"
 import { T } from "../theme"
+
+const FORMAT_LANGUAGE = { html: "html", jsx: "tsx", json: "json" } as const
 
 export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose: () => void }) {
   const [format, setFormat] = useState<"html" | "jsx" | "json">("html")
@@ -208,22 +212,25 @@ export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose:
         </div>
 
         {/* Code area */}
-        <textarea
-          value={output}
-          readOnly
-          style={{
-            flex: 1,
-            padding: 16,
-            background: "#fafafa",
-            color: T.text,
-            border: "none",
-            fontFamily: "'SF Mono', Menlo, monospace",
-            fontSize: 11,
-            lineHeight: 1.6,
-            resize: "none",
-            outline: "none",
-          }}
-        />
+        <div style={{ flex: 1, overflow: "auto" }}>
+          <SyntaxHighlighter
+            language={FORMAT_LANGUAGE[format]}
+            style={oneLight}
+            customStyle={{
+              margin: 0,
+              padding: 16,
+              background: "#fafafa",
+              fontSize: 11,
+              lineHeight: 1.6,
+              fontFamily: "'SF Mono', Menlo, monospace",
+              minHeight: "100%",
+            }}
+            showLineNumbers
+            lineNumberStyle={{ color: "#ccc", fontSize: 10, minWidth: 28, paddingRight: 12, userSelect: "none" }}
+          >
+            {output}
+          </SyntaxHighlighter>
+        </div>
 
         {/* Footer actions */}
         <div style={{ display: "flex", gap: 6, padding: "8px 12px", borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
