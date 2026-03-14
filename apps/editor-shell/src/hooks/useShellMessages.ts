@@ -35,6 +35,19 @@ export function useShellMessages({
   getVisibleCanvasInfo,
 }: UseShellMessagesOptions) {
   function findFormContainer(): string | undefined {
+    // 선택된 요소가 form이거나 form 내부에 있으면 그 form 반환
+    const selected = selectionStore.selectedElements[0]
+    if (selected) {
+      if (selected.type === "form") return selected.id
+      let current = selected
+      while (current.parentId) {
+        const parent = documentStore.getElement(current.parentId)
+        if (!parent) break
+        if (parent.type === "form") return parent.id
+        current = parent
+      }
+    }
+    // fallback: root의 첫 번째 form
     const root = documentStore.root
     if (!root) return undefined
     for (const childId of root.children) {
@@ -365,8 +378,10 @@ export function useShellMessages({
           console.log("[Form Submit]", msg.payload.formId, msg.payload.values)
           break
         case "ADD_FORM_FIELD_REQUEST": {
-          historyStore.pushSnapshot()
+          const ALLOWED_FORM_FIELDS = ["sc:input", "sc:textarea", "sc:select", "sc:checkbox", "sc:switch", "sc:radio-group", "sc:slider", "sc:button"]
           const fieldType = msg.payload.elementType as ElementType
+          if (!ALLOWED_FORM_FIELDS.includes(fieldType)) break
+          historyStore.pushSnapshot()
           const isSubmit = fieldType === "sc:button"
           const extraProps: Record<string, unknown> = isSubmit ? { formRole: "submit" } : { formField: { name: `field_${Date.now()}` } }
           const fieldId = documentStore.addElement(fieldType, msg.payload.formId, extraProps)

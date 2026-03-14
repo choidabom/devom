@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 
 interface FormFieldInsertButtonProps {
   formId: string
@@ -18,9 +18,26 @@ const FIELD_OPTIONS: { type: string; label: string }[] = [
 
 export function FormFieldInsertButton({ formId, onInsert }: FormFieldInsertButtonProps) {
   const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showMenu) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowMenu(false)
+    }
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowMenu(false)
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("keydown", handleEscape)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [showMenu])
 
   return (
-    <div onPointerDown={(e) => e.stopPropagation()} style={{ display: "flex", justifyContent: "center", padding: "6px 0", position: "relative" }}>
+    <div ref={menuRef} onPointerDown={(e) => e.stopPropagation()} style={{ display: "flex", justifyContent: "center", padding: "6px 0", position: "relative" }}>
       <button
         onClick={() => setShowMenu((p) => !p)}
         style={{
