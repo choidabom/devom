@@ -1,14 +1,6 @@
 import { useState, useCallback, useMemo, useRef } from "react"
 import { observer } from "mobx-react-lite"
-import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter"
-import tsx from "react-syntax-highlighter/dist/esm/languages/prism/tsx"
-import html from "react-syntax-highlighter/dist/esm/languages/prism/markup"
-import json from "react-syntax-highlighter/dist/esm/languages/prism/json"
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism"
-
-SyntaxHighlighter.registerLanguage("tsx", tsx)
-SyntaxHighlighter.registerLanguage("html", html)
-SyntaxHighlighter.registerLanguage("json", json)
+import { Highlight, themes } from "prism-react-renderer"
 import html2canvas from "html2canvas"
 import { jsPDF } from "jspdf"
 import { exportToJSON, exportToJSX, exportToHTML, convertToPageLayout } from "@devom/editor-core"
@@ -220,23 +212,30 @@ export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose:
 
         {/* Code area */}
         <div style={{ flex: 1, overflow: "auto" }}>
-          <SyntaxHighlighter
-            language={FORMAT_LANGUAGE[format]}
-            style={oneLight}
-            customStyle={{
-              margin: 0,
-              padding: 16,
-              background: "#fafafa",
-              fontSize: 11,
-              lineHeight: 1.6,
-              fontFamily: "'SF Mono', Menlo, monospace",
-              minHeight: "100%",
-            }}
-            showLineNumbers
-            lineNumberStyle={{ color: "#ccc", fontSize: 10, minWidth: 28, paddingRight: 12, userSelect: "none" }}
-          >
-            {output}
-          </SyntaxHighlighter>
+          <Highlight theme={themes.oneLight} code={output} language={FORMAT_LANGUAGE[format]}>
+            {({ tokens, getLineProps, getTokenProps }) => (
+              <pre
+                style={{
+                  margin: 0,
+                  padding: 16,
+                  background: "#fafafa",
+                  fontSize: 11,
+                  lineHeight: 1.6,
+                  fontFamily: "'SF Mono', Menlo, monospace",
+                  minHeight: "100%",
+                }}
+              >
+                {tokens.map((line, i) => (
+                  <div key={i} {...getLineProps({ line })}>
+                    <span style={{ display: "inline-block", width: 28, color: "#ccc", fontSize: 10, textAlign: "right", paddingRight: 12, userSelect: "none" }}>{i + 1}</span>
+                    {line.map((token, key) => (
+                      <span key={key} {...getTokenProps({ token })} />
+                    ))}
+                  </div>
+                ))}
+              </pre>
+            )}
+          </Highlight>
         </div>
 
         {/* Footer actions */}
