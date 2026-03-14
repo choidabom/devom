@@ -285,12 +285,6 @@ export function useShellMessages({
           break
         case "KEY_EVENT": {
           const k = msg.payload
-          if (k.key === "Escape" && editorMode === "interact") {
-            setEditorMode("edit")
-            bridge.send({ type: "SET_MODE", payload: { mode: "edit" } })
-            setShowPanels(true)
-            return
-          }
           if (k.key === "Delete" || k.key === "Backspace") {
             handleDelete()
           }
@@ -306,6 +300,19 @@ export function useShellMessages({
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyX") handleCut()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyV") handlePaste()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyD") handleDuplicate()
+          // Mode switch — e.code for Korean IME compatibility
+          if (!k.metaKey && !k.ctrlKey) {
+            if (k.code === "KeyV" || k.key === "Escape") {
+              setEditorMode("edit")
+              bridge.send({ type: "SET_MODE", payload: { mode: "edit" } })
+              setShowPanels(true)
+            } else if (k.code === "KeyP") {
+              setEditorMode("interact")
+              selectionStore.clear()
+              bridge.send({ type: "SET_MODE", payload: { mode: "interact", canvasMode: documentStore.canvasMode } })
+              if (documentStore.canvasMode === "page") setShowPanels(false)
+            }
+          }
           break
         }
         case "REORDER_CHILD":
