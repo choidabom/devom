@@ -162,6 +162,10 @@ export function ungroupElements(elements: ObservableMap<string, EditorElement>, 
 
       const directChildIds = [...element.children]
 
+      // Container offset for coordinate restoration
+      const containerLeft = typeof element.style.left === "number" ? element.style.left : 0
+      const containerTop = typeof element.style.top === "number" ? element.style.top : 0
+
       for (const childId of directChildIds) {
         const child = elements.get(childId)
         if (!child) continue
@@ -172,7 +176,15 @@ export function ungroupElements(elements: ObservableMap<string, EditorElement>, 
           const { position, left, top, ...rest } = child.style
           child.style = { ...rest, position: "relative" as const }
         } else {
-          child.style = { ...child.style, position: "absolute" as const }
+          // Restore absolute coordinates by adding container offset
+          const childLeft = typeof child.style.left === "number" ? child.style.left : 0
+          const childTop = typeof child.style.top === "number" ? child.style.top : 0
+          child.style = {
+            ...child.style,
+            position: "absolute" as const,
+            left: childLeft + containerLeft,
+            top: childTop + containerTop,
+          }
         }
 
         newSelection.push(childId)
