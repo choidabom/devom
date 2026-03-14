@@ -17,11 +17,20 @@ export function getFormComponentName(formElement: EditorElement): string {
 
 export function collectFormComponents(elements: Record<string, EditorElement>, rootId: string): Array<{ id: string; componentName: string; code: string }> {
   const forms = collectForms(elements, rootId)
-  return forms.map((f) => ({
-    id: f.formElement.id,
-    componentName: getFormComponentName(f.formElement),
-    code: generateFormCode(f),
-  }))
+  const usedNames = new Set<string>()
+  return forms.map((f) => {
+    let name = getFormComponentName(f.formElement)
+    let suffix = 2
+    while (usedNames.has(name)) {
+      name = `${getFormComponentName(f.formElement)}${suffix++}`
+    }
+    usedNames.add(name)
+    return {
+      id: f.formElement.id,
+      componentName: name,
+      code: generateFormCode(f),
+    }
+  })
 }
 
 function collectForms(elements: Record<string, EditorElement>, rootId: string): FormInfo[] {

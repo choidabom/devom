@@ -353,10 +353,20 @@ function getHtmlContent(el: EditorElement): string {
   return ""
 }
 
+function isSafeUrl(url: string): boolean {
+  const trimmed = url.trim().toLowerCase()
+  return !trimmed.startsWith("javascript:") && !trimmed.startsWith("data:text/html")
+}
+
 function getHtmlPropsString(el: EditorElement): string {
-  if (el.type === "image" && el.props.src) return ` src="${escapeHtml(String(el.props.src))}" alt="${escapeHtml(String(el.props.alt ?? ""))}"`
-  if (el.type === "video" && el.props.src)
-    return ` src="${escapeHtml(String(el.props.src))}"${el.props.autoplay !== false ? " autoPlay" : ""}${el.props.muted !== false ? " muted" : ""}${el.props.loop !== false ? " loop" : ""}${el.props.controls ? " controls" : ""} playsInline`
+  if (el.type === "image" && el.props.src) {
+    const src = isSafeUrl(String(el.props.src)) ? escapeHtml(String(el.props.src)) : ""
+    return ` src="${src}" alt="${escapeHtml(String(el.props.alt ?? ""))}"`
+  }
+  if (el.type === "video" && el.props.src) {
+    const src = isSafeUrl(String(el.props.src)) ? escapeHtml(String(el.props.src)) : ""
+    return ` src="${src}"${el.props.autoplay !== false ? " autoPlay" : ""}${el.props.muted !== false ? " muted" : ""}${el.props.loop !== false ? " loop" : ""}${el.props.controls ? " controls" : ""} playsInline`
+  }
   if (el.type === "input") return ` placeholder="${escapeHtml(String(el.props.placeholder ?? ""))}"`
   return ""
 }

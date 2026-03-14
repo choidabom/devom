@@ -383,7 +383,7 @@ export function useShellMessages({
           if (!ALLOWED_FORM_FIELDS.includes(fieldType)) break
           historyStore.pushSnapshot()
           const isSubmit = fieldType === "sc:button"
-          const extraProps: Record<string, unknown> = isSubmit ? { formRole: "submit" } : { formField: { name: `field_${Date.now()}` } }
+          const extraProps: Record<string, unknown> = isSubmit ? { formRole: "submit" } : { formField: { name: `field_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` } }
           const fieldId = documentStore.addElement(fieldType, msg.payload.formId, extraProps)
           if (fieldId) {
             selectionStore.select(fieldId)

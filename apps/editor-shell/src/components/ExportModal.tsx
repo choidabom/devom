@@ -50,7 +50,8 @@ export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose:
       iframe = document.createElement("iframe")
       iframe.style.cssText = "position:fixed;left:-9999px;top:0;width:1280px;height:900px;border:none;"
       document.body.appendChild(iframe)
-      const iframeDoc = iframe.contentDocument!
+      const iframeDoc = iframe.contentDocument
+      if (!iframeDoc) throw new Error("Failed to access iframe document")
       iframeDoc.open()
       iframeDoc.write(htmlContent)
       iframeDoc.close()
@@ -101,9 +102,11 @@ export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose:
       isResizingRef.current = false
       target.removeEventListener("pointermove", onMove)
       target.removeEventListener("pointerup", onUp)
+      target.removeEventListener("pointercancel", onUp)
     }
     target.addEventListener("pointermove", onMove)
     target.addEventListener("pointerup", onUp)
+    target.addEventListener("pointercancel", onUp)
   }
 
   return (
