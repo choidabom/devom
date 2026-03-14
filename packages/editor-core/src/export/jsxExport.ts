@@ -355,7 +355,10 @@ function getHtmlContent(el: EditorElement): string {
 
 function isSafeUrl(url: string): boolean {
   const trimmed = url.trim().toLowerCase()
-  return !trimmed.startsWith("javascript:") && !trimmed.startsWith("data:text/html")
+  if (trimmed.startsWith("data:")) {
+    return /^data:image\/(png|jpeg|jpg|gif|webp|avif);base64,/.test(trimmed)
+  }
+  return !trimmed.startsWith("javascript:") && !trimmed.startsWith("vbscript:")
 }
 
 function getHtmlPropsString(el: EditorElement): string {
