@@ -314,15 +314,25 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
   // Parse Tailwind classes
   const tw = className ? parseTailwindClasses(className) : { style: {}, layout: {} }
 
+  // Determine effective type: div with only text children → treat as text
+  let effectiveType = mapping.type
+  if (mapping.type === "div") {
+    const hasJSXChildren = node.children.some((c: any) => c.type === "JSXElement" || c.type === "JSXFragment" || (c.type === "JSXExpressionContainer" && isJSXNode(c.expression)))
+    if (!hasJSXChildren) {
+      const text = extractTextContent(node.children)
+      if (text) effectiveType = "text"
+    }
+  }
+
   // Extract text content for text/button types
   let textContent = ""
-  if (mapping.type === "text" || mapping.type === "sc:button") {
+  if (effectiveType === "text" || mapping.type === "sc:button") {
     textContent = extractTextContent(node.children)
   }
 
   // Walk children (unless it's a leaf node)
   const childElements: ElementTemplate[] = []
-  if (mapping.type !== "text" && mapping.type !== "sc:button" && !mapping.type.startsWith("sc:")) {
+  if (effectiveType !== "text" && mapping.type !== "sc:button" && !mapping.type.startsWith("sc:")) {
     for (const child of node.children) {
       childElements.push(...walkNode(child, warnings, nextId, depth + 1))
     }
@@ -332,15 +342,15 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
   }
 
   // Set content/label prop for text types
-  if (mapping.type === "text" && textContent) {
+  if (effectiveType === "text" && textContent) {
     props.content = textContent
   } else if (mapping.type === "sc:button" && textContent) {
     props.label = textContent
   }
 
   const template: ElementTemplate = {
-    type: mapping.type,
-    name: generateName(tagName, nextId()),
+    type: effectiveType,
+    name: generateName(effectiveType === "text" ? "text" : tagName, nextId()),
     style: {
       position: "relative" as const,
       left: undefined,
