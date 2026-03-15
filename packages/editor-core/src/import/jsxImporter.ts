@@ -361,7 +361,7 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
   }
 
   // Extract layout info from inline styles (takes precedence over Tailwind)
-  let layoutMode = tw.layout.layoutMode ?? "none"
+  let layoutMode: "none" | "flex" | "grid" = tw.layout.layoutMode ?? "none"
   let direction = tw.layout.direction ?? DEFAULT_LAYOUT_PROPS.direction
   let layoutGap = tw.layout.gap ?? DEFAULT_LAYOUT_PROPS.gap
   let layoutAlignItems = (tw.layout.alignItems as any) ?? DEFAULT_LAYOUT_PROPS.alignItems
