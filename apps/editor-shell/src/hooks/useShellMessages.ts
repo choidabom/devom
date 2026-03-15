@@ -103,6 +103,8 @@ export function useShellMessages({
     documentStore.loadTemplate(templateId)
     selectionStore.clear()
     bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
+    const { visibleWidth, leftOffset } = getVisibleCanvasInfo()
+    bridge.send({ type: "ZOOM_TO_FIT", payload: { visibleWidth: visibleWidth ?? 800, leftOffset: leftOffset ?? 0 } })
   }, [])
 
   const handleAddFormPreset = useCallback(
@@ -249,6 +251,9 @@ export function useShellMessages({
               bridge.send({ type: "SET_CANVAS_MODE", payload: { mode: documentStore.canvasMode, ...info } })
             }
             setCanvasMode(documentStore.canvasMode)
+          } else {
+            const { visibleWidth, leftOffset } = getVisibleCanvasInfo()
+            bridge.send({ type: "ZOOM_TO_FIT", payload: { visibleWidth: visibleWidth ?? 800, leftOffset: leftOffset ?? 0 } })
           }
           break
         }
@@ -295,6 +300,10 @@ export function useShellMessages({
           if ((k.metaKey || k.ctrlKey) && k.code === "Backslash") {
             setShowPanels((prev) => !prev)
             return
+          }
+          if ((k.metaKey || k.ctrlKey) && k.code === "Digit1") {
+            const { visibleWidth, leftOffset } = getVisibleCanvasInfo()
+            bridge.send({ type: "ZOOM_TO_FIT", payload: { visibleWidth: visibleWidth ?? 800, leftOffset: leftOffset ?? 0 } })
           }
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyC") handleCopy()
           if ((k.metaKey || k.ctrlKey) && k.code === "KeyX") handleCut()

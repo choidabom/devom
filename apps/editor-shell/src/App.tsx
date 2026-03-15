@@ -426,6 +426,17 @@ export const App = observer(function App() {
             }}
           >
             <button
+              onClick={() => {
+                const { visibleWidth, leftOffset } = getVisibleCanvasInfo()
+                bridge.send({ type: "ZOOM_TO_FIT", payload: { visibleWidth: visibleWidth ?? 800, leftOffset: leftOffset ?? 0 } })
+              }}
+              title="Zoom to Fit (⌘1)"
+              style={{ border: "none", background: "none", cursor: "pointer", fontSize: 11, color: T.textSub, padding: "0 4px", lineHeight: 1 }}
+            >
+              Fit
+            </button>
+            <div style={{ width: 1, height: 12, background: T.panelBorder }} />
+            <button
               onClick={() => bridge.send({ type: "ZOOM_OUT" })}
               style={{ border: "none", background: "none", cursor: "pointer", fontSize: 13, color: T.textSub, padding: "0 2px", lineHeight: 1 }}
             >

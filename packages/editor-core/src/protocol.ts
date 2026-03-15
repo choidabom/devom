@@ -32,6 +32,7 @@ export type ShellToCanvasMessage =
   | { type: "ZOOM_IN" }
   | { type: "ZOOM_OUT" }
   | { type: "ZOOM_RESET" }
+  | { type: "ZOOM_TO_FIT"; payload: { visibleWidth: number; leftOffset: number } }
   | { type: "SET_INTERACTION_FORM_STATE"; formId: string; fields: FormFieldRuntime[] }
 
 // Canvas -> Shell messages

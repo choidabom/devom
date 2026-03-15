@@ -11,7 +11,6 @@ interface UseCanvasMessagesOptions {
   pageViewport: number
   outerRef: React.RefObject<HTMLDivElement | null>
   viewportRef: React.RefObject<{ zoom: number; panX: number; panY: number }>
-  initialCenterDoneRef: React.RefObject<boolean>
   savedViewportRef: React.RefObject<{ zoom: number; panX: number; panY: number } | null>
   setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>
   setEditorMode: React.Dispatch<React.SetStateAction<"edit" | "interact">>
@@ -28,7 +27,6 @@ export function useCanvasMessages({
   pageViewport,
   outerRef,
   viewportRef,
-  initialCenterDoneRef,
   savedViewportRef,
   setSelectedIds,
   setEditorMode,
@@ -42,48 +40,6 @@ export function useCanvasMessages({
       switch (msg.type) {
         case "SYNC_DOCUMENT":
           documentStore.loadFromSerializable(msg.payload)
-          if (!initialCenterDoneRef.current) {
-            initialCenterDoneRef.current = true
-            if (canvasMode !== "canvas") {
-              setCanvasReady(true)
-              break
-            }
-            requestAnimationFrame(() => {
-              const outer = outerRef.current
-              if (!outer) {
-                setCanvasReady(true)
-                return
-              }
-              const root = documentStore.root
-              if (!root || root.children.length === 0) {
-                setCanvasReady(true)
-                return
-              }
-              let minX = Infinity,
-                minY = Infinity,
-                maxX = -Infinity,
-                maxY = -Infinity
-              for (const childId of root.children) {
-                const child = documentStore.getElement(childId)
-                if (!child) continue
-                const x = typeof child.style.left === "number" ? child.style.left : 0
-                const y = typeof child.style.top === "number" ? child.style.top : 0
-                const w = typeof child.style.width === "number" ? child.style.width : 200
-                const h = typeof child.style.height === "number" ? child.style.height : 100
-                if (w <= 0 || h <= 0) continue
-                minX = Math.min(minX, x)
-                minY = Math.min(minY, y)
-                maxX = Math.max(maxX, x + w)
-                maxY = Math.max(maxY, y + h)
-              }
-              if (isFinite(minX)) {
-                const contentCx = minX + (maxX - minX) / 2
-                const rect = outer.getBoundingClientRect()
-                setViewport({ zoom: 1, panX: rect.width / 2 - contentCx, panY: 60 - minY })
-              }
-              setCanvasReady(true)
-            })
-          }
           break
         case "DND_DROP": {
           const vp = viewportRef.current
@@ -182,6 +138,51 @@ export function useCanvasMessages({
         case "ZOOM_RESET":
           setViewport({ zoom: 1, panX: 0, panY: 0 })
           break
+        case "ZOOM_TO_FIT": {
+          const outer = outerRef.current
+          if (!outer) break
+          const root = documentStore.root
+          if (!root || root.children.length === 0) break
+          const rect = outer.getBoundingClientRect()
+          const visibleW = msg.payload.visibleWidth
+          const leftOff = msg.payload.leftOffset
+          if (canvasMode === "page") {
+            const fitZoom = Math.min(1, (visibleW - 40) / pageViewport)
+            setViewport({ zoom: fitZoom, panX: leftOff + (visibleW - pageViewport * fitZoom) / 2, panY: 20 })
+          } else {
+            let bMinX = Infinity,
+              bMinY = Infinity,
+              bMaxX = -Infinity,
+              bMaxY = -Infinity
+            for (const childId of root.children) {
+              const child = documentStore.getElement(childId)
+              if (!child) continue
+              const x = typeof child.style.left === "number" ? child.style.left : 0
+              const y = typeof child.style.top === "number" ? child.style.top : 0
+              const w = typeof child.style.width === "number" ? child.style.width : 200
+              const h = typeof child.style.height === "number" ? child.style.height : 100
+              if (w <= 0 || h <= 0) continue
+              bMinX = Math.min(bMinX, x)
+              bMinY = Math.min(bMinY, y)
+              bMaxX = Math.max(bMaxX, x + w)
+              bMaxY = Math.max(bMaxY, y + h)
+            }
+            if (!isFinite(bMinX)) break
+            const contentW = bMaxX - bMinX
+            const contentH = bMaxY - bMinY
+            const padding = 60
+            const fitZoom = Math.min(1, (visibleW - padding * 2) / contentW, (rect.height - padding * 2) / contentH)
+            const contentCx = bMinX + contentW / 2
+            const contentCy = bMinY + contentH / 2
+            setViewport({
+              zoom: fitZoom,
+              panX: leftOff + visibleW / 2 - contentCx * fitZoom,
+              panY: padding - bMinY * fitZoom,
+            })
+          }
+          setCanvasReady(true)
+          break
+        }
         case "SET_PAGE_VIEWPORT":
           setPageViewport(msg.payload.width)
           {

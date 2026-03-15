@@ -41,7 +41,6 @@ export const App = observer(function App() {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
 
   const outerRef = useRef<HTMLDivElement>(null)
-  const initialCenterDoneRef = useRef(false)
   const savedViewportRef = useRef<{ zoom: number; panX: number; panY: number } | null>(null)
   const [canvasReady, setCanvasReady] = useState(false)
 
@@ -54,7 +53,6 @@ export const App = observer(function App() {
     pageViewport,
     outerRef,
     viewportRef,
-    initialCenterDoneRef,
     savedViewportRef,
     setSelectedIds,
     setEditorMode,
@@ -193,7 +191,7 @@ export const App = observer(function App() {
         sendUngroupRequest()
         return
       }
-      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyX", "KeyV", "KeyD", "Backslash"].includes(e.code)) {
+      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyX", "KeyV", "KeyD", "Backslash", "Digit1"].includes(e.code)) {
         e.preventDefault()
       }
       bridge.send({
