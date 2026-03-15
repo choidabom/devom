@@ -373,7 +373,9 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
 
   if (inlineStyle.display === "flex") {
     layoutMode = "flex"
-    direction = (inlineStyle.flexDirection as "row" | "column") ?? direction
+    if (inlineStyle.flexDirection === "row" || inlineStyle.flexDirection === "column") {
+      direction = inlineStyle.flexDirection
+    }
   } else if (inlineStyle.display === "grid") {
     layoutMode = "grid"
   }
@@ -393,13 +395,6 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
     delete cleanedStyle.gap
     delete cleanedStyle.alignItems
     delete cleanedStyle.justifyContent
-  }
-  if (
-    layoutPaddingTop !== DEFAULT_LAYOUT_PROPS.paddingTop ||
-    layoutPaddingRight !== DEFAULT_LAYOUT_PROPS.paddingRight ||
-    layoutPaddingBottom !== DEFAULT_LAYOUT_PROPS.paddingBottom ||
-    layoutPaddingLeft !== DEFAULT_LAYOUT_PROPS.paddingLeft
-  ) {
     delete cleanedStyle.paddingTop
     delete cleanedStyle.paddingRight
     delete cleanedStyle.paddingBottom
