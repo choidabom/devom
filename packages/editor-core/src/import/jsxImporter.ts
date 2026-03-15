@@ -2,7 +2,7 @@ import { parse } from "@babel/parser"
 import type { CSSProperties } from "react"
 import { getComponentMapping, isUnknownComponent } from "./componentMap"
 import { parseTailwindClasses } from "./tailwindMap"
-import { DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING } from "../types"
+import { DEFAULT_LAYOUT_PROPS, DEFAULT_SIZING, DEFAULT_GRID_PROPS } from "../types"
 import type { ElementTemplate } from "../types"
 
 // Type definitions for @babel/types nodes (transitive dependency)
@@ -400,6 +400,9 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
     delete cleanedStyle.paddingBottom
     delete cleanedStyle.paddingLeft
   }
+  if (inlineStyle.alignSelf === "stretch") {
+    delete cleanedStyle.alignSelf
+  }
 
   const template: ElementTemplate = {
     type: effectiveType,
@@ -430,8 +433,10 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
     sizing: {
       ...DEFAULT_SIZING,
       ...tw.layout.sizing,
+      // alignSelf:stretch → fill (부모 layoutMode 확인 불가하므로 항상 변환, none일 때는 무시됨)
       ...(inlineStyle.alignSelf === "stretch" ? { w: "fill" as const } : {}),
     },
+    ...(layoutMode === "grid" ? { gridProps: { ...DEFAULT_GRID_PROPS, gap: layoutGap } } : {}),
     canvasPosition: null,
     children: childElements,
   }
@@ -538,6 +543,10 @@ function extractTextContent(children: any[]): string {
         text += expr.value
       } else if (expr.type === "NumericLiteral") {
         text += String(expr.value)
+      } else if (expr.type === "TemplateLiteral" && expr.quasis?.length === 1) {
+        text += expr.quasis[0].value.raw
+      } else if (expr.type === "Identifier") {
+        text += `{${expr.name}}`
       }
     } else if (child.type === "JSXElement" || child.type === "JSXFragment") {
       const nested = extractTextContent(child.children)
