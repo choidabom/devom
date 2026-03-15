@@ -40,6 +40,7 @@ export const ElementRenderer = observer(function ElementRenderer({
 }: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
+  const clickHandledRef = useRef(false)
 
   useEffect(() => {
     return () => {
@@ -65,6 +66,10 @@ export const ElementRenderer = observer(function ElementRenderer({
 
   const handleClick = (e: React.MouseEvent) => {
     if (editorMode === "interact") return
+    if (clickHandledRef.current) {
+      clickHandledRef.current = false
+      return
+    }
     e.stopPropagation()
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     onSelect(element.id, e.shiftKey)
@@ -85,15 +90,17 @@ export const ElementRenderer = observer(function ElementRenderer({
       e.stopPropagation()
       return
     }
-    if (inAutoLayout) return // Auto-layout drag handled separately
-    if (element.style.position !== "absolute") return
     e.stopPropagation()
+    if (inAutoLayout) return // Auto-layout drag handled by click, not pointer
+    if (element.style.position !== "absolute") return
     e.preventDefault()
 
     const target = e.currentTarget as HTMLElement
     target.setPointerCapture(e.pointerId)
     const startX = e.clientX
     const startY = e.clientY
+    const shiftKey = e.shiftKey
+    let didMove = false
 
     // Block entire group drag if any selected element is locked
     const dragIds = selectedIds.includes(elementId) ? selectedIds : [elementId]
@@ -169,6 +176,7 @@ export const ElementRenderer = observer(function ElementRenderer({
     }
 
     const onMove = (me: PointerEvent) => {
+      didMove = true
       const dx = (me.clientX - startX) / z
       const dy = (me.clientY - startY) / z
 
@@ -211,6 +219,15 @@ export const ElementRenderer = observer(function ElementRenderer({
     const onUp = (me: PointerEvent) => {
       cleanup()
       clearTransforms()
+
+      // Click without drag — handle selection (including Shift+Click)
+      if (!didMove) {
+        clickHandledRef.current = true
+        onSelect(element.id, shiftKey)
+        const rect = target.getBoundingClientRect()
+        bridge.send({ type: "ELEMENT_CLICKED", payload: { id: element.id, bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, shiftKey } })
+        return
+      }
 
       // Check if dropping into auto-layout container
       const dropTarget = findDropTarget(me.clientX, me.clientY, dragIds, documentStore)
