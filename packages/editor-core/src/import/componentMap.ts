@@ -58,6 +58,7 @@ export const JSX_TO_EDITOR: Record<string, ComponentMapping> = {
   h5: { type: "text", defaultStyle: { fontSize: 18, fontWeight: 600 } },
   h6: { type: "text", defaultStyle: { fontSize: 16, fontWeight: 600 } },
   img: { type: "image" },
+  video: { type: "video" },
 }
 
 export function getComponentMapping(tagName: string): ComponentMapping {

@@ -311,6 +311,18 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
   }
   if (alt) props.alt = alt
 
+  // Video props
+  if (mapping.type === "video") {
+    const autoPlay = getBooleanAttribute(node.openingElement.attributes, "autoPlay")
+    const muted = getBooleanAttribute(node.openingElement.attributes, "muted")
+    const loop = getBooleanAttribute(node.openingElement.attributes, "loop")
+    const controls = getBooleanAttribute(node.openingElement.attributes, "controls")
+    if (autoPlay !== null) props.autoplay = autoPlay
+    if (muted !== null) props.muted = muted
+    if (loop !== null) props.loop = loop
+    if (controls !== null) props.controls = controls
+  }
+
   // Parse Tailwind classes
   const tw = className ? parseTailwindClasses(className) : { style: {}, layout: {} }
 
@@ -348,6 +360,52 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
     props.label = textContent
   }
 
+  // Extract layout info from inline styles (takes precedence over Tailwind)
+  let layoutMode = tw.layout.layoutMode ?? "none"
+  let direction = tw.layout.direction ?? DEFAULT_LAYOUT_PROPS.direction
+  let layoutGap = tw.layout.gap ?? DEFAULT_LAYOUT_PROPS.gap
+  let layoutAlignItems = (tw.layout.alignItems as any) ?? DEFAULT_LAYOUT_PROPS.alignItems
+  let layoutJustifyContent = (tw.layout.justifyContent as any) ?? DEFAULT_LAYOUT_PROPS.justifyContent
+  let layoutPaddingTop = tw.layout.padding?.top ?? DEFAULT_LAYOUT_PROPS.paddingTop
+  let layoutPaddingRight = tw.layout.padding?.right ?? DEFAULT_LAYOUT_PROPS.paddingRight
+  let layoutPaddingBottom = tw.layout.padding?.bottom ?? DEFAULT_LAYOUT_PROPS.paddingBottom
+  let layoutPaddingLeft = tw.layout.padding?.left ?? DEFAULT_LAYOUT_PROPS.paddingLeft
+
+  if (inlineStyle.display === "flex") {
+    layoutMode = "flex"
+    direction = (inlineStyle.flexDirection as "row" | "column") ?? direction
+  } else if (inlineStyle.display === "grid") {
+    layoutMode = "grid"
+  }
+  if (typeof inlineStyle.gap === "number") layoutGap = inlineStyle.gap
+  if (inlineStyle.alignItems) layoutAlignItems = inlineStyle.alignItems as any
+  if (inlineStyle.justifyContent) layoutJustifyContent = inlineStyle.justifyContent as any
+  if (typeof inlineStyle.paddingTop === "number") layoutPaddingTop = inlineStyle.paddingTop
+  if (typeof inlineStyle.paddingRight === "number") layoutPaddingRight = inlineStyle.paddingRight
+  if (typeof inlineStyle.paddingBottom === "number") layoutPaddingBottom = inlineStyle.paddingBottom
+  if (typeof inlineStyle.paddingLeft === "number") layoutPaddingLeft = inlineStyle.paddingLeft
+
+  // Remove layout properties from style (they're now in layoutMode/layoutProps)
+  const cleanedStyle = { ...inlineStyle }
+  if (layoutMode !== "none") {
+    delete cleanedStyle.display
+    delete cleanedStyle.flexDirection
+    delete cleanedStyle.gap
+    delete cleanedStyle.alignItems
+    delete cleanedStyle.justifyContent
+  }
+  if (
+    layoutPaddingTop !== DEFAULT_LAYOUT_PROPS.paddingTop ||
+    layoutPaddingRight !== DEFAULT_LAYOUT_PROPS.paddingRight ||
+    layoutPaddingBottom !== DEFAULT_LAYOUT_PROPS.paddingBottom ||
+    layoutPaddingLeft !== DEFAULT_LAYOUT_PROPS.paddingLeft
+  ) {
+    delete cleanedStyle.paddingTop
+    delete cleanedStyle.paddingRight
+    delete cleanedStyle.paddingBottom
+    delete cleanedStyle.paddingLeft
+  }
+
   const template: ElementTemplate = {
     type: effectiveType,
     name: generateName(effectiveType === "text" ? "text" : tagName, nextId()),
@@ -357,24 +415,28 @@ function walkJSXElement(node: any, warnings: string[], nextId: () => number, dep
       top: undefined,
       ...mapping.defaultStyle,
       ...tw.style,
-      ...inlineStyle,
+      ...cleanedStyle,
     },
     props,
     locked: false,
     visible: true,
-    layoutMode: tw.layout.layoutMode ?? "none",
+    layoutMode,
     layoutProps: {
       ...DEFAULT_LAYOUT_PROPS,
-      direction: tw.layout.direction ?? DEFAULT_LAYOUT_PROPS.direction,
-      gap: tw.layout.gap ?? DEFAULT_LAYOUT_PROPS.gap,
-      alignItems: (tw.layout.alignItems as any) ?? DEFAULT_LAYOUT_PROPS.alignItems,
-      justifyContent: (tw.layout.justifyContent as any) ?? DEFAULT_LAYOUT_PROPS.justifyContent,
-      paddingTop: tw.layout.padding?.top ?? DEFAULT_LAYOUT_PROPS.paddingTop,
-      paddingRight: tw.layout.padding?.right ?? DEFAULT_LAYOUT_PROPS.paddingRight,
-      paddingBottom: tw.layout.padding?.bottom ?? DEFAULT_LAYOUT_PROPS.paddingBottom,
-      paddingLeft: tw.layout.padding?.left ?? DEFAULT_LAYOUT_PROPS.paddingLeft,
+      direction,
+      gap: layoutGap,
+      alignItems: layoutAlignItems,
+      justifyContent: layoutJustifyContent,
+      paddingTop: layoutPaddingTop,
+      paddingRight: layoutPaddingRight,
+      paddingBottom: layoutPaddingBottom,
+      paddingLeft: layoutPaddingLeft,
     },
-    sizing: { ...DEFAULT_SIZING, ...tw.layout.sizing },
+    sizing: {
+      ...DEFAULT_SIZING,
+      ...tw.layout.sizing,
+      ...(inlineStyle.alignSelf === "stretch" ? { w: "fill" as const } : {}),
+    },
     canvasPosition: null,
     children: childElements,
   }
