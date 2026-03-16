@@ -20,7 +20,13 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
-type ContentRenderer = (props: Record<string, unknown>, editorMode: "edit" | "interact") => React.ReactNode
+interface FormContext {
+  value: unknown
+  error: string | null
+  onChange: (v: unknown) => void
+}
+
+type ContentRenderer = (props: Record<string, unknown>, editorMode: "edit" | "interact", formContext?: FormContext, formRole?: "submit" | "reset") => React.ReactNode
 
 const registry: Record<string, ContentRenderer> = {
   text: (props) => String(props.content ?? "Text"),
@@ -35,38 +41,40 @@ const registry: Record<string, ContentRenderer> = {
     />
   ),
 
-  image: (props) => props.src ? (
-    <img src={String(props.src)} alt={String(props.alt ?? "")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-  ) : (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>
-      Image
-    </div>
-  ),
+  image: (props) =>
+    props.src ? (
+      <img src={String(props.src)} alt={String(props.alt ?? "")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    ) : (
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>Image</div>
+    ),
 
-  video: (props) => props.src ? (
-    <video
-      src={String(props.src)}
-      autoPlay={props.autoplay !== false}
-      muted={props.muted !== false}
-      loop={props.loop !== false}
-      controls={Boolean(props.controls)}
-      playsInline
-      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-    />
-  ) : (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>
-      Video
-    </div>
-  ),
+  video: (props) =>
+    props.src ? (
+      <video
+        src={String(props.src)}
+        autoPlay={props.autoplay !== false}
+        muted={props.muted !== false}
+        loop={props.loop !== false}
+        controls={Boolean(props.controls)}
+        playsInline
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+    ) : (
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>Video</div>
+    ),
 
-  "sc:button": (props) => (
-    <Button
-      variant={(props.variant as "default" | "destructive" | "outline" | "secondary" | "ghost" | "link") ?? "default"}
-      size={(props.size as "default" | "sm" | "lg" | "icon") ?? "default"}
-    >
-      {String(props.label ?? "Button")}
-    </Button>
-  ),
+  "sc:button": (props, editorMode, _formContext, formRole) => {
+    const buttonType = editorMode === "interact" && formRole === "submit" ? "submit" : editorMode === "interact" && formRole === "reset" ? "reset" : "button"
+    return (
+      <Button
+        variant={(props.variant as "default" | "destructive" | "outline" | "secondary" | "ghost" | "link") ?? "default"}
+        size={(props.size as "default" | "sm" | "lg" | "icon") ?? "default"}
+        type={buttonType}
+      >
+        {String(props.label ?? "Button")}
+      </Button>
+    )
+  },
 
   "sc:card": (props) => (
     <Card>
@@ -74,39 +82,65 @@ const registry: Record<string, ContentRenderer> = {
         <CardTitle>{String(props.title ?? "Card Title")}</CardTitle>
         <CardDescription>{String(props.description ?? "")}</CardDescription>
       </CardHeader>
-      <CardContent><p>{String(props.content ?? "")}</p></CardContent>
+      <CardContent>
+        <p>{String(props.content ?? "")}</p>
+      </CardContent>
     </Card>
   ),
 
-  "sc:input": (props, editorMode) => (
-    <Input placeholder={String(props.placeholder ?? "")} type={String(props.type ?? "text")} readOnly={editorMode === "edit"} />
-  ),
+  "sc:input": (props, editorMode, formContext) =>
+    formContext ? (
+      <Input
+        placeholder={String(props.placeholder ?? "")}
+        type={String(props.type ?? "text")}
+        value={String(formContext.value ?? "")}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => formContext.onChange(e.target.value)}
+      />
+    ) : (
+      <Input placeholder={String(props.placeholder ?? "")} type={String(props.type ?? "text")} readOnly={editorMode === "edit"} />
+    ),
 
-  "sc:badge": (props) => (
-    <Badge variant={(props.variant as "default" | "secondary" | "destructive" | "outline") ?? "default"}>
-      {String(props.label ?? "Badge")}
-    </Badge>
-  ),
+  "sc:badge": (props) => <Badge variant={(props.variant as "default" | "secondary" | "destructive" | "outline") ?? "default"}>{String(props.label ?? "Badge")}</Badge>,
 
-  "sc:checkbox": (props) => (
-    <div className="flex items-center space-x-2">
-      <Checkbox id="cb" />
-      <Label htmlFor="cb">{String(props.label ?? "Check")}</Label>
-    </div>
-  ),
+  "sc:checkbox": (props, editorMode, formContext) =>
+    formContext ? (
+      <div className="flex items-center space-x-2">
+        <Checkbox id="cb" checked={Boolean(formContext.value)} onCheckedChange={(v) => formContext.onChange(v)} disabled={editorMode === "edit"} />
+        <Label htmlFor="cb">{String(props.label ?? "Check")}</Label>
+      </div>
+    ) : (
+      <div className="flex items-center space-x-2">
+        <Checkbox id="cb" />
+        <Label htmlFor="cb">{String(props.label ?? "Check")}</Label>
+      </div>
+    ),
 
-  "sc:switch": (props) => (
-    <div className="flex items-center space-x-2">
-      <Switch id="sw" />
-      <Label htmlFor="sw">{String(props.label ?? "Switch")}</Label>
-    </div>
-  ),
+  "sc:switch": (props, editorMode, formContext) =>
+    formContext ? (
+      <div className="flex items-center space-x-2">
+        <Switch id="sw" checked={Boolean(formContext.value)} onCheckedChange={(v) => formContext.onChange(v)} disabled={editorMode === "edit"} />
+        <Label htmlFor="sw">{String(props.label ?? "Switch")}</Label>
+      </div>
+    ) : (
+      <div className="flex items-center space-x-2">
+        <Switch id="sw" />
+        <Label htmlFor="sw">{String(props.label ?? "Switch")}</Label>
+      </div>
+    ),
 
   "sc:label": (props) => <Label>{String(props.text ?? "Label")}</Label>,
 
-  "sc:textarea": (props, editorMode) => (
-    <Textarea placeholder={String(props.placeholder ?? "")} rows={Number(props.rows ?? 3)} readOnly={editorMode === "edit"} />
-  ),
+  "sc:textarea": (props, editorMode, formContext) =>
+    formContext ? (
+      <Textarea
+        placeholder={String(props.placeholder ?? "")}
+        rows={Number(props.rows ?? 3)}
+        value={String(formContext.value ?? "")}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => formContext.onChange(e.target.value)}
+      />
+    ) : (
+      <Textarea placeholder={String(props.placeholder ?? "")} rows={Number(props.rows ?? 3)} readOnly={editorMode === "edit"} />
+    ),
 
   "sc:avatar": (props) => (
     <Avatar>
@@ -126,21 +160,29 @@ const registry: Record<string, ContentRenderer> = {
     </div>
   ),
 
-  "sc:slider": (props) => (
-    <Slider
-      defaultValue={[Number(props.value ?? 50)]}
-      min={Number(props.min ?? 0)}
-      max={Number(props.max ?? 100)}
-      step={Number(props.step ?? 1)}
-    />
-  ),
+  "sc:slider": (props, editorMode, formContext) =>
+    formContext ? (
+      <Slider
+        value={[Number(formContext.value ?? 50)]}
+        onValueChange={(v) => formContext.onChange(v[0])}
+        min={Number(props.min ?? 0)}
+        max={Number(props.max ?? 100)}
+        step={Number(props.step ?? 1)}
+      />
+    ) : (
+      <Slider defaultValue={[Number(props.value ?? 50)]} min={Number(props.min ?? 0)} max={Number(props.max ?? 100)} step={Number(props.step ?? 1)} />
+    ),
 
   "sc:tabs": (props) => {
     const tabs = (props.tabs as string[]) ?? ["Tab 1", "Tab 2"]
     return (
       <Tabs defaultValue={String(props.activeTab ?? tabs[0])}>
         <TabsList>
-          {tabs.map((t: string) => <TabsTrigger key={t} value={t}>{t}</TabsTrigger>)}
+          {tabs.map((t: string) => (
+            <TabsTrigger key={t} value={t}>
+              {t}
+            </TabsTrigger>
+          ))}
         </TabsList>
         {tabs.map((t: string) => (
           <TabsContent key={t} value={t}>
@@ -160,15 +202,35 @@ const registry: Record<string, ContentRenderer> = {
 
   "sc:toggle": (props) => <Toggle>{String(props.label ?? "Toggle")}</Toggle>,
 
-  "sc:select": (props) => {
+  "sc:select": (props, editorMode, formContext) => {
     const options = (props.options as string[]) ?? ["Option 1"]
+    if (formContext) {
+      return (
+        <Select value={String(formContext.value ?? "")} onValueChange={(v) => formContext.onChange(v)}>
+          <SelectTrigger>
+            <SelectValue placeholder={String(props.placeholder ?? "Select")} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((o: string) => (
+              <SelectItem key={o} value={o}>
+                {o}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )
+    }
     return (
       <Select defaultValue={options[0]}>
         <SelectTrigger>
           <SelectValue placeholder={String(props.placeholder ?? "Select")} />
         </SelectTrigger>
         <SelectContent>
-          {options.map((o: string) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+          {options.map((o: string) => (
+            <SelectItem key={o} value={o}>
+              {o}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     )
@@ -181,13 +243,17 @@ const registry: Record<string, ContentRenderer> = {
       <Table>
         <TableHeader>
           <TableRow>
-            {headers.map((h: string) => <TableHead key={h}>{h}</TableHead>)}
+            {headers.map((h: string) => (
+              <TableHead key={h}>{h}</TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((row: string[], i: number) => (
             <TableRow key={i}>
-              {row.map((cell: string, j: number) => <TableCell key={j}>{cell}</TableCell>)}
+              {row.map((cell: string, j: number) => (
+                <TableCell key={j}>{cell}</TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>
@@ -209,8 +275,20 @@ const registry: Record<string, ContentRenderer> = {
     )
   },
 
-  "sc:radio-group": (props) => {
+  "sc:radio-group": (props, editorMode, formContext) => {
     const options = (props.options as string[]) ?? ["Option 1"]
+    if (formContext) {
+      return (
+        <RadioGroup value={String(formContext.value ?? options[0])} onValueChange={(v) => formContext.onChange(v)}>
+          {options.map((o: string) => (
+            <div key={o} className="flex items-center space-x-2">
+              <RadioGroupItem value={o} id={`r-${o}`} />
+              <Label htmlFor={`r-${o}`}>{o}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      )
+    }
     return (
       <RadioGroup defaultValue={String(props.value ?? options[0])}>
         {options.map((o: string) => (
@@ -222,9 +300,17 @@ const registry: Record<string, ContentRenderer> = {
       </RadioGroup>
     )
   },
+
+  form: () => null, // children rendered by ElementRenderer, form tag wraps them
 }
 
-export function getElementContent(type: string, props: Record<string, unknown>, editorMode: "edit" | "interact"): React.ReactNode {
+export function getElementContent(
+  type: string,
+  props: Record<string, unknown>,
+  editorMode: "edit" | "interact",
+  formContext?: FormContext,
+  formRole?: "submit" | "reset"
+): React.ReactNode {
   const renderer = registry[type]
-  return renderer ? renderer(props, editorMode) : null
+  return renderer ? renderer(props, editorMode, formContext, formRole) : null
 }

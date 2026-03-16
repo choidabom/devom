@@ -7,6 +7,7 @@
 ## 현재 상태
 
 `image` 타입이 이미 존재:
+
 - `types.ts`: `ElementType`에 `"image"` 포함
 - `DocumentStore.getDefaultProps()`: `{ src: "", alt: "Image" }` 반환
 - `ElementRenderer`: `<img>` 렌더링 (src 없으면 placeholder 표시)
@@ -39,8 +40,8 @@
 
 ## 수정 파일
 
-| 파일 | 변경 내용 |
-|------|----------|
-| `apps/editor-shell/src/App.tsx` | Image 업로드 메시지 핸들러 |
-| `apps/editor-shell/src/components/Toolbar.tsx` | Image 항목 추가 (Media 카테고리) |
+| 파일                                                   | 변경 내용                                |
+| ------------------------------------------------------ | ---------------------------------------- |
+| `apps/editor-shell/src/App.tsx`                        | Image 업로드 메시지 핸들러               |
+| `apps/editor-shell/src/components/Toolbar.tsx`         | Image 항목 추가 (Media 카테고리)         |
 | `apps/editor-shell/src/components/PropertiesPanel.tsx` | image 속성 UI (src 변경, alt, objectFit) |

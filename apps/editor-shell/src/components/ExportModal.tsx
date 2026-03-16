@@ -1,26 +1,28 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo, useRef } from "react"
 import { observer } from "mobx-react-lite"
+import { Highlight, themes } from "prism-react-renderer"
 import html2canvas from "html2canvas"
 import { jsPDF } from "jspdf"
 import { exportToJSON, exportToJSX, exportToHTML, convertToPageLayout } from "@devom/editor-core"
 import { documentStore } from "../stores"
 import { T } from "../theme"
 
-export const ExportModal = observer(function ExportModal({ onClose }: { onClose: () => void }) {
+const FORMAT_LANGUAGE = { html: "html", jsx: "tsx", json: "json" } as const
+
+export const ExportPanel = observer(function ExportPanel({ onClose }: { onClose: () => void }) {
   const [format, setFormat] = useState<"html" | "jsx" | "json">("html")
   const [copied, setCopied] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [panelWidth, setPanelWidth] = useState(480)
+  const isResizingRef = useRef(false)
   const data = documentStore.toSerializable()
-  // Always export as page layout (flex column) regardless of canvas/page mode
-  const exportElements = documentStore.canvasMode === 'canvas'
-    ? convertToPageLayout(data.elements, data.rootId)
-    : data.elements
+  const exportElements = documentStore.canvasMode === "canvas" ? convertToPageLayout(data.elements, data.rootId) : data.elements
 
-  const output = format === "html"
-    ? exportToHTML(exportElements, data.rootId)
-    : format === "jsx"
-    ? exportToJSX(exportElements, data.rootId)
-    : exportToJSON(exportElements, data.rootId)
+  const output = useMemo(() => {
+    if (format === "html") return exportToHTML(exportElements, data.rootId)
+    if (format === "json") return exportToJSON(exportElements, data.rootId)
+    return exportToJSX(exportElements, data.rootId)
+  }, [format, exportElements, data.rootId])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(output)
@@ -29,7 +31,7 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
   }
 
   const handleDownload = () => {
-    const ext = format === "html" ? "html" : format === "jsx" ? "jsx" : "json"
+    const ext = format === "html" ? "html" : format === "jsx" ? "tsx" : "json"
     const mime = format === "json" ? "application/json" : "text/plain"
     const blob = new Blob([output], { type: `${mime};charset=utf-8` })
     const url = URL.createObjectURL(blob)
@@ -48,16 +50,16 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
       iframe = document.createElement("iframe")
       iframe.style.cssText = "position:fixed;left:-9999px;top:0;width:1280px;height:900px;border:none;"
       document.body.appendChild(iframe)
-      const iframeDoc = iframe.contentDocument!
+      const iframeDoc = iframe.contentDocument
+      if (!iframeDoc) throw new Error("Failed to access iframe document")
       iframeDoc.open()
       iframeDoc.write(htmlContent)
       iframeDoc.close()
 
-      // Wait for fonts to load
       if (iframeDoc.fonts) await iframeDoc.fonts.ready
-      else await new Promise(r => setTimeout(r, 500))
+      else await new Promise((r) => setTimeout(r, 500))
 
-      const root = iframeDoc.body.firstElementChild as HTMLElement ?? iframeDoc.body
+      const root = (iframeDoc.body.firstElementChild as HTMLElement) ?? iframeDoc.body
       const canvas = await html2canvas(root, {
         scale: 2,
         useCORS: true,
@@ -82,51 +84,214 @@ export const ExportModal = observer(function ExportModal({ onClose }: { onClose:
     }
   }, [exportElements, data.rootId])
 
+  const handleResizePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault()
+    const target = e.currentTarget as HTMLElement
+    target.setPointerCapture(e.pointerId)
+    isResizingRef.current = true
+    const startX = e.clientX
+    const startW = panelWidth
+    const line = target.firstElementChild as HTMLElement
+    if (line) line.style.background = T.accent
+
+    const onMove = (ev: PointerEvent) => {
+      setPanelWidth(Math.max(320, Math.min(900, startW - (ev.clientX - startX))))
+    }
+    const onUp = () => {
+      if (line) line.style.background = ""
+      isResizingRef.current = false
+      target.removeEventListener("pointermove", onMove)
+      target.removeEventListener("pointerup", onUp)
+      target.removeEventListener("pointercancel", onUp)
+    }
+    target.addEventListener("pointermove", onMove)
+    target.addEventListener("pointerup", onUp)
+    target.addEventListener("pointercancel", onUp)
+  }
+
   return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", backdropFilter: "blur(4px)",
-      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
-    }} onClick={onClose}>
-      <div style={{
-        background: T.panel, borderRadius: 16, width: 640, maxHeight: "80vh",
-        display: "flex", flexDirection: "column", boxShadow: "0 24px 48px rgba(0,0,0,0.12)",
-        border: `1px solid ${T.panelBorder}`,
-      }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderBottom: `1px solid ${T.border}` }}>
-          <div style={{ display: "flex", gap: 4 }}>
-            {(["html", "jsx", "json"] as const).map(f => (
-              <button key={f} onClick={() => setFormat(f)} style={{
-                padding: "6px 14px", background: format === f ? T.accent : "transparent",
-                color: format === f ? "#fff" : T.text, border: `1px solid ${format === f ? T.accent : T.inputBorder}`,
-                borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 500, textTransform: "uppercase",
-              }}>{f}</button>
+    <div
+      style={{
+        position: "absolute",
+        right: 0,
+        top: 0,
+        bottom: 0,
+        width: panelWidth,
+        display: "flex",
+        flexDirection: "column",
+        zIndex: 20,
+        padding: "0 8px 8px 0",
+      }}
+    >
+      {/* Resize handle */}
+      <div
+        style={{
+          position: "absolute",
+          left: -4,
+          top: 0,
+          bottom: 0,
+          width: 8,
+          cursor: "col-resize",
+          zIndex: 21,
+          touchAction: "none",
+        }}
+        onPointerDown={handleResizePointerDown}
+        onPointerEnter={(e) => {
+          if (!isResizingRef.current) {
+            const line = e.currentTarget.firstElementChild as HTMLElement
+            if (line) line.style.background = T.border
+          }
+        }}
+        onPointerLeave={(e) => {
+          if (!isResizingRef.current) {
+            const line = e.currentTarget.firstElementChild as HTMLElement
+            if (line) line.style.background = ""
+          }
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            left: 3,
+            top: 0,
+            bottom: 0,
+            width: 1,
+            transition: "background 0.15s ease",
+          }}
+        />
+      </div>
+
+      {/* Panel content */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          background: T.panel,
+          borderRadius: T.panelRadius,
+          boxShadow: T.panelShadow,
+          border: `1px solid ${T.panelBorder}`,
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: 3 }}>
+            {(["html", "jsx", "json"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFormat(f)}
+                style={{
+                  padding: "4px 10px",
+                  background: format === f ? T.accent : "transparent",
+                  color: format === f ? "#fff" : T.text,
+                  border: `1px solid ${format === f ? T.accent : T.inputBorder}`,
+                  borderRadius: 5,
+                  cursor: "pointer",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  textTransform: "uppercase",
+                }}
+              >
+                {f}
+              </button>
             ))}
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={handlePdfDownload} disabled={pdfLoading} style={{
-              padding: "6px 16px", background: T.hover, color: T.text,
-              border: `1px solid ${T.inputBorder}`, borderRadius: 6, cursor: pdfLoading ? "wait" : "pointer", fontSize: 12, fontWeight: 500,
-              opacity: pdfLoading ? 0.6 : 1,
-            }}>{pdfLoading ? "Generating..." : "PDF"}</button>
-            <button onClick={handleDownload} style={{
-              padding: "6px 16px", background: T.hover, color: T.text,
-              border: `1px solid ${T.inputBorder}`, borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 500,
-            }}>Download</button>
-            <button onClick={handleCopy} style={{
-              padding: "6px 16px", background: T.accent, color: "#fff",
-              border: "none", borderRadius: 6, cursor: "pointer", fontSize: 12, fontWeight: 500,
-            }}>{copied ? "Copied!" : "Copy"}</button>
-            <button onClick={onClose} style={{
-              padding: "6px 10px", background: T.hover, color: T.textSub,
-              border: `1px solid ${T.inputBorder}`, borderRadius: 6, cursor: "pointer", fontSize: 14,
-            }}>✕</button>
-          </div>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "2px 6px",
+              background: "transparent",
+              color: T.textSub,
+              border: "none",
+              borderRadius: 4,
+              cursor: "pointer",
+              fontSize: 14,
+            }}
+          >
+            ✕
+          </button>
         </div>
-        <textarea value={output} readOnly style={{
-          flex: 1, minHeight: 300, padding: 20, background: "#fafafa", color: T.text,
-          border: "none", fontFamily: "'SF Mono', Menlo, monospace", fontSize: 12, resize: "none",
-          borderBottomLeftRadius: 16, borderBottomRightRadius: 16,
-        }} />
+
+        {/* Code area */}
+        <div style={{ flex: 1, overflow: "auto" }}>
+          <Highlight theme={themes.oneLight} code={output} language={FORMAT_LANGUAGE[format]}>
+            {({ tokens, getLineProps, getTokenProps }) => (
+              <pre
+                style={{
+                  margin: 0,
+                  padding: 16,
+                  background: "#fafafa",
+                  fontSize: 11,
+                  lineHeight: 1.6,
+                  fontFamily: "'SF Mono', Menlo, monospace",
+                  minHeight: "100%",
+                }}
+              >
+                {tokens.map((line, i) => (
+                  <div key={i} {...getLineProps({ line })}>
+                    <span style={{ display: "inline-block", width: 28, color: "#ccc", fontSize: 10, textAlign: "right", paddingRight: 12, userSelect: "none" }}>{i + 1}</span>
+                    {line.map((token, key) => (
+                      <span key={key} {...getTokenProps({ token })} />
+                    ))}
+                  </div>
+                ))}
+              </pre>
+            )}
+          </Highlight>
+        </div>
+
+        {/* Footer actions */}
+        <div style={{ display: "flex", gap: 6, padding: "8px 12px", borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
+          <button
+            onClick={handleCopy}
+            style={{
+              flex: 1,
+              padding: "6px 0",
+              background: T.accent,
+              color: "#fff",
+              border: "none",
+              borderRadius: 6,
+              cursor: "pointer",
+              fontSize: 11,
+              fontWeight: 500,
+            }}
+          >
+            {copied ? "Copied!" : "Copy"}
+          </button>
+          <button
+            onClick={handleDownload}
+            style={{
+              padding: "6px 12px",
+              background: T.hover,
+              color: T.text,
+              border: `1px solid ${T.inputBorder}`,
+              borderRadius: 6,
+              cursor: "pointer",
+              fontSize: 11,
+              fontWeight: 500,
+            }}
+          >
+            Download
+          </button>
+          <button
+            onClick={handlePdfDownload}
+            disabled={pdfLoading}
+            style={{
+              padding: "6px 12px",
+              background: T.hover,
+              color: T.text,
+              border: `1px solid ${T.inputBorder}`,
+              borderRadius: 6,
+              cursor: pdfLoading ? "wait" : "pointer",
+              fontSize: 11,
+              fontWeight: 500,
+              opacity: pdfLoading ? 0.6 : 1,
+            }}
+          >
+            {pdfLoading ? "..." : "PDF"}
+          </button>
+        </div>
       </div>
     </div>
   )

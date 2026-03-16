@@ -13,6 +13,7 @@
 ## Task 1: Add `SET_MODE` to protocol
 
 **Files:**
+
 - Modify: `packages/editor-core/src/protocol.ts`
 
 - [ ] **Step 1: Add `SET_MODE` to `ShellToCanvasMessage`**
@@ -35,6 +36,7 @@ git commit -m "feat(editor-core): add SET_MODE protocol message"
 ## Task 2: Add mode state and toggle to Shell
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/App.tsx`
 - Modify: `apps/editor-shell/src/components/Toolbar.tsx`
 
@@ -52,7 +54,7 @@ Add after `handleAlign`:
 
 ```typescript
 const handleToggleMode = useCallback(() => {
-  setEditorMode(prev => {
+  setEditorMode((prev) => {
     const next = prev === "edit" ? "interact" : "edit"
     bridge.send({ type: "SET_MODE", payload: { mode: next } })
     if (next === "interact") selectionStore.clear()
@@ -98,16 +100,19 @@ Add `editorMode` and `onToggleMode` props to `<Toolbar>`:
 Wrap the selection-dependent rendering. The Properties Panel area should show a message when in interaction mode:
 
 ```tsx
-{editorMode === "interact" ? (
-  <div style={{ padding: 20, color: T.textMuted, fontSize: 13, textAlign: "center" }}>
-    Interaction Mode<br />
-    <span style={{ fontSize: 11 }}>Press V to return to edit mode</span>
-  </div>
-) : selectedElements.length > 0 ? <PropertiesPanel /> : (
-  <div style={{ padding: 20, color: T.textMuted, fontSize: 13, textAlign: "center" }}>
-    Select an element
-  </div>
-)}
+{
+  editorMode === "interact" ? (
+    <div style={{ padding: 20, color: T.textMuted, fontSize: 13, textAlign: "center" }}>
+      Interaction Mode
+      <br />
+      <span style={{ fontSize: 11 }}>Press V to return to edit mode</span>
+    </div>
+  ) : selectedElements.length > 0 ? (
+    <PropertiesPanel />
+  ) : (
+    <div style={{ padding: 20, color: T.textMuted, fontSize: 13, textAlign: "center" }}>Select an element</div>
+  )
+}
 ```
 
 - [ ] **Step 6: Handle ESC key from canvas for mode switch**
@@ -126,7 +131,11 @@ if (k.key === "Escape" && editorMode === "interact") {
 Read Toolbar.tsx, then add `editorMode` and `onToggleMode` to props interface. Add a toggle button in the toolbar (before the undo/redo buttons):
 
 ```tsx
-<button onClick={onToggleMode} style={{ ...buttonStyle, background: editorMode === "interact" ? "#6366f1" : undefined, color: editorMode === "interact" ? "#fff" : undefined }} title={editorMode === "edit" ? "Interaction Mode (P)" : "Edit Mode (V)"}>
+<button
+  onClick={onToggleMode}
+  style={{ ...buttonStyle, background: editorMode === "interact" ? "#6366f1" : undefined, color: editorMode === "interact" ? "#fff" : undefined }}
+  title={editorMode === "edit" ? "Interaction Mode (P)" : "Edit Mode (V)"}
+>
   {editorMode === "edit" ? "▶" : "✎"}
 </button>
 ```
@@ -143,6 +152,7 @@ git commit -m "feat(editor-shell): add edit/interaction mode toggle with keyboar
 ## Task 3: Handle mode in Canvas
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/App.tsx`
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 
@@ -178,10 +188,12 @@ onPointerUp={editorMode === "edit" ? handleCanvasPointerUp : undefined}
 Hide SelectionOverlay and SnapGuides:
 
 ```tsx
-{editorMode === "edit" && !isDragging && selectedIds.map(id => (
-  <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} />
-))}
-{editorMode === "edit" && <SnapGuides lines={snapLines} />}
+{
+  editorMode === "edit" && !isDragging && selectedIds.map((id) => <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} />)
+}
+{
+  editorMode === "edit" && <SnapGuides lines={snapLines} />
+}
 ```
 
 - [ ] **Step 4: Pass mode to ElementRenderer**

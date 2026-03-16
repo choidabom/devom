@@ -1,12 +1,15 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useMemo } from "react"
 import { observer } from "mobx-react-lite"
-import type { DocumentStore, SectionRole } from "@devom/editor-core"
+import type { DocumentStore, SectionRole, FormFieldConfig } from "@devom/editor-core"
 import type { MessageBridge } from "@devom/editor-core"
 import { getContainerStyles, getChildSizingStyles, getSectionStyles, getSectionContentStyles } from "@devom/editor-core"
 import { calcSnap, type SnapLine, type Bounds } from "../utils/snap"
 import { findDropTarget, calcInsertionIndicator } from "../utils/autoLayoutDrag"
 import { SectionInsertButton } from "./SectionInsertButton"
+import { FormFieldInsertButton } from "./FormFieldInsertButton"
 import { getElementContent } from "./componentRegistry"
+import { useFormRuntime } from "../hooks/useFormRuntime"
+import { FormRuntimeContext, useFormRuntimeContext } from "../contexts/FormRuntimeContext"
 
 interface ElementRendererProps {
   elementId: string
@@ -22,12 +25,27 @@ interface ElementRendererProps {
   zoom?: number
 }
 
-export const ElementRenderer = observer(function ElementRenderer({ elementId, selectedIds, onSelect, onDragChange, onSnapLines, onInsertionIndicator, onDropHighlight, documentStore, bridge, editorMode, zoom = 1 }: ElementRendererProps) {
+export const ElementRenderer = observer(function ElementRenderer({
+  elementId,
+  selectedIds,
+  onSelect,
+  onDragChange,
+  onSnapLines,
+  onInsertionIndicator,
+  onDropHighlight,
+  documentStore,
+  bridge,
+  editorMode,
+  zoom = 1,
+}: ElementRendererProps) {
   const element = documentStore.getElement(elementId)
   const dragCleanupRef = useRef<(() => void) | null>(null)
+  const clickHandledRef = useRef(false)
 
   useEffect(() => {
-    return () => { dragCleanupRef.current?.() }
+    return () => {
+      dragCleanupRef.current?.()
+    }
   }, [])
 
   if (!element || !element.visible) return null
@@ -38,10 +56,8 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   // Auto Layout styles
   const containerStyles = getContainerStyles(element)
   const parent = element.parentId ? documentStore.getElement(element.parentId) : undefined
-  const inAutoLayout = (parent?.layoutMode === 'flex' || parent?.layoutMode === 'grid') && !!parent?.layoutProps
-  const childSizingStyles = inAutoLayout
-    ? getChildSizingStyles(element, parent!.layoutProps.direction, parent!.layoutProps.flexWrap)
-    : {}
+  const inAutoLayout = (parent?.layoutMode === "flex" || parent?.layoutMode === "grid") && !!parent?.layoutProps
+  const childSizingStyles = inAutoLayout ? getChildSizingStyles(element, parent!.layoutProps.direction, parent!.layoutProps.flexWrap) : {}
 
   // Section styles
   const sectionStyles = getSectionStyles(element)
@@ -50,6 +66,10 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
 
   const handleClick = (e: React.MouseEvent) => {
     if (editorMode === "interact") return
+    if (clickHandledRef.current) {
+      clickHandledRef.current = false
+      return
+    }
     e.stopPropagation()
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     onSelect(element.id, e.shiftKey)
@@ -64,22 +84,26 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   }
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.button === 2) return  // Right-click: skip drag, let contextmenu handle
+    if (e.button === 2) return // Right-click: skip drag, let contextmenu handle
     if (editorMode === "interact") return
-    if (element.locked || isRoot) { e.stopPropagation(); return }
-    if (inAutoLayout) return  // Auto-layout drag handled separately
-    if (element.style.position !== "absolute") return
+    if (element.locked || isRoot) {
+      e.stopPropagation()
+      return
+    }
     e.stopPropagation()
+    if (inAutoLayout) return // Auto-layout drag handled by click, not pointer
+    if (element.style.position !== "absolute") return
     e.preventDefault()
 
     const target = e.currentTarget as HTMLElement
     target.setPointerCapture(e.pointerId)
     const startX = e.clientX
     const startY = e.clientY
+    let didMove = false
 
     // Block entire group drag if any selected element is locked
     const dragIds = selectedIds.includes(elementId) ? selectedIds : [elementId]
-    const hasLockedInGroup = dragIds.some(id => {
+    const hasLockedInGroup = dragIds.some((id) => {
       const el = documentStore.getElement(id)
       return el?.locked
     })
@@ -90,7 +114,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
 
     // Collect all dragged elements (selected group or just this one)
     const dragTargets = dragIds
-      .map(id => {
+      .map((id) => {
         const el = documentStore.getElement(id)
         if (!el || el.locked || el.parentId === null || el.style.position !== "absolute") return null
         const dom = document.querySelector(`[data-element-id="${id}"]`) as HTMLElement | null
@@ -151,6 +175,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     }
 
     const onMove = (me: PointerEvent) => {
+      didMove = true
       const dx = (me.clientX - startX) / z
       const dy = (me.clientY - startY) / z
 
@@ -179,13 +204,10 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         onDropHighlight?.(dropTarget.containerId)
         const container = documentStore.getElement(dropTarget.containerId)
         if (container) {
-          const indicator = calcInsertionIndicator(
-            dropTarget.containerId, dropTarget.insertIndex,
-            container.layoutProps.direction, dragIds, documentStore,
-          )
+          const indicator = calcInsertionIndicator(dropTarget.containerId, dropTarget.insertIndex, container.layoutProps.direction, dragIds, documentStore)
           onInsertionIndicator?.(indicator)
         }
-        onSnapLines?.([])  // Disable snap when over a container
+        onSnapLines?.([]) // Disable snap when over a container
       } else {
         onDropHighlight?.(null)
         onInsertionIndicator?.(null)
@@ -196,6 +218,15 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     const onUp = (me: PointerEvent) => {
       cleanup()
       clearTransforms()
+
+      // Click without drag — handle selection (including Shift+Click)
+      if (!didMove) {
+        clickHandledRef.current = true
+        onSelect(element.id, me.shiftKey)
+        const rect = target.getBoundingClientRect()
+        bridge.send({ type: "ELEMENT_CLICKED", payload: { id: element.id, bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, shiftKey: me.shiftKey } })
+        return
+      }
 
       // Check if dropping into auto-layout container
       const dropTarget = findDropTarget(me.clientX, me.clientY, dragIds, documentStore)
@@ -213,7 +244,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         }
         onInsertionIndicator?.(null)
         onDropHighlight?.(null)
-        return  // Skip the normal absolute move logic
+        return // Skip the normal absolute move logic
       }
 
       const dx = (me.clientX - startX) / z + lastSnapDx
@@ -251,6 +282,32 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     bridge.send({ type: "INSERT_SECTION_REQUEST", payload: { preset: role, index } })
   }
 
+  const handleInsertFormField = (formId: string, elementType: string) => {
+    bridge.send({ type: "ADD_FORM_FIELD_REQUEST", payload: { formId, elementType } })
+  }
+
+  const isFormEdit = element.type === "form" && editorMode === "edit"
+
+  // Determine if this is a form in interact mode
+  const isFormInteract = element.type === "form" && editorMode === "interact"
+
+  // Collect form fields for form elements
+  const formFields = useMemo(() => {
+    if (!isFormInteract) return []
+    const fields: Array<{ elementId: string; formField: FormFieldConfig }> = []
+    const traverse = (id: string) => {
+      const el = documentStore.getElement(id)
+      if (!el) return
+      if (el.formField) fields.push({ elementId: el.id, formField: el.formField })
+      el.children.forEach(traverse)
+    }
+    element.children.forEach((cid) => traverse(cid))
+    return fields
+  }, [isFormInteract, element.children, documentStore])
+
+  // Form runtime hook
+  const formRuntime = useFormRuntime(formFields, isFormInteract)
+
   // Find the root-level ancestor (direct child of root) for this element
   const findRootAncestor = (): { id: string; el: typeof element; dom: HTMLElement } | null => {
     let cur = element
@@ -268,18 +325,21 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
   }
 
   const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
-    if (e.button === 2) return  // Right-click: skip drag, let contextmenu handle
+    if (e.button === 2) return // Right-click: skip drag, let contextmenu handle
     if (editorMode === "interact") return
-    if (element.locked || isRoot) { e.stopPropagation(); return }
+    if (element.locked || isRoot) {
+      e.stopPropagation()
+      return
+    }
     if (!inAutoLayout || !parent) return
     e.stopPropagation()
     e.preventDefault()
 
     // Page mode: if the root-level ancestor is absolute-positioned, move it instead of reordering
     // Canvas mode: always allow individual element reorder within container
-    const rootAncestor = documentStore.canvasMode === 'page' ? findRootAncestor() : null
+    const rootAncestor = documentStore.canvasMode === "page" ? findRootAncestor() : null
     const z = zoom
-    if (rootAncestor && rootAncestor.el.style.position === 'absolute') {
+    if (rootAncestor && rootAncestor.el.style.position === "absolute") {
       const target = e.currentTarget as HTMLElement
       const containerDom = rootAncestor.dom
       target.setPointerCapture(e.pointerId)
@@ -289,7 +349,11 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       onDragChange?.(true)
 
       const cleanup = () => {
-        try { target.releasePointerCapture(e.pointerId) } catch { /* */ }
+        try {
+          target.releasePointerCapture(e.pointerId)
+        } catch {
+          /* */
+        }
         target.removeEventListener("pointermove", onMove)
         target.removeEventListener("pointerup", onUp)
         target.removeEventListener("pointercancel", onCancel)
@@ -305,11 +369,14 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         containerDom.style.transform = `translate(${dx / z}px, ${dy / z}px)`
       }
       const onUp = (me: PointerEvent) => {
-        if (!hasMoved) { cleanup(); return }
+        if (!hasMoved) {
+          cleanup()
+          return
+        }
         const dx = (me.clientX - startX) / z
         const dy = (me.clientY - startY) / z
-        const curLeft = typeof rootAncestor.el.style.left === 'number' ? rootAncestor.el.style.left : 0
-        const curTop = typeof rootAncestor.el.style.top === 'number' ? rootAncestor.el.style.top : 0
+        const curLeft = typeof rootAncestor.el.style.left === "number" ? rootAncestor.el.style.left : 0
+        const curTop = typeof rootAncestor.el.style.top === "number" ? rootAncestor.el.style.top : 0
         const newX = Math.round(curLeft + dx)
         const newY = Math.round(curTop + dy)
         documentStore.updateStyle(rootAncestor.id, { left: newX, top: newY })
@@ -319,7 +386,9 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
           payload: { id: rootAncestor.id, x: newX, y: newY },
         })
       }
-      const onCancel = () => { cleanup() }
+      const onCancel = () => {
+        cleanup()
+      }
       dragCleanupRef.current = cleanup
       target.addEventListener("pointermove", onMove)
       target.addEventListener("pointerup", onUp)
@@ -368,13 +437,7 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
         onDropHighlight?.(dropTarget.containerId)
         const container = documentStore.getElement(dropTarget.containerId)
         if (container) {
-          const indicator = calcInsertionIndicator(
-            dropTarget.containerId,
-            dropTarget.insertIndex,
-            container.layoutProps.direction,
-            [elementId],
-            documentStore,
-          )
+          const indicator = calcInsertionIndicator(dropTarget.containerId, dropTarget.insertIndex, container.layoutProps.direction, [elementId], documentStore)
           onInsertionIndicator?.(indicator)
         }
       } else {
@@ -399,7 +462,9 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
       }
     }
 
-    const onCancel = () => { cleanup() }
+    const onCancel = () => {
+      cleanup()
+    }
 
     dragCleanupRef.current = cleanup
     target.addEventListener("pointermove", onMove)
@@ -407,59 +472,171 @@ export const ElementRenderer = observer(function ElementRenderer({ elementId, se
     target.addEventListener("pointercancel", onCancel)
   }
 
-  const content = getElementContent(element.type, element.props, editorMode)
+  // Get form context for form fields
+  const formCtx = useFormRuntimeContext()
+  const fieldFormContext =
+    formCtx && element.formField
+      ? {
+          value: formCtx.values[element.formField.name],
+          error: formCtx.errors[element.formField.name] ?? null,
+          onChange: (v: unknown) => formCtx.setValue(element.formField!.name, v),
+        }
+      : undefined
 
-  return (
-    <div
-      data-element-id={element.id}
-      style={{
-        ...element.style,
-        ...(inAutoLayout ? { position: 'relative' as const, left: undefined, top: undefined } : {}),
-        ...containerStyles,
-        ...sectionStyles,
-        ...childSizingStyles,
-        ...(isRoot && documentStore.canvasMode === 'page' && editorMode !== 'interact' ? {
-          boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
-          borderRadius: 2,
-        } : {}),
-        // Interact mode: convert fixed widths to max-width for responsiveness
-        ...(editorMode === "interact" && inAutoLayout && typeof element.style.width === 'number'
-          && childSizingStyles.flex === undefined ? {
-          maxWidth: element.style.width,
-          width: '100%',
-          overflowX: 'auto' as const,
-        } : {}),
-        outline: editorMode === "edit" && isSelected ? "1.5px dashed #6366f1" : undefined,
-        outlineOffset: editorMode === "edit" && isSelected ? 2 : undefined,
-        cursor: editorMode === "interact" ? undefined : (element.locked || isRoot ? "default" : (inAutoLayout ? "grab" : "move")),
-        userSelect: editorMode === "interact" ? undefined : "none",
-      }}
-      onClick={handleClick}
-      onPointerDown={inAutoLayout ? handleAutoLayoutPointerDown : handlePointerDown}
-    >
-      {content}
-      {hasContentWrapper ? (
+  const content = getElementContent(element.type, element.props, editorMode, fieldFormContext, element.formRole)
+
+  // Render error message for form fields
+  const errorMessage =
+    editorMode === "interact" && element.formField && fieldFormContext?.error ? (
+      <p style={{ color: "hsl(0 84% 60%)", fontSize: 12, marginTop: 4, padding: "0 2px" }}>{fieldFormContext.error}</p>
+    ) : null
+
+  // Determine wrapper tag: form elements use <form> in interact mode
+  const WrapperTag = isFormInteract ? "form" : "div"
+
+  // Form submit handler
+  const handleFormSubmit = isFormInteract ? formRuntime.handleSubmit : undefined
+
+  // Render children JSX
+  const renderChildren = () => {
+    if (hasContentWrapper) {
+      return (
         <div style={contentStyles}>
           {element.children.map((childId) => (
-            <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+            <ElementRenderer
+              key={childId}
+              elementId={childId}
+              selectedIds={selectedIds}
+              onSelect={onSelect}
+              onDragChange={onDragChange}
+              onSnapLines={onSnapLines}
+              onInsertionIndicator={onInsertionIndicator}
+              onDropHighlight={onDropHighlight}
+              documentStore={documentStore}
+              bridge={bridge}
+              editorMode={editorMode}
+              zoom={zoom}
+            />
           ))}
         </div>
-      ) : isRoot && documentStore.canvasMode === 'page' && editorMode === 'edit' ? (
+      )
+    }
+    if (isRoot && documentStore.canvasMode === "page" && editorMode === "edit") {
+      return (
         <>
           <SectionInsertButton index={0} onInsert={handleInsertSection} />
           {element.children.map((childId, i) => (
             <React.Fragment key={childId}>
-              <ElementRenderer elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
+              <ElementRenderer
+                elementId={childId}
+                selectedIds={selectedIds}
+                onSelect={onSelect}
+                onDragChange={onDragChange}
+                onSnapLines={onSnapLines}
+                onInsertionIndicator={onInsertionIndicator}
+                onDropHighlight={onDropHighlight}
+                documentStore={documentStore}
+                bridge={bridge}
+                editorMode={editorMode}
+                zoom={zoom}
+              />
               <SectionInsertButton index={i + 1} onInsert={handleInsertSection} />
             </React.Fragment>
           ))}
         </>
-      ) : (
-        element.children.map((childId) => (
-          <ElementRenderer key={childId} elementId={childId} selectedIds={selectedIds} onSelect={onSelect} onDragChange={onDragChange} onSnapLines={onSnapLines} onInsertionIndicator={onInsertionIndicator} onDropHighlight={onDropHighlight} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
-        ))
-      )}
-    </div>
+      )
+    }
+    if (isFormEdit) {
+      return (
+        <>
+          {element.children.map((childId) => (
+            <ElementRenderer
+              key={childId}
+              elementId={childId}
+              selectedIds={selectedIds}
+              onSelect={onSelect}
+              onDragChange={onDragChange}
+              onSnapLines={onSnapLines}
+              onInsertionIndicator={onInsertionIndicator}
+              onDropHighlight={onDropHighlight}
+              documentStore={documentStore}
+              bridge={bridge}
+              editorMode={editorMode}
+              zoom={zoom}
+            />
+          ))}
+          <FormFieldInsertButton formId={element.id} onInsert={handleInsertFormField} />
+        </>
+      )
+    }
+    return element.children.map((childId) => (
+      <ElementRenderer
+        key={childId}
+        elementId={childId}
+        selectedIds={selectedIds}
+        onSelect={onSelect}
+        onDragChange={onDragChange}
+        onSnapLines={onSnapLines}
+        onInsertionIndicator={onInsertionIndicator}
+        onDropHighlight={onDropHighlight}
+        documentStore={documentStore}
+        bridge={bridge}
+        editorMode={editorMode}
+        zoom={zoom}
+      />
+    ))
+  }
+
+  // Wrap children with FormRuntimeContext for form elements in interact mode
+  const childrenContent = isFormInteract ? (
+    <FormRuntimeContext.Provider
+      value={{
+        values: formRuntime.values,
+        errors: formRuntime.errors,
+        setValue: formRuntime.setValue,
+      }}
+    >
+      {renderChildren()}
+    </FormRuntimeContext.Provider>
+  ) : (
+    renderChildren()
+  )
+
+  return (
+    <WrapperTag
+      data-element-id={element.id}
+      style={{
+        ...element.style,
+        ...(inAutoLayout ? { position: "relative" as const, left: undefined, top: undefined } : {}),
+        ...containerStyles,
+        ...sectionStyles,
+        ...childSizingStyles,
+        ...(isRoot && documentStore.canvasMode === "page" && editorMode !== "interact"
+          ? {
+              boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+              borderRadius: 2,
+            }
+          : {}),
+        // Interact mode: convert fixed widths to max-width for responsiveness
+        ...(editorMode === "interact" && inAutoLayout && typeof element.style.width === "number" && childSizingStyles.flex === undefined
+          ? {
+              maxWidth: element.style.width,
+              width: "100%",
+              overflowX: "auto" as const,
+            }
+          : {}),
+        outline: editorMode === "edit" && isSelected ? "1.5px dashed #6366f1" : undefined,
+        outlineOffset: editorMode === "edit" && isSelected ? 2 : undefined,
+        cursor: editorMode === "interact" ? undefined : element.locked || isRoot ? "default" : inAutoLayout ? "grab" : "move",
+        userSelect: editorMode === "interact" ? undefined : "none",
+      }}
+      onClick={handleClick}
+      onPointerDown={inAutoLayout ? handleAutoLayoutPointerDown : handlePointerDown}
+      onSubmit={handleFormSubmit}
+    >
+      {content}
+      {errorMessage}
+      {childrenContent}
+    </WrapperTag>
   )
 })
-

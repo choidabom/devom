@@ -8,11 +8,15 @@ export class SelectionStore {
   selectedBounds: ElementBounds | null = null
 
   constructor(private documentStore: DocumentStore) {
-    makeAutoObservable(this, {
-      selectedElement: computed,
-      selectedElements: computed,
-      selectedId: computed,
-    }, { autoBind: true })
+    makeAutoObservable(
+      this,
+      {
+        selectedElement: computed,
+        selectedElements: computed,
+        selectedId: computed,
+      },
+      { autoBind: true }
+    )
   }
 
   get selectedId(): string | null {
@@ -26,9 +30,7 @@ export class SelectionStore {
   }
 
   get selectedElements(): EditorElement[] {
-    return this.selectedIds
-      .map(id => this.documentStore.getElement(id))
-      .filter((el): el is EditorElement => el !== undefined)
+    return this.selectedIds.map((id) => this.documentStore.getElement(id)).filter((el): el is EditorElement => el !== undefined)
   }
 
   select(id: string | null, bounds?: ElementBounds) {

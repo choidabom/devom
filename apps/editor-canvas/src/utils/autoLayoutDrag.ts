@@ -8,15 +8,8 @@ export interface DropTarget {
 /**
  * Find the auto-layout container under the given point, if any.
  */
-export function findDropTarget(
-  clientX: number,
-  clientY: number,
-  draggedIds: string[],
-  documentStore: DocumentStore,
-): DropTarget | null {
-  const containers = documentStore.getAllElements().filter(
-    el => el.layoutMode === 'flex' && !draggedIds.includes(el.id)
-  )
+export function findDropTarget(clientX: number, clientY: number, draggedIds: string[], documentStore: DocumentStore): DropTarget | null {
+  const containers = documentStore.getAllElements().filter((el) => el.layoutMode === "flex" && !draggedIds.includes(el.id))
 
   for (const container of containers) {
     const dom = document.querySelector(`[data-element-id="${container.id}"]`) as HTMLElement | null
@@ -35,18 +28,11 @@ export function findDropTarget(
 /**
  * Calculate the insertion index within an auto-layout container.
  */
-export function calcInsertionIndex(
-  containerId: string,
-  direction: 'row' | 'column',
-  clientX: number,
-  clientY: number,
-  draggedIds: string[],
-  documentStore: DocumentStore,
-): number {
+export function calcInsertionIndex(containerId: string, direction: "row" | "column", clientX: number, clientY: number, draggedIds: string[], documentStore: DocumentStore): number {
   const container = documentStore.getElement(containerId)
   if (!container) return 0
 
-  const childIds = container.children.filter(id => !draggedIds.includes(id))
+  const childIds = container.children.filter((id) => !draggedIds.includes(id))
   if (childIds.length === 0) return 0
 
   for (let i = 0; i < childIds.length; i++) {
@@ -57,8 +43,8 @@ export function calcInsertionIndex(
     const centerX = childRect.left + childRect.width / 2
     const centerY = childRect.top + childRect.height / 2
 
-    if (direction === 'row' && clientX < centerX) return i
-    if (direction === 'column' && clientY < centerY) return i
+    if (direction === "row" && clientX < centerX) return i
+    if (direction === "column" && clientY < centerY) return i
   }
 
   return childIds.length
@@ -70,9 +56,9 @@ export function calcInsertionIndex(
 export function calcInsertionIndicator(
   containerId: string,
   insertIndex: number,
-  direction: 'row' | 'column',
+  direction: "row" | "column",
   draggedIds: string[],
-  documentStore: DocumentStore,
+  documentStore: DocumentStore
 ): { x: number; y: number; width: number; height: number } | null {
   const container = documentStore.getElement(containerId)
   if (!container) return null
@@ -81,13 +67,13 @@ export function calcInsertionIndicator(
   if (!containerDom) return null
 
   const containerRect = containerDom.getBoundingClientRect()
-  const childIds = container.children.filter(id => !draggedIds.includes(id))
+  const childIds = container.children.filter((id) => !draggedIds.includes(id))
 
   const THICKNESS = 2
   const INSET = 4
 
   if (childIds.length === 0) {
-    if (direction === 'row') {
+    if (direction === "row") {
       return { x: containerRect.left + INSET, y: containerRect.top + INSET, width: THICKNESS, height: containerRect.height - INSET * 2 }
     }
     return { x: containerRect.left + INSET, y: containerRect.top + INSET, width: containerRect.width - INSET * 2, height: THICKNESS }
@@ -98,7 +84,7 @@ export function calcInsertionIndicator(
     if (!lastDom) return null
     const lastRect = lastDom.getBoundingClientRect()
 
-    if (direction === 'row') {
+    if (direction === "row") {
       return { x: lastRect.right + 2, y: containerRect.top + INSET, width: THICKNESS, height: containerRect.height - INSET * 2 }
     }
     return { x: containerRect.left + INSET, y: lastRect.bottom + 2, width: containerRect.width - INSET * 2, height: THICKNESS }
@@ -108,7 +94,7 @@ export function calcInsertionIndicator(
   if (!childDom) return null
   const childRect = childDom.getBoundingClientRect()
 
-  if (direction === 'row') {
+  if (direction === "row") {
     return { x: childRect.left - 2, y: containerRect.top + INSET, width: THICKNESS, height: containerRect.height - INSET * 2 }
   }
   return { x: containerRect.left + INSET, y: childRect.top - 2, width: containerRect.width - INSET * 2, height: THICKNESS }

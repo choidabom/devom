@@ -4,7 +4,7 @@ import importPlugin from "eslint-plugin-import"
 
 const eslintConfig = [
   {
-    ignores: ["**/node_modules/**", "**/dist/**", "**/.next/**", "**/build/**", "**/*.config.*", "**/public/**", "**/.*/**", "**/out"],
+    ignores: ["**/node_modules/**", "**/dist/**", "**/dist-editor/**", "**/.next/**", "**/build/**", "**/*.config.*", "**/public/**", "**/.*/**", "**/out"],
   },
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
@@ -24,7 +24,7 @@ const eslintConfig = [
     },
     rules: {
       "no-console": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_", ignoreRestSiblings: true }],
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/ban-types": "off",
       "prefer-const": "error",

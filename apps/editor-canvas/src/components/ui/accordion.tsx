@@ -20,14 +20,7 @@ interface AccordionProps extends React.ComponentProps<"div"> {
   onValueChange?: (value: string | string[]) => void
 }
 
-function Accordion({
-  className,
-  type = "single",
-  defaultValue,
-  value: controlledValue,
-  onValueChange,
-  ...props
-}: AccordionProps) {
+function Accordion({ className, type = "single", defaultValue, value: controlledValue, onValueChange, ...props }: AccordionProps) {
   const [internalValue, setInternalValue] = React.useState<string[]>(() => {
     if (defaultValue) {
       return Array.isArray(defaultValue) ? defaultValue : [defaultValue]
@@ -44,14 +37,7 @@ function Accordion({
 
   const toggleItem = React.useCallback(
     (itemValue: string) => {
-      const newValue =
-        type === "single"
-          ? value.includes(itemValue)
-            ? []
-            : [itemValue]
-          : value.includes(itemValue)
-            ? value.filter((v) => v !== itemValue)
-            : [...value, itemValue]
+      const newValue = type === "single" ? (value.includes(itemValue) ? [] : [itemValue]) : value.includes(itemValue) ? value.filter((v) => v !== itemValue) : [...value, itemValue]
 
       setInternalValue(newValue)
       onValueChange?.(type === "single" ? newValue[0] || "" : newValue)
@@ -70,9 +56,7 @@ interface AccordionItemProps extends React.ComponentProps<"div"> {
   value: string
 }
 
-const AccordionItemContext = React.createContext<{ value: string; isOpen: boolean } | undefined>(
-  undefined
-)
+const AccordionItemContext = React.createContext<{ value: string; isOpen: boolean } | undefined>(undefined)
 
 function AccordionItem({ className, value, ...props }: AccordionItemProps) {
   const context = React.useContext(AccordionContext)
@@ -87,16 +71,11 @@ function AccordionItem({ className, value, ...props }: AccordionItemProps) {
   )
 }
 
-function AccordionTrigger({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"button">) {
+function AccordionTrigger({ className, children, ...props }: React.ComponentProps<"button">) {
   const accordionContext = React.useContext(AccordionContext)
   const itemContext = React.useContext(AccordionItemContext)
 
-  if (!accordionContext || !itemContext)
-    throw new Error("AccordionTrigger must be used within AccordionItem")
+  if (!accordionContext || !itemContext) throw new Error("AccordionTrigger must be used within AccordionItem")
 
   return (
     <button
@@ -115,31 +94,20 @@ function AccordionTrigger({
       {children}
       <ChevronDownIcon
         data-slot="accordion-trigger-icon"
-        className={cn(
-          "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
-          itemContext.isOpen && "rotate-180"
-        )}
+        className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200", itemContext.isOpen && "rotate-180")}
       />
     </button>
   )
 }
 
-function AccordionContent({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function AccordionContent({ className, children, ...props }: React.ComponentProps<"div">) {
   const itemContext = React.useContext(AccordionItemContext)
   if (!itemContext) throw new Error("AccordionContent must be used within AccordionItem")
 
   if (!itemContext.isOpen) return null
 
   return (
-    <div
-      data-slot="accordion-content"
-      className={cn("overflow-hidden text-sm animate-in slide-in-from-top-2", className)}
-      {...props}
-    >
+    <div data-slot="accordion-content" className={cn("overflow-hidden text-sm animate-in slide-in-from-top-2", className)} {...props}>
       <div className="pt-0 pb-2.5">{children}</div>
     </div>
   )

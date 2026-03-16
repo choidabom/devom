@@ -39,17 +39,12 @@ function Tooltip({ children, open: controlledOpen, onOpenChange }: TooltipProps)
   )
 }
 
-function TooltipTrigger({ children, asChild, ...props }: React.ComponentProps<"div"> & { asChild?: boolean }) {
+function TooltipTrigger({ children, ...props }: React.ComponentProps<"div">) {
   const context = React.useContext(TooltipContext)
   if (!context) throw new Error("TooltipTrigger must be used within Tooltip")
 
   return (
-    <div
-      data-slot="tooltip-trigger"
-      onMouseEnter={() => context.setOpen(true)}
-      onMouseLeave={() => context.setOpen(false)}
-      {...props}
-    >
+    <div data-slot="tooltip-trigger" onMouseEnter={() => context.setOpen(true)} onMouseLeave={() => context.setOpen(false)} {...props}>
       {children}
     </div>
   )
@@ -57,16 +52,9 @@ function TooltipTrigger({ children, asChild, ...props }: React.ComponentProps<"d
 
 interface TooltipContentProps extends React.ComponentProps<"div"> {
   side?: "top" | "bottom" | "left" | "right"
-  sideOffset?: number
 }
 
-function TooltipContent({
-  className,
-  side = "top",
-  sideOffset = 4,
-  children,
-  ...props
-}: TooltipContentProps) {
+function TooltipContent({ className, side = "top", children, ...props }: TooltipContentProps) {
   const context = React.useContext(TooltipContext)
   if (!context) throw new Error("TooltipContent must be used within Tooltip")
 

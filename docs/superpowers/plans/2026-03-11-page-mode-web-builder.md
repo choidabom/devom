@@ -16,24 +16,24 @@
 
 ### Modified Files
 
-| File | Responsibility | Changes |
-|------|---------------|---------|
-| `packages/editor-core/src/types.ts` | 타입 정의 | `role`, `SectionProps`, `GridProps` 타입 + `EditorElement` 확장, `LayoutMode`에 `'grid'` 추가 |
-| `packages/editor-core/src/utils/layoutStyles.ts` | 레이아웃 → CSS 변환 | `getContainerStyles()`에 grid 지원 추가, `getSectionStyles()` 함수 추가 |
-| `packages/editor-core/src/stores/DocumentStore.ts` | 상태 관리 | `addSection()` 메서드, 6개 섹션 프리셋 팩토리, `setGridProps()` 메서드 |
-| `packages/editor-core/src/protocol.ts` | 메시지 프로토콜 | `UPDATE_SECTION_PROPS`, `SET_GRID_PROPS` 메시지 추가 |
-| `packages/editor-core/src/index.ts` | 패키지 exports | 새 타입/유틸 re-export |
-| `apps/editor-canvas/src/components/ElementRenderer.tsx` | 요소 렌더링 | 섹션 스타일(배경, maxWidth, 패딩) 적용, page mode root shadow |
-| `apps/editor-shell/src/components/Toolbar.tsx` | 툴바 | Sections 카테고리 드롭다운 추가 |
-| `apps/editor-shell/src/components/PropertiesPanel.tsx` | 속성 패널 | 섹션 속성 편집 UI, grid 설정 UI, layout mode 3-way 선택 |
-| `apps/editor-shell/src/App.tsx` | Shell 메시지 처리 | 새 메시지 타입 핸들링 |
-| `apps/editor-canvas/src/App.tsx` | Canvas 메시지 처리 | 새 메시지 타입 핸들링, 섹션 삽입 버튼 |
+| File                                                    | Responsibility      | Changes                                                                                       |
+| ------------------------------------------------------- | ------------------- | --------------------------------------------------------------------------------------------- |
+| `packages/editor-core/src/types.ts`                     | 타입 정의           | `role`, `SectionProps`, `GridProps` 타입 + `EditorElement` 확장, `LayoutMode`에 `'grid'` 추가 |
+| `packages/editor-core/src/utils/layoutStyles.ts`        | 레이아웃 → CSS 변환 | `getContainerStyles()`에 grid 지원 추가, `getSectionStyles()` 함수 추가                       |
+| `packages/editor-core/src/stores/DocumentStore.ts`      | 상태 관리           | `addSection()` 메서드, 6개 섹션 프리셋 팩토리, `setGridProps()` 메서드                        |
+| `packages/editor-core/src/protocol.ts`                  | 메시지 프로토콜     | `UPDATE_SECTION_PROPS`, `SET_GRID_PROPS` 메시지 추가                                          |
+| `packages/editor-core/src/index.ts`                     | 패키지 exports      | 새 타입/유틸 re-export                                                                        |
+| `apps/editor-canvas/src/components/ElementRenderer.tsx` | 요소 렌더링         | 섹션 스타일(배경, maxWidth, 패딩) 적용, page mode root shadow                                 |
+| `apps/editor-shell/src/components/Toolbar.tsx`          | 툴바                | Sections 카테고리 드롭다운 추가                                                               |
+| `apps/editor-shell/src/components/PropertiesPanel.tsx`  | 속성 패널           | 섹션 속성 편집 UI, grid 설정 UI, layout mode 3-way 선택                                       |
+| `apps/editor-shell/src/App.tsx`                         | Shell 메시지 처리   | 새 메시지 타입 핸들링                                                                         |
+| `apps/editor-canvas/src/App.tsx`                        | Canvas 메시지 처리  | 새 메시지 타입 핸들링, 섹션 삽입 버튼                                                         |
 
 ### New Files
 
-| File | Responsibility |
-|------|---------------|
-| `packages/editor-core/src/presets/sectionPresets.ts` | 6개 섹션 프리셋 팩토리 함수 |
+| File                                                        | Responsibility                      |
+| ----------------------------------------------------------- | ----------------------------------- |
+| `packages/editor-core/src/presets/sectionPresets.ts`        | 6개 섹션 프리셋 팩토리 함수         |
 | `apps/editor-canvas/src/components/SectionInsertButton.tsx` | 섹션 간 `+ 섹션 추가` 버튼 컴포넌트 |
 
 ---
@@ -43,6 +43,7 @@
 ### Task 1: EditorElement 타입 확장
 
 **Files:**
+
 - Modify: `packages/editor-core/src/types.ts`
 
 - [ ] **Step 1: `SectionProps` 인터페이스 추가**
@@ -68,7 +69,7 @@ export const DEFAULT_GRID_PROPS: GridProps = {
   gap: 24,
 }
 
-export type SectionRole = 'section' | 'hero' | 'features' | 'cta' | 'footer' | 'header'
+export type SectionRole = "section" | "hero" | "features" | "cta" | "footer" | "header"
 ```
 
 - [ ] **Step 2: `EditorElement`에 필드 추가**
@@ -108,6 +109,7 @@ git commit -m "feat(editor-core): add SectionProps, GridProps types and grid lay
 ### Task 2: Grid 레이아웃 스타일 유틸리티
 
 **Files:**
+
 - Modify: `packages/editor-core/src/utils/layoutStyles.ts`
 
 - [ ] **Step 1: `getContainerStyles()`에 grid 지원 추가**
@@ -116,17 +118,15 @@ git commit -m "feat(editor-core): add SectionProps, GridProps types and grid lay
 
 ```typescript
 export function getContainerStyles(element: EditorElement): React.CSSProperties {
-  if (element.layoutMode === 'flex' && element.layoutProps) {
+  if (element.layoutMode === "flex" && element.layoutProps) {
     // ... existing flex code (unchanged) ...
   }
 
-  if (element.layoutMode === 'grid' && element.gridProps) {
+  if (element.layoutMode === "grid" && element.gridProps) {
     const g = element.gridProps
     return {
-      display: 'grid',
-      gridTemplateColumns: g.minColumnWidth
-        ? `repeat(auto-fit, minmax(${g.minColumnWidth}px, 1fr))`
-        : `repeat(${g.columns}, 1fr)`,
+      display: "grid",
+      gridTemplateColumns: g.minColumnWidth ? `repeat(auto-fit, minmax(${g.minColumnWidth}px, 1fr))` : `repeat(${g.columns}, 1fr)`,
       gap: g.gap,
     }
   }
@@ -157,9 +157,9 @@ export function getSectionContentStyles(element: EditorElement): React.CSSProper
   if (!element.sectionProps?.maxWidth) return {}
   return {
     maxWidth: element.sectionProps.maxWidth,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    width: '100%',
+    marginLeft: "auto",
+    marginRight: "auto",
+    width: "100%",
   }
 }
 ```
@@ -172,7 +172,7 @@ export function getSectionContentStyles(element: EditorElement): React.CSSProper
 export function isAutoLayoutChild(element: EditorElement, getElement: (id: string) => EditorElement | undefined): boolean {
   if (!element.parentId) return false
   const parent = getElement(element.parentId)
-  return parent?.layoutMode === 'flex' || parent?.layoutMode === 'grid'
+  return parent?.layoutMode === "flex" || parent?.layoutMode === "grid"
 }
 ```
 
@@ -194,6 +194,7 @@ git commit -m "feat(editor-core): add grid container styles and section style ut
 ### Task 3: DocumentStore grid 메서드 추가
 
 **Files:**
+
 - Modify: `packages/editor-core/src/stores/DocumentStore.ts`
 
 - [ ] **Step 1: `setLayoutMode` 확장 — grid 모드 지원**
@@ -271,6 +272,7 @@ git commit -m "feat(editor-core): add grid layout mode and section props to Docu
 ### Task 4: 프로토콜 메시지 추가
 
 **Files:**
+
 - Modify: `packages/editor-core/src/protocol.ts`
 
 - [ ] **Step 1: Shell→Canvas 메시지 추가**
@@ -315,6 +317,7 @@ git commit -m "feat(editor-core): add section and grid protocol messages"
 ### Task 5: 섹션 프리셋 팩토리
 
 **Files:**
+
 - Create: `packages/editor-core/src/presets/sectionPresets.ts`
 - Modify: `packages/editor-core/src/index.ts`
 
@@ -328,163 +331,196 @@ import type { EditorElement, SectionRole, SectionProps } from "../types"
 import { DEFAULT_ELEMENT_STYLE, DEFAULT_LAYOUT_PROPS } from "../types"
 
 interface PresetResult {
-  section: Omit<EditorElement, 'id'>
-  children: Omit<EditorElement, 'id'>[]
+  section: Omit<EditorElement, "id">
+  children: Omit<EditorElement, "id">[]
 }
 
-function createText(content: string, style: Partial<React.CSSProperties> = {}): Omit<EditorElement, 'id'> {
+function createText(content: string, style: Partial<React.CSSProperties> = {}): Omit<EditorElement, "id"> {
   return {
-    type: 'text',
-    parentId: '',  // filled by caller
+    type: "text",
+    parentId: "", // filled by caller
     children: [],
-    style: { ...DEFAULT_ELEMENT_STYLE['text'], position: 'relative' as const, left: undefined, top: undefined, ...style },
+    style: { ...DEFAULT_ELEMENT_STYLE["text"], position: "relative" as const, left: undefined, top: undefined, ...style },
     props: { content },
     locked: false,
-    sizing: { width: 'hug', height: 'hug' },
+    sizing: { width: "hug", height: "hug" },
   }
 }
 
-function createButton(label: string, style: Partial<React.CSSProperties> = {}): Omit<EditorElement, 'id'> {
+function createButton(label: string, style: Partial<React.CSSProperties> = {}): Omit<EditorElement, "id"> {
   return {
-    type: 'button',
-    parentId: '',
+    type: "button",
+    parentId: "",
     children: [],
-    style: { ...DEFAULT_ELEMENT_STYLE['button'], position: 'relative' as const, left: undefined, top: undefined, ...style },
+    style: { ...DEFAULT_ELEMENT_STYLE["button"], position: "relative" as const, left: undefined, top: undefined, ...style },
     props: { label },
     locked: false,
-    sizing: { width: 'hug', height: 'hug' },
+    sizing: { width: "hug", height: "hug" },
   }
 }
 
-function createDiv(style: Partial<React.CSSProperties> = {}, overrides: Partial<EditorElement> = {}): Omit<EditorElement, 'id'> {
+function createDiv(style: Partial<React.CSSProperties> = {}, overrides: Partial<EditorElement> = {}): Omit<EditorElement, "id"> {
   return {
-    type: 'div',
-    parentId: '',
+    type: "div",
+    parentId: "",
     children: [],
-    style: { ...DEFAULT_ELEMENT_STYLE['div'], position: 'relative' as const, left: undefined, top: undefined, height: 'auto', ...style },
+    style: { ...DEFAULT_ELEMENT_STYLE["div"], position: "relative" as const, left: undefined, top: undefined, height: "auto", ...style },
     props: {},
     locked: false,
-    sizing: { width: 'fill', height: 'hug' },
+    sizing: { width: "fill", height: "hug" },
     ...overrides,
   }
 }
 
 export function createSectionPreset(role: SectionRole): PresetResult {
   switch (role) {
-    case 'header':
+    case "header":
       return {
         section: {
-          type: 'div', parentId: '', children: [], locked: false,
-          role: 'header',
-          style: { ...DEFAULT_ELEMENT_STYLE['div'], position: 'relative' as const, left: undefined, top: undefined, height: 'auto', borderBottom: '1px solid #e5e7eb' },
+          type: "div",
+          parentId: "",
+          children: [],
+          locked: false,
+          role: "header",
+          style: { ...DEFAULT_ELEMENT_STYLE["div"], position: "relative" as const, left: undefined, top: undefined, height: "auto", borderBottom: "1px solid #e5e7eb" },
           props: {},
-          sizing: { width: 'fill', height: 'hug' },
-          layoutMode: 'flex',
-          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: 'row', gap: 12, paddingTop: 12, paddingBottom: 12, paddingLeft: 24, paddingRight: 24, alignItems: 'center' },
+          sizing: { width: "fill", height: "hug" },
+          layoutMode: "flex",
+          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: "row", gap: 12, paddingTop: 12, paddingBottom: 12, paddingLeft: 24, paddingRight: 24, alignItems: "center" },
           sectionProps: {},
         },
         children: [
-          createDiv({ width: 32, height: 32, backgroundColor: '#6366f1', borderRadius: 6 }, { sizing: { width: 'fixed', height: 'fixed' } }),
-          createText('My App', { fontWeight: '600', fontSize: 16, color: '#1e293b' }),
-          createText('Home', { fontSize: 14, color: '#64748b', marginLeft: 'auto' }),
-          createText('About', { fontSize: 14, color: '#64748b' }),
-          createText('Contact', { fontSize: 14, color: '#64748b' }),
+          createDiv({ width: 32, height: 32, backgroundColor: "#6366f1", borderRadius: 6 }, { sizing: { width: "fixed", height: "fixed" } }),
+          createText("My App", { fontWeight: "600", fontSize: 16, color: "#1e293b" }),
+          createText("Home", { fontSize: 14, color: "#64748b", marginLeft: "auto" }),
+          createText("About", { fontSize: 14, color: "#64748b" }),
+          createText("Contact", { fontSize: 14, color: "#64748b" }),
         ],
       }
 
-    case 'hero':
+    case "hero":
       return {
         section: {
-          type: 'div', parentId: '', children: [], locked: false,
-          role: 'hero',
-          style: { ...DEFAULT_ELEMENT_STYLE['div'], position: 'relative' as const, left: undefined, top: undefined, height: 'auto' },
+          type: "div",
+          parentId: "",
+          children: [],
+          locked: false,
+          role: "hero",
+          style: { ...DEFAULT_ELEMENT_STYLE["div"], position: "relative" as const, left: undefined, top: undefined, height: "auto" },
           props: {},
-          sizing: { width: 'fill', height: 'hug' },
-          layoutMode: 'flex',
-          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: 'column', gap: 16, paddingTop: 80, paddingBottom: 80, paddingLeft: 24, paddingRight: 24, alignItems: 'center' },
-          sectionProps: { backgroundColor: '#6366f1', verticalPadding: 80 },
+          sizing: { width: "fill", height: "hug" },
+          layoutMode: "flex",
+          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: "column", gap: 16, paddingTop: 80, paddingBottom: 80, paddingLeft: 24, paddingRight: 24, alignItems: "center" },
+          sectionProps: { backgroundColor: "#6366f1", verticalPadding: 80 },
         },
         children: [
-          createText('Build something amazing', { fontSize: 36, fontWeight: '700', color: '#ffffff', textAlign: 'center' }),
-          createText('Create beautiful web pages with our intuitive editor', { fontSize: 18, color: 'rgba(255,255,255,0.8)', textAlign: 'center' }),
-          createButton('Get Started', { backgroundColor: '#ffffff', color: '#6366f1' }),
+          createText("Build something amazing", { fontSize: 36, fontWeight: "700", color: "#ffffff", textAlign: "center" }),
+          createText("Create beautiful web pages with our intuitive editor", { fontSize: 18, color: "rgba(255,255,255,0.8)", textAlign: "center" }),
+          createButton("Get Started", { backgroundColor: "#ffffff", color: "#6366f1" }),
         ],
       }
 
-    case 'features':
+    case "features":
       return {
         section: {
-          type: 'div', parentId: '', children: [], locked: false,
-          role: 'features',
-          style: { ...DEFAULT_ELEMENT_STYLE['div'], position: 'relative' as const, left: undefined, top: undefined, height: 'auto' },
+          type: "div",
+          parentId: "",
+          children: [],
+          locked: false,
+          role: "features",
+          style: { ...DEFAULT_ELEMENT_STYLE["div"], position: "relative" as const, left: undefined, top: undefined, height: "auto" },
           props: {},
-          sizing: { width: 'fill', height: 'hug' },
-          layoutMode: 'grid',
+          sizing: { width: "fill", height: "hug" },
+          layoutMode: "grid",
           gridProps: { columns: 3, gap: 24 },
           layoutProps: { ...DEFAULT_LAYOUT_PROPS, paddingTop: 60, paddingBottom: 60, paddingLeft: 24, paddingRight: 24 },
-          sectionProps: { backgroundColor: '#f8fafc', verticalPadding: 60 },
+          sectionProps: { backgroundColor: "#f8fafc", verticalPadding: 60 },
         },
         children: [
-          createDiv({ backgroundColor: '#ffffff', borderRadius: 12, padding: 24, border: '1px solid #e2e8f0' }, {
-            layoutMode: 'flex', layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: 'column', gap: 8 }, sizing: { width: 'fill', height: 'hug' },
-          }),
-          createDiv({ backgroundColor: '#ffffff', borderRadius: 12, padding: 24, border: '1px solid #e2e8f0' }, {
-            layoutMode: 'flex', layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: 'column', gap: 8 }, sizing: { width: 'fill', height: 'hug' },
-          }),
-          createDiv({ backgroundColor: '#ffffff', borderRadius: 12, padding: 24, border: '1px solid #e2e8f0' }, {
-            layoutMode: 'flex', layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: 'column', gap: 8 }, sizing: { width: 'fill', height: 'hug' },
-          }),
+          createDiv(
+            { backgroundColor: "#ffffff", borderRadius: 12, padding: 24, border: "1px solid #e2e8f0" },
+            {
+              layoutMode: "flex",
+              layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: "column", gap: 8 },
+              sizing: { width: "fill", height: "hug" },
+            }
+          ),
+          createDiv(
+            { backgroundColor: "#ffffff", borderRadius: 12, padding: 24, border: "1px solid #e2e8f0" },
+            {
+              layoutMode: "flex",
+              layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: "column", gap: 8 },
+              sizing: { width: "fill", height: "hug" },
+            }
+          ),
+          createDiv(
+            { backgroundColor: "#ffffff", borderRadius: 12, padding: 24, border: "1px solid #e2e8f0" },
+            {
+              layoutMode: "flex",
+              layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: "column", gap: 8 },
+              sizing: { width: "fill", height: "hug" },
+            }
+          ),
         ],
       }
 
-    case 'cta':
+    case "cta":
       return {
         section: {
-          type: 'div', parentId: '', children: [], locked: false,
-          role: 'cta',
-          style: { ...DEFAULT_ELEMENT_STYLE['div'], position: 'relative' as const, left: undefined, top: undefined, height: 'auto' },
+          type: "div",
+          parentId: "",
+          children: [],
+          locked: false,
+          role: "cta",
+          style: { ...DEFAULT_ELEMENT_STYLE["div"], position: "relative" as const, left: undefined, top: undefined, height: "auto" },
           props: {},
-          sizing: { width: 'fill', height: 'hug' },
-          layoutMode: 'flex',
-          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: 'column', gap: 16, paddingTop: 60, paddingBottom: 60, paddingLeft: 24, paddingRight: 24, alignItems: 'center' },
-          sectionProps: { backgroundColor: '#1e293b', verticalPadding: 60 },
+          sizing: { width: "fill", height: "hug" },
+          layoutMode: "flex",
+          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: "column", gap: 16, paddingTop: 60, paddingBottom: 60, paddingLeft: 24, paddingRight: 24, alignItems: "center" },
+          sectionProps: { backgroundColor: "#1e293b", verticalPadding: 60 },
         },
         children: [
-          createText('Ready to get started?', { fontSize: 28, fontWeight: '700', color: '#ffffff', textAlign: 'center' }),
-          createButton('Sign Up Now', { backgroundColor: '#6366f1', color: '#ffffff' }),
+          createText("Ready to get started?", { fontSize: 28, fontWeight: "700", color: "#ffffff", textAlign: "center" }),
+          createButton("Sign Up Now", { backgroundColor: "#6366f1", color: "#ffffff" }),
         ],
       }
 
-    case 'footer':
+    case "footer":
       return {
         section: {
-          type: 'div', parentId: '', children: [], locked: false,
-          role: 'footer',
-          style: { ...DEFAULT_ELEMENT_STYLE['div'], position: 'relative' as const, left: undefined, top: undefined, height: 'auto' },
+          type: "div",
+          parentId: "",
+          children: [],
+          locked: false,
+          role: "footer",
+          style: { ...DEFAULT_ELEMENT_STYLE["div"], position: "relative" as const, left: undefined, top: undefined, height: "auto" },
           props: {},
-          sizing: { width: 'fill', height: 'hug' },
-          layoutMode: 'flex',
-          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: 'row', gap: 24, paddingTop: 24, paddingBottom: 24, paddingLeft: 24, paddingRight: 24, alignItems: 'center' },
-          sectionProps: { backgroundColor: '#1e293b' },
+          sizing: { width: "fill", height: "hug" },
+          layoutMode: "flex",
+          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: "row", gap: 24, paddingTop: 24, paddingBottom: 24, paddingLeft: 24, paddingRight: 24, alignItems: "center" },
+          sectionProps: { backgroundColor: "#1e293b" },
         },
         children: [
-          createText('© 2026 My App', { fontSize: 13, color: '#94a3b8' }),
-          createText('Privacy', { fontSize: 13, color: '#94a3b8', marginLeft: 'auto' }),
-          createText('Terms', { fontSize: 13, color: '#94a3b8' }),
+          createText("© 2026 My App", { fontSize: 13, color: "#94a3b8" }),
+          createText("Privacy", { fontSize: 13, color: "#94a3b8", marginLeft: "auto" }),
+          createText("Terms", { fontSize: 13, color: "#94a3b8" }),
         ],
       }
 
-    case 'section':
+    case "section":
     default:
       return {
         section: {
-          type: 'div', parentId: '', children: [], locked: false,
-          role: 'section',
-          style: { ...DEFAULT_ELEMENT_STYLE['div'], position: 'relative' as const, left: undefined, top: undefined, height: 'auto' },
+          type: "div",
+          parentId: "",
+          children: [],
+          locked: false,
+          role: "section",
+          style: { ...DEFAULT_ELEMENT_STYLE["div"], position: "relative" as const, left: undefined, top: undefined, height: "auto" },
           props: {},
-          sizing: { width: 'fill', height: 'hug' },
-          layoutMode: 'flex',
-          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: 'column', gap: 16, paddingTop: 40, paddingBottom: 40, paddingLeft: 24, paddingRight: 24 },
+          sizing: { width: "fill", height: "hug" },
+          layoutMode: "flex",
+          layoutProps: { ...DEFAULT_LAYOUT_PROPS, direction: "column", gap: 16, paddingTop: 40, paddingBottom: 40, paddingLeft: 24, paddingRight: 24 },
           sectionProps: {},
         },
         children: [],
@@ -561,6 +597,7 @@ git commit -m "feat(editor-core): add section preset factory and addSection meth
 ### Task 6: ElementRenderer — 페이지 비주얼 & 섹션 렌더링
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 
 - [ ] **Step 1: import 추가**
@@ -643,6 +680,7 @@ git commit -m "feat(editor-canvas): add page visual shadow and section rendering
 ### Task 7: Toolbar에 Sections 카테고리 추가
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/Toolbar.tsx`
 
 - [ ] **Step 1: 섹션 프리셋 목록 상수 추가**
@@ -651,12 +689,12 @@ git commit -m "feat(editor-canvas): add page visual shadow and section rendering
 
 ```typescript
 const SECTION_PRESETS = [
-  { role: 'section' as const, label: 'Empty Section', icon: '☐' },
-  { role: 'header' as const, label: 'Header', icon: '▔' },
-  { role: 'hero' as const, label: 'Hero', icon: '◆' },
-  { role: 'features' as const, label: 'Features', icon: '▦' },
-  { role: 'cta' as const, label: 'CTA', icon: '▶' },
-  { role: 'footer' as const, label: 'Footer', icon: '▁' },
+  { role: "section" as const, label: "Empty Section", icon: "☐" },
+  { role: "header" as const, label: "Header", icon: "▔" },
+  { role: "hero" as const, label: "Hero", icon: "◆" },
+  { role: "features" as const, label: "Features", icon: "▦" },
+  { role: "cta" as const, label: "CTA", icon: "▶" },
+  { role: "footer" as const, label: "Footer", icon: "▁" },
 ]
 ```
 
@@ -724,6 +762,7 @@ git commit -m "feat(editor-shell): add Sections dropdown to toolbar for page mod
 ### Task 8: PropertiesPanel — 섹션 속성 & Grid 설정 UI
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/PropertiesPanel.tsx`
 
 - [ ] **Step 1: Layout Mode 3-way 선택 UI**
@@ -828,6 +867,7 @@ git commit -m "feat(editor-shell): add grid layout and section props to Properti
 ### Task 9: Shell App — 메시지 핸들링 & addSection 연결
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/App.tsx`
 
 - [ ] **Step 1: `handleAddSection` 콜백 추가**
@@ -835,11 +875,14 @@ git commit -m "feat(editor-shell): add grid layout and section props to Properti
 기존 `handleAddElement` 근처에:
 
 ```typescript
-const handleAddSection = useCallback((role: SectionRole) => {
-  historyStore.pushSnapshot()
-  documentStore.addSection(role)
-  syncToCanvas()
-}, [syncToCanvas])
+const handleAddSection = useCallback(
+  (role: SectionRole) => {
+    historyStore.pushSnapshot()
+    documentStore.addSection(role)
+    syncToCanvas()
+  },
+  [syncToCanvas]
+)
 ```
 
 - [ ] **Step 2: Canvas→Shell 메시지 핸들링**
@@ -891,6 +934,7 @@ git commit -m "feat(editor-shell): wire up section adding and message handling"
 ### Task 10: 섹션 삽입 버튼 컴포넌트
 
 **Files:**
+
 - Create: `apps/editor-canvas/src/components/SectionInsertButton.tsx`
 
 - [ ] **Step 1: 컴포넌트 생성**
@@ -981,6 +1025,7 @@ git commit -m "feat(editor-canvas): add SectionInsertButton component"
 ### Task 11: ElementRenderer에 섹션 삽입 버튼 통합
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 - Modify: `apps/editor-canvas/src/App.tsx`
 

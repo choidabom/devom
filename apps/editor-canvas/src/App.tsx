@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { DocumentStore, MessageBridge, type EditorMessage } from "@devom/editor-core"
+import { DocumentStore, MessageBridge } from "@devom/editor-core"
 import { ElementRenderer } from "./components/ElementRenderer"
 import { SelectionOverlay } from "./components/SelectionOverlay"
 import { SnapGuides } from "./components/SnapGuides"
@@ -21,10 +21,7 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => bridge.destroy())
 }
 
-function rectsIntersect(
-  a: { left: number; top: number; right: number; bottom: number },
-  b: { left: number; top: number; right: number; bottom: number },
-) {
+function rectsIntersect(a: { left: number; top: number; right: number; bottom: number }, b: { left: number; top: number; right: number; bottom: number }) {
   return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
 }
 
@@ -44,7 +41,6 @@ export const App = observer(function App() {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
 
   const outerRef = useRef<HTMLDivElement>(null)
-  const initialCenterDoneRef = useRef(false)
   const savedViewportRef = useRef<{ zoom: number; panX: number; panY: number } | null>(null)
   const [canvasReady, setCanvasReady] = useState(false)
 
@@ -57,7 +53,6 @@ export const App = observer(function App() {
     pageViewport,
     outerRef,
     viewportRef,
-    initialCenterDoneRef,
     savedViewportRef,
     setSelectedIds,
     setEditorMode,
@@ -70,40 +65,48 @@ export const App = observer(function App() {
   // Close context menu on Escape
   useEffect(() => {
     if (!contextMenu) return
-    const onKey = (e: KeyboardEvent) => { if (e.code === "Escape") setContextMenu(null) }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code === "Escape") setContextMenu(null)
+    }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
   }, [contextMenu])
 
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    if (editorMode !== "edit") return
-    e.preventDefault()
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      if (editorMode !== "edit") return
+      e.preventDefault()
 
-    const target = e.target as HTMLElement
-    const elDom = target.closest("[data-element-id]") as HTMLElement | null
-    if (elDom) {
-      const id = elDom.getAttribute("data-element-id")!
-      const el = documentStore.getElement(id)
-      if (el && el.parentId !== null) {
-        let ancestorSelected = false
-        let checkId: string | null = id
-        while (checkId) {
-          if (selectedIdsRef.current.includes(checkId)) { ancestorSelected = true; break }
-          const checkEl = documentStore.getElement(checkId)
-          checkId = checkEl?.parentId ?? null
-        }
-        if (!ancestorSelected) {
-          setSelectedIds([id])
-          bridge.send({
-            type: "ELEMENT_CLICKED",
-            payload: { id, bounds: { x: 0, y: 0, width: 0, height: 0 }, shiftKey: false },
-          })
+      const target = e.target as HTMLElement
+      const elDom = target.closest("[data-element-id]") as HTMLElement | null
+      if (elDom) {
+        const id = elDom.getAttribute("data-element-id")!
+        const el = documentStore.getElement(id)
+        if (el && el.parentId !== null) {
+          let ancestorSelected = false
+          let checkId: string | null = id
+          while (checkId) {
+            if (selectedIdsRef.current.includes(checkId)) {
+              ancestorSelected = true
+              break
+            }
+            const checkEl = documentStore.getElement(checkId)
+            checkId = checkEl?.parentId ?? null
+          }
+          if (!ancestorSelected) {
+            setSelectedIds([id])
+            bridge.send({
+              type: "ELEMENT_CLICKED",
+              payload: { id, bounds: { x: 0, y: 0, width: 0, height: 0 }, shiftKey: false },
+            })
+          }
         }
       }
-    }
 
-    setContextMenu({ x: e.clientX, y: e.clientY })
-  }, [editorMode])
+      setContextMenu({ x: e.clientX, y: e.clientY })
+    },
+    [editorMode]
+  )
 
   const sendGroupRequest = useCallback(() => {
     const ids = selectedIdsRef.current
@@ -165,11 +168,12 @@ export const App = observer(function App() {
           setViewport({ zoom: 1, panX: 0, panY: 0 })
         } else {
           const factor = e.code === "Equal" ? 1.2 : 1 / 1.2
-          setViewport(prev => {
+          setViewport((prev) => {
             const el = outerRef.current
             if (!el) return prev
             const rect = el.getBoundingClientRect()
-            const cx = rect.width / 2, cy = rect.height / 2
+            const cx = rect.width / 2,
+              cy = rect.height / 2
             const newZoom = Math.min(5, Math.max(0.1, prev.zoom * factor))
             const scale = newZoom / prev.zoom
             return { zoom: newZoom, panX: cx - (cx - prev.panX) * scale, panY: cy - (cy - prev.panY) * scale }
@@ -187,7 +191,7 @@ export const App = observer(function App() {
         sendUngroupRequest()
         return
       }
-      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyX", "KeyV", "KeyD", "Backslash"].includes(e.code)) {
+      if ((e.metaKey || e.ctrlKey) && ["KeyZ", "KeyC", "KeyX", "KeyV", "KeyD", "Backslash", "Digit1"].includes(e.code)) {
         e.preventDefault()
       }
       bridge.send({
@@ -201,49 +205,53 @@ export const App = observer(function App() {
     window.addEventListener("keydown", onKeyDown)
     window.addEventListener("keyup", onKeyUp)
 
-    return () => { dispose(); window.removeEventListener("keydown", onKeyDown); window.removeEventListener("keyup", onKeyUp) }
+    return () => {
+      dispose()
+      window.removeEventListener("keydown", onKeyDown)
+      window.removeEventListener("keyup", onKeyUp)
+    }
   }, [handleShellMessage])
 
   // Interact mode: override root element styles for real-page preview (page mode only)
   useEffect(() => {
-    if (!(editorMode === "interact" && canvasMode === 'page')) return
+    if (!(editorMode === "interact" && canvasMode === "page")) return
     const r = documentStore.root
     if (!r) return
     const rootEl = document.querySelector(`[data-element-id="${r.id}"]`) as HTMLElement | null
     if (!rootEl) return
-    const rootWidth = typeof r.style.width === 'number' ? r.style.width : pageViewport
-    rootEl.style.setProperty('width', '100%', 'important')
-    rootEl.style.setProperty('min-height', '100vh', 'important')
-    rootEl.style.setProperty('overflow', 'visible', 'important')
-    rootEl.style.setProperty('padding', '0', 'important')
-    rootEl.style.setProperty('background', 'transparent', 'important')
-    rootEl.style.setProperty('gap', '0', 'important')
-    rootEl.style.setProperty('align-items', 'center', 'important')
-    const firstChild = rootEl.querySelector(':scope > [data-element-id]') as HTMLElement | null
+    const rootWidth = typeof r.style.width === "number" ? r.style.width : pageViewport
+    rootEl.style.setProperty("width", "100%", "important")
+    rootEl.style.setProperty("min-height", "100vh", "important")
+    rootEl.style.setProperty("overflow", "visible", "important")
+    rootEl.style.setProperty("padding", "0", "important")
+    rootEl.style.setProperty("background", "transparent", "important")
+    rootEl.style.setProperty("gap", "0", "important")
+    rootEl.style.setProperty("align-items", "center", "important")
+    const firstChild = rootEl.querySelector(":scope > [data-element-id]") as HTMLElement | null
     if (firstChild) {
-      firstChild.style.setProperty('max-width', `${rootWidth}px`, 'important')
-      firstChild.style.setProperty('align-self', 'center', 'important')
+      firstChild.style.setProperty("max-width", `${rootWidth}px`, "important")
+      firstChild.style.setProperty("align-self", "center", "important")
     }
-    const allEls = rootEl.querySelectorAll('[data-element-id]') as NodeListOf<HTMLElement>
+    const allEls = rootEl.querySelectorAll("[data-element-id]") as NodeListOf<HTMLElement>
     for (const el of allEls) {
-      el.style.setProperty('cursor', 'default', 'important')
-      el.style.setProperty('user-select', 'auto', 'important')
+      el.style.setProperty("cursor", "default", "important")
+      el.style.setProperty("user-select", "auto", "important")
     }
     return () => {
-      rootEl.style.removeProperty('width')
-      rootEl.style.removeProperty('min-height')
-      rootEl.style.removeProperty('overflow')
-      rootEl.style.removeProperty('padding')
-      rootEl.style.removeProperty('background')
-      rootEl.style.removeProperty('gap')
-      rootEl.style.removeProperty('align-items')
+      rootEl.style.removeProperty("width")
+      rootEl.style.removeProperty("min-height")
+      rootEl.style.removeProperty("overflow")
+      rootEl.style.removeProperty("padding")
+      rootEl.style.removeProperty("background")
+      rootEl.style.removeProperty("gap")
+      rootEl.style.removeProperty("align-items")
       if (firstChild) {
-        firstChild.style.removeProperty('max-width')
-        firstChild.style.removeProperty('align-self')
+        firstChild.style.removeProperty("max-width")
+        firstChild.style.removeProperty("align-self")
       }
       for (const el of allEls) {
-        el.style.removeProperty('cursor')
-        el.style.removeProperty('user-select')
+        el.style.removeProperty("cursor")
+        el.style.removeProperty("user-select")
       }
     }
   }, [editorMode, documentStore.root?.id, documentStore.root?.style?.width, pageViewport])
@@ -252,9 +260,9 @@ export const App = observer(function App() {
   if (!root) return null
 
   const handleSelect = useCallback((id: string, shiftKey: boolean) => {
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       if (shiftKey) {
-        return prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        return prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
       }
       return [id]
     })
@@ -283,7 +291,7 @@ export const App = observer(function App() {
       const dx = e.clientX - panDragRef.current.x
       const dy = e.clientY - panDragRef.current.y
       panDragRef.current = { x: e.clientX, y: e.clientY }
-      setViewport(prev => ({ ...prev, panX: prev.panX + dx, panY: prev.panY + dy }))
+      setViewport((prev) => ({ ...prev, panX: prev.panX + dx, panY: prev.panY + dy }))
       return
     }
     if (!marqueeRef.current) return
@@ -310,7 +318,11 @@ export const App = observer(function App() {
 
   const handleCanvasPointerUp = (e: React.PointerEvent) => {
     const target = e.currentTarget as HTMLElement
-    try { target.releasePointerCapture(e.pointerId) } catch { /* not captured */ }
+    try {
+      target.releasePointerCapture(e.pointerId)
+    } catch {
+      /* not captured */
+    }
 
     if (e.button === 2) return
 
@@ -367,10 +379,11 @@ export const App = observer(function App() {
     <div
       ref={outerRef}
       style={{
-        width: "100%", height: "100%",
-        background: (editorMode === "interact" && canvasMode === 'page') ? "#ffffff" : "#eeeef2",
+        width: "100%",
+        height: "100%",
+        background: editorMode === "interact" && canvasMode === "page" ? "#ffffff" : "#eeeef2",
         position: "relative",
-        overflow: (editorMode === "interact" && canvasMode === 'page') ? "auto" : "hidden",
+        overflow: editorMode === "interact" && canvasMode === "page" ? "auto" : "hidden",
         cursor: spaceHeldRef.current ? "grab" : undefined,
       }}
       onPointerDown={handleCanvasPointerDown}
@@ -378,61 +391,86 @@ export const App = observer(function App() {
       onPointerUp={handleCanvasPointerUp}
       onContextMenu={handleContextMenu}
     >
-      {(editorMode === "interact" && canvasMode === 'page') ? (
-        <ElementRenderer elementId={root.id} selectedIds={[]} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={1} />
+      {editorMode === "interact" && canvasMode === "page" ? (
+        <ElementRenderer
+          elementId={root.id}
+          selectedIds={[]}
+          onSelect={handleSelect}
+          onDragChange={setIsDragging}
+          onSnapLines={setSnapLines}
+          onInsertionIndicator={setInsertionIndicator}
+          onDropHighlight={setDropHighlightId}
+          documentStore={documentStore}
+          bridge={bridge}
+          editorMode={editorMode}
+          zoom={1}
+        />
       ) : (
         <>
-        <div style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: '0 0', position: 'absolute', opacity: canvasReady ? 1 : 0 }}>
-          <ElementRenderer elementId={root.id} selectedIds={selectedIds} onSelect={handleSelect} onDragChange={setIsDragging} onSnapLines={setSnapLines} onInsertionIndicator={setInsertionIndicator} onDropHighlight={setDropHighlightId} documentStore={documentStore} bridge={bridge} editorMode={editorMode} zoom={zoom} />
-          {!isDragging && selectedIds.map(id => (
-            <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} zoom={zoom} />
-          ))}
-          <SnapGuides lines={snapLines} />
-          {dropHighlightId && (() => {
-            const dom = document.querySelector(`[data-element-id="${dropHighlightId}"]`) as HTMLElement | null
-            if (!dom) return null
-            const parentEl = dom.offsetParent as HTMLElement | null
-            if (!parentEl) return null
-            const parentRect = parentEl.getBoundingClientRect()
-            const domRect = dom.getBoundingClientRect()
-            return (
-              <div style={{
-                position: 'absolute',
-                left: (domRect.left - parentRect.left) / zoom,
-                top: (domRect.top - parentRect.top) / zoom,
-                width: domRect.width / zoom,
-                height: domRect.height / zoom,
-                border: '2px solid #3b82f6',
-                borderRadius: 4,
-                pointerEvents: 'none',
-                zIndex: 9998,
-              }} />
-            )
-          })()}
-        </div>
+          <div style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})`, transformOrigin: "0 0", position: "absolute", opacity: canvasReady ? 1 : 0 }}>
+            <ElementRenderer
+              elementId={root.id}
+              selectedIds={selectedIds}
+              onSelect={handleSelect}
+              onDragChange={setIsDragging}
+              onSnapLines={setSnapLines}
+              onInsertionIndicator={setInsertionIndicator}
+              onDropHighlight={setDropHighlightId}
+              documentStore={documentStore}
+              bridge={bridge}
+              editorMode={editorMode}
+              zoom={zoom}
+            />
+            {!isDragging && selectedIds.map((id) => <SelectionOverlay key={id} elementId={id} documentStore={documentStore} bridge={bridge} zoom={zoom} />)}
+            <SnapGuides lines={snapLines} />
+            {dropHighlightId &&
+              (() => {
+                const dom = document.querySelector(`[data-element-id="${dropHighlightId}"]`) as HTMLElement | null
+                if (!dom) return null
+                const parentEl = dom.offsetParent as HTMLElement | null
+                if (!parentEl) return null
+                const parentRect = parentEl.getBoundingClientRect()
+                const domRect = dom.getBoundingClientRect()
+                return (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: (domRect.left - parentRect.left) / zoom,
+                      top: (domRect.top - parentRect.top) / zoom,
+                      width: domRect.width / zoom,
+                      height: domRect.height / zoom,
+                      border: "2px solid #3b82f6",
+                      borderRadius: 4,
+                      pointerEvents: "none",
+                      zIndex: 9998,
+                    }}
+                  />
+                )
+              })()}
+          </div>
         </>
       )}
 
       {/* Screen-space overlays */}
       {insertionIndicator && <InsertionIndicator {...insertionIndicator} />}
       {marquee && (
-        <div style={{
-          position: "absolute",
-          left: Math.min(marquee.startX, marquee.endX),
-          top: Math.min(marquee.startY, marquee.endY),
-          width: Math.abs(marquee.endX - marquee.startX),
-          height: Math.abs(marquee.endY - marquee.startY),
-          border: "1.5px dashed #6366f1",
-          background: "rgba(99, 102, 241, 0.08)",
-          borderRadius: 2,
-          pointerEvents: "none",
-        }} />
+        <div
+          style={{
+            position: "absolute",
+            left: Math.min(marquee.startX, marquee.endX),
+            top: Math.min(marquee.startY, marquee.endY),
+            width: Math.abs(marquee.endX - marquee.startX),
+            height: Math.abs(marquee.endY - marquee.startY),
+            border: "1.5px dashed #6366f1",
+            background: "rgba(99, 102, 241, 0.08)",
+            borderRadius: 2,
+            pointerEvents: "none",
+          }}
+        />
       )}
 
       {/* Viewport preset bar (Page Mode only, hidden in interact mode) */}
-      {canvasMode === 'page' && editorMode !== 'interact' && (
-        <ViewportBar pageViewport={pageViewport} bridge={bridge} />
-      )}
+      {canvasMode === "page" && editorMode !== "interact" && <ViewportBar pageViewport={pageViewport} bridge={bridge} />}
 
       {/* Context menu */}
       {contextMenu && (

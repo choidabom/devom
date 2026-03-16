@@ -5,34 +5,28 @@ import type { EditorElement } from "../types"
  * Compute CSS properties for a flex container from its layoutProps.
  */
 export function getContainerStyles(element: EditorElement): CSSProperties {
-  if (element.layoutMode === 'flex') {
+  if (element.layoutMode === "flex") {
     const lp = element.layoutProps
     return {
-      display: 'flex',
+      display: "flex",
       flexDirection: lp.direction,
       gap: lp.gap,
       paddingTop: lp.paddingTop,
       paddingRight: lp.paddingRight,
       paddingBottom: lp.paddingBottom,
       paddingLeft: lp.paddingLeft,
-      alignItems: lp.alignItems === 'start' ? 'flex-start'
-        : lp.alignItems === 'end' ? 'flex-end'
-        : lp.alignItems,
-      justifyContent: lp.justifyContent === 'start' ? 'flex-start'
-        : lp.justifyContent === 'end' ? 'flex-end'
-        : lp.justifyContent === 'space-between' ? 'space-between'
-        : lp.justifyContent,
-      ...(lp.flexWrap === 'wrap' ? { flexWrap: 'wrap' as const } : {}),
+      alignItems: lp.alignItems === "start" ? "flex-start" : lp.alignItems === "end" ? "flex-end" : lp.alignItems,
+      justifyContent:
+        lp.justifyContent === "start" ? "flex-start" : lp.justifyContent === "end" ? "flex-end" : lp.justifyContent === "space-between" ? "space-between" : lp.justifyContent,
+      ...(lp.flexWrap === "wrap" ? { flexWrap: "wrap" as const } : {}),
     }
   }
 
-  if (element.layoutMode === 'grid' && element.gridProps) {
+  if (element.layoutMode === "grid" && element.gridProps) {
     const g = element.gridProps
     return {
-      display: 'grid' as const,
-      gridTemplateColumns: g.minColumnWidth
-        ? `repeat(auto-fit, minmax(${g.minColumnWidth}px, 1fr))`
-        : `repeat(${g.columns}, 1fr)`,
+      display: "grid" as const,
+      gridTemplateColumns: g.minColumnWidth ? `repeat(auto-fit, minmax(${g.minColumnWidth}px, 1fr))` : `repeat(${g.columns}, 1fr)`,
       gap: g.gap,
     }
   }
@@ -44,36 +38,32 @@ export function getContainerStyles(element: EditorElement): CSSProperties {
  * Compute CSS properties for a child inside an auto-layout container.
  * parentDirection determines which axis is the main axis.
  */
-export function getChildSizingStyles(
-  child: EditorElement,
-  parentDirection: 'row' | 'column',
-  parentFlexWrap?: 'nowrap' | 'wrap',
-): CSSProperties {
+export function getChildSizingStyles(child: EditorElement, parentDirection: "row" | "column", parentFlexWrap?: "nowrap" | "wrap"): CSSProperties {
   const styles: CSSProperties = {}
   const { w, h } = child.sizing
 
-  const mainSizing = parentDirection === 'row' ? w : h
-  const crossSizing = parentDirection === 'row' ? h : w
-  const mainDim = parentDirection === 'row' ? 'width' : 'height'
-  const crossDim = parentDirection === 'row' ? 'height' : 'width'
+  const mainSizing = parentDirection === "row" ? w : h
+  const crossSizing = parentDirection === "row" ? h : w
+  const mainDim = parentDirection === "row" ? "width" : "height"
+  const crossDim = parentDirection === "row" ? "height" : "width"
 
-  if (mainSizing === 'fill') {
+  if (mainSizing === "fill") {
     const dim = child.style[mainDim]
-    let basis = typeof dim === 'number' ? dim : 0
-    if (parentFlexWrap === 'wrap' && parentDirection === 'row' && typeof child.style.minWidth === 'number') {
+    let basis = typeof dim === "number" ? dim : 0
+    if (parentFlexWrap === "wrap" && parentDirection === "row" && typeof child.style.minWidth === "number") {
       basis = child.style.minWidth
     }
     styles.flex = `1 0 ${basis}px`
     styles[mainDim] = undefined
-  } else if (mainSizing === 'hug') {
-    styles[mainDim] = 'fit-content'
+  } else if (mainSizing === "hug") {
+    styles[mainDim] = "fit-content"
   }
 
-  if (crossSizing === 'fill') {
-    styles.alignSelf = 'stretch'
+  if (crossSizing === "fill") {
+    styles.alignSelf = "stretch"
     styles[crossDim] = undefined
-  } else if (crossSizing === 'hug') {
-    styles[crossDim] = 'fit-content'
+  } else if (crossSizing === "hug") {
+    styles[crossDim] = "fit-content"
   }
 
   return styles
@@ -82,13 +72,10 @@ export function getChildSizingStyles(
 /**
  * Check if an element is inside an auto-layout container.
  */
-export function isAutoLayoutChild(
-  element: EditorElement,
-  getElement: (id: string) => EditorElement | undefined,
-): boolean {
+export function isAutoLayoutChild(element: EditorElement, getElement: (id: string) => EditorElement | undefined): boolean {
   if (!element.parentId) return false
   const parent = getElement(element.parentId)
-  return parent?.layoutMode === 'flex' || parent?.layoutMode === 'grid'
+  return parent?.layoutMode === "flex" || parent?.layoutMode === "grid"
 }
 
 export function getSectionStyles(element: EditorElement): CSSProperties {
@@ -108,8 +95,8 @@ export function getSectionContentStyles(element: EditorElement): CSSProperties {
   if (!element.sectionProps?.maxWidth) return {}
   return {
     maxWidth: element.sectionProps.maxWidth,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    width: '100%',
+    marginLeft: "auto",
+    marginRight: "auto",
+    width: "100%",
   }
 }

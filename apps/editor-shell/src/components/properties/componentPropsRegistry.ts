@@ -16,6 +16,7 @@ export const COMPONENT_PROPS: Record<string, PropField[]> = {
     { key: "label", label: "Label", type: "text", default: "Button", singleOnly: true },
     { key: "variant", label: "Variant", type: "select", options: ["default", "destructive", "outline", "secondary", "ghost", "link"], default: "default" },
     { key: "size", label: "Size", type: "select", options: ["default", "sm", "lg", "icon"], default: "default" },
+    { key: "formRole", label: "Form Role", type: "select", options: ["none", "submit", "reset"], default: "none" },
   ],
   "sc:card": [
     { key: "title", label: "Title", type: "text", default: "", singleOnly: true },
@@ -38,22 +39,14 @@ export const COMPONENT_PROPS: Record<string, PropField[]> = {
     { key: "label", label: "Label", type: "text", default: "", singleOnly: true },
     { key: "checked", label: "Checked", type: "toggle", default: false },
   ],
-  "sc:label": [
-    { key: "text", label: "Text", type: "text", default: "Label", singleOnly: true },
-  ],
+  "sc:label": [{ key: "text", label: "Text", type: "text", default: "Label", singleOnly: true }],
   "sc:textarea": [
     { key: "placeholder", label: "Placeholder", type: "text", default: "", singleOnly: true },
     { key: "rows", label: "Rows", type: "number", default: 3 },
   ],
-  "sc:avatar": [
-    { key: "fallback", label: "Fallback", type: "text", default: "", singleOnly: true },
-  ],
-  "sc:separator": [
-    { key: "orientation", label: "Orient", type: "select", options: ["horizontal", "vertical"], default: "horizontal" },
-  ],
-  "sc:progress": [
-    { key: "value", label: "Value", type: "number", default: 60, min: 0, max: 100 },
-  ],
+  "sc:avatar": [{ key: "fallback", label: "Fallback", type: "text", default: "", singleOnly: true }],
+  "sc:separator": [{ key: "orientation", label: "Orient", type: "select", options: ["horizontal", "vertical"], default: "horizontal" }],
+  "sc:progress": [{ key: "value", label: "Value", type: "number", default: 60, min: 0, max: 100 }],
   "sc:slider": [
     { key: "value", label: "Value", type: "number", default: 50 },
     { key: "min", label: "Min", type: "number", default: 0 },
@@ -77,9 +70,7 @@ export const COMPONENT_PROPS: Record<string, PropField[]> = {
     { key: "placeholder", label: "Placeholder", type: "text", default: "", singleOnly: true },
     { key: "options", label: "Options", type: "csv", default: [], singleOnly: true },
   ],
-  "sc:table": [
-    { key: "headers", label: "Headers", type: "csv", default: [], singleOnly: true },
-  ],
+  "sc:table": [{ key: "headers", label: "Headers", type: "csv", default: [], singleOnly: true }],
   "sc:accordion": [],
   "sc:radio-group": [
     { key: "label", label: "Label", type: "text", default: "", singleOnly: true },

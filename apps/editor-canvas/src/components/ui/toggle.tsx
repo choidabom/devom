@@ -29,14 +29,7 @@ interface ToggleProps extends React.ComponentProps<"button">, VariantProps<typeo
   onPressedChange?: (pressed: boolean) => void
 }
 
-function Toggle({
-  className,
-  variant = "default",
-  size = "default",
-  pressed,
-  onPressedChange,
-  ...props
-}: ToggleProps) {
+function Toggle({ className, variant = "default", size = "default", pressed, onPressedChange, ...props }: ToggleProps) {
   const [internalPressed, setInternalPressed] = React.useState(false)
   const isPressed = pressed ?? internalPressed
 
@@ -52,11 +45,7 @@ function Toggle({
       data-slot="toggle"
       aria-pressed={isPressed}
       onClick={handleClick}
-      className={cn(
-        toggleVariants({ variant, size }),
-        isPressed && "bg-muted",
-        className
-      )}
+      className={cn(toggleVariants({ variant, size }), isPressed && "bg-muted", className)}
       {...props}
     />
   )

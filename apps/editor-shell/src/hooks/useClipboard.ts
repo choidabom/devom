@@ -6,10 +6,10 @@ let clipboard: EditorElement[] = []
 
 export function useClipboard(syncToCanvas: () => void) {
   const handleCopy = useCallback(() => {
-    const elements = selectionStore.selectedElements.filter(el => !el.locked && el.id !== documentStore.rootId)
+    const elements = selectionStore.selectedElements.filter((el) => !el.locked && el.id !== documentStore.rootId)
     if (elements.length === 0) return
-    const selectedSet = new Set(elements.map(el => el.id))
-    const topLevel = elements.filter(el => {
+    const selectedSet = new Set(elements.map((el) => el.id))
+    const topLevel = elements.filter((el) => {
       let cur = el.parentId
       while (cur) {
         if (selectedSet.has(cur)) return false
@@ -18,13 +18,13 @@ export function useClipboard(syncToCanvas: () => void) {
       }
       return true
     })
-    clipboard = topLevel.flatMap(el => documentStore.collectSubtree(el.id))
+    clipboard = topLevel.flatMap((el) => documentStore.collectSubtree(el.id))
   }, [])
 
   const handleDelete = useCallback(() => {
     if (selectionStore.selectedIds.length === 0) return
     historyStore.pushSnapshot()
-    const toDelete = [...selectionStore.selectedIds].filter(id => {
+    const toDelete = [...selectionStore.selectedIds].filter((id) => {
       const el = documentStore.getElement(id)
       return el && !el.locked && el.id !== documentStore.rootId
     })
@@ -50,7 +50,7 @@ export function useClipboard(syncToCanvas: () => void) {
   }, [syncToCanvas])
 
   const handleDuplicate = useCallback(() => {
-    const ids = selectionStore.selectedIds.filter(id => {
+    const ids = selectionStore.selectedIds.filter((id) => {
       const el = documentStore.getElement(id)
       return el && !el.locked && el.id !== documentStore.rootId
     })

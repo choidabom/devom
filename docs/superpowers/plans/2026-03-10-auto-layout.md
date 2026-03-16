@@ -13,6 +13,7 @@
 ## File Structure
 
 ### New Files
+
 - `packages/editor-core/src/utils/layoutStyles.ts` — Computes CSS from layoutMode/layoutProps/sizing (pure function)
 - `apps/editor-canvas/src/components/InsertionIndicator.tsx` — Blue line showing drop position in auto-layout containers
 - `apps/editor-canvas/src/utils/autoLayoutDrag.ts` — Drag logic for auto-layout: hit-test containers, calculate insertion index
@@ -20,6 +21,7 @@
 - `apps/editor-shell/src/components/SizingSection.tsx` — PropertiesPanel section for child sizing (Fixed/Hug/Fill)
 
 ### Modified Files
+
 - `packages/editor-core/src/types.ts` — Add SizingMode, LayoutProps, SizingProps, extend EditorElement
 - `packages/editor-core/src/protocol.ts` — Add new message types
 - `packages/editor-core/src/stores/DocumentStore.ts` — Add layout methods
@@ -38,6 +40,7 @@
 ### Task 1: Extend types.ts
 
 **Files:**
+
 - Modify: `packages/editor-core/src/types.ts`
 
 - [ ] **Step 1: Add new types and extend EditorElement**
@@ -45,17 +48,17 @@
 ```typescript
 // Add after ElementBounds interface (line 41)
 
-export type SizingMode = 'fixed' | 'hug' | 'fill'
+export type SizingMode = "fixed" | "hug" | "fill"
 
 export interface LayoutProps {
-  direction: 'row' | 'column'
+  direction: "row" | "column"
   gap: number
   paddingTop: number
   paddingRight: number
   paddingBottom: number
   paddingLeft: number
-  alignItems: 'start' | 'center' | 'end' | 'stretch'
-  justifyContent: 'start' | 'center' | 'end' | 'space-between'
+  alignItems: "start" | "center" | "end" | "stretch"
+  justifyContent: "start" | "center" | "end" | "space-between"
 }
 
 export interface SizingProps {
@@ -64,19 +67,19 @@ export interface SizingProps {
 }
 
 export const DEFAULT_LAYOUT_PROPS: LayoutProps = {
-  direction: 'column',
+  direction: "column",
   gap: 8,
   paddingTop: 8,
   paddingRight: 8,
   paddingBottom: 8,
   paddingLeft: 8,
-  alignItems: 'start',
-  justifyContent: 'start',
+  alignItems: "start",
+  justifyContent: "start",
 }
 
 export const DEFAULT_SIZING: SizingProps = {
-  w: 'fixed',
-  h: 'fixed',
+  w: "fixed",
+  h: "fixed",
 }
 ```
 
@@ -93,9 +96,9 @@ export interface EditorElement {
   props: Record<string, unknown>
   locked: boolean
   visible: boolean
-  layoutMode: 'none' | 'flex'      // NEW
-  layoutProps: LayoutProps           // NEW
-  sizing: SizingProps                // NEW
+  layoutMode: "none" | "flex" // NEW
+  layoutProps: LayoutProps // NEW
+  sizing: SizingProps // NEW
 }
 ```
 
@@ -114,6 +117,7 @@ git commit -m "feat(editor-core): add layoutMode, layoutProps, sizing to EditorE
 ### Task 2: Update DocumentStore
 
 **Files:**
+
 - Modify: `packages/editor-core/src/stores/DocumentStore.ts`
 
 - [ ] **Step 1: Add default fields to initRoot, addElement, pasteElements, duplicateElements**
@@ -121,6 +125,7 @@ git commit -m "feat(editor-core): add layoutMode, layoutProps, sizing to EditorE
 Every place that creates an EditorElement needs `layoutMode: 'none'`, `layoutProps: { ...DEFAULT_LAYOUT_PROPS }`, `sizing: { ...DEFAULT_SIZING }`.
 
 In `initRoot()` — add to root element:
+
 ```typescript
 layoutMode: 'none' as const,
 layoutProps: { ...DEFAULT_LAYOUT_PROPS },
@@ -128,6 +133,7 @@ sizing: { ...DEFAULT_SIZING },
 ```
 
 In `addElement()` — add to new element:
+
 ```typescript
 layoutMode: 'none' as const,
 layoutProps: { ...DEFAULT_LAYOUT_PROPS },
@@ -135,6 +141,7 @@ sizing: { ...DEFAULT_SIZING },
 ```
 
 In `pasteElements()` — ensure cloned elements include the new fields (they already come from JSON.parse, so they should carry through, but add defaults for safety):
+
 ```typescript
 const cloned: EditorElement = {
   ...JSON.parse(JSON.stringify(el)),
@@ -251,11 +258,13 @@ git commit -m "feat(editor-core): add auto-layout store methods"
 ### Task 3: Update protocol.ts
 
 **Files:**
+
 - Modify: `packages/editor-core/src/protocol.ts`
 
 - [ ] **Step 1: Add new message types**
 
 Add to `ShellToCanvasMessage` union:
+
 ```typescript
 | { type: "SET_LAYOUT_MODE"; payload: { id: string; mode: "none" | "flex" } }
 | { type: "UPDATE_LAYOUT_PROPS"; payload: { id: string; layoutProps: Partial<LayoutProps> } }
@@ -263,12 +272,14 @@ Add to `ShellToCanvasMessage` union:
 ```
 
 Add to `CanvasToShellMessage` union:
+
 ```typescript
 | { type: "REORDER_CHILD"; payload: { parentId: string; childId: string; newIndex: number } }
 | { type: "REPARENT_ELEMENT"; payload: { id: string; oldParentId: string; newParentId: string; index: number; dropPosition?: { x: number; y: number } } }
 ```
 
 Add imports at top:
+
 ```typescript
 import type { EditorElement, ElementBounds, LayoutProps, SizingProps } from "./types"
 ```
@@ -288,6 +299,7 @@ git commit -m "feat(editor-core): add auto-layout protocol messages"
 ### Task 4: Create layoutStyles utility
 
 **Files:**
+
 - Create: `packages/editor-core/src/utils/layoutStyles.ts`
 
 - [ ] **Step 1: Create the utility**
@@ -300,23 +312,19 @@ import type { EditorElement, SizingMode } from "../types"
  * Compute CSS properties for a flex container from its layoutProps.
  */
 export function getContainerStyles(element: EditorElement): CSSProperties {
-  if (element.layoutMode !== 'flex') return {}
+  if (element.layoutMode !== "flex") return {}
   const lp = element.layoutProps
   return {
-    display: 'flex',
+    display: "flex",
     flexDirection: lp.direction,
     gap: lp.gap,
     paddingTop: lp.paddingTop,
     paddingRight: lp.paddingRight,
     paddingBottom: lp.paddingBottom,
     paddingLeft: lp.paddingLeft,
-    alignItems: lp.alignItems === 'start' ? 'flex-start'
-      : lp.alignItems === 'end' ? 'flex-end'
-      : lp.alignItems,
-    justifyContent: lp.justifyContent === 'start' ? 'flex-start'
-      : lp.justifyContent === 'end' ? 'flex-end'
-      : lp.justifyContent === 'space-between' ? 'space-between'
-      : lp.justifyContent,
+    alignItems: lp.alignItems === "start" ? "flex-start" : lp.alignItems === "end" ? "flex-end" : lp.alignItems,
+    justifyContent:
+      lp.justifyContent === "start" ? "flex-start" : lp.justifyContent === "end" ? "flex-end" : lp.justifyContent === "space-between" ? "space-between" : lp.justifyContent,
   }
 }
 
@@ -324,33 +332,30 @@ export function getContainerStyles(element: EditorElement): CSSProperties {
  * Compute CSS properties for a child inside an auto-layout container.
  * parentDirection determines which axis is the main axis.
  */
-export function getChildSizingStyles(
-  child: EditorElement,
-  parentDirection: 'row' | 'column',
-): CSSProperties {
+export function getChildSizingStyles(child: EditorElement, parentDirection: "row" | "column"): CSSProperties {
   const styles: CSSProperties = {}
   const { w, h } = child.sizing
 
   // Main axis sizing
-  const mainSizing = parentDirection === 'row' ? w : h
-  const crossSizing = parentDirection === 'row' ? h : w
-  const mainDim = parentDirection === 'row' ? 'width' : 'height'
-  const crossDim = parentDirection === 'row' ? 'height' : 'width'
+  const mainSizing = parentDirection === "row" ? w : h
+  const crossSizing = parentDirection === "row" ? h : w
+  const mainDim = parentDirection === "row" ? "width" : "height"
+  const crossDim = parentDirection === "row" ? "height" : "width"
 
-  if (mainSizing === 'fill') {
-    styles.flex = '1 0 0'
+  if (mainSizing === "fill") {
+    styles.flex = "1 0 0"
     // Remove fixed main dimension
     styles[mainDim] = undefined
-  } else if (mainSizing === 'hug') {
-    styles[mainDim] = 'fit-content'
+  } else if (mainSizing === "hug") {
+    styles[mainDim] = "fit-content"
   }
   // 'fixed': keep existing style dimension
 
-  if (crossSizing === 'fill') {
-    styles.alignSelf = 'stretch'
+  if (crossSizing === "fill") {
+    styles.alignSelf = "stretch"
     styles[crossDim] = undefined
-  } else if (crossSizing === 'hug') {
-    styles[crossDim] = 'fit-content'
+  } else if (crossSizing === "hug") {
+    styles[crossDim] = "fit-content"
   }
   // 'fixed': keep existing style dimension
 
@@ -360,19 +365,17 @@ export function getChildSizingStyles(
 /**
  * Check if an element is inside an auto-layout container.
  */
-export function isAutoLayoutChild(
-  element: EditorElement,
-  getElement: (id: string) => EditorElement | undefined,
-): boolean {
+export function isAutoLayoutChild(element: EditorElement, getElement: (id: string) => EditorElement | undefined): boolean {
   if (!element.parentId) return false
   const parent = getElement(element.parentId)
-  return parent?.layoutMode === 'flex'
+  return parent?.layoutMode === "flex"
 }
 ```
 
 - [ ] **Step 2: Export from index**
 
 Add to `packages/editor-core/src/index.ts`:
+
 ```typescript
 export * from "./utils/layoutStyles"
 ```
@@ -399,6 +402,7 @@ git commit -m "feat(editor-core): add layoutStyles utility for CSS computation"
 ### Task 5: Update ElementRenderer for flex rendering
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 
 - [ ] **Step 1: Import layout utilities**
@@ -415,10 +419,8 @@ Inside the component, after `const isRoot = element.parentId === null`:
 // Auto Layout styles
 const containerStyles = getContainerStyles(element)
 const parent = element.parentId ? documentStore.getElement(element.parentId) : undefined
-const inAutoLayout = parent?.layoutMode === 'flex'
-const childSizingStyles = inAutoLayout
-  ? getChildSizingStyles(element, parent.layoutProps.direction)
-  : {}
+const inAutoLayout = parent?.layoutMode === "flex"
+const childSizingStyles = inAutoLayout ? getChildSizingStyles(element, parent.layoutProps.direction) : {}
 ```
 
 - [ ] **Step 3: Update the rendered div's style**
@@ -444,12 +446,15 @@ style={{
 - [ ] **Step 4: Guard drag — skip absolute drag for auto-layout children**
 
 In `handlePointerDown`, change the early return check on line 53 from:
+
 ```typescript
 if (element.style.position !== "absolute") return
 ```
+
 to:
+
 ```typescript
-if (inAutoLayout) return  // Auto-layout drag handled separately (Task 7)
+if (inAutoLayout) return // Auto-layout drag handled separately (Task 7)
 if (element.style.position !== "absolute") return
 ```
 
@@ -477,6 +482,7 @@ git commit -m "feat(editor-canvas): render flex containers with auto-layout CSS"
 ### Task 6: Handle new messages in Canvas App.tsx
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/App.tsx`
 
 - [ ] **Step 1: Add message handlers**
@@ -514,6 +520,7 @@ git commit -m "feat(editor-canvas): handle auto-layout protocol messages"
 ### Task 7: Create AutoLayoutSection component
 
 **Files:**
+
 - Create: `apps/editor-shell/src/components/AutoLayoutSection.tsx`
 
 - [ ] **Step 1: Create the component**
@@ -666,6 +673,7 @@ git commit -m "feat(editor-shell): add AutoLayoutSection component"
 ### Task 8: Create SizingSection component
 
 **Files:**
+
 - Create: `apps/editor-shell/src/components/SizingSection.tsx`
 
 - [ ] **Step 1: Create the component**
@@ -761,6 +769,7 @@ git commit -m "feat(editor-shell): add SizingSection component"
 ### Task 9: Integrate into PropertiesPanel
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/PropertiesPanel.tsx`
 
 - [ ] **Step 1: Import new components and utilities**
@@ -778,8 +787,8 @@ Inside the PropertiesPanel component, after `updateProp`:
 ```typescript
 const toggleAutoLayout = () => {
   historyStore.pushSnapshot()
-  const newMode = element.layoutMode === 'flex' ? 'none' : 'flex'
-  documentStore.setLayoutMode(element.id, newMode as 'none' | 'flex')
+  const newMode = element.layoutMode === "flex" ? "none" : "flex"
+  documentStore.setLayoutMode(element.id, newMode as "none" | "flex")
   bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
 }
 
@@ -884,11 +893,13 @@ git commit -m "feat(editor-shell): integrate Auto Layout and Sizing into Propert
 ### Task 10: Update LeftPanel icons
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/LeftPanel.tsx`
 
 - [ ] **Step 1: Import LayoutList icon**
 
 Add to lucide-react imports:
+
 ```typescript
 import { ..., LayoutList } from "lucide-react"
 ```
@@ -904,6 +915,7 @@ const displayIcon = element.layoutMode === 'flex'
 ```
 
 Use `displayIcon` instead of `icon` in the render:
+
 ```typescript
 <span style={{ ... }}>{displayIcon}</span>
 ```
@@ -911,6 +923,7 @@ Use `displayIcon` instead of `icon` in the render:
 - [ ] **Step 3: Show direction indicator**
 
 After the name span, add:
+
 ```typescript
 {element.layoutMode === 'flex' && (
   <span style={{ fontSize: 10, opacity: 0.4, flexShrink: 0 }}>
@@ -929,6 +942,7 @@ git commit -m "feat(editor-shell): show auto-layout indicator in layer tree"
 ### Task 11: Handle new Canvas messages in Shell App.tsx
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/App.tsx`
 
 - [ ] **Step 1: Add message handlers**
@@ -962,6 +976,7 @@ git commit -m "feat(editor-shell): handle reorder and reparent messages"
 ### Task 12: Create autoLayoutDrag utility
 
 **Files:**
+
 - Create: `apps/editor-canvas/src/utils/autoLayoutDrag.ts`
 
 - [ ] **Step 1: Create hit-test and insertion index utilities**
@@ -978,16 +993,9 @@ export interface DropTarget {
  * Find the auto-layout container under the given point, if any.
  * Returns the container element ID and the insertion index.
  */
-export function findDropTarget(
-  clientX: number,
-  clientY: number,
-  draggedIds: string[],
-  documentStore: DocumentStore,
-): DropTarget | null {
+export function findDropTarget(clientX: number, clientY: number, draggedIds: string[], documentStore: DocumentStore): DropTarget | null {
   // Find all auto-layout containers
-  const containers = documentStore.getAllElements().filter(
-    el => el.layoutMode === 'flex' && !draggedIds.includes(el.id)
-  )
+  const containers = documentStore.getAllElements().filter((el) => el.layoutMode === "flex" && !draggedIds.includes(el.id))
 
   for (const container of containers) {
     const dom = document.querySelector(`[data-element-id="${container.id}"]`) as HTMLElement | null
@@ -1008,18 +1016,11 @@ export function findDropTarget(
  * Calculate the insertion index within an auto-layout container
  * based on mouse position relative to children.
  */
-export function calcInsertionIndex(
-  containerId: string,
-  direction: 'row' | 'column',
-  clientX: number,
-  clientY: number,
-  draggedIds: string[],
-  documentStore: DocumentStore,
-): number {
+export function calcInsertionIndex(containerId: string, direction: "row" | "column", clientX: number, clientY: number, draggedIds: string[], documentStore: DocumentStore): number {
   const container = documentStore.getElement(containerId)
   if (!container) return 0
 
-  const childIds = container.children.filter(id => !draggedIds.includes(id))
+  const childIds = container.children.filter((id) => !draggedIds.includes(id))
   if (childIds.length === 0) return 0
 
   for (let i = 0; i < childIds.length; i++) {
@@ -1030,8 +1031,8 @@ export function calcInsertionIndex(
     const centerX = childRect.left + childRect.width / 2
     const centerY = childRect.top + childRect.height / 2
 
-    if (direction === 'row' && clientX < centerX) return i
-    if (direction === 'column' && clientY < centerY) return i
+    if (direction === "row" && clientX < centerX) return i
+    if (direction === "column" && clientY < centerY) return i
   }
 
   return childIds.length
@@ -1043,9 +1044,9 @@ export function calcInsertionIndex(
 export function calcInsertionIndicator(
   containerId: string,
   insertIndex: number,
-  direction: 'row' | 'column',
+  direction: "row" | "column",
   draggedIds: string[],
-  documentStore: DocumentStore,
+  documentStore: DocumentStore
 ): { x: number; y: number; width: number; height: number } | null {
   const container = documentStore.getElement(containerId)
   if (!container) return null
@@ -1054,14 +1055,14 @@ export function calcInsertionIndicator(
   if (!containerDom) return null
 
   const containerRect = containerDom.getBoundingClientRect()
-  const childIds = container.children.filter(id => !draggedIds.includes(id))
+  const childIds = container.children.filter((id) => !draggedIds.includes(id))
 
   const THICKNESS = 2
   const INSET = 4
 
   if (childIds.length === 0) {
     // Empty container — show indicator at start
-    if (direction === 'row') {
+    if (direction === "row") {
       return { x: containerRect.left + INSET, y: containerRect.top + INSET, width: THICKNESS, height: containerRect.height - INSET * 2 }
     }
     return { x: containerRect.left + INSET, y: containerRect.top + INSET, width: containerRect.width - INSET * 2, height: THICKNESS }
@@ -1073,7 +1074,7 @@ export function calcInsertionIndicator(
     if (!lastDom) return null
     const lastRect = lastDom.getBoundingClientRect()
 
-    if (direction === 'row') {
+    if (direction === "row") {
       return { x: lastRect.right + 2, y: containerRect.top + INSET, width: THICKNESS, height: containerRect.height - INSET * 2 }
     }
     return { x: containerRect.left + INSET, y: lastRect.bottom + 2, width: containerRect.width - INSET * 2, height: THICKNESS }
@@ -1084,7 +1085,7 @@ export function calcInsertionIndicator(
   if (!childDom) return null
   const childRect = childDom.getBoundingClientRect()
 
-  if (direction === 'row') {
+  if (direction === "row") {
     return { x: childRect.left - 2, y: containerRect.top + INSET, width: THICKNESS, height: containerRect.height - INSET * 2 }
   }
   return { x: containerRect.left + INSET, y: childRect.top - 2, width: containerRect.width - INSET * 2, height: THICKNESS }
@@ -1101,6 +1102,7 @@ git commit -m "feat(editor-canvas): add auto-layout drag utilities"
 ### Task 13: Create InsertionIndicator component
 
 **Files:**
+
 - Create: `apps/editor-canvas/src/components/InsertionIndicator.tsx`
 
 - [ ] **Step 1: Create the component**
@@ -1142,6 +1144,7 @@ git commit -m "feat(editor-canvas): add InsertionIndicator component"
 ### Task 14: Add auto-layout drag to ElementRenderer
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 
 - [ ] **Step 1: Import utilities**
@@ -1153,6 +1156,7 @@ import { findDropTarget, calcInsertionIndicator } from "../utils/autoLayoutDrag"
 - [ ] **Step 2: Add auto-layout drag props**
 
 Add to `ElementRendererProps`:
+
 ```typescript
 onInsertionIndicator?: (indicator: { x: number; y: number; width: number; height: number } | null) => void
 onDropHighlight?: (containerId: string | null) => void
@@ -1210,13 +1214,7 @@ const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
       onDropHighlight?.(dropTarget.containerId)
       const container = documentStore.getElement(dropTarget.containerId)
       if (container) {
-        const indicator = calcInsertionIndicator(
-          dropTarget.containerId,
-          dropTarget.insertIndex,
-          container.layoutProps.direction,
-          [elementId],
-          documentStore,
-        )
+        const indicator = calcInsertionIndicator(dropTarget.containerId, dropTarget.insertIndex, container.layoutProps.direction, [elementId], documentStore)
         onInsertionIndicator?.(indicator)
       }
     } else {
@@ -1267,7 +1265,9 @@ const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
     }
   }
 
-  const onCancel = () => { cleanup() }
+  const onCancel = () => {
+    cleanup()
+  }
 
   dragCleanupRef.current = cleanup
   target.addEventListener("pointermove", onMove)
@@ -1279,6 +1279,7 @@ const handleAutoLayoutPointerDown = (e: React.PointerEvent) => {
 - [ ] **Step 4: Update onPointerDown to branch**
 
 Change the `onPointerDown` in the rendered div:
+
 ```typescript
 onPointerDown={inAutoLayout ? handleAutoLayoutPointerDown : handlePointerDown}
 ```
@@ -1286,6 +1287,7 @@ onPointerDown={inAutoLayout ? handleAutoLayoutPointerDown : handlePointerDown}
 - [ ] **Step 5: Pass new props through recursive children**
 
 Update the children rendering:
+
 ```typescript
 {element.children.map((childId) => (
   <ElementRenderer
@@ -1314,6 +1316,7 @@ git commit -m "feat(editor-canvas): add auto-layout drag with reorder and repare
 ### Task 15: Wire InsertionIndicator and drop highlight in Canvas App
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/App.tsx`
 
 - [ ] **Step 1: Add state for insertion indicator and drop highlight**
@@ -1332,14 +1335,16 @@ import { InsertionIndicator } from "./components/InsertionIndicator"
 - [ ] **Step 3: Pass callbacks to ElementRenderer**
 
 Add to the root `<ElementRenderer>`:
+
 ```typescript
-onInsertionIndicator={setInsertionIndicator}
-onDropHighlight={setDropHighlightId}
+onInsertionIndicator = { setInsertionIndicator }
+onDropHighlight = { setDropHighlightId }
 ```
 
 - [ ] **Step 4: Render InsertionIndicator**
 
 Add after SnapGuides:
+
 ```typescript
 {insertionIndicator && <InsertionIndicator {...insertionIndicator} />}
 ```
@@ -1349,6 +1354,7 @@ Add after SnapGuides:
 Add a CSS effect: when `dropHighlightId` is set, the container gets a highlight. This can be done via a separate overlay div or by adding a data attribute.
 
 Add after InsertionIndicator:
+
 ```typescript
 {dropHighlightId && (() => {
   const dom = document.querySelector(`[data-element-id="${dropHighlightId}"]`) as HTMLElement | null
@@ -1403,6 +1409,7 @@ git commit -m "feat(editor-canvas): wire insertion indicator and drop highlight"
 ### Task 16: Update SelectionOverlay for auto-layout children
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/SelectionOverlay.tsx`
 
 - [ ] **Step 1: Import utility**
@@ -1414,6 +1421,7 @@ import { isAutoLayoutChild } from "@devom/editor-core"
 - [ ] **Step 2: Detect auto-layout context**
 
 After the element fetch:
+
 ```typescript
 const inAutoLayout = element ? isAutoLayoutChild(element, (id) => documentStore.getElement(id)) : false
 ```
@@ -1421,18 +1429,19 @@ const inAutoLayout = element ? isAutoLayoutChild(element, (id) => documentStore.
 - [ ] **Step 3: Adjust resize handles based on sizing**
 
 If `inAutoLayout` and sizing is `fill` or `hug`, hide the relevant resize handles:
+
 ```typescript
 const filteredHandles = inAutoLayout
-  ? handles.filter(h => {
+  ? handles.filter((h) => {
       const parent = documentStore.getElement(element!.parentId!)
       if (!parent) return true
       const dir = parent.layoutProps.direction
-      const mainAxis = dir === 'row' ? ['e', 'w'] : ['n', 's']
-      const crossAxis = dir === 'row' ? ['n', 's'] : ['e', 'w']
+      const mainAxis = dir === "row" ? ["e", "w"] : ["n", "s"]
+      const crossAxis = dir === "row" ? ["n", "s"] : ["e", "w"]
       // Hide main axis handles if fill
-      if (element!.sizing[dir === 'row' ? 'w' : 'h'] === 'fill' && mainAxis.some(a => h.position.includes(a))) return false
+      if (element!.sizing[dir === "row" ? "w" : "h"] === "fill" && mainAxis.some((a) => h.position.includes(a))) return false
       // Hide cross axis handles if fill
-      if (element!.sizing[dir === 'row' ? 'h' : 'w'] === 'fill' && crossAxis.some(a => h.position.includes(a))) return false
+      if (element!.sizing[dir === "row" ? "h" : "w"] === "fill" && crossAxis.some((a) => h.position.includes(a))) return false
       return true
     })
   : handles
@@ -1450,6 +1459,7 @@ git commit -m "feat(editor-canvas): adjust resize handles for auto-layout childr
 ### Task 17: Update JSX export for auto-layout
 
 **Files:**
+
 - Modify: `packages/editor-core/src/export/jsxExport.ts`
 
 - [ ] **Step 1: Handle layoutMode in style generation**
@@ -1463,12 +1473,12 @@ import { getContainerStyles, getChildSizingStyles } from "../utils/layoutStyles"
 
 // In renderHtmlElement, compute effective style:
 const effectiveStyle = { ...el.style }
-if (el.layoutMode === 'flex') {
+if (el.layoutMode === "flex") {
   Object.assign(effectiveStyle, getContainerStyles(el))
 }
 if (el.parentId) {
   const parent = elements[el.parentId]
-  if (parent?.layoutMode === 'flex') {
+  if (parent?.layoutMode === "flex") {
     const { position, left, top, ...rest } = effectiveStyle
     Object.assign(effectiveStyle, rest, getChildSizingStyles(el, parent.layoutProps.direction))
     delete (effectiveStyle as any).position
@@ -1489,6 +1499,7 @@ git commit -m "feat(editor-core): include auto-layout styles in JSX export"
 ### Task 18: Handle external drag into auto-layout containers
 
 **Files:**
+
 - Modify: `apps/editor-canvas/src/components/ElementRenderer.tsx`
 
 - [ ] **Step 1: Extend absolute drag to detect auto-layout containers**
@@ -1502,13 +1513,10 @@ if (dropTarget) {
   onDropHighlight?.(dropTarget.containerId)
   const container = documentStore.getElement(dropTarget.containerId)
   if (container) {
-    const indicator = calcInsertionIndicator(
-      dropTarget.containerId, dropTarget.insertIndex,
-      container.layoutProps.direction, dragIds, documentStore,
-    )
+    const indicator = calcInsertionIndicator(dropTarget.containerId, dropTarget.insertIndex, container.layoutProps.direction, dragIds, documentStore)
     onInsertionIndicator?.(indicator)
   }
-  onSnapLines?.([])  // Disable snap when over a container
+  onSnapLines?.([]) // Disable snap when over a container
 } else {
   onDropHighlight?.(null)
   onInsertionIndicator?.(null)
@@ -1516,6 +1524,7 @@ if (dropTarget) {
 ```
 
 In `onUp`, check if dropping into a container:
+
 ```typescript
 const dropTarget = findDropTarget(me.clientX, me.clientY, dragIds, documentStore)
 if (dropTarget) {
@@ -1541,6 +1550,7 @@ if (dropTarget) {
 - [ ] **Step 2: Cleanup on cancel**
 
 In `onCancel`, also clear indicators:
+
 ```typescript
 const onCancel = () => {
   cleanup()
@@ -1562,6 +1572,7 @@ git commit -m "feat(editor-canvas): support drag from absolute into auto-layout 
 - [ ] **Step 1: Full manual test**
 
 Run dev server and test all scenarios:
+
 1. Create a div → toggle Auto Layout on
 2. Add multiple children (button, input, card, badge)
 3. Verify direction toggle (row ↔ column)

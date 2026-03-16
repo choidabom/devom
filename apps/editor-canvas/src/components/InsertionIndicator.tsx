@@ -9,14 +9,14 @@ export function InsertionIndicator({ x, y, width, height }: InsertionIndicatorPr
   return (
     <div
       style={{
-        position: 'fixed',
+        position: "fixed",
         left: x,
         top: y,
         width,
         height,
-        backgroundColor: '#3b82f6',
+        backgroundColor: "#3b82f6",
         borderRadius: 1,
-        pointerEvents: 'none',
+        pointerEvents: "none",
         zIndex: 9999,
       }}
     />

@@ -22,21 +22,21 @@ interface EditorElement {
   // ... existing fields ...
 
   // 섹션 역할 식별 (page mode에서 의미)
-  role?: 'section' | 'hero' | 'features' | 'cta' | 'footer' | 'header'
+  role?: "section" | "hero" | "features" | "cta" | "footer" | "header"
 
   // 섹션 전용 속성
   sectionProps?: {
-    backgroundColor?: string    // 섹션 배경색
-    backgroundImage?: string    // 섹션 배경 이미지 URL
-    maxWidth?: number           // 내부 콘텐츠 최대 너비 (예: 1200px)
-    verticalPadding?: number    // 섹션 상하 패딩
+    backgroundColor?: string // 섹션 배경색
+    backgroundImage?: string // 섹션 배경 이미지 URL
+    maxWidth?: number // 내부 콘텐츠 최대 너비 (예: 1200px)
+    verticalPadding?: number // 섹션 상하 패딩
   }
 
   // Grid 레이아웃 속성
   gridProps?: {
-    columns: number             // 컬럼 수 (2, 3, 4 등)
-    gap: number                 // grid gap (px)
-    minColumnWidth?: number     // auto-fit 시 최소 컬럼 너비
+    columns: number // 컬럼 수 (2, 3, 4 등)
+    gap: number // grid gap (px)
+    minColumnWidth?: number // auto-fit 시 최소 컬럼 너비
   }
 }
 ```
@@ -46,7 +46,7 @@ interface EditorElement {
 ```typescript
 // 기존: 'none' | 'flex'
 // 변경: 'none' | 'flex' | 'grid'
-type LayoutMode = 'none' | 'flex' | 'grid'
+type LayoutMode = "none" | "flex" | "grid"
 ```
 
 ## Page Visual
@@ -92,14 +92,14 @@ type LayoutMode = 'none' | 'flex' | 'grid'
 
 Toolbar "Add" 드롭다운에 **Sections** 카테고리 추가:
 
-| 프리셋 | 구조 | 기본 스타일 |
-|--------|------|-------------|
-| Empty Section | flex-column 빈 컨테이너 | padding: 40px, fill-width |
-| Hero | heading + subtext + CTA button | 큰 패딩, 중앙 정렬, 그라데이션 배경 |
-| Features | grid 3-column + card 3개 | 배경 #f8fafc, gap 24px |
-| CTA | heading + button | 배경색, 중앙 정렬 |
-| Header | flex-row: logo + nav links | border-bottom, 작은 패딩 |
-| Footer | flex-row: 링크 텍스트들 | 어두운 배경 (#1e293b) |
+| 프리셋        | 구조                           | 기본 스타일                         |
+| ------------- | ------------------------------ | ----------------------------------- |
+| Empty Section | flex-column 빈 컨테이너        | padding: 40px, fill-width           |
+| Hero          | heading + subtext + CTA button | 큰 패딩, 중앙 정렬, 그라데이션 배경 |
+| Features      | grid 3-column + card 3개       | 배경 #f8fafc, gap 24px              |
+| CTA           | heading + button               | 배경색, 중앙 정렬                   |
+| Header        | flex-row: logo + nav links     | border-bottom, 작은 패딩            |
+| Footer        | flex-row: 링크 텍스트들        | 어두운 배경 (#1e293b)               |
 
 ### 프리셋 동작
 
@@ -118,6 +118,7 @@ Toolbar "Add" 드롭다운에 **Sections** 카테고리 추가:
 ### Properties Panel 확장
 
 섹션 선택 시 추가 UI:
+
 - **Section** 탭: 배경색 picker, maxWidth 입력, verticalPadding 슬라이더
 - **Layout** 탭: 기존 flex 설정 + grid 설정 (layoutMode에 따라)
 

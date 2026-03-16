@@ -20,10 +20,7 @@ export interface SnapResult {
 
 const SNAP_THRESHOLD = 5
 
-export function calcSnap(
-  dragged: Bounds,
-  others: Bounds[],
-): SnapResult {
+export function calcSnap(dragged: Bounds, others: Bounds[]): SnapResult {
   let bestDx = Infinity
   let bestDy = Infinity
   const xLines: SnapLine[] = []
@@ -102,9 +99,6 @@ export function calcSnap(
   return {
     dx: Math.abs(bestDx) <= SNAP_THRESHOLD ? bestDx : 0,
     dy: Math.abs(bestDy) <= SNAP_THRESHOLD ? bestDy : 0,
-    lines: [
-      ...(Math.abs(bestDx) <= SNAP_THRESHOLD ? xLines : []),
-      ...(Math.abs(bestDy) <= SNAP_THRESHOLD ? yLines : []),
-    ],
+    lines: [...(Math.abs(bestDx) <= SNAP_THRESHOLD ? xLines : []), ...(Math.abs(bestDy) <= SNAP_THRESHOLD ? yLines : [])],
   }
 }

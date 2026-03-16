@@ -37,7 +37,7 @@ export function useEditorKeyboard({
       if (e.metaKey || e.ctrlKey) {
         if (e.code === "Backslash") {
           e.preventDefault()
-          setShowPanels(prev => !prev)
+          setShowPanels((prev) => !prev)
           return
         }
         if (e.code === "KeyZ") {
@@ -86,7 +86,7 @@ export function useEditorKeyboard({
           setEditorMode("interact")
           selectionStore.clear()
           bridge.send({ type: "SET_MODE", payload: { mode: "interact", canvasMode } })
-          if (canvasMode === 'page') setShowPanels(false)
+          if (canvasMode === "page") setShowPanels(false)
         }
         return
       }

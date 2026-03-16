@@ -35,23 +35,14 @@ function Select({ value: controlledValue, onValueChange, defaultValue, children 
     [onValueChange]
   )
 
-  return (
-    <SelectContext.Provider value={{ value, onValueChange: handleValueChange, open, setOpen }}>
-      {children}
-    </SelectContext.Provider>
-  )
+  return <SelectContext.Provider value={{ value, onValueChange: handleValueChange, open, setOpen }}>{children}</SelectContext.Provider>
 }
 
 interface SelectTriggerProps extends React.ComponentProps<"button"> {
   size?: "sm" | "default"
 }
 
-function SelectTrigger({
-  className,
-  size = "default",
-  children,
-  ...props
-}: SelectTriggerProps) {
+function SelectTrigger({ className, size = "default", children, ...props }: SelectTriggerProps) {
   const context = React.useContext(SelectContext)
   if (!context) throw new Error("SelectTrigger must be used within Select")
 
@@ -81,10 +72,7 @@ function SelectValue({ placeholder, className }: { placeholder?: string; classNa
   if (!context) throw new Error("SelectValue must be used within Select")
 
   return (
-    <span
-      data-slot="select-value"
-      className={cn("flex flex-1 text-left", className)}
-    >
+    <span data-slot="select-value" className={cn("flex flex-1 text-left", className)}>
       {context.value || placeholder}
     </span>
   )
@@ -100,10 +88,7 @@ function SelectContent({ className, children, ...props }: SelectContentProps) {
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-40"
-        onClick={() => context.setOpen(false)}
-      />
+      <div className="fixed inset-0 z-40" onClick={() => context.setOpen(false)} />
       <div
         data-slot="select-content"
         className={cn(
@@ -153,10 +138,4 @@ function SelectItem({ className, children, value, ...props }: SelectItemProps) {
   )
 }
 
-export {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-}
+export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue }

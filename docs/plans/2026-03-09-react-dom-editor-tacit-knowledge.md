@@ -9,14 +9,14 @@
 
 ### Canvas vs DOM 트레이드오프
 
-| 관점 | Canvas API | React DOM |
-|------|-----------|-----------|
-| 렌더링 성능 | 수만 개 요소에 유리 | 수천 개까지 실용적 |
-| 텍스트 렌더링 | 직접 구현 필요 (줄바꿈, 커서 등) | 브라우저가 처리 |
-| 이벤트 처리 | hitTest 직접 구현 | DOM 이벤트 자연스럽게 사용 |
-| 접근성 | 별도 구현 필요 | 기본 제공 |
-| CSS 호환 | 없음 (직접 그리기) | **그대로 적용** |
-| 결과물 = 코드 | 변환 과정 필요 | **디자인 = 실제 코드** |
+| 관점          | Canvas API                       | React DOM                  |
+| ------------- | -------------------------------- | -------------------------- |
+| 렌더링 성능   | 수만 개 요소에 유리              | 수천 개까지 실용적         |
+| 텍스트 렌더링 | 직접 구현 필요 (줄바꿈, 커서 등) | 브라우저가 처리            |
+| 이벤트 처리   | hitTest 직접 구현                | DOM 이벤트 자연스럽게 사용 |
+| 접근성        | 별도 구현 필요                   | 기본 제공                  |
+| CSS 호환      | 없음 (직접 그리기)               | **그대로 적용**            |
+| 결과물 = 코드 | 변환 과정 필요                   | **디자인 = 실제 코드**     |
 
 데우스가 DOM을 선택한 핵심 이유: **디자인한 것이 곧 실제 제품 코드**가 되어야 하기 때문이다.
 Canvas로 그린 사각형은 CSS `div`와 다르지만, DOM으로 만든 `div`는 그 자체가 코드다.
@@ -56,11 +56,13 @@ canvas.example.io   → eTLD+1 = example.io
 ### 개발 환경에서의 구현
 
 localhost에서는 포트가 달라도 Same-Site다:
+
 ```
 localhost:4000 + localhost:4001 → Same-Site (localhost)
 ```
 
 개발 중 진정한 격리를 테스트하려면:
+
 - `/etc/hosts`에 서로 다른 도메인 매핑
 - 또는 `127.0.0.1 shell.editor.local` + `127.0.0.1 canvas.editor.test`
 
@@ -89,7 +91,7 @@ React는 **컴포넌트 단위**로 리렌더한다:
 // 모든 요소가 리렌더될 수 있음
 
 function Canvas({ elements }) {
-  return elements.map(el => <Element key={el.id} data={el} />)
+  return elements.map((el) => <Element key={el.id} data={el} />)
 }
 
 // setState로 elements 배열 참조가 바뀌면
@@ -146,14 +148,14 @@ MobX의 Proxy 기반 자동 추적이 여전히 최고의 선택이다.
 ```typescript
 // ❌ 나쁜 예: 매 프레임마다 전체 문서를 전송
 onDrag(({ x, y }) => {
-  postMessage({ type: 'UPDATE', payload: entireDocument })
+  postMessage({ type: "UPDATE", payload: entireDocument })
 })
 
 // ✅ 좋은 예: 변경된 속성만 전송 (delta)
 onDrag(({ x, y }) => {
   postMessage({
-    type: 'ELEMENT_MOVED',
-    payload: { id: 'el-42', x, y }  // 최소 데이터
+    type: "ELEMENT_MOVED",
+    payload: { id: "el-42", x, y }, // 최소 데이터
   })
 })
 ```
@@ -179,21 +181,25 @@ onDrag(({ x, y }) => {
 ```typescript
 // ❌ 중첩 트리 - 깊은 요소 접근이 O(n), 이동이 복잡
 const tree = {
-  id: 'root',
-  children: [{
-    id: 'flex',
-    children: [{
-      id: 'button1',  // 이걸 찾으려면 트리 순회 필요
-      children: []
-    }]
-  }]
+  id: "root",
+  children: [
+    {
+      id: "flex",
+      children: [
+        {
+          id: "button1", // 이걸 찾으려면 트리 순회 필요
+          children: [],
+        },
+      ],
+    },
+  ],
 }
 
 // ✅ Flat Map - 임의 접근 O(1), 이동은 배열 splice
 const elements = new Map([
-  ['root', { id: 'root', parentId: null, children: ['flex'] }],
-  ['flex', { id: 'flex', parentId: 'root', children: ['button1'] }],
-  ['button1', { id: 'button1', parentId: 'flex', children: [] }],
+  ["root", { id: "root", parentId: null, children: ["flex"] }],
+  ["flex", { id: "flex", parentId: "root", children: ["button1"] }],
+  ["button1", { id: "button1", parentId: "flex", children: [] }],
 ])
 
 // button1을 root로 이동:
@@ -209,10 +215,10 @@ DB의 adjacency list 패턴과 동일한 원리다.
 
 ### Snapshot vs Command 패턴
 
-| 방식 | 장점 | 단점 |
-|------|------|------|
-| Snapshot (전체 상태 저장) | 구현 간단, 버그 적음 | 메모리 사용 큼 |
-| Command (변경 명령 저장) | 메모리 효율적 | 역연산 정의 필요, 복잡 |
+| 방식                      | 장점                 | 단점                   |
+| ------------------------- | -------------------- | ---------------------- |
+| Snapshot (전체 상태 저장) | 구현 간단, 버그 적음 | 메모리 사용 큼         |
+| Command (변경 명령 저장)  | 메모리 효율적        | 역연산 정의 필요, 복잡 |
 
 **MVP에서는 Snapshot 방식을 추천한다.**
 
@@ -223,7 +229,7 @@ class HistoryStore {
 
   pushSnapshot(doc: EditorDocument) {
     this.undoStack.push(structuredClone(doc))
-    this.redoStack = []  // redo 초기화
+    this.redoStack = [] // redo 초기화
   }
 
   undo() {
@@ -289,9 +295,11 @@ class HistoryStore {
 "무엇을 만들지" 못지않게 "무엇을 안 만들지"가 중요하다.
 
 MVP에 포함:
+
 - 요소 배치, 스타일 편집, 계층 구조, 내보내기, undo/redo
 
 MVP에서 제외 (추후):
+
 - 실시간 협업 (CRDT/OT)
 - 컴포넌트 라이브러리 연동
 - AI 기반 레이아웃 제안
