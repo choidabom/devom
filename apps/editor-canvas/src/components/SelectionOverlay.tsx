@@ -168,7 +168,9 @@ export const SelectionOverlay = observer(function SelectionOverlay({ elementId, 
       })
     }
 
-    const onCancel = () => { cleanup() }
+    const onCancel = () => {
+      cleanup()
+    }
 
     resizeCleanupRef.current = cleanup
     target.addEventListener("pointermove", onMove)

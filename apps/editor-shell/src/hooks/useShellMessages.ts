@@ -241,14 +241,28 @@ export function useShellMessages({
 
   // Refs to avoid stale closures in the bridge message handler
   const handlersRef = useRef({
-    editorMode, handleDelete, handleUndo, handleRedo,
-    handleCopy, handleCut, handlePaste, handleDuplicate,
-    getVisibleCanvasInfo, setCanvasZoom,
+    editorMode,
+    handleDelete,
+    handleUndo,
+    handleRedo,
+    handleCopy,
+    handleCut,
+    handlePaste,
+    handleDuplicate,
+    getVisibleCanvasInfo,
+    setCanvasZoom,
   })
   handlersRef.current = {
-    editorMode, handleDelete, handleUndo, handleRedo,
-    handleCopy, handleCut, handlePaste, handleDuplicate,
-    getVisibleCanvasInfo, setCanvasZoom,
+    editorMode,
+    handleDelete,
+    handleUndo,
+    handleRedo,
+    handleCopy,
+    handleCut,
+    handlePaste,
+    handleDuplicate,
+    getVisibleCanvasInfo,
+    setCanvasZoom,
   }
 
   useEffect(() => {

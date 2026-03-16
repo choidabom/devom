@@ -207,7 +207,7 @@ export class DocumentStore {
 
     const parent = element.parentId ? this.elements.get(element.parentId) : undefined
     if (parent) {
-      parent.children = parent.children.filter(c => c !== id)
+      parent.children = parent.children.filter((c) => c !== id)
     }
 
     this.elements.delete(id)
@@ -309,7 +309,7 @@ export class DocumentStore {
 
     const oldParent = element.parentId ? this.elements.get(element.parentId) : undefined
     if (oldParent) {
-      oldParent.children = oldParent.children.filter(c => c !== id)
+      oldParent.children = oldParent.children.filter((c) => c !== id)
     }
 
     element.parentId = newParentId
@@ -320,7 +320,7 @@ export class DocumentStore {
     const parent = this.elements.get(parentId)
     if (!parent) return
     if (!parent.children.includes(childId)) return
-    const filtered = parent.children.filter(c => c !== childId)
+    const filtered = parent.children.filter((c) => c !== childId)
     parent.children = [...filtered.slice(0, newIndex), childId, ...filtered.slice(newIndex)]
   }
 
@@ -331,7 +331,7 @@ export class DocumentStore {
 
     const oldParent = element.parentId ? this.elements.get(element.parentId) : undefined
     if (oldParent) {
-      oldParent.children = oldParent.children.filter(c => c !== id)
+      oldParent.children = oldParent.children.filter((c) => c !== id)
     }
 
     element.parentId = newParentId
