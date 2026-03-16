@@ -99,7 +99,6 @@ export const ElementRenderer = observer(function ElementRenderer({
     target.setPointerCapture(e.pointerId)
     const startX = e.clientX
     const startY = e.clientY
-    const shiftKey = e.shiftKey
     let didMove = false
 
     // Block entire group drag if any selected element is locked
@@ -223,9 +222,9 @@ export const ElementRenderer = observer(function ElementRenderer({
       // Click without drag — handle selection (including Shift+Click)
       if (!didMove) {
         clickHandledRef.current = true
-        onSelect(element.id, shiftKey)
+        onSelect(element.id, me.shiftKey)
         const rect = target.getBoundingClientRect()
-        bridge.send({ type: "ELEMENT_CLICKED", payload: { id: element.id, bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, shiftKey } })
+        bridge.send({ type: "ELEMENT_CLICKED", payload: { id: element.id, bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, shiftKey: me.shiftKey } })
         return
       }
 
