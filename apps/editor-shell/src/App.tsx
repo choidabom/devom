@@ -96,16 +96,13 @@ export const App = observer(function App() {
     setShowPanels,
   })
 
-  // iframe bridge setup
+  // iframe bridge setup — only set target, SYNC_DOCUMENT is sent on CANVAS_READY
   useEffect(() => {
     const iframe = iframeRef.current
     if (iframe) {
       const onLoad = () => {
         if (iframe.contentWindow) {
           bridge.setTarget(iframe.contentWindow)
-          setTimeout(() => {
-            bridge.send({ type: "SYNC_DOCUMENT", payload: documentStore.toSerializable() })
-          }, 100)
         }
       }
       iframe.addEventListener("load", onLoad)
