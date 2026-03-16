@@ -1,6 +1,6 @@
 import { type ReactNode, useState, useCallback, useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
-import { Lock, Unlock, Square, Columns3, Type, LayoutGrid, ImageIcon, MousePointerClick, TextCursorInput, ChevronRight, LayoutList } from "lucide-react"
+import { Lock, Unlock, Square, Columns3, Type, LayoutGrid, ImageIcon, MousePointerClick, TextCursorInput, ChevronRight, LayoutList, Send } from "lucide-react"
 import { documentStore, selectionStore, historyStore, bridge } from "../stores"
 import { T } from "../theme"
 
@@ -36,6 +36,16 @@ function canDrop(dragId: string, overId: string): boolean {
 export const LeftPanel = observer(function LeftPanel() {
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
   const [drag, setDrag] = useState<DragState>(INITIAL_DRAG)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [layersHeight, setLayersHeight] = useState(0)
+  const [isDraggingSplitter, setIsDraggingSplitter] = useState(false)
+
+  useEffect(() => {
+    if (!containerRef.current) return
+    const totalHeight = containerRef.current.clientHeight
+    setLayersHeight((totalHeight - 8) * 0.6)
+  }, [])
 
   const selectedKey = selectionStore.selectedIds.join(",")
 
@@ -192,31 +202,89 @@ export const LeftPanel = observer(function LeftPanel() {
 
   return (
     <div
+      ref={containerRef}
       style={{
-        background: T.panel,
-        borderRadius: T.panelRadius,
-        boxShadow: T.panelShadow,
-        border: `1px solid ${T.panelBorder}`,
         height: "100%",
         display: "flex",
         flexDirection: "column",
+        gap: 0,
       }}
     >
-      <div style={{ padding: "14px 16px 10px", fontSize: 13, fontWeight: 600, color: T.text }}>Layers</div>
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 6px 8px" }}>
-        <LayerTree
-          elementId={documentStore.rootId}
-          depth={0}
-          collapsedIds={collapsedIds}
-          onToggleCollapse={toggleCollapse}
-          drag={drag}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onDragEnd={handleDragEnd}
-        />
+      {/* Layers Panel */}
+      <div
+        style={{
+          height: layersHeight || "60%",
+          background: T.panel,
+          borderRadius: T.panelRadius,
+          boxShadow: T.panelShadow,
+          border: `1px solid ${T.panelBorder}`,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        <div style={{ padding: "14px 16px 10px", fontSize: 13, fontWeight: 600, color: T.text }}>Layers</div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 6px 8px" }}>
+          <LayerTree
+            elementId={documentStore.rootId}
+            depth={0}
+            collapsedIds={collapsedIds}
+            onToggleCollapse={toggleCollapse}
+            drag={drag}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onDragEnd={handleDragEnd}
+          />
+        </div>
       </div>
+
+      {/* Splitter */}
+      <div
+        style={{
+          height: 8,
+          cursor: "row-resize",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          touchAction: "none",
+        }}
+        onPointerDown={(e) => {
+          e.preventDefault()
+          ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+          setIsDraggingSplitter(true)
+          const startY = e.clientY
+          const startH = layersHeight
+          const containerH = containerRef.current?.clientHeight ?? 0
+          const handle = e.currentTarget as HTMLElement
+          handle.style.background = `${T.accent}4d`
+
+          const onMove = (ev: PointerEvent) => {
+            const newHeight = startH + ev.clientY - startY
+            setLayersHeight(Math.max(100, Math.min(containerH - 108, newHeight)))
+          }
+          const onUp = () => {
+            handle.style.background = ""
+            setIsDraggingSplitter(false)
+            handle.removeEventListener("pointermove", onMove)
+            handle.removeEventListener("pointerup", onUp)
+            handle.removeEventListener("pointercancel", onUp)
+          }
+          handle.addEventListener("pointermove", onMove)
+          handle.addEventListener("pointerup", onUp)
+          handle.addEventListener("pointercancel", onUp)
+        }}
+        onPointerEnter={(e) => {
+          if (!isDraggingSplitter) (e.currentTarget as HTMLElement).style.background = T.hover
+        }}
+        onPointerLeave={(e) => {
+          if (!isDraggingSplitter) (e.currentTarget as HTMLElement).style.background = ""
+        }}
+      />
+
+      {/* Chat Panel */}
+      <ChatPanel />
     </div>
   )
 })
@@ -394,3 +462,87 @@ const LayerTree = observer(function LayerTree({
     </div>
   )
 })
+
+function ChatPanel() {
+  const [input, setInput] = useState("")
+
+  return (
+    <div
+      style={{
+        flex: 1,
+        background: T.panel,
+        borderRadius: T.panelRadius,
+        boxShadow: T.panelShadow,
+        border: `1px solid ${T.panelBorder}`,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        minHeight: 0,
+      }}
+    >
+      {/* Header */}
+      <div style={{ padding: "14px 16px 10px", fontSize: 13, fontWeight: 600, color: T.text }}>Chat</div>
+
+      {/* Message area */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0 16px",
+        }}
+      >
+        <span style={{ fontSize: 13, color: T.textMuted }}>Ask anything about your design</span>
+      </div>
+
+      {/* Input area */}
+      <div style={{ padding: 8, display: "flex", gap: 6, alignItems: "center" }}>
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            e.stopPropagation()
+            if (e.key === "Enter" && input.trim()) {
+              setInput("")
+            }
+          }}
+          placeholder="Message..."
+          style={{
+            flex: 1,
+            padding: "8px 10px",
+            fontSize: 13,
+            border: `1px solid ${T.inputBorder}`,
+            borderRadius: 8,
+            background: T.inputBg,
+            color: T.text,
+            outline: "none",
+          }}
+        />
+        <button
+          onClick={() => {
+            if (input.trim()) setInput("")
+          }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 32,
+            height: 32,
+            border: "none",
+            borderRadius: 8,
+            background: input.trim() ? T.accent : T.inputBg,
+            color: input.trim() ? "#fff" : T.textMuted,
+            cursor: input.trim() ? "pointer" : "default",
+            transition: "background 0.15s, color 0.15s",
+            flexShrink: 0,
+          }}
+        >
+          <Send size={14} />
+        </button>
+      </div>
+    </div>
+  )
+}
