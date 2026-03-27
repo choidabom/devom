@@ -17,6 +17,7 @@
 ### Task 1: LeftPanel 레이아웃을 Layers + Splitter + Chat으로 분할
 
 **Files:**
+
 - Modify: `apps/editor-shell/src/components/LeftPanel.tsx:1-5` (imports)
 - Modify: `apps/editor-shell/src/components/LeftPanel.tsx:36-222` (LeftPanel 컴포넌트)
 
@@ -232,6 +233,7 @@ function ChatPanel() {
 Run: `pnpm dev` (이미 실행 중이면 브라우저에서 HMR 확인)
 
 확인 항목:
+
 1. Layers 패널과 Chat 패널이 독립 카드 스타일로 세로 분할됨
 2. 8px gap이 두 패널 사이에 보임
 3. gap에 마우스 올리면 `row-resize` 커서 표시

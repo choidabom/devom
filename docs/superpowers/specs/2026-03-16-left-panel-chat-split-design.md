@@ -90,15 +90,18 @@ useEffect(() => {
 ```
 
 ### 헤더
+
 - "Chat" 텍스트
 - 기존 Layers 헤더와 동일 스타일: `padding: 14px 16px 10px`, `fontSize: 13`, `fontWeight: 600`
 
 ### 메시지 영역
+
 - 비어있는 상태, 중앙에 안내 텍스트 "Ask anything about your design"
 - `flex: 1`, `overflowY: auto`, flex centering (수직+수평 중앙)
 - 텍스트 스타일: `fontSize: 13`, `color: T.textMuted`
 
 ### 입력창
+
 - 하단 고정, `padding: 8px`
 - `<input type="text">` — border, borderRadius 적용, 배경 `T.panel`
 - Send 버튼: Lucide `Send` 아이콘 (기존 Toolbar 아이콘 패턴과 동일)
@@ -107,8 +110,8 @@ useEffect(() => {
 
 ## 변경 파일
 
-| 파일 | 변경 내용 |
-|------|-----------|
+| 파일                                             | 변경 내용                                                    |
+| ------------------------------------------------ | ------------------------------------------------------------ |
 | `apps/editor-shell/src/components/LeftPanel.tsx` | 최상위 레이아웃 분할, 스플리터 로직, ChatPanel 컴포넌트 추가 |
 
 ## 변경하지 않는 것

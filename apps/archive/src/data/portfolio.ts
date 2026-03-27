@@ -1,3 +1,4 @@
+import { AboutMe } from "@/components/portfolio/AboutMe"
 import { PortfolioWork } from "@/types/portfolio"
 
 export const portfolioWorks: PortfolioWork[] = [
@@ -53,7 +54,6 @@ export const portfolioWorks: PortfolioWork[] = [
     height: 380,
     url: "/dark-theme",
     contentType: "image",
-    status: "live",
     tooltipMessage: "One of my soul foods",
   },
   {
@@ -79,5 +79,18 @@ export const portfolioWorks: PortfolioWork[] = [
     url: "/devil-wears-prada",
     contentType: "image",
     tooltipMessage: "This is the BOOK. (that I once thought was really cool when I was younger)",
+  },
+  {
+    component: AboutMe,
+    id: "About",
+    external: false,
+    year: "2026",
+    category: "me",
+    width: 430,
+    height: 350,
+    url: "/about",
+    hasControls: true,
+    contentType: "component",
+    tooltipMessage: "$ whoami",
   },
 ]
